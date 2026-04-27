@@ -1,0 +1,360 @@
+@import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.legacy-app-root,
+.majestan-app-root {
+  background: #fff;
+  color: #171717;
+}
+
+.migrated-home {
+  overflow-x: hidden;
+}
+
+.migrated-header .header-inner-wrap {
+  align-items: center;
+  display: flex;
+  gap: 28px;
+  justify-content: space-between;
+}
+
+.migrated-nav {
+  align-items: center;
+  display: flex;
+  gap: 26px;
+}
+
+.migrated-nav a,
+.migrated-nav summary {
+  color: #2c2e33;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  text-decoration: none;
+}
+
+.migrated-nav summary::-webkit-details-marker {
+  display: none;
+}
+
+.migrated-nav-group {
+  position: relative;
+}
+
+.migrated-nav-group .submenu {
+  background: #fff;
+  border: 1px solid #eef0f4;
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(18, 31, 67, 0.12);
+  display: grid;
+  gap: 6px;
+  left: 0;
+  min-width: 230px;
+  opacity: 0;
+  padding: 14px;
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 16px);
+  transform: translateY(8px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 40;
+}
+
+.migrated-nav-group[open] .submenu,
+.migrated-nav-group:hover .submenu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.migrated-wishlist {
+  color: #27427f;
+  font-size: 24px;
+}
+
+.migrated-hero .content-inner {
+  padding-top: 110px;
+}
+
+.home-title {
+  font-size: 40px;
+  line-height: 55px;
+}
+
+.migrated-category-tabs {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(8, minmax(96px, 1fr));
+  margin: 34px 0;
+}
+
+.migrated-category-link {
+  align-items: center;
+  color: inherit;
+  justify-items: center;
+  min-height: 104px;
+  text-align: center;
+}
+
+.migrated-search .form-title {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(5, minmax(150px, 1fr)) auto;
+}
+
+.migrated-search .tf-btn {
+  border: 0;
+  min-height: 54px;
+}
+
+.section-subtitle {
+  font-size: 30px;
+  line-height: 1.25;
+  margin: 0 0 28px;
+}
+
+.migrated-card-rail,
+.migrated-project-grid {
+  display: grid;
+  gap: 30px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.migrated-card-rail .box-house,
+.migrated-property-card {
+  height: 100%;
+}
+
+.migrated-card-rail img,
+.migrated-property-card img,
+.migrated-project-grid img {
+  height: 280px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.migrated-swiper {
+  padding-bottom: 58px !important;
+}
+
+.migrated-banner {
+  padding: 0;
+}
+
+.migrated-banner-swiper {
+  padding-bottom: 36px !important;
+}
+
+.migrated-banner-swiper img {
+  display: block;
+  width: 100%;
+}
+
+.migrated-property-footer {
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.migrated-property-footer .price {
+  display: grid;
+  gap: 4px;
+}
+
+.migrated-empty {
+  border: 1px solid #eef0f4;
+  border-radius: 8px;
+  color: #5c5e61;
+  padding: 28px;
+  text-align: center;
+}
+
+.migrated-dialog-backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.48);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 1000;
+}
+
+.migrated-dialog {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 460px;
+  padding: 28px;
+  position: relative;
+  width: 100%;
+}
+
+.migrated-dialog-close {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #2c2e33;
+  display: flex;
+  font-size: 18px;
+  height: 36px;
+  justify-content: center;
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  width: 36px;
+}
+
+.migrated-enquiry-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.migrated-enquiry-form input,
+.migrated-enquiry-form textarea {
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.migrated-form-success {
+  color: #147a3f;
+  font-weight: 600;
+}
+
+.migrated-form-error {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.migrated-help-card {
+  height: 100%;
+}
+
+.migrated-services {
+  margin-top: 54px;
+}
+
+.migrated-quick-links {
+  display: grid;
+  gap: 30px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #27427f !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: #27427f !important;
+}
+
+.legacy-page-root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.rotate-words {
+  display: inline-block;
+  position: relative;
+  min-width: 70px;
+}
+
+.rotate-words span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  transform: translateY(20px);
+  color: #ffc900;
+}
+
+.rotate-words span.active {
+  opacity: 1;
+  position: relative;
+  transform: translateY(0);
+  transition: transform 1s ease, opacity 1s ease;
+}
+
+.home-filter-grid .form-select {
+  min-width: 180px;
+  border-radius: 14px;
+  border: 1px solid #d9d9d9;
+  min-height: 54px;
+  padding: 12px 14px;
+  color: #2c2e33;
+}
+
+.home-filter-grid .form-select:focus {
+  border-color: #27427f;
+  box-shadow: none;
+}
+
+.error-tooltip {
+  color: #27427f;
+  font-size: 15px;
+  margin-top: 10px;
+  margin-left: 5px;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.blogs_img img {
+  height: 300px;
+  width: 422px;
+  object-fit: cover;
+}
+
+.tf-btn.bg-color-primary:focus {
+  color: #fff !important;
+}
+
+@media (max-width: 720px) {
+  .migrated-header .header-inner-wrap,
+  .migrated-nav,
+  .header-right {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .migrated-nav {
+    gap: 14px;
+    width: 100%;
+  }
+
+  .migrated-nav-group .submenu {
+    box-shadow: none;
+    min-width: 100%;
+    position: static;
+  }
+
+  .migrated-category-tabs,
+  .migrated-card-rail,
+  .migrated-project-grid,
+  .migrated-quick-links {
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-title {
+    font-size: 32px;
+    line-height: 44px;
+  }
+
+  .Featured_Properties {
+    font-size: 15px !important;
+    justify-content: center !important;
+    align-items: baseline !important;
+  }
+
+  .home-filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

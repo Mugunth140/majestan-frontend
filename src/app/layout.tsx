@@ -68,6 +68,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { QueryProvider } from "@/providers/query-provider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -98,7 +100,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon-precomposed" href="/assets/images/logo/fav.png" />
       </head>
       <body className="theme-color-3 majestan-app-root">
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

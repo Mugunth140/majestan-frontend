@@ -67,9 +67,12 @@ export function HomePage({ data }: { data: HomePageData }) {
             <div className="row">
               <div className="col-12">
                 <div className="content-inner">
-                  <div className="heading-title">
-                    <h1 className="title home-title">
-                      Your Trusted Partner to <RotatingWords words={["Buy", "Sell", "Rent"]} /> Properties in Coimbatore
+                  <div className="heading-title flex! flex-col items-center text-center">
+
+                    <h1 className="title home-title font-sans font-black tracking-tight text-[#27427f] leading-normal flex flex-wrap items-center justify-center gap-y-2 max-[720px]:text-[32px] max-[720px]:leading-[44px]">
+                      <span>Your Trusted Partner to</span>
+                      <RotatingWords words={["Buy", "Sell", "Rent"]} />
+                      <span>Properties in <span className="relative inline-block text-[#ffc900] after:content-[''] after:absolute after:bottom-1.5 after:left-0 after:w-full after:h-[6px] after:bg-[#ffc900]/25 after:-z-10">Coimbatore</span></span>
                     </h1>
                   </div>
 

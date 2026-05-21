@@ -228,7 +228,7 @@ export function SiteHeader(): React.JSX.Element {
                   
                   <div className="relative z-10 flex w-full h-full flex-col items-center justify-center p-2">
                     <div className="mb-4 inline-flex items-center justify-center rounded-full p-4 text-[#ffc900] transition-transform duration-300 group-hover:scale-110">
-                      {hoveredLink ? React.cloneElement(hoveredLink.icon as React.ReactElement, { size: 32 }) : <Bolt size={32} />}
+                      {hoveredLink ? React.cloneElement(hoveredLink.icon as React.ReactElement<any>, { size: 32 }) : <Bolt size={32} />}
                     </div>
                     
                     <h4 className="mb-3 text-[16px]! font-black leading-tight text-white transition-all duration-300">

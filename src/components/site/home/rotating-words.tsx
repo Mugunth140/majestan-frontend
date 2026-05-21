@@ -15,7 +15,7 @@ export function RotatingWords({ words }: { words: string[] }) {
   }, [words.length]);
 
   return (
-    <span className="relative inline-flex flex-col overflow-hidden items-center justify-center bg-[#27427f]/5 px-5 py-1.5 rounded-2xl border border-[#27427f]/10 shadow-[inset_0_1.5px_4px_rgba(39,66,127,0.06)] mx-2 align-middle max-[640px]:px-4 max-[640px]:py-1 max-[640px]:rounded-xl">
+    <span className="relative inline-flex flex-col overflow-hidden items-center justify-center bg-[#27427f]/5 px-1 py-1 rounded-2xl shadow-[inset_0_1.5px_4px_rgba(39,66,127,0.06)] mx-2 align-middle max-[640px]:px-4 max-[640px]:py-1 max-[640px]:rounded-xl">
       <AnimatePresence mode="wait">
         <motion.span
           key={activeIndex}

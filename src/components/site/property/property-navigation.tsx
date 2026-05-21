@@ -7,14 +7,11 @@ export function PropertyNavigation({ slug }: { slug: string }) {
   const pathname = usePathname();
 
   const links = [
-    { href: `/property/${slug}`, label: "Overview" },
-    { href: `/property/${slug}/amenities`, label: "Amenities" },
-    { href: `/property/${slug}/floor-plan`, label: "Floor Plan" },
-    { href: `/property/${slug}/locality`, label: "Locality" },
-    { href: `/property/${slug}/photos`, label: "Photos" },
-    { href: `/property/${slug}/videos`, label: "Videos" },
-    { href: `/property/${slug}/price`, label: "Price" },
-    { href: `/property/${slug}/specifications`, label: "Specifications" },
+    { href: `/${slug}`, label: "Overview" },
+    { href: `/${slug}/amenities`, label: "Amenities" },
+    { href: `/${slug}/floor-plan`, label: "Floor Plan" },
+    { href: `/${slug}/locality`, label: "Locality" },
+    { href: `/${slug}/photos`, label: "Photos" },
   ];
 
   return (

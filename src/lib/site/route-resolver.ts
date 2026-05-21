@@ -72,12 +72,14 @@ const SEO_ROUTE_PATTERNS: RoutePattern[] = [
   { pattern: /^\/rent-industrials-/i, view: "industrial.php" },
   { pattern: /^\/industrialspace-rent-/i, view: "industrial.php" },
   { pattern: /^\/rent-co-working-/i, view: "coworkers.php" },
-  { pattern: /-a\d+$/i, view: "apartment-details.php" },
+  { pattern: /-ap\d+$/i, view: "apartment-details.php" },
   { pattern: /-v\d+$/i, view: "villa-details.php" },
   { pattern: /-p\d+$/i, view: "plot-details.php" },
-  { pattern: /-f\d+$/i, view: "farmland-details.php" },
-  { pattern: /-c\d+$/i, view: "commercial-details.php" },
-  { pattern: /-i\d+$/i, view: "industrial-details.php" },
+  { pattern: /-ip\d+$/i, view: "independent-house-details.php" },
+  { pattern: /-fl\d+$/i, view: "farmland-details.php" },
+  { pattern: /-cs\d+$/i, view: "commercial-details.php" },
+  { pattern: /-in\d+$/i, view: "industrial-details.php" },
+  { pattern: /-cw\d+$/i, view: "coworkers-details.php" },
 ];
 
 const hasView = (viewName: string): viewName is LegacyViewName =>

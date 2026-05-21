@@ -15,7 +15,7 @@ export const getProperties = async () => {
 };
 
 export const getPropertyBySlug = async (slug: string) => {
-  const { data } = await api.get(`/properties/${slug}`);
+  const { data } = await api.get(`/properties/by-slug/${encodeURIComponent(slug)}`);
   return data;
 };
 

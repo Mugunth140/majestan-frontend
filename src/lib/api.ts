@@ -43,10 +43,16 @@ type ApiEnvelope<T> = {
   data: T;
 };
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
+const DEFAULT_API_BASE_URL = "http://localhost:5000/api/v1";
+const SERVER_API_BASE_URL =
   process.env.API_BASE_URL ??
-  "http://localhost:4000/api/v1";
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  DEFAULT_API_BASE_URL;
+const BROWSER_API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+
+export const API_BASE_URL =
+  typeof window === "undefined" ? SERVER_API_BASE_URL : BROWSER_API_BASE_URL;
 
 export async function fetchApi<T>(
   path: string,

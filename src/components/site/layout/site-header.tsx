@@ -116,7 +116,7 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header 
-        className={`!fixed left-1/2 z-[1000] w-[min(95vw,1400px)] max-w-[1400px] -translate-x-1/2 rounded-full border border-white/45 bg-white/95 font-['Lexend',sans-serif] shadow-[0_18px_45px_rgba(22,30,45,0.18)] backdrop-blur-md transition-all duration-300 max-[640px]:w-[calc(100vw-20px)] ${isScrolled ? "top-2 py-2" : "top-4 py-3 max-[640px]:top-2.5"}`}
+        className={`!fixed left-1/2 z-[1000] px-4 w-[min(95vw,1400px)] max-w-[1400px] -translate-x-1/2 rounded-full border border-white/45 bg-white/95 font-['Lexend',sans-serif] shadow-[0_18px_45px_rgba(22,30,45,0.18)] backdrop-blur-md transition-all duration-300 max-[640px]:w-[calc(100vw-20px)] ${isScrolled ? "top-2 py-2" : "top-4 py-3 max-[640px]:top-2.5"}`}
         onMouseLeave={() => setHoveredCategory(null)}
       >
         <div className="w-full px-6 max-[640px]:px-4">
@@ -139,12 +139,12 @@ export function SiteHeader(): React.JSX.Element {
                     onMouseEnter={() => setHoveredCategory(cat)}
                     className="relative"
                   >
-                    <button className={`!inline-flex !items-center gap-1.5 rounded-full border-0 !bg-transparent px-4 py-2 !text-[14px] font-bold leading-none text-[#27427f] no-underline transition-colors hover:!bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3 ${hoveredCategory === cat ? "!bg-[#27427f]/5 text-[#ffc900]" : ""}`}>
+                    <button className={`inline-flex! items-center! gap-1.5 rounded-full! border-0 bg-transparent! px-4 py-2 !text-[14px]! font-bold leading-none text-[#27427f] no-underline transition-colors hover:!bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3 ${hoveredCategory === cat ? "bg-[#27427f]/40! text-[#ffc900]" : ""}`}>
                       {cat} <ChevronDown size={14} className={`transition-transform duration-200 ${hoveredCategory === cat ? "rotate-180" : ""}`} />
                     </button>
                   </li>
                 ))}
-                <li><Link href="/contact-us" className="!inline-flex rounded-full px-4 py-2 !text-[14px] font-bold leading-none text-[#27427f] no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">Contact</Link></li>
+                <li><Link href="/contact-us" className="!inline-flex rounded-full! px-4 py-2 !text-[14px] font-bold leading-none text-[#27427f] no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">Contact</Link></li>
               </ul>
             </nav>
 
@@ -153,7 +153,7 @@ export function SiteHeader(): React.JSX.Element {
               {/* Location */}
               <button 
                 onClick={detectLocation}
-                className="!hidden !items-center gap-2 rounded-full border-0 !bg-[#27427f]/5 px-3 py-2 text-[#27427f] transition-colors hover:!bg-[#ffc900]/20 md:!inline-flex"
+                className="!hidden !items-center gap-2 border-0 !bg-[#27427f]/5 px-3 py-2 text-[#27427f] transition-colors hover:!bg-[#ffc900]/20 md:!inline-flex rounded-full!"
               >
                 <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
                 <span className="!text-[13px] font-black leading-none text-[#27427f]">{location}</span>

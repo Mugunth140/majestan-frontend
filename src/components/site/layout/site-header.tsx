@@ -116,47 +116,47 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header 
-        className={`!fixed left-1/2 z-[1000] px-4 w-[min(95vw,1400px)] max-w-[1400px] -translate-x-1/2 rounded-full border border-white/45 bg-white/95 font-['Lexend',sans-serif] shadow-[0_18px_45px_rgba(22,30,45,0.18)] backdrop-blur-md transition-all duration-300 max-[640px]:w-[calc(100vw-20px)] ${isScrolled ? "top-2 py-2" : "top-4 py-3 max-[640px]:top-2.5"}`}
+        className={`fixed! left-1/2 z-1000 w-[min(95vw,1400px)] max-w-[1400px] -translate-x-1/2 rounded-full border border-white/45 bg-white! px-4 font-[\'Lexend\',sans-serif] shadow-[0_18px_45px_rgba(22,30,45,0.18)] transition-all duration-300 max-[640px]:w-[calc(100vw-20px)] ${isScrolled ? "top-2 py-2 px-2.5! max-[1024px]:py-1.5" : "top-4 py-3 max-[1024px]:py-2 max-[640px]:top-2.5"}`}
         onMouseLeave={() => setHoveredCategory(null)}
       >
-        <div className="w-full px-6 max-[640px]:px-4">
-          <div className="!flex min-h-11 !items-center !justify-between gap-4">
+        <div className="w-full px-6 max-[1024px]:px-5 max-[640px]:px-4">
+          <div className="flex! min-h-11 items-center! justify-between! gap-3 max-[1024px]:gap-2">
             {/* Logo */}
-            <Link href="/" className="!inline-flex shrink-0 transition-transform active:scale-95">
+            <Link href="/" className="inline-flex! shrink-0 transition-transform active:scale-95">
               <img 
                 src="/assets/images/logo/logo.png" 
                 alt="Majestan Realty" 
-                className={`!w-auto object-contain transition-all duration-300 max-[1180px]:!h-[38px] max-[640px]:!h-8 max-[640px]:!max-w-[210px] ${isScrolled ? "!h-9" : "!h-10"}`}
+                className={`w-auto! object-contain transition-all duration-300 max-[1180px]:h-[38px]! max-[900px]:!h-8 max-[640px]:!h-7 max-[640px]:!max-w-[200px] ${isScrolled ? "!h-9" : "!h-10"}`}
               />
             </Link>
 
             {/* Navigation - Centered via Flex */}
-            <nav className="!hidden flex-1 !justify-center lg:!flex" aria-label="Main navigation">
-              <ul className="!flex !items-center gap-2 p-0">
+            <nav className="hidden! flex-1 !justify-center lg:!flex" aria-label="Main navigation">
+              <ul className="flex! !items-center gap-1.5 p-0">
                 {(["Buy", "Rent", "Services"] as const).map((cat) => (
                   <li 
                     key={cat}
                     onMouseEnter={() => setHoveredCategory(cat)}
                     className="relative"
                   >
-                    <button className={`inline-flex! items-center! gap-1.5 rounded-full! border-0 bg-transparent! px-4 py-2 !text-[14px]! font-bold leading-none text-[#27427f] no-underline transition-colors hover:!bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3 ${hoveredCategory === cat ? "bg-[#27427f]/40! text-[#ffc900]" : ""}`}>
+                    <button className={`inline-flex! items-center! gap-1.5 rounded-full border-0 bg-transparent px-4 py-2 text-black/80! leading-none no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3 ${hoveredCategory === cat ? "bg-[#27427f]/10 text-[#ffc900]" : ""}`}>
                       {cat} <ChevronDown size={14} className={`transition-transform duration-200 ${hoveredCategory === cat ? "rotate-180" : ""}`} />
                     </button>
                   </li>
                 ))}
-                <li><Link href="/contact-us" className="!inline-flex rounded-full! px-4 py-2 !text-[14px] font-bold leading-none text-[#27427f] no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">Contact</Link></li>
+                <li><Link href="/contact-us" className="inline-flex! rounded-full! px-4 py-2 text-[14px] font-bold leading-none text-[#27427f]text-black/80! no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">Contact</Link></li>
               </ul>
             </nav>
 
             {/* Right Actions */}
-            <div className="!flex shrink-0 !items-center !justify-end gap-3 max-[1180px]:gap-2.5">
+            <div className="!flex shrink-0 !items-center !justify-end gap-3 max-[1180px]:gap-2.5 max-[1024px]:gap-2">
               {/* Location */}
               <button 
                 onClick={detectLocation}
-                className="!hidden !items-center gap-2 border-0 !bg-[#27427f]/5 px-3 py-2 text-[#27427f] transition-colors hover:!bg-[#ffc900]/20 md:!inline-flex rounded-full!"
+                className="hidden! items-center! gap-2 border-0 bg-[#27427f]/5! px-3 py-3 transition-colors hover:bg-[#27427f]/10! md:inline-flex! rounded-full!"
               >
                 <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
-                <span className="!text-[13px] font-black leading-none text-[#27427f]">{location}</span>
+                <span className="text-[14px]! font-semibold! leading-none text-[#27427f]">{location}</span>
               </button>
 
               {/* Wishlist */}
@@ -170,16 +170,19 @@ export function SiteHeader(): React.JSX.Element {
               </Link>
 
               {/* Auth Links */}
-              <div className="!hidden !items-center gap-2 rounded-full border border-[#27427f]/10 bg-[#27427f]/5 py-2 pr-3 pl-2 !text-[12px] font-extrabold tracking-[0.04em] text-[#27427f] uppercase transition-colors hover:border-[#ffc900]/35 hover:bg-[#ffc900]/15 xl:!inline-flex">
-                <span className="!flex h-[26px] w-[26px] !items-center !justify-center rounded-full bg-[#27427f] text-[#ffc900]"><UserRound size={16} /></span>
-                <Link href="/login" className="text-[#27427f] no-underline transition-colors hover:text-[#ffc900]">Login</Link>
-                <span className="text-[#27427f]/30">/</span>
-                <Link href="/register" className="text-[#27427f] no-underline transition-colors hover:text-[#ffc900]">Register</Link>
-              </div>
+              <Link
+                href="/login"
+                aria-label="Login"
+                className="!hidden !items-center rounded-full border border-[#27427f]/10 bg-[#27427f]/5 p-2 text-[#27427f] transition-colors hover:border-[#27427f]/35 hover:bg-[#27427f]/15 xl:inline-flex!"
+              >
+                <span className="flex! h-7 w-7 items-center! justify-center! rounded-full bg-[#27427f] text-white">
+                  <UserRound size={18} />
+                </span>
+              </Link>
 
               {/* Post Property */}
-              <Link href="/rent-or-sell-your-property" className="!hidden !items-center gap-2 rounded-full bg-[#ffc900] px-[18px] py-3.5 !text-[11px] font-black leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline shadow-[0_14px_26px_rgba(255,201,0,0.22)] transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white hover:shadow-[0_14px_28px_rgba(39,66,127,0.24)] lg:!inline-flex">
-                Post Property <ArrowUpRight size={15} />
+              <Link href="/rent-or-sell-your-property" className="!hidden !items-center gap-2 rounded-full bg-[#ffc900] px-3 py-3 text-[13px]! font-semibold! text-black/10 leading-none tracking-[0.05em] no-underline transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white! lg:inline-flex!">
+                Rent / Sell your Property
               </Link>
 
               {/* Mobile Toggle */}
@@ -201,30 +204,30 @@ export function SiteHeader(): React.JSX.Element {
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 12, x: "-50%" }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="!absolute top-full left-1/2 z-[1002] w-[min(920px,88vw)] pt-[18px]"
+              className="absolute! top-full left-1/2 z-1002 w-[min(920px,88vw)] pt-2.5!"
             >
-              <div className="!flex gap-9 rounded-[28px] border border-black/5 bg-white p-8 shadow-[0_22px_55px_rgba(22,30,45,0.20)]">
+              <div className="flex! gap-9 rounded-[28px] border border-black/5 bg-white p-6! shadow-[0_22px_55px_rgba(22,30,45,0.20)]">
                 <div className="flex-1">
                   <div className="mb-[18px] border-b border-[#ffc900]/30 pb-3.5">
-                    <h6 className="mb-2 !text-[11px] font-black leading-none tracking-[0.14em] text-[#27427f]/45 uppercase">
+                    {/* <h6 className="mb-2 !text-[11px] font-black leading-none tracking-[0.14em] text-[#27427f]/45 uppercase">
                       {hoveredCategory === "Services" ? "Expertise" : "Property Types"}
-                    </h6>
-                    <p className="m-0 !text-[18px] font-extrabold leading-tight text-[#27427f]">{getFeatured(hoveredCategory)?.title}</p>
+                    </h6> */}
+                    <p className="m-0 mb-2 text-[18px]! font-semibold! leading-tight text-[#27427f]!">{getFeatured(hoveredCategory)?.title}</p>
                   </div>
-                  <div className="!grid grid-cols-2 gap-2.5">
+                  <div className="grid! grid-cols-2 gap-1 max-[640px]:grid-cols-1 transition-all duration-200">
                     {getLinks(hoveredCategory).map((link) => (
-                      <Link key={link.href} href={link.href} className="!flex !items-center gap-3.5 rounded-xl p-3 !text-[14px] font-bold leading-tight text-[#27427f]/75 no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#27427f]">
-                        <span className="!inline-flex shrink-0 text-[#27427f]">{link.icon}</span>
+                      <Link key={link.href} href={link.href} className="flex! items-center! gap-3.5 rounded-xl p-3 text-[14px]! font-bold leading-tight text-[#27427f]/75 no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#27427f]">
+                        <span className="inline-flex! shrink-0 text-[#27427f]">{link.icon}</span>
                         <span>{link.text}</span>
                       </Link>
                     ))}
                   </div>
                 </div>
 
-                <div className="!flex w-[270px] shrink-0 flex-col !items-center !justify-center rounded-[22px] bg-[#27427f] bg-[linear-gradient(135deg,rgba(255,201,0,0.16),rgba(255,255,255,0)_38%)] p-7 text-center text-white">
+                <div className="flex! w-[270px]! shrink-0 flex-col items-center! justify-center! rounded-[22px] bg-[#27427f] bg-[linear-gradient(135deg,rgba(255,201,0,0.16),rgba(255,255,255,0)_38%)] p-7 text-center text-white">
                   <Bolt size={30} className="mb-4 text-[#ffc900]" />
-                  <p className="mb-4 !text-[14px] font-extrabold leading-tight text-white">{getFeatured(hoveredCategory)?.title}</p>
-                  <Link href={getFeatured(hoveredCategory)?.href || "#"} className="w-full rounded-xl bg-[#ffc900] px-3.5 py-3 !text-[12px] font-black leading-none tracking-[0.08em] text-[#27427f] uppercase no-underline transition-transform hover:scale-[1.04] hover:text-[#27427f]">
+                  <p className="mb-4 text-[14px]! font-extrabold leading-tight text-white">{getFeatured(hoveredCategory)?.title}</p>
+                  <Link href={getFeatured(hoveredCategory)?.href || "#"} className="w-full rounded-xl bg-[#ffc900] px-3.5 py-3 text-[12px]! font-black leading-none tracking-[0.08em] text-[#27427f] uppercase no-underline transition-transform hover:scale-[1.04] hover:text-[#27427f]">
                     {getFeatured(hoveredCategory)?.btn}
                   </Link>
                 </div>
@@ -253,9 +256,9 @@ export function SiteHeader(): React.JSX.Element {
                 <button onClick={() => setIsMobileMenuOpen(false)} className="!inline-flex h-9 w-9 !items-center !justify-center rounded-full border-0 !bg-[#27427f]/5 text-[#27427f]" aria-label="Close navigation menu"><X size={20} /></button>
               </div>
 
-              <div className="!grid gap-6">
+              <div className="grid! gap-6">
                 {(["Buy", "Rent", "Services"] as const).map((cat) => (
-                  <div key={cat} className="!grid gap-2">
+                  <div key={cat} className="grid! gap-2">
                     <h6 className="m-0 px-2 !text-[10px] font-black leading-none tracking-[0.2em] text-[#27427f]/45 uppercase">{cat}</h6>
                     <div className="!grid gap-1">
                       {getLinks(cat).slice(0, 4).map((link) => (

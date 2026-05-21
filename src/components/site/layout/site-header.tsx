@@ -49,6 +49,7 @@ export function SiteHeader(): React.JSX.Element {
   const [location, setLocation] = useState("Coimbatore");
   const [isLocating, setIsLocating] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredLink, setHoveredLink] = useState<MegaMenuLink | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -136,7 +137,10 @@ export function SiteHeader(): React.JSX.Element {
                 {(["Buy", "Rent", "Services"] as const).map((cat) => (
                   <li 
                     key={cat}
-                    onMouseEnter={() => setHoveredCategory(cat)}
+                    onMouseEnter={() => {
+                      setHoveredCategory(cat);
+                      setHoveredLink(null);
+                    }}
                     className="relative"
                   >
                     <button className={`inline-flex! items-center! gap-1.5 rounded-full border-0 bg-transparent px-4 py-2 text-black/80! leading-none no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3 ${hoveredCategory === cat ? "bg-[#27427f]/10 text-[#ffc900]" : ""}`}>
@@ -150,15 +154,6 @@ export function SiteHeader(): React.JSX.Element {
 
             {/* Right Actions */}
             <div className="!flex shrink-0 !items-center !justify-end gap-3 max-[1180px]:gap-2.5 max-[1024px]:gap-2">
-              {/* Location */}
-              <button 
-                onClick={detectLocation}
-                className="hidden! items-center! gap-2 border-0 bg-[#27427f]/5! px-3 py-3 transition-colors hover:bg-[#27427f]/10! md:inline-flex! rounded-full!"
-              >
-                <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
-                <span className="text-[14px]! font-semibold! leading-none text-[#27427f]">{location}</span>
-              </button>
-
               {/* Wishlist */}
               <Link href="/wishlist" className="!inline-flex relative text-[#27427f] transition-transform hover:scale-110 hover:text-[#27427f]" aria-label="Wishlist">
                 <Heart size={20} className={wishlistCount > 0 ? "fill-[#27427f]" : ""} />
@@ -169,16 +164,15 @@ export function SiteHeader(): React.JSX.Element {
                 )}
               </Link>
 
-              {/* Auth Links */}
-              <Link
-                href="/login"
-                aria-label="Login"
-                className="!hidden !items-center rounded-full border border-[#27427f]/10 bg-[#27427f]/5 p-2 text-[#27427f] transition-colors hover:border-[#27427f]/35 hover:bg-[#27427f]/15 xl:inline-flex!"
+              {/* Location */}
+              <button 
+                onClick={detectLocation}
+                className="hidden! items-center! gap-2 border-0 bg-[#27427f]/5! px-3 py-3 transition-colors hover:bg-[#27427f]/10! md:inline-flex! rounded-full!"
               >
-                <span className="flex! h-7 w-7 items-center! justify-center! rounded-full bg-[#27427f] text-white">
-                  <UserRound size={18} />
-                </span>
-              </Link>
+                <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
+                <span className="text-[14px]! font-semibold! leading-none text-[#27427f]">{location}</span>
+              </button>
+
 
               {/* Post Property */}
               <Link href="/rent-or-sell-your-property" className="!hidden !items-center gap-2 rounded-full bg-[#ffc900] px-3 py-3 text-[13px]! font-semibold! text-black/10 leading-none tracking-[0.05em] no-underline transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white! lg:inline-flex!">
@@ -216,7 +210,12 @@ export function SiteHeader(): React.JSX.Element {
                   </div>
                   <div className="grid! grid-cols-2 gap-1 max-[640px]:grid-cols-1 transition-all duration-200">
                     {getLinks(hoveredCategory).map((link) => (
-                      <Link key={link.href} href={link.href} className="flex! items-center! gap-3.5 rounded-xl p-3 text-[14px]! font-bold leading-tight text-[#27427f]/75 no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#27427f]">
+                      <Link 
+                        key={link.href} 
+                        href={link.href}
+                        onMouseEnter={() => setHoveredLink(link)} 
+                        className="flex! items-center! gap-3.5 rounded-xl p-3 text-[14px]! font-bold leading-tight text-[#27427f]/75 no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#27427f]"
+                      >
                         <span className="inline-flex! shrink-0 text-[#27427f]">{link.icon}</span>
                         <span>{link.text}</span>
                       </Link>
@@ -224,12 +223,31 @@ export function SiteHeader(): React.JSX.Element {
                   </div>
                 </div>
 
-                <div className="flex! w-[270px]! shrink-0 flex-col items-center! justify-center! rounded-[22px] bg-[#27427f] bg-[linear-gradient(135deg,rgba(255,201,0,0.16),rgba(255,255,255,0)_38%)] p-7 text-center text-white">
-                  <Bolt size={30} className="mb-4 text-[#ffc900]" />
-                  <p className="mb-4 text-[14px]! font-extrabold leading-tight text-white">{getFeatured(hoveredCategory)?.title}</p>
-                  <Link href={getFeatured(hoveredCategory)?.href || "#"} className="w-full rounded-xl bg-[#ffc900] px-3.5 py-3 text-[12px]! font-black leading-none tracking-[0.08em] text-[#27427f] uppercase no-underline transition-transform hover:scale-[1.04] hover:text-[#27427f]">
-                    {getFeatured(hoveredCategory)?.btn}
-                  </Link>
+                <div className="flex! w-[270px]! shrink-0 flex-col items-center! justify-center! rounded-2xl bg-[#27427f] p-7 text-center text-white relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-[linear-gradient(135deg,#27427f,rgba(39,66,127,0.85))] z-0 transition-all duration-300"></div>
+                  
+                  <div className="relative z-10 flex w-full h-full flex-col items-center justify-center p-2">
+                    <div className="mb-4 inline-flex items-center justify-center rounded-full p-4 text-[#ffc900] transition-transform duration-300 group-hover:scale-110">
+                      {hoveredLink ? React.cloneElement(hoveredLink.icon as React.ReactElement, { size: 32 }) : <Bolt size={32} />}
+                    </div>
+                    
+                    <h4 className="mb-3 text-[16px]! font-black leading-tight text-white transition-all duration-300">
+                      {hoveredLink ? hoveredLink.text : getFeatured(hoveredCategory)?.title}
+                    </h4>
+                    
+                    <p className="mb-6 text-[12px]! font-medium leading-relaxed text-white/70">
+                      {hoveredLink 
+                        ? `Explore the best options in ${hoveredLink.text.toLowerCase()} tailored just for you.`
+                        : "Discover top properties in the city."}
+                    </p>
+                    
+                    <Link 
+                      href={hoveredLink ? hoveredLink.href : (getFeatured(hoveredCategory)?.href || "#")} 
+                      className="w-full rounded-xl bg-[#ffc900] px-4! py-3.5! text-[12px]! font-black leading-none tracking-[0.08em] text-[#27427f] uppercase no-underline shadow-[0_10px_20px_rgba(39,66,127,0.3)] transition-transform hover:scale-[1.04] hover:shadow-[0_12px_24px_rgba(39,66,127,0.4)]"
+                    >
+                      {hoveredLink ? `View ${hoveredLink.text}` : getFeatured(hoveredCategory)?.btn}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </motion.div>

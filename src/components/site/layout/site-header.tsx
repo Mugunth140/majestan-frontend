@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt } from "lucide-react";
+import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, ArrowUpRight } from "lucide-react";
 
 const city = "coimbatore";
 
@@ -116,109 +116,75 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header 
-        className={`migrated-site-header ${isScrolled ? "migrated-site-header--scrolled" : ""}`}
+        className={`!fixed left-1/2 z-[1000] w-[min(95vw,1400px)] max-w-[1400px] -translate-x-1/2 rounded-full border border-white/45 bg-white/95 font-['Lexend',sans-serif] shadow-[0_18px_45px_rgba(22,30,45,0.18)] backdrop-blur-md transition-all duration-300 max-[640px]:w-[calc(100vw-20px)] ${isScrolled ? "top-2 py-2" : "top-4 py-3 max-[640px]:top-2.5"}`}
+        onMouseLeave={() => setHoveredCategory(null)}
       >
-        <div className="msh-container">
-          <div className="msh-bar">
+        <div className="w-full px-6 max-[640px]:px-4">
+          <div className="!flex min-h-11 !items-center !justify-between gap-4">
             {/* Logo */}
-            <Link href="/" className="msh-logo">
+            <Link href="/" className="!inline-flex shrink-0 transition-transform active:scale-95">
               <img 
                 src="/assets/images/logo/logo.png" 
                 alt="Majestan Realty" 
-                className="msh-logo-img"
+                className={`!w-auto object-contain transition-all duration-300 max-[1180px]:!h-[38px] max-[640px]:!h-8 max-[640px]:!max-w-[210px] ${isScrolled ? "!h-9" : "!h-10"}`}
               />
             </Link>
 
             {/* Navigation - Centered via Flex */}
-            <nav className="msh-nav" aria-label="Main navigation">
-              <ul className="msh-nav-list">
+            <nav className="!hidden flex-1 !justify-center lg:!flex" aria-label="Main navigation">
+              <ul className="!flex !items-center gap-2 p-0">
                 {(["Buy", "Rent", "Services"] as const).map((cat) => (
                   <li 
                     key={cat}
                     onMouseEnter={() => setHoveredCategory(cat)}
-                    onMouseLeave={() => setHoveredCategory(null)}
-                    className="msh-nav-item"
+                    className="relative"
                   >
-                    <button className={`msh-nav-button ${hoveredCategory === cat ? "msh-nav-button--active" : ""}`}>
-                      {cat} <ChevronDown size={14} className={`msh-chevron ${hoveredCategory === cat ? "msh-chevron--open" : ""}`} />
+                    <button className={`!inline-flex !items-center gap-1.5 rounded-full border-0 !bg-transparent px-4 py-2 !text-[14px] font-bold leading-none text-[#27427f] no-underline transition-colors hover:!bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3 ${hoveredCategory === cat ? "!bg-[#27427f]/5 text-[#ffc900]" : ""}`}>
+                      {cat} <ChevronDown size={14} className={`transition-transform duration-200 ${hoveredCategory === cat ? "rotate-180" : ""}`} />
                     </button>
-
-                    <AnimatePresence>
-                      {hoveredCategory === cat && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10, x: "-50%" }}
-                          animate={{ opacity: 1, y: 0, x: "-50%" }}
-                          exit={{ opacity: 0, y: 10, x: "-50%" }}
-                          className="msh-mega"
-                        >
-                          <div className="msh-mega-card">
-                            <div className="msh-mega-links">
-                              <h6 className="msh-mega-title">
-                                {cat === "Services" ? "Expertise" : "Property Types"}
-                              </h6>
-                              <div className="msh-mega-grid">
-                                {getLinks(cat).map((link) => (
-                                  <Link key={link.href} href={link.href} className="msh-mega-link">
-                                    <span className="msh-mega-link-icon">{link.icon}</span>
-                                    <span>{link.text}</span>
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="msh-feature">
-                              <Bolt size={32} className="msh-feature-icon" />
-                              <p>{getFeatured(cat)?.title}</p>
-                              <Link href={getFeatured(cat)?.href || "#"} className="msh-feature-link">
-                                {getFeatured(cat)?.btn}
-                              </Link>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </li>
                 ))}
-                <li><Link href="/contact-us" className="msh-contact-link">Contact</Link></li>
+                <li><Link href="/contact-us" className="!inline-flex rounded-full px-4 py-2 !text-[14px] font-bold leading-none text-[#27427f] no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">Contact</Link></li>
               </ul>
             </nav>
 
             {/* Right Actions */}
-            <div className="msh-actions">
+            <div className="!flex shrink-0 !items-center !justify-end gap-3 max-[1180px]:gap-2.5">
               {/* Location */}
               <button 
                 onClick={detectLocation}
-                className="msh-location"
+                className="!hidden !items-center gap-2 rounded-full border-0 !bg-[#27427f]/5 px-3 py-2 text-[#27427f] transition-colors hover:!bg-[#ffc900]/20 md:!inline-flex"
               >
-                <MapPin size={16} className={isLocating ? "msh-pin msh-pin--locating" : "msh-pin"} />
-                <span>{location}</span>
+                <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
+                <span className="!text-[13px] font-black leading-none text-[#27427f]">{location}</span>
               </button>
 
               {/* Wishlist */}
-              <Link href="/wishlist" className="msh-wishlist" aria-label="Wishlist">
-                <Heart size={20} className={wishlistCount > 0 ? "msh-wishlist-icon--active" : ""} />
+              <Link href="/wishlist" className="!inline-flex relative text-[#27427f] transition-transform hover:scale-110 hover:text-[#27427f]" aria-label="Wishlist">
+                <Heart size={20} className={wishlistCount > 0 ? "fill-[#27427f]" : ""} />
                 {wishlistCount > 0 && (
-                  <span className="msh-wishlist-count">
+                  <span className="!absolute -right-2 -top-2 !flex h-4 w-4 !items-center !justify-center rounded-full border border-white bg-[#ffc900] !text-[9px] font-black leading-none text-[#27427f]">
                     {wishlistCount}
                   </span>
                 )}
               </Link>
 
               {/* Auth Links */}
-              <div className="msh-auth">
-                <a href="#modalLogin" data-bs-toggle="modal">Login</a>
-                <span className="msh-auth-divider">|</span>
-                <a href="#modalRegister" data-bs-toggle="modal">Register</a>
+              <div className="!hidden !items-center gap-2 rounded-full border border-[#27427f]/10 bg-[#27427f]/5 py-2 pr-3 pl-2 !text-[12px] font-extrabold tracking-[0.04em] text-[#27427f] uppercase transition-colors hover:border-[#ffc900]/35 hover:bg-[#ffc900]/15 xl:!inline-flex">
+                <span className="!flex h-[26px] w-[26px] !items-center !justify-center rounded-full bg-[#27427f] text-[#ffc900]"><UserRound size={16} /></span>
+                <Link href="/login" className="text-[#27427f] no-underline transition-colors hover:text-[#ffc900]">Login</Link>
+                <span className="text-[#27427f]/30">/</span>
+                <Link href="/register" className="text-[#27427f] no-underline transition-colors hover:text-[#ffc900]">Register</Link>
               </div>
 
               {/* Post Property */}
-              <Link href="/rent-or-sell-your-property" className="msh-post">
-                Post Property
+              <Link href="/rent-or-sell-your-property" className="!hidden !items-center gap-2 rounded-full bg-[#ffc900] px-[18px] py-3.5 !text-[11px] font-black leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline shadow-[0_14px_26px_rgba(255,201,0,0.22)] transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white hover:shadow-[0_14px_28px_rgba(39,66,127,0.24)] lg:!inline-flex">
+                Post Property <ArrowUpRight size={15} />
               </Link>
 
               {/* Mobile Toggle */}
               <button 
-                className="msh-mobile-toggle" 
+                className="!inline-flex h-9 w-9 !items-center !justify-center rounded-full border-0 !bg-[#27427f]/5 text-[#27427f] transition-colors hover:!bg-[#27427f]/10 lg:!hidden" 
                 onClick={() => setIsMobileMenuOpen(true)}
                 aria-label="Open navigation menu"
               >
@@ -227,6 +193,45 @@ export function SiteHeader(): React.JSX.Element {
             </div>
           </div>
         </div>
+
+        <AnimatePresence>
+          {hoveredCategory && (
+            <motion.div
+              initial={{ opacity: 0, y: 12, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: 12, x: "-50%" }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="!absolute top-full left-1/2 z-[1002] w-[min(920px,88vw)] pt-[18px]"
+            >
+              <div className="!flex gap-9 rounded-[28px] border border-black/5 bg-white p-8 shadow-[0_22px_55px_rgba(22,30,45,0.20)]">
+                <div className="flex-1">
+                  <div className="mb-[18px] border-b border-[#ffc900]/30 pb-3.5">
+                    <h6 className="mb-2 !text-[11px] font-black leading-none tracking-[0.14em] text-[#27427f]/45 uppercase">
+                      {hoveredCategory === "Services" ? "Expertise" : "Property Types"}
+                    </h6>
+                    <p className="m-0 !text-[18px] font-extrabold leading-tight text-[#27427f]">{getFeatured(hoveredCategory)?.title}</p>
+                  </div>
+                  <div className="!grid grid-cols-2 gap-2.5">
+                    {getLinks(hoveredCategory).map((link) => (
+                      <Link key={link.href} href={link.href} className="!flex !items-center gap-3.5 rounded-xl p-3 !text-[14px] font-bold leading-tight text-[#27427f]/75 no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#27427f]">
+                        <span className="!inline-flex shrink-0 text-[#27427f]">{link.icon}</span>
+                        <span>{link.text}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="!flex w-[270px] shrink-0 flex-col !items-center !justify-center rounded-[22px] bg-[#27427f] bg-[linear-gradient(135deg,rgba(255,201,0,0.16),rgba(255,255,255,0)_38%)] p-7 text-center text-white">
+                  <Bolt size={30} className="mb-4 text-[#ffc900]" />
+                  <p className="mb-4 !text-[14px] font-extrabold leading-tight text-white">{getFeatured(hoveredCategory)?.title}</p>
+                  <Link href={getFeatured(hoveredCategory)?.href || "#"} className="w-full rounded-xl bg-[#ffc900] px-3.5 py-3 !text-[12px] font-black leading-none tracking-[0.08em] text-[#27427f] uppercase no-underline transition-transform hover:scale-[1.04] hover:text-[#27427f]">
+                    {getFeatured(hoveredCategory)?.btn}
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Mobile Menu */}
@@ -236,25 +241,25 @@ export function SiteHeader(): React.JSX.Element {
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="msh-mobile-backdrop"
+              className="!fixed inset-0 z-[1100] bg-[#27427f]/20 backdrop-blur-sm"
             />
             <motion.div 
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25 }}
-              className="msh-mobile-drawer"
+              className="!fixed top-0 right-0 bottom-0 z-[1101] w-[80%] max-w-xs bg-white p-6 shadow-[-18px_0_45px_rgba(22,30,45,0.20)]"
             >
-              <div className="msh-mobile-head">
-                <img src="/assets/images/logo/logo.png" alt="Majestan" className="msh-mobile-logo" />
-                <button onClick={() => setIsMobileMenuOpen(false)} className="msh-mobile-close" aria-label="Close navigation menu"><X size={20} /></button>
+              <div className="mb-8 !flex !items-center !justify-between">
+                <img src="/assets/images/logo/logo.png" alt="Majestan" className="h-7 w-auto object-contain" />
+                <button onClick={() => setIsMobileMenuOpen(false)} className="!inline-flex h-9 w-9 !items-center !justify-center rounded-full border-0 !bg-[#27427f]/5 text-[#27427f]" aria-label="Close navigation menu"><X size={20} /></button>
               </div>
 
-              <div className="msh-mobile-sections">
+              <div className="!grid gap-6">
                 {(["Buy", "Rent", "Services"] as const).map((cat) => (
-                  <div key={cat} className="msh-mobile-section">
-                    <h6>{cat}</h6>
-                    <div className="msh-mobile-link-list">
+                  <div key={cat} className="!grid gap-2">
+                    <h6 className="m-0 px-2 !text-[10px] font-black leading-none tracking-[0.2em] text-[#27427f]/45 uppercase">{cat}</h6>
+                    <div className="!grid gap-1">
                       {getLinks(cat).slice(0, 4).map((link) => (
-                        <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="msh-mobile-link">
+                        <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="!flex !items-center gap-3 rounded-xl bg-[#27427f]/5 p-2.5 !text-[12px] font-bold text-[#27427f] no-underline">
                           {link.icon} {link.text}
                         </Link>
                       ))}
@@ -262,14 +267,15 @@ export function SiteHeader(): React.JSX.Element {
                   </div>
                 ))}
                 
-                <div className="msh-mobile-footer">
-                  <Link href="/rent-or-sell-your-property" onClick={() => setIsMobileMenuOpen(false)} className="msh-mobile-post">
+                <div className="!grid gap-3 pt-4 text-center">
+                  <Link href="/rent-or-sell-your-property" onClick={() => setIsMobileMenuOpen(false)} className="w-full rounded-xl bg-[#ffc900] py-3 !text-[12px] font-black leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline transition-colors hover:bg-[#27427f] hover:text-white">
                     Post Property
                   </Link>
-                  <div className="msh-mobile-auth">
-                    <a href="#modalLogin" data-bs-toggle="modal">Login</a>
-                    <span className="msh-mobile-auth-divider">|</span>
-                    <a href="#modalRegister" data-bs-toggle="modal">Register</a>
+                  <div className="!flex !items-center !justify-center gap-2.5 rounded-full bg-[#27427f]/5 px-3 py-2.5 !text-[11px] font-black tracking-[0.08em] text-[#27427f] uppercase">
+                    <UserRound size={14} />
+                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-[#27427f] no-underline">Login</Link>
+                    <span className="text-[#27427f]/30">/</span>
+                    <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="text-[#27427f] no-underline">Register</Link>
                   </div>
                 </div>
               </div>

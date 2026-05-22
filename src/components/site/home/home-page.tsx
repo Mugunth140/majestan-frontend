@@ -1,23 +1,13 @@
 import Link from "next/link";
 import { FeatureCarousel } from "./property-carousel";
-import { HomeSearch } from "./home-search";
-import { RotatingWords } from "./rotating-words";
+import { HeroSection } from "./hero-section";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { HomePageData } from "@/lib/api";
 
 const city = "coimbatore";
 
-const propertyCategories = [
-  ["Apartment", "/property/apartment", "/assets/images/icons/apartment-home.png"],
-  ["Villa", "/property/villa", "/assets/images/icons/villa.png"],
-  ["Independent House", "/property/independent-house", "/assets/images/icons/independent.png"],
-  ["Plots", "/property/plots", "/assets/images/icons/plot.png"],
-  ["Commercial Space", "/property/commercial", "/assets/images/icons/commercial.png"],
-  ["Industrial", "/property/industrial", "/assets/images/icons/industrial.png"],
-  ["Farmland", "/property/farmland", "/assets/images/icons/farmland.png"],
-  ["Co-Working", "/property/coworking", "/assets/images/icons/co-working.png"],
-] as const;
+
 
 const saleCards = [
   ["Apartment", `/buy-apartments-${city}`, "/assets/images/home/apartment-buy.png", "for sale"],
@@ -62,42 +52,10 @@ export function HomePage({ data }: { data: HomePageData }) {
       <SiteHeader />
 
       <main>
-        <section className="page-title home04 migrated-hero">
-          <div className="tf-container">
-            <div className="row">
-              <div className="col-12">
-                <div className="content-inner">
-                  <div className="heading-title flex! flex-col items-center text-center">
-
-                    <h1 className="title home-title font-sans font-black tracking-tight text-[#27427f] leading-normal flex flex-wrap items-center justify-center gap-y-2 max-[720px]:text-[32px] max-[720px]:leading-[44px]">
-                      <span>Your Trusted Partner to</span>
-                      <RotatingWords words={["Buy", "Sell", "Rent"]} />
-                      <span>Properties in <span className="relative inline-block text-[#ffc900] after:content-[''] after:absolute after:bottom-1.5 after:left-0 after:w-full after:h-[6px] after:bg-[#ffc900]/25 after:-z-10">Coimbatore</span></span>
-                    </h1>
-                  </div>
-
-                  <ul className="widget-menu-tab migrated-category-tabs">
-                    {propertyCategories.map(([label, href, icon]) => (
-                      <li className="item-title" key={label}>
-                        <Link href={href}>
-                          <span className="d-grid migrated-category-link">
-                            <img src={icon} width="60" alt="" />
-                            {label}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <HomeSearch
-                    sublocations={data.filters.sublocations}
-                    unitTypes={data.filters.unitTypes}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSection
+          sublocations={data.filters.sublocations}
+          unitTypes={data.filters.unitTypes}
+        />
 
         <section className="sale-in-cbe section-featured-properties tf-spacing-7">
           <div className="tf-container">

@@ -1,0 +1,157 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { Home as HomeIcon, Key, TrendingUp } from "lucide-react";
+import { HomeSearch } from "./home-search";
+import type { Sublocation, UnitType } from "@/lib/api";
+
+const propertyCategories = [
+  ["Apartment", "/property/apartment", "/assets/images/icons/apartment-home.png"],
+  ["Villa", "/property/villa", "/assets/images/icons/villa.png"],
+  ["Independent House", "/property/independent-house", "/assets/images/icons/independent.png"],
+  ["Plots", "/property/plots", "/assets/images/icons/plot.png"],
+  ["Commercial Space", "/property/commercial", "/assets/images/icons/commercial.png"],
+  ["Industrial", "/property/industrial", "/assets/images/icons/industrial.png"],
+  ["Farmland", "/property/farmland", "/assets/images/icons/farmland.png"],
+  ["Co-Working", "/property/coworking", "/assets/images/icons/co-working.png"],
+] as const;
+
+const TAGLINES = [
+  { id: 0, text: "Buy Your Dream Home",    Icon: HomeIcon    },
+  { id: 1, text: "Rent Premium Spaces",    Icon: Key         },
+  { id: 2, text: "Sell with Confidence",   Icon: TrendingUp  },
+] as const;
+
+interface HeroSectionProps {
+  sublocations: Sublocation[];
+  unitTypes: UnitType[];
+}
+
+export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
+  const [city, setCity]           = useState("Coimbatore");
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  /* ── Cycle taglines ─────────────────────────────────────────── */
+  useEffect(() => {
+    const id = setInterval(
+      () => setActiveIdx((i) => (i + 1) % TAGLINES.length),
+      3000
+    );
+    return () => clearInterval(id);
+  }, []);
+
+  /* ── Geo-detect city (silent fail) ─────────────────────────── */
+  useEffect(() => {
+    if (typeof window === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
+          );
+          const d = await res.json();
+          const detected = d.address?.city ?? d.address?.town ?? d.address?.village;
+          if (detected) setCity(detected);
+        } catch { /* keep default */ }
+      },
+      () => { /* geolocation denied → keep default */ }
+    );
+  }, []);
+
+  const { Icon: ActiveIcon } = TAGLINES[activeIdx];
+
+  return (
+    <section className="relative min-h-screen flex flex-col justify-end overflow-hidden bg-white">
+
+      {/* ── Hero background image (responsive) ─────────────────── */}
+      <picture>
+        <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.webp" />
+        <img
+          src="/assets/images/hero/hero_desktop.png"
+          alt="Majestan Realty — Properties"
+          className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
+          fetchPriority="high"
+          loading="eager"
+        />
+      </picture>
+
+      {/* ── Gradient overlay — (bottom-to-top) ──────────── */}
+      <div
+        className="absolute inset-0 block md:hidden"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.74) 34%, rgba(255,255,255,0.05) 58%, rgba(255,255,255,0) 78%)",
+        }}
+      />
+
+      {/* ── Content ─────────────────────────────────────────────── */}
+      <div className="relative z-10 tf-container pt-[130px] pb-14 max-[640px]:pt-[108px] max-[640px]:pb-10">
+
+        {/* H1 */}
+        <h1
+          className="font-['Lexend',sans-serif] font-light! text-[#0a0a0a] leading-[1.06] tracking-[-0.02em] mb-1"
+          style={{ fontSize: "clamp(30px, 4.4vw, 62px)" }}
+        >
+          Your Trusted Real Estate Partner in{" "}
+          <span className="text-[#27427f]">{city}</span>
+        </h1>
+
+        {/* Animated tagline block */}
+        <div className="mb-9 max-[640px]:mb-7">
+          {/* Fixed-height row — prevents layout shift */}
+          <div
+            className="flex items-center gap-3 overflow-hidden"
+            style={{ height: "clamp(36px, 4vw, 50px)" }}
+          >
+            {/* Gold accent bar */}
+            <div className="w-[4px] h-9 rounded-full bg-[#ffc900] shrink-0 max-[640px]:h-7" />
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeIdx}
+                initial={{ y: 44, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -44, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                className="flex items-center gap-2.5"
+              >
+                <ActiveIcon
+                  size={22}
+                  className="text-[#27427f] shrink-0 max-[640px]:hidden"
+                  strokeWidth={2.5}
+                />
+                <span
+                  className="font-['Lexend',sans-serif] font-semibold text-[#27427f] whitespace-nowrap"
+                  style={{ fontSize: "clamp(17px, 1.9vw, 25px)" }}
+                >
+                  {TAGLINES[activeIdx].text}
+                </span>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Progress pill indicators */}
+          <div className="flex items-center gap-[7px] mt-4">
+            {TAGLINES.map(({ id, text }, i) => (
+              <button
+                key={id}
+                onClick={() => setActiveIdx(i)}
+                aria-label={`Show: ${text}`}
+                className={`h-[5px] rounded-full border-0 p-0 transition-all duration-500 cursor-pointer ${
+                  i === activeIdx
+                    ? "w-8 bg-[#27427f]"
+                    : "w-[5px] bg-[#27427f]/25 hover:bg-[#27427f]/45"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Search bar */}
+        <HomeSearch sublocations={sublocations} unitTypes={unitTypes} />
+      </div>
+    </section>
+  );
+}

@@ -19,9 +19,9 @@ const propertyCategories = [
 ] as const;
 
 const TAGLINES = [
-  { id: 0, text: "Buy Your Dream Home",    Icon: HomeIcon    },
-  { id: 1, text: "Rent Premium Spaces",    Icon: Key         },
-  { id: 2, text: "Sell with Confidence",   Icon: TrendingUp  },
+  { id: 0, text: "Buy Your Dream Home", Icon: HomeIcon },
+  { id: 1, text: "Rent Premium Spaces", Icon: Key },
+  { id: 2, text: "Sell with Confidence", Icon: TrendingUp },
 ] as const;
 
 interface HeroSectionProps {
@@ -30,7 +30,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
-  const [city, setCity]           = useState("Coimbatore");
+  const [city, setCity] = useState("Coimbatore");
   const [activeIdx, setActiveIdx] = useState(0);
 
   /* ── Cycle taglines ─────────────────────────────────────────── */
@@ -63,13 +63,13 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
   const { Icon: ActiveIcon } = TAGLINES[activeIdx];
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-end overflow-hidden bg-white">
+    <section className="relative min-h-screen flex flex-col justify-center overflow-x-hidden bg-white">
 
       {/* ── Hero background image (responsive) ─────────────────── */}
       <picture>
         <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.webp" />
         <img
-          src="/assets/images/hero/hero_desktop.png"
+          src="/assets/images/hero/hero_desktop1.png"
           alt="Majestan Realty — Properties"
           className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
           fetchPriority="high"
@@ -79,34 +79,35 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
 
       {/* ── Gradient overlay — (bottom-to-top) ──────────── */}
       <div
-        className="absolute inset-0 block md:hidden"
+        className="absolute inset-x-0 bottom-0 h-[60%] pointer-events-none"
         style={{
           background:
-            "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.74) 34%, rgba(255,255,255,0.05) 58%, rgba(255,255,255,0) 78%)",
+            "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 25%,rgba(255,255,255,0.5) 40%, rgba(255,255,255,0) 100%)",
         }}
       />
 
       {/* ── Content ─────────────────────────────────────────────── */}
-      <div className="relative z-10 tf-container pt-[130px] pb-14 max-[640px]:pt-[108px] max-[640px]:pb-10">
+      <div className="relative z-10 tf-container flex flex-col items-center justify-center text-center w-full px-4 mt-20 md:mt-12">
 
         {/* H1 */}
         <h1
-          className="font-['Lexend',sans-serif] font-light! text-[#0a0a0a] leading-[1.06] tracking-[-0.02em] mb-1"
-          style={{ fontSize: "clamp(30px, 4.4vw, 62px)" }}
+          className="font-['Lexend',sans-serif] text-[#0a0a0a] leading-[1.06] tracking-[-0.02em] mb-6 drop-shadow-sm"
+          style={{ fontSize: "clamp(30px, 4.4vw, 62px)", fontWeight: 300 }}
         >
-          Your Trusted Real Estate Partner in{" "}
-          <span className="text-[#27427f]">{city}</span>
+          Your Trusted Real Estate Partner
+          <br className="hidden md:block!" /> in{" "}
+          <span className="text-[#27427f] font-semibold">{city}</span>
         </h1>
 
         {/* Animated tagline block */}
-        <div className="mb-9 max-[640px]:mb-7">
+        <div className="mb-10 max-[640px]:mb-8 flex flex-col items-center w-full">
           {/* Fixed-height row — prevents layout shift */}
           <div
-            className="flex items-center gap-3 overflow-hidden"
+            className="flex items-center justify-center gap-3 overflow-hidden"
             style={{ height: "clamp(36px, 4vw, 50px)" }}
           >
             {/* Gold accent bar */}
-            <div className="w-[4px] h-9 rounded-full bg-[#ffc900] shrink-0 max-[640px]:h-7" />
+            <div className="w-[4px] h-9 rounded-full bg-[#ffc900] shrink-0 max-[640px]:h-7 hidden sm:block" />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -115,7 +116,7 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -44, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 28 }}
-                className="flex items-center gap-2.5"
+                className="flex items-center justify-center gap-2.5"
               >
                 <ActiveIcon
                   size={22}
@@ -123,7 +124,7 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
                   strokeWidth={2.5}
                 />
                 <span
-                  className="font-['Lexend',sans-serif] font-semibold text-[#27427f] whitespace-nowrap"
+                  className="font-['Lexend',sans-serif] font-semibold text-[#27427f] whitespace-nowrap drop-shadow-sm"
                   style={{ fontSize: "clamp(17px, 1.9vw, 25px)" }}
                 >
                   {TAGLINES[activeIdx].text}
@@ -133,24 +134,25 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
           </div>
 
           {/* Progress pill indicators */}
-          <div className="flex items-center gap-[7px] mt-4">
+          {/* <div className="flex items-center justify-center gap-[7px] mt-4">
             {TAGLINES.map(({ id, text }, i) => (
               <button
                 key={id}
                 onClick={() => setActiveIdx(i)}
                 aria-label={`Show: ${text}`}
-                className={`h-[5px] rounded-full border-0 p-0 transition-all duration-500 cursor-pointer ${
-                  i === activeIdx
+                className={`h-[5px] rounded-full border-0 p-0 transition-all duration-500 cursor-pointer ${i === activeIdx
                     ? "w-8 bg-[#27427f]"
                     : "w-[5px] bg-[#27427f]/25 hover:bg-[#27427f]/45"
-                }`}
+                  }`}
               />
             ))}
-          </div>
+          </div> */}
         </div>
 
         {/* Search bar */}
-        <HomeSearch sublocations={sublocations} unitTypes={unitTypes} />
+        <div className="w-full">
+          <HomeSearch sublocations={sublocations} unitTypes={unitTypes} />
+        </div>
       </div>
     </section>
   );

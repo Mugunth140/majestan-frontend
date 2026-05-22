@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import type { Sublocation, UnitType } from "@/lib/api";
+import { MapPin, ChevronDown, Search } from "lucide-react";
 
 const propertyTypeOptions = [
   ["apartment", "Apartment"],
@@ -38,18 +39,16 @@ export function HomeSearch({
   unitTypes: UnitType[];
 }) {
   const router = useRouter();
-  const [listingType, setListingType] = useState("");
+  const [listingType, setListingType] = useState<"Sell" | "Rent">("Sell");
   const [propertyType, setPropertyType] = useState("");
   const [location, setLocation] = useState("");
-  const [unitType, setUnitType] = useState("");
-  const [facing, setFacing] = useState("");
   const [error, setError] = useState("");
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!propertyType) {
-      setError("Please select a property type.");
+      setError("Please select a property type to continue.");
       return;
     }
 
@@ -60,12 +59,10 @@ export function HomeSearch({
     if (listingType) params.set("listingType", listingType);
     if (propertyType) params.set("propertyType", propertyType);
     if (location) params.set("location", location);
-    if (unitType) params.set("unitType", unitType);
-    if (facing) params.set("facing", facing);
 
     setError("");
 
-    if (routeBase && !unitType && !facing) {
+    if (routeBase) {
       const suffix = location
         ? location.toLowerCase().trim().replace(/\s+/g, "-")
         : "coimbatore";
@@ -77,81 +74,111 @@ export function HomeSearch({
   }
 
   return (
-    <div className="wg-filter migrated-search">
-      <form className="w-full" onSubmit={onSubmit}>
-        <div className="form-title home-filter-grid">
-          <select
-            aria-label="Purchase type"
-            className="form-select"
-            value={listingType}
-            onChange={(event) => setListingType(event.target.value)}
-          >
-            <option value="">Purchase type</option>
-            <option value="Sell">Buy</option>
-            <option value="Rent">Rent</option>
-          </select>
+    <div className="!w-full !max-w-[1100px] !mx-auto !mt-10 md:!mt-14 !relative !z-20 !px-4">
+      <form
+        className="!w-full !bg-white/95 !backdrop-blur-2xl !rounded-[2rem] md:!rounded-full !shadow-2xl !border !border-white/80 !p-2.5 !flex !flex-col md:!flex-row !items-center !gap-2 md:!gap-0"
+        onSubmit={onSubmit}
+      >
+        {/* ── Location Input ────────────────────────────────── */}
+        <div className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none md:!rounded-l-full hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors !cursor-text">
+          <MapPin className="!text-[#27427f] !mr-3 !shrink-0" size={24} strokeWidth={1.8} />
+          <div className="!w-full !flex !flex-col !text-left !overflow-hidden">
+            <label className="!text-[11px] !font-semibold !text-gray-500 !uppercase !tracking-wide !mb-0.5 !leading-normal group-focus-within:!text-[#27427f] !transition-colors">
+              Location
+            </label>
+            <input
+              type="text"
+              list="sublocations-list"
+              placeholder="Search area, landmark..."
+              className="!w-full !outline-none !bg-transparent !text-gray-900 !placeholder-gray-400 !font-semibold !text-[15px] !border-none !p-0 !m-0 !shadow-none focus:!ring-0 !truncate !rounded-none !leading-normal !h-auto !min-h-0"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+            <datalist id="sublocations-list">
+              {sublocations.map((item) => (
+                <option key={item.id} value={item.sublocation} />
+              ))}
+            </datalist>
+          </div>
+        </div>
 
-          <select
-            aria-label="Property type"
-            className="form-select"
-            value={propertyType}
-            onChange={(event) => setPropertyType(event.target.value)}
-          >
-            <option value="">Property type</option>
-            {propertyTypeOptions.map(([value, label]) => (
-              <option value={value} key={value}>
-                {label}
+        {/* ── Property Type Dropdown ────────────────────────── */}
+        <div className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors !cursor-pointer">
+          <div className="!w-full !flex !flex-col !text-left !overflow-hidden !relative">
+            <label className="!text-[11px] !font-semibold !text-gray-500 !uppercase !tracking-wide !mb-0.5 !leading-normal group-focus-within:!text-[#27427f] !transition-colors">
+              Property Type
+            </label>
+            <select
+              aria-label="Property type"
+              className="!w-full !outline-none !bg-transparent !text-gray-900 !font-semibold !text-[15px] !appearance-none !cursor-pointer !border-none !p-0 !m-0 !shadow-none focus:!ring-0 !rounded-none !leading-normal !h-auto !min-h-0"
+              value={propertyType}
+              onChange={(e) => setPropertyType(e.target.value)}
+            >
+              <option value="" disabled className="!text-gray-400">
+                Select type...
               </option>
-            ))}
-          </select>
+              {propertyTypeOptions.map(([value, label]) => (
+                <option value={value} key={value} className="!text-gray-800">
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <ChevronDown className="!text-gray-400 group-hover:!text-[#27427f] !ml-2 !shrink-0 !pointer-events-none !transition-colors" size={20} strokeWidth={2} />
+        </div>
 
-          <select
-            aria-label="Location"
-            className="form-select"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
+        {/* ── Buy/Rent Toggle + Search Button ───────────────── */}
+        <div className="!w-full md:!w-[30%] !flex !flex-col md:!flex-row !items-center !justify-between !px-5 md:!px-0 md:!pl-4 md:!pr-1.5 !py-3 md:!py-1 !relative !rounded-2xl md:!rounded-none md:!rounded-r-full !transition-colors !gap-3 md:!gap-3">
+          {/* Toggle container */}
+          <div className="!flex !bg-gray-100 !p-1 !rounded-full !border !border-gray-200/60 !w-full md:!w-auto !relative">
+            {/* Sliding pill indicator */}
+            <div
+              className="!absolute !top-1 !bottom-1 !w-[calc(50%-4px)] !bg-white !rounded-full !shadow-sm !transition-transform !duration-300 !ease-in-out !pointer-events-none"
+              style={{
+                transform: listingType === "Rent" ? "translateX(100%)" : "translateX(0)",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setListingType("Sell")}
+              className={`!relative !z-10 !flex-1 md:!flex-none md:!w-[68px] !py-2 !rounded-full !text-[13px] !font-bold !transition-colors !duration-300 !border-none !bg-transparent !shadow-none !outline-none !leading-normal !m-0 ${
+                listingType === "Sell" ? "!text-[#27427f]" : "!text-gray-500 hover:!text-gray-700"
+              }`}
+            >
+              Buy
+            </button>
+            <button
+              type="button"
+              onClick={() => setListingType("Rent")}
+              className={`!relative !z-10 !flex-1 md:!flex-none md:!w-[68px] !py-2 !rounded-full !text-[13px] !font-bold !transition-colors !duration-300 !border-none !bg-transparent !shadow-none !outline-none !leading-normal !m-0 ${
+                listingType === "Rent" ? "!text-[#27427f]" : "!text-gray-500 hover:!text-gray-700"
+              }`}
+            >
+              Rent
+            </button>
+          </div>
+
+          {/* Search button */}
+          <button
+            type="submit"
+            className="!w-full md:!w-[52px] !h-[52px] !bg-[#27427f] hover:!bg-[#1a2d59] !text-white !rounded-full !flex !items-center !justify-center !shrink-0 !transition-all !duration-300 !shadow-lg !border-none !outline-none !p-0 !m-0 !leading-normal md:hover:!scale-105 focus:!ring-2 focus:!ring-[#27427f]/30 focus:!ring-offset-2"
           >
-            <option value="">Location</option>
-            {sublocations.map((item) => (
-              <option value={item.sublocation} key={item.id}>
-                {item.sublocation}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label="Unit type"
-            className="form-select"
-            value={unitType}
-            onChange={(event) => setUnitType(event.target.value)}
-          >
-            <option value="">Various Unit Types</option>
-            {unitTypes.map((item) => (
-              <option value={item.unittype} key={item.id}>
-                {item.unittype}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label="Facing"
-            className="form-select"
-            value={facing}
-            onChange={(event) => setFacing(event.target.value)}
-          >
-            <option value="">Facing</option>
-            <option value="east">East</option>
-            <option value="west">West</option>
-            <option value="north">North</option>
-            <option value="south">South</option>
-          </select>
-
-          <button className="tf-btn bg-color-primary pd-3" type="submit">
-            Search <i className="icon-MagnifyingGlass fw-6" />
+            <Search size={22} strokeWidth={2.5} />
+            <span className="md:!hidden !ml-2 !font-bold !text-base">Search</span>
           </button>
         </div>
-        {error ? <p className="error-tooltip">{error}</p> : null}
       </form>
+
+      {error && (
+        <div className="!mt-4 !flex !justify-center animate-fade-in">
+          <p className="!text-red-500 !bg-white/95 !backdrop-blur-md !px-5 !py-2.5 !rounded-full !text-sm !font-semibold !border !border-red-100 !shadow-lg !flex !items-center !gap-2.5">
+            <span className="!w-2 !h-2 !rounded-full !bg-red-500 !shrink-0" />
+            {error}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
+
+

@@ -74,7 +74,7 @@ export function HomeSearch({
   }
 
   return (
-    <div className="!w-full !max-w-[1100px] !mx-auto !mt-10 md:!mt-14 !relative !z-20 !px-4">
+    <div className="!w-full !max-w-[1100px] !mx-auto !mt-4 !relative !z-20 !px-4">
       <form
         className="!w-full !bg-white/95 !backdrop-blur-2xl !rounded-[2rem] md:!rounded-full !shadow-2xl !border !border-white/80 !p-2.5 !flex !flex-col md:!flex-row !items-center !gap-2 md:!gap-0"
         onSubmit={onSubmit}
@@ -124,7 +124,7 @@ export function HomeSearch({
               ))}
             </select>
           </div>
-          <ChevronDown className="!text-gray-400 group-hover:!text-[#27427f] !ml-2 !shrink-0 !pointer-events-none !transition-colors" size={20} strokeWidth={2} />
+          <ChevronDown className="text-gray-400! group-hover:!text-[#27427f] !ml-2 !shrink-0 !pointer-events-none !transition-colors" size={20} strokeWidth={2} />
         </div>
 
         {/* ── Buy/Rent Toggle + Search Button ───────────────── */}
@@ -159,20 +159,19 @@ export function HomeSearch({
           </div>
 
           {/* Search button */}
+  
           <button
             type="submit"
-            className="!w-full md:!w-[52px] !h-[52px] !bg-[#27427f] hover:!bg-[#1a2d59] !text-white !rounded-full !flex !items-center !justify-center !shrink-0 !transition-all !duration-300 !shadow-lg !border-none !outline-none !p-0 !m-0 !leading-normal md:hover:!scale-105 focus:!ring-2 focus:!ring-[#27427f]/30 focus:!ring-offset-2"
-          >
+            className="bg-[#27427f]! group-hover:bg-[#1a2d59]! !text-white !rounded-full flex items-center justify-center transition-all duration-300 shadow-lg border-none outline-none leading-normal md:hover:scale-100 focus:ring-0 focus:ring-[#27427f]/30 px-6! py-3.5! gap-2.5">
+            <span className="ml-2 font-bold text-base bg-[#27427f]! group-hover:bg-[#1a2d59]! text-white">Search</span>
             <Search size={22} strokeWidth={2.5} />
-            <span className="md:!hidden !ml-2 !font-bold !text-base">Search</span>
           </button>
         </div>
       </form>
 
       {error && (
         <div className="!mt-4 !flex !justify-center animate-fade-in">
-          <p className="!text-red-500 !bg-white/95 !backdrop-blur-md !px-5 !py-2.5 !rounded-full !text-sm !font-semibold !border !border-red-100 !shadow-lg !flex !items-center !gap-2.5">
-            <span className="!w-2 !h-2 !rounded-full !bg-red-500 !shrink-0" />
+          <p className="text-red-500! bg-white px-5! py-2.5! rounded-full !text-sm !font-semibold !flex items-center">
             {error}
           </p>
         </div>

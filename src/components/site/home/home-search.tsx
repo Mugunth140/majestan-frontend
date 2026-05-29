@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Sublocation, UnitType } from "@/lib/api";
 import { MapPin, ChevronDown, Search } from "lucide-react";
 
@@ -15,25 +15,9 @@ const propertyTypeOptions = [
   ["farmlands", "Farmlands"],
 ] as const;
 
-const propertySlugMap: Record<string, { buy: string; rent: string }> = {
-  apartment: { buy: "buy-apartments", rent: "rent-apartments" },
-  villa: { buy: "buy-villas", rent: "rent-villas" },
-  independenthouse: {
-    buy: "buy-independent-houses",
-    rent: "rent-independent-houses",
-  },
-  plot: { buy: "buy-plots", rent: "buy-plots" },
-  commercialspace: {
-    buy: "buy-commercial-space",
-    rent: "rent-commercial-space",
-  },
-  industrialspace: { buy: "buy-industrials", rent: "rent-industrials" },
-  farmlands: { buy: "buy-farmlands", rent: "buy-farmlands" },
-};
 
 export function HomeSearch({
   sublocations,
-  unitTypes,
 }: {
   sublocations: Sublocation[];
   unitTypes: UnitType[];
@@ -43,6 +27,45 @@ export function HomeSearch({
   const [propertyType, setPropertyType] = useState("");
   const [location, setLocation] = useState("");
   const [error, setError] = useState("");
+  const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
+  const [isPropertyMenuOpen, setIsPropertyMenuOpen] = useState(false);
+  const locationMenuRef = useRef<HTMLDivElement>(null);
+  const propertyMenuRef = useRef<HTMLDivElement>(null);
+
+  const selectedPropertyLabel =
+    propertyTypeOptions.find(([value]) => value === propertyType)?.[1] ?? "Select type...";
+
+  const filteredSublocations = useMemo(() => {
+    const query = location.trim().toLowerCase();
+    const matches = query
+      ? sublocations.filter((item) =>
+          item.sublocation.toLowerCase().includes(query),
+        )
+      : sublocations;
+
+    return matches.slice(0, 8);
+  }, [location, sublocations]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        locationMenuRef.current &&
+        !locationMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsLocationMenuOpen(false);
+      }
+
+      if (
+        propertyMenuRef.current &&
+        !propertyMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsPropertyMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,25 +75,14 @@ export function HomeSearch({
       return;
     }
 
-    const listingMode = listingType === "Rent" ? "rent" : "buy";
-    const routeBase = propertySlugMap[propertyType]?.[listingMode];
-    const params = new URLSearchParams();
-
-    if (listingType) params.set("listingType", listingType);
-    if (propertyType) params.set("propertyType", propertyType);
-    if (location) params.set("location", location);
-
     setError("");
 
-    if (routeBase) {
-      const suffix = location
-        ? location.toLowerCase().trim().replace(/\s+/g, "-")
-        : "coimbatore";
-      router.push(`/${routeBase}-${suffix}`);
-      return;
-    }
+    const params = new URLSearchParams();
+    params.set("listingType", listingType);
+    params.set("propertyType", propertyType);
+    if (location) params.set("location", location);
 
-    router.push(`/property?${params.toString()}`);
+    router.push(`/search?${params.toString()}`);
   }
 
   return (
@@ -80,51 +92,139 @@ export function HomeSearch({
         onSubmit={onSubmit}
       >
         {/* ── Location Input ────────────────────────────────── */}
-        <div className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none md:!rounded-l-full hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors !cursor-text">
+        <div
+          ref={locationMenuRef}
+          className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none md:!rounded-l-full hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors !cursor-text"
+        >
           <MapPin className="!text-[#27427f] !mr-3 !shrink-0" size={24} strokeWidth={1.8} />
-          <div className="!w-full !flex !flex-col !text-left !overflow-hidden">
-            <label className="!text-[11px] !font-semibold !text-gray-500 !uppercase !tracking-wide !mb-0.5 !leading-normal group-focus-within:!text-[#27427f] !transition-colors">
+          <div className="!w-full !flex !flex-col !text-left !relative">
+            <label
+              id="location-label"
+              className="!text-[11px] !font-semibold !text-gray-500 !uppercase !tracking-wide !mb-0.5 !leading-normal group-focus-within:!text-[#27427f] !transition-colors"
+            >
               Location
             </label>
             <input
               type="text"
-              list="sublocations-list"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={isLocationMenuOpen}
+              aria-controls="location-options"
+              aria-labelledby="location-label"
               placeholder="Search area, landmark..."
               className="!w-full !outline-none !bg-transparent !text-gray-900 !placeholder-gray-400 !font-semibold !text-[15px] !border-none !p-0 !m-0 !shadow-none focus:!ring-0 !truncate !rounded-none !leading-normal !h-auto !min-h-0"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setIsLocationMenuOpen(true);
+              }}
+              onFocus={() => setIsLocationMenuOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setIsLocationMenuOpen(false);
+              }}
             />
-            <datalist id="sublocations-list">
-              {sublocations.map((item) => (
-                <option key={item.id} value={item.sublocation} />
-              ))}
-            </datalist>
+
+            {isLocationMenuOpen && (
+              <div
+                id="location-options"
+                role="listbox"
+                aria-labelledby="location-label"
+                className="!absolute !left-0 !right-0 !top-[calc(100%+14px)] !z-50 !max-h-72 !overflow-y-auto !rounded-2xl !border !border-gray-100 !bg-white !p-2 !shadow-[0_18px_45px_rgba(22,30,45,0.16)]"
+              >
+                {filteredSublocations.length > 0 ? (
+                  filteredSublocations.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="option"
+                      aria-selected={location === item.sublocation}
+                      className={`!w-full !rounded-xl !border-none !px-3.5 !py-2.5 !text-left !text-sm !font-semibold !shadow-none !outline-none !transition-colors ${
+                        location === item.sublocation
+                          ? "!bg-[#27427f] !text-white"
+                          : "!bg-transparent !text-gray-700 hover:!bg-[#27427f]/5 hover:!text-[#27427f]"
+                      }`}
+                      onClick={() => {
+                        setLocation(item.sublocation);
+                        setIsLocationMenuOpen(false);
+                      }}
+                    >
+                      {item.sublocation}
+                    </button>
+                  ))
+                ) : (
+                  <p className="!m-0 !px-3.5 !py-2.5 !text-sm !font-semibold !text-gray-400">
+                    No matching locations
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* ── Property Type Dropdown ────────────────────────── */}
-        <div className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors !cursor-pointer">
-          <div className="!w-full !flex !flex-col !text-left !overflow-hidden !relative">
-            <label className="!text-[11px] !font-semibold !text-gray-500 !uppercase !tracking-wide !mb-0.5 !leading-normal group-focus-within:!text-[#27427f] !transition-colors">
+        <div
+          ref={propertyMenuRef}
+          className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors"
+        >
+          <div className="!w-full !flex !flex-col !text-left !relative">
+            <label
+              id="property-type-label"
+              className="!text-[11px] !font-semibold !text-gray-500 !uppercase !tracking-wide !mb-0.5 !leading-normal group-focus-within:!text-[#27427f] !transition-colors"
+            >
               Property Type
             </label>
-            <select
-              aria-label="Property type"
-              className="!w-full !outline-none !bg-transparent !text-gray-900 !font-semibold !text-[15px] !appearance-none !cursor-pointer !border-none !p-0 !m-0 !shadow-none focus:!ring-0 !rounded-none !leading-normal !h-auto !min-h-0"
-              value={propertyType}
-              onChange={(e) => setPropertyType(e.target.value)}
+            <button
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded={isPropertyMenuOpen}
+              aria-labelledby="property-type-label"
+              className={`!w-full !border-none !bg-transparent !p-0 !m-0 !shadow-none !outline-none focus:!ring-0 !text-left !font-semibold !text-[15px] !leading-normal !transition-colors ${
+                propertyType ? "!text-gray-900" : "!text-gray-400"
+              }`}
+              onClick={() => setIsPropertyMenuOpen((open) => !open)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setIsPropertyMenuOpen(false);
+              }}
             >
-              <option value="" disabled className="!text-gray-400">
-                Select type...
-              </option>
-              {propertyTypeOptions.map(([value, label]) => (
-                <option value={value} key={value} className="!text-gray-800">
-                  {label}
-                </option>
-              ))}
-            </select>
+              {selectedPropertyLabel}
+            </button>
+
+            {isPropertyMenuOpen && (
+              <div
+                role="listbox"
+                aria-labelledby="property-type-label"
+                className="!absolute !left-0 !right-0 !top-[calc(100%+14px)] !z-50 !max-h-72 !overflow-y-auto !rounded-2xl !border !border-gray-100 !bg-white !p-2 !shadow-[0_18px_45px_rgba(22,30,45,0.16)]"
+              >
+                {propertyTypeOptions.map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="option"
+                    aria-selected={propertyType === value}
+                    className={`!w-full !rounded-xl !border-none !px-3.5 !py-2.5 !text-left !text-sm !font-semibold !shadow-none !outline-none !transition-colors ${
+                      propertyType === value
+                        ? "!bg-[#27427f] !text-white"
+                        : "!bg-transparent !text-gray-700 hover:!bg-[#27427f]/5 hover:!text-[#27427f]"
+                    }`}
+                    onClick={() => {
+                      setPropertyType(value);
+                      setError("");
+                      setIsPropertyMenuOpen(false);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <ChevronDown className="text-gray-400! group-hover:!text-[#27427f] !ml-2 !shrink-0 !pointer-events-none !transition-colors" size={20} strokeWidth={2} />
+          <ChevronDown
+            className={`!ml-2 !shrink-0 !pointer-events-none !transition-colors ${
+              isPropertyMenuOpen ? "!rotate-180 !text-[#27427f]" : "!text-gray-400 group-hover:!text-[#27427f]"
+            }`}
+            size={20}
+            strokeWidth={2}
+          />
         </div>
 
         {/* ── Buy/Rent Toggle + Search Button ───────────────── */}
@@ -179,5 +279,3 @@ export function HomeSearch({
     </div>
   );
 }
-
-

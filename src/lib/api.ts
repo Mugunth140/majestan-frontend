@@ -103,3 +103,96 @@ export async function createEnquiry(payload: {
     cache: "no-store",
   });
 }
+
+/* ── Property Search ───────────────────────────────────────── */
+
+export type PropertySearchParams = {
+  propertyType?: string;
+  listingType?: string;
+  location?: string;
+  propertyName?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type PropertySearchItem = {
+  id: number;
+  propertyType: string;
+  legacyPropertyType: string;
+  propertyname?: string;
+  sublocation?: string;
+  address?: string;
+  posttype?: string;
+  expectedsaleprice?: string;
+  monthly_rent?: string;
+  photo1?: string;
+  photo2?: string;
+  slug_url?: string;
+  unittype?: string;
+  configuration?: string;
+  build_up_area?: string;
+  buildup_area?: string;
+  carpet_area?: string;
+  super_build_up_area?: string;
+  plot_area?: string;
+  totalarea?: string;
+  unitsize?: string;
+  project_area?: string;
+  facing?: string;
+  facing_direction?: string;
+  floor?: string;
+  total_floors?: string;
+  furnishing_status?: string;
+  property_age?: string;
+  ageofproperty?: string;
+  age_of_property?: string;
+  parking1?: string;
+  parking2?: string;
+  parking?: string;
+  amenities?: string;
+  key_highlight?: string;
+  apartment_code?: string;
+  villa_code?: string;
+  [key: string]: unknown;
+};
+
+export type PropertySearchResponse = {
+  items: PropertySearchItem[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+/** Map frontend form values to backend PropertyType enum values */
+const PROPERTY_TYPE_MAP: Record<string, string> = {
+  apartment: "apartment",
+  villa: "villa",
+  independenthouse: "independent-house",
+  plot: "plot",
+  commercialspace: "commercial-space",
+  industrialspace: "industrial-space",
+  farmlands: "farmland",
+  coworking: "coworking",
+};
+
+export async function searchProperties(
+  params: PropertySearchParams,
+): Promise<PropertySearchResponse> {
+  const query = new URLSearchParams();
+
+  if (params.propertyType) {
+    const mapped = PROPERTY_TYPE_MAP[params.propertyType] ?? params.propertyType;
+    query.set("propertyType", mapped);
+  }
+  if (params.listingType) query.set("listingType", params.listingType);
+  if (params.location) query.set("location", params.location);
+  if (params.propertyName) query.set("propertyName", params.propertyName);
+  if (params.sort) query.set("sort", params.sort);
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+
+  return fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, {
+    cache: "no-store",
+  });
+}

@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { Home as HomeIcon, Key, TrendingUp } from "lucide-react";
 import { HomeSearch } from "./home-search";
 import type { Sublocation, UnitType } from "@/lib/api";
+import Image from "next/image";
 
 const propertyCategories = [
-  ["Apartment", "/property/apartment", "/assets/images/icons/apartment-home.png"],
-  ["Villa", "/property/villa", "/assets/images/icons/villa.png"],
-  ["Independent House", "/property/independent-house", "/assets/images/icons/independent.png"],
-  ["Plots", "/property/plots", "/assets/images/icons/plot.png"],
-  ["Commercial Space", "/property/commercial", "/assets/images/icons/commercial.png"],
-  ["Industrial", "/property/industrial", "/assets/images/icons/industrial.png"],
-  ["Farmland", "/property/farmland", "/assets/images/icons/farmland.png"],
-  ["Co-Working", "/property/coworking", "/assets/images/icons/co-working.png"],
+  ["Apartment", "/property/apartment", "/assets/icons/properties/apartment.png"],
+  ["Villa", "/property/villa", "/assets/icons/properties/villas.png"],
+  ["Independent House", "/property/independent-house", "/assets/icons/properties/house.png"],
+  ["Plots", "/property/plots", "/assets/icons/properties/plot.png"],
+  ["Commercial Space", "/property/commercial", "/assets/icons/properties/commercial.png"],
+  ["Industrial", "/property/industrial", "/assets/icons/properties/industrial.png"],
+  ["Farmland", "/property/farmland", "/assets/icons/properties/farm-land.png"],
+  ["Co-Working", "/property/coworking", "/assets/icons/properties/co-living.png"],
 ] as const;
 
 const TAGLINES = [
@@ -192,6 +193,29 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
         <div className="w-full">
           <HomeSearch sublocations={sublocations} unitTypes={unitTypes} />
         </div>
+
+        {/* Quick Links */}
+        <motion.div 
+          className="grid grid-cols-4 sm:hidden md:flex justsm:flex-wrapify-center justify-around items-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl mx-auto h-25 mt-12!"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          {propertyCategories.map(([title, href, iconSource]) => (
+            <Link 
+              key={title} 
+              href={href}
+              className="group flex flex-col items-center justify-center bg-white rounded-xl p-1.5 size-23 aspect-square shadow-sm hover:shadow-md ring-1 ring-black/5 transition-all hover:bg-[#27427f]! hover:-translate-y-1"
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 mb-1.5 sm:mb-2 opacity-85 group-hover:opacity-100 group-hover:scale-110 group-hover:text-white! transition-all flex items-center justify-center">
+              <Image src={iconSource} alt={title} width={38} height={38} className="w-full h-full object-contain" />
+              </div>
+              <span className="text-center text-[#27427f] font-normal font-['Lexend',sans-serif] text-sm! leading-tight px-0.5 group-hover:text-white!">
+                {title}
+              </span>
+            </Link>
+          ))}
+        </motion.div>
       </div>
     </section>
   );

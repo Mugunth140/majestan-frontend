@@ -49,6 +49,7 @@ export function SiteHeader(): React.JSX.Element {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [location, setLocation] = useState("Coimbatore");
   const [isLocating, setIsLocating] = useState(false);
+  const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<MegaMenuLink | null>(null);
 
@@ -70,33 +71,57 @@ export function SiteHeader(): React.JSX.Element {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const detectLocation = (e: React.MouseEvent) => {
+  const detectLocation = async (e: React.MouseEvent) => {
     e.preventDefault();
+    setIsLocating(true);
+
+    const fallbackToIP = async () => {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        if (data.city) {
+          setLocation(data.city);
+        } else {
+          console.warn("Could not determine city from IP fallback.");
+        }
+      } catch (err) {
+        console.error("IP fallback error:", err);
+      } finally {
+        setIsLocating(false);
+      }
+    };
+
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      console.warn("Geolocation is not supported by your browser, using fallback.");
+      await fallbackToIP();
       return;
     }
 
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          const data = await response.json();
-          const detectedCity = data.address.city || data.address.town || data.address.village || "Coimbatore";
-          setLocation(detectedCity);
-        } catch (error) {
-          console.error("Error fetching city:", error);
-        } finally {
-          setIsLocating(false);
-        }
-      },
-      (error) => {
-        setIsLocating(false);
-        console.error("Geolocation error:", error);
-      }
-    );
+    try {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await response.json();
+            const detectedCity = data.address.city || data.address.town || data.address.village || "Coimbatore";
+            setLocation(detectedCity);
+            setIsLocating(false);
+          } catch (error) {
+            console.error("Error fetching city from coordinates:", error);
+            await fallbackToIP();
+          }
+        },
+        async (error) => {
+          console.warn(`Geolocation error (${error.code}): ${error.message}. Using fallback.`);
+          await fallbackToIP();
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+      );
+    } catch (err) {
+      console.error("Geolocation API exception:", err);
+      await fallbackToIP();
+    }
   };
 
   const getLinks = (cat: Category) => {
@@ -170,13 +195,59 @@ export function SiteHeader(): React.JSX.Element {
               </Link>
 
               {/* Location */}
-              <button
-                onClick={detectLocation}
-                className="hidden! items-center! gap-2 border-0 bg-[#27427f]/5! px-3 py-3 rounded-full! transition-colors hover:bg-[#27427f]/10! md:inline-flex!"
-              >
-                <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
-                <span className="text-[13px]! font-semibold! leading-none text-[#27427f]">{location}</span>
-              </button>
+              <div className="relative hidden! md:block!" onMouseLeave={() => setIsLocationMenuOpen(false)}>
+                <button
+                  onClick={() => setIsLocationMenuOpen(!isLocationMenuOpen)}
+                  onMouseEnter={() => setIsLocationMenuOpen(true)}
+                  className="inline-flex! items-center! gap-2 border-0 bg-[#27427f]/5! px-3 py-3 rounded-full! transition-colors hover:bg-[#27427f]/10!"
+                >
+                  <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
+                  <span className="text-[13px]! font-semibold! leading-none text-[#27427f]">{location}</span>
+                </button>
+                
+                <AnimatePresence>
+                  {isLocationMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute! right-0 top-full mt-2 w-64 rounded-2xl border border-black/5 bg-white p-3 shadow-[0_15px_35px_rgba(22,30,45,0.15)] z-[1010]"
+                    >
+                      <button
+                        onClick={(e) => {
+                          setIsLocationMenuOpen(false);
+                          detectLocation(e);
+                        }}
+                        className="flex! w-full items-center! gap-2.5 rounded-xl border-0 bg-[#27427f]/5 px-3 py-2.5 text-left text-[13px]! font-bold text-[#27427f]! transition-colors hover:bg-[#27427f]/10!"
+                      >
+                        <MapPin size={16} />
+                        Use My Current Location
+                      </button>
+                      <div className="my-2 border-t border-black/5"></div>
+                      <div className="px-2 pb-1 pt-1 text-[11px]! font-bold uppercase tracking-wider text-black/40!">
+                        Popular Cities
+                      </div>
+                      <div className="grid! gap-1">
+                        {["Coimbatore", "Chennai", "Bangalore", "Hyderabad", "Kochi"].map((city) => (
+                          <button
+                            key={city}
+                            onClick={() => {
+                              setLocation(city);
+                              setIsLocationMenuOpen(false);
+                            }}
+                            className={`flex! w-full items-center! rounded-lg border-0 px-3 py-2 text-left text-[13px]! font-semibold! transition-colors hover:bg-[#27427f]/5! ${
+                              location === city ? "text-[#27427f]! bg-[#27427f]/5!" : "text-black/70! bg-transparent!"
+                            }`}
+                          >
+                            {city}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Post Property */}
               <Link

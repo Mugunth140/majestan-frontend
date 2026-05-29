@@ -42,25 +42,53 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
     return () => clearInterval(id);
   }, []);
 
-  /* ── Geo-detect city (silent fail) ─────────────────────────── */
+  /* ── Sync city label with stored location ───────────────────── */
   useEffect(() => {
-    if (typeof window === "undefined" || !navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
-          );
-          const d = await res.json();
-          const detected = d.address?.city ?? d.address?.town ?? d.address?.village;
-          if (detected) setCity(detected);
-        } catch { /* keep default */ }
-      },
-      () => { /* geolocation denied → keep default */ }
-    );
+    if (typeof window === "undefined") return;
+
+    const stored = localStorage.getItem("majestan-location");
+    if (stored) setCity(stored);
+
+    const handleLocationChange = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      if (typeof customEvent.detail === "string" && customEvent.detail.trim()) {
+        setCity(customEvent.detail);
+      }
+    };
+
+    window.addEventListener("majestan-location-changed", handleLocationChange);
+    return () => window.removeEventListener("majestan-location-changed", handleLocationChange);
   }, []);
 
   const { Icon: ActiveIcon } = TAGLINES[activeIdx];
+
+  const taglineContainerVariants = {
+    hidden: { opacity: 0, y: 44 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        type: "spring" as const, stiffness: 300, damping: 28,
+        staggerChildren: 0.08,
+        delayChildren: 0.1
+      }
+    },
+    exit: { opacity: 0, y: -44, transition: { duration: 0.2 } }
+  };
+
+  const taglineWordVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { type: "spring" as const, damping: 20, stiffness: 200 } 
+    }
+  };
+
+  const taglineIconVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1, transition: { type: "spring" as const, stiffness: 300 } }
+  };
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-x-hidden bg-white">
@@ -112,23 +140,34 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeIdx}
-                initial={{ y: 44, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -44, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={taglineContainerVariants}
                 className="flex items-center justify-center gap-2.5"
               >
-                <ActiveIcon
-                  size={22}
-                  className="text-[#27427f] shrink-0 max-[640px]:hidden"
-                  strokeWidth={2.5}
-                />
-                <span
-                  className="font-['Lexend',sans-serif] font-semibold text-[#27427f] whitespace-nowrap drop-shadow-sm"
+                <motion.div variants={taglineIconVariants}>
+                  <ActiveIcon
+                    size={22}
+                    className="text-[#27427f] shrink-0 max-[640px]:hidden"
+                    strokeWidth={2.5}
+                  />
+                </motion.div>
+                <div
+                  className="font-['Lexend',sans-serif] font-semibold text-[#27427f] whitespace-nowrap drop-shadow-sm flex"
                   style={{ fontSize: "clamp(17px, 1.9vw, 25px)" }}
                 >
-                  {TAGLINES[activeIdx].text}
-                </span>
+                  {TAGLINES[activeIdx].text.split(" ").map((word, i) => (
+                    <motion.span
+                      key={i}
+                      variants={taglineWordVariants}
+                      className="inline-block mr-[0.25em]"
+                      style={{ willChange: "transform, opacity" }}
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </div>
               </motion.div>
             </AnimatePresence>
           </div>

@@ -7,6 +7,15 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
+const RESERVED_SLUGS = new Set([
+  "assets",
+  "favicon.ico",
+  "robots.txt",
+  "sitemap.xml",
+  "manifest.json",
+  "apple-touch-icon.png",
+]);
+
 type SlugPageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -22,7 +31,24 @@ const buildPropertyDescription = (description: string, city: string): string => 
 
 export async function generateMetadata({ params }: SlugPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const property = await getPropertyBySeoSlug(slug);
+
+  if (RESERVED_SLUGS.has(slug)) {
+    return {
+      title: "Page Not Found | Majestan Realty",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
+
+  try {
+    property = await getPropertyBySeoSlug(slug);
+  } catch {
+    property = null;
+  }
 
   if (property) {
     const canonicalPath = `/${property.canonicalSlug}`;
@@ -68,7 +94,18 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 
 export default async function SlugPage({ params }: SlugPageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
-  const property = await getPropertyBySeoSlug(slug);
+
+  if (RESERVED_SLUGS.has(slug)) {
+    notFound();
+  }
+
+  let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
+
+  try {
+    property = await getPropertyBySeoSlug(slug);
+  } catch {
+    property = null;
+  }
 
   if (property) {
     if (property.shouldRedirect) {

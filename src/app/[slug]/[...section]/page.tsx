@@ -8,6 +8,8 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
+const RESERVED_SECTION_SLUGS = new Set(["assets"]);
+
 type PropertySectionPageProps = {
   params: Promise<{ slug: string; section: string[] }>;
 };
@@ -56,7 +58,24 @@ export async function generateMetadata({
   params,
 }: PropertySectionPageProps): Promise<Metadata> {
   const { slug, section } = await params;
-  const property = await getPropertyBySeoSlug(slug);
+
+  if (RESERVED_SECTION_SLUGS.has(slug)) {
+    return {
+      title: "Page Not Found | Majestan Realty",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
+
+  try {
+    property = await getPropertyBySeoSlug(slug);
+  } catch {
+    property = null;
+  }
 
   if (property) {
     const sectionKey = section[0];
@@ -112,7 +131,18 @@ export default async function PropertySectionPage({
   params,
 }: PropertySectionPageProps): Promise<React.JSX.Element> {
   const { slug, section } = await params;
-  const property = await getPropertyBySeoSlug(slug);
+
+  if (RESERVED_SECTION_SLUGS.has(slug)) {
+    notFound();
+  }
+
+  let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
+
+  try {
+    property = await getPropertyBySeoSlug(slug);
+  } catch {
+    property = null;
+  }
 
   if (property) {
     const sectionKey = section[0];

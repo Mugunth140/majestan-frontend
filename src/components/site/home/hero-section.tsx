@@ -68,9 +68,9 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
       opacity: 1, 
       y: 0,
       transition: { 
-        type: "spring" as const, stiffness: 300, damping: 28,
+        type: "spring" as const, stiffness: 100, damping: 10,
         staggerChildren: 0.08,
-        delayChildren: 0.1
+        delayChildren: 0.05
       }
     },
     exit: { opacity: 0, y: -44, transition: { duration: 0.2 } }
@@ -81,13 +81,13 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
     visible: { 
       opacity: 1, 
       y: 0, 
-      transition: { type: "spring" as const, damping: 20, stiffness: 200 } 
+      transition: { type: "spring" as const, damping: 10, stiffness: 100 } 
     }
   };
 
   const taglineIconVariants = {
     hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1, transition: { type: "spring" as const, stiffness: 300 } }
+    visible: { opacity: 1, scale: 1, transition: { type: "spring" as const, stiffness: 100 } }
   };
 
   return (
@@ -157,14 +157,14 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
                   className="font-['Lexend',sans-serif] font-semibold text-[#27427f] whitespace-nowrap drop-shadow-sm flex"
                   style={{ fontSize: "clamp(17px, 1.9vw, 25px)" }}
                 >
-                  {TAGLINES[activeIdx].text.split(" ").map((word, i) => (
+                  {TAGLINES[activeIdx].text.split(" ").map((word) => (
                     <motion.span
-                      key={i}
+                      key={word}
                       variants={taglineWordVariants}
                       className="inline-block mr-[0.25em]"
                       style={{ willChange: "transform, opacity" }}
                     >
-                      {word}
+                      {word}{"\u00a0"}
                     </motion.span>
                   ))}
                 </div>

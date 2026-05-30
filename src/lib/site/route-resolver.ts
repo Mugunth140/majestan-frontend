@@ -35,43 +35,8 @@ const STATIC_ROUTE_MAP: Record<string, LegacyViewName> = {
   "/services/luxury": "laxury.php",
 };
 
-const PROPERTY_ROUTE_MAP: Record<string, LegacyViewName> = {
-  apartment: "apartment.php",
-  villa: "villa.php",
-  "independent-house": "independent_house.php",
-  "independent-housees": "independent_house.php",
-  plots: "plots.php",
-  plot: "plots.php",
-  farmland: "farmland.php",
-  farmlands: "farmland.php",
-  commercial: "commercial.php",
-  industrial: "industrial.php",
-  coworking: "coworkers.php",
-  coworkers: "coworkers.php",
-};
 
 const SEO_ROUTE_PATTERNS: RoutePattern[] = [
-  { pattern: /^\/buy-apartments-/i, view: "apartment.php" },
-  { pattern: /^\/rent-apartments-/i, view: "apartment.php" },
-  { pattern: /^\/flats-sale-/i, view: "apartment.php" },
-  { pattern: /^\/flats-rent-/i, view: "apartment.php" },
-  { pattern: /^\/buy-villas-/i, view: "villa.php" },
-  { pattern: /^\/rent-villas-/i, view: "villa.php" },
-  { pattern: /^\/villas-sale-/i, view: "villa.php" },
-  { pattern: /^\/villas-rent-/i, view: "villa.php" },
-  { pattern: /^\/buy-independent-houses-/i, view: "independent_house.php" },
-  { pattern: /^\/rent-independent-houses-/i, view: "independent_house.php" },
-  { pattern: /^\/buy-plots-/i, view: "plots.php" },
-  { pattern: /^\/plots-sale-/i, view: "plots.php" },
-  { pattern: /^\/buy-farmlands-/i, view: "farmland.php" },
-  { pattern: /^\/buy-commercial-space-/i, view: "commercial.php" },
-  { pattern: /^\/rent-commercial-space-/i, view: "commercial.php" },
-  { pattern: /^\/commercialspace-sale-/i, view: "commercial.php" },
-  { pattern: /^\/commercialspace-rent-/i, view: "commercial.php" },
-  { pattern: /^\/buy-industrials-/i, view: "industrial.php" },
-  { pattern: /^\/rent-industrials-/i, view: "industrial.php" },
-  { pattern: /^\/industrialspace-rent-/i, view: "industrial.php" },
-  { pattern: /^\/rent-co-working-/i, view: "coworkers.php" },
   { pattern: /-ap\d+$/i, view: "apartment-details.php" },
   { pattern: /-v\d+$/i, view: "villa-details.php" },
   { pattern: /-p\d+$/i, view: "plot-details.php" },
@@ -118,13 +83,6 @@ export const resolveViewForPath = (pathname: string): LegacyViewName | null => {
   }
 
   const segments = lookupKey.split("/").filter(Boolean);
-
-  if (segments.length >= 2 && segments[0] === "property") {
-    const propertyView = PROPERTY_ROUTE_MAP[segments[1]];
-    if (propertyView && hasView(propertyView)) {
-      return propertyView;
-    }
-  }
 
   if (segments.length >= 2 && segments[0] === "blogs" && hasView("blog_details.php")) {
     return "blog_details.php";

@@ -15,22 +15,22 @@ type MegaMenuLink = {
 };
 
 const BUY_LINKS: MegaMenuLink[] = [
-  { text: "Apartments", href: `/buy-apartments-${city}`, icon: <Building size={18} /> },
-  { text: "Villas", href: `/buy-villas-${city}`, icon: <House size={18} /> },
-  { text: "Independent Houses", href: `/buy-independent-houses-${city}`, icon: <House size={18} /> },
-  { text: "Plots", href: `/buy-plots-${city}`, icon: <Map size={18} /> },
-  { text: "Farmlands", href: `/buy-farmlands-${city}`, icon: <Palmtree size={18} /> },
-  { text: "Commercial Spaces", href: `/buy-commercial-space-${city}`, icon: <Store size={18} /> },
-  { text: "Industrials", href: `/buy-industrials-${city}`, icon: <Factory size={18} /> },
+  { text: "Apartments", href: `/for-sale/apartments/${city}`, icon: <Building size={18} /> },
+  { text: "Villas", href: `/for-sale/villas/${city}`, icon: <House size={18} /> },
+  { text: "Independent Houses", href: `/for-sale/independent-houses/${city}`, icon: <House size={18} /> },
+  { text: "Plots", href: `/for-sale/plots/${city}`, icon: <Map size={18} /> },
+  { text: "Farmlands", href: `/for-sale/farmlands/${city}`, icon: <Palmtree size={18} /> },
+  { text: "Commercial Spaces", href: `/for-sale/commercial-spaces/${city}`, icon: <Store size={18} /> },
+  { text: "Industrials", href: `/for-sale/industrial-spaces/${city}`, icon: <Factory size={18} /> },
 ];
 
 const RENT_LINKS: MegaMenuLink[] = [
-  { text: "Commercial", href: `/rent-commercial-space-${city}`, icon: <Store size={18} /> },
-  { text: "Industrial", href: `/rent-industrials-${city}`, icon: <Factory size={18} /> },
-  { text: "Apartment", href: `/rent-apartments-${city}`, icon: <Building size={18} /> },
-  { text: "Villa", href: `/rent-villas-${city}`, icon: <House size={18} /> },
-  { text: "Independent House", href: `/rent-independent-houses-${city}`, icon: <House size={18} /> },
-  { text: "Co-Working", href: `/rent-co-working-${city}`, icon: <Laptop size={18} /> },
+  { text: "Commercial", href: `/for-rent/commercial-spaces/${city}`, icon: <Store size={18} /> },
+  { text: "Industrial", href: `/for-rent/industrial-spaces/${city}`, icon: <Factory size={18} /> },
+  { text: "Apartment", href: `/for-rent/apartments/${city}`, icon: <Building size={18} /> },
+  { text: "Villa", href: `/for-rent/villas/${city}`, icon: <House size={18} /> },
+  { text: "Independent House", href: `/for-rent/independent-houses/${city}`, icon: <House size={18} /> },
+  { text: "Co-Working", href: `/for-rent/coworking/${city}`, icon: <Laptop size={18} /> },
 ];
 
 const SERVICE_LINKS: MegaMenuLink[] = [
@@ -134,8 +134,8 @@ export function SiteHeader(): React.JSX.Element {
   };
 
   const getFeatured = (cat: Category) => {
-    if (cat === "Buy") return { title: "Find your dream home", btn: "Explore Buy", href: "/buy-apartments-coimbatore" };
-    if (cat === "Rent") return { title: "Verified rental properties", btn: "Browse Rent", href: "/rent-apartments-coimbatore" };
+    if (cat === "Buy") return { title: "Find your dream home", btn: "Explore Buy", href: `/for-sale/apartments/${city}` };
+    if (cat === "Rent") return { title: "Verified rental properties", btn: "Browse Rent", href: `/for-rent/apartments/${city}` };
     if (cat === "Services") return { title: "Expert real estate help", btn: "Our Services", href: "/contact-us" };
     return null;
   };

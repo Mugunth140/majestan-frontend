@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Sublocation, UnitType } from "@/lib/api";
 import { MapPin, ChevronDown, Search } from "lucide-react";
+import { buildListingUrl } from "@/lib/seo-urls";
 
 const propertyTypeOptions = [
   ["apartment", "Apartment"],
@@ -77,12 +78,13 @@ export function HomeSearch({
 
     setError("");
 
-    const params = new URLSearchParams();
-    params.set("listingType", listingType);
-    params.set("propertyType", propertyType);
-    if (location) params.set("location", location);
+    const url = buildListingUrl(
+      listingType, 
+      propertyType, 
+      location || "coimbatore"
+    );
 
-    router.push(`/search?${params.toString()}`);
+    router.push(url);
   }
 
   return (

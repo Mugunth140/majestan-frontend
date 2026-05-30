@@ -9,14 +9,14 @@ import type { Sublocation, UnitType } from "@/lib/api";
 import Image from "next/image";
 
 const propertyCategories = [
-  ["Apartment", "/property/apartment", "/assets/icons/properties/apartment.png"],
-  ["Villa", "/property/villa", "/assets/icons/properties/villas.png"],
-  ["Independent House", "/property/independent-house", "/assets/icons/properties/house.png"],
-  ["Plots", "/property/plots", "/assets/icons/properties/plot.png"],
-  ["Commercial Space", "/property/commercial", "/assets/icons/properties/commercial.png"],
-  ["Industrial", "/property/industrial", "/assets/icons/properties/industrial.png"],
-  ["Farmland", "/property/farmland", "/assets/icons/properties/farm-land.png"],
-  ["Co-Working", "/property/coworking", "/assets/icons/properties/co-living.png"],
+  ["Apartment", "/for-sale/apartments/coimbatore", "/assets/icons/properties/apartment.png"],
+  ["Villa", "/for-sale/villas/coimbatore", "/assets/icons/properties/villas.png"],
+  ["Independent House", "/for-sale/independent-houses/coimbatore", "/assets/icons/properties/house.png"],
+  ["Plots", "/for-sale/plots/coimbatore", "/assets/icons/properties/plot.png"],
+  ["Commercial Space", "/for-sale/commercial-spaces/coimbatore", "/assets/icons/properties/commercial.png"],
+  ["Industrial", "/for-sale/industrial-spaces/coimbatore", "/assets/icons/properties/industrial.png"],
+  ["Farmland", "/for-sale/farmlands/coimbatore", "/assets/icons/properties/farm-land.png"],
+  ["Co-Working", "/for-rent/coworking/coimbatore", "/assets/icons/properties/co-living.png"],
 ] as const;
 
 const TAGLINES = [

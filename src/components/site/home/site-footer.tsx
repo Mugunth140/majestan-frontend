@@ -16,23 +16,23 @@ const footerColumns = [
   {
     title: "Buy",
     links: [
-      ["Apartments", `/buy-apartments-${city}`],
-      ["Villas", `/buy-villas-${city}`],
-      ["Independent Houses", `/buy-independent-houses-${city}`],
-      ["Plots", `/buy-plots-${city}`],
-      ["Farmlands", `/buy-farmlands-${city}`],
-      ["Commercial Spaces", `/buy-commercial-${city}`],
-      ["Industrials", `/buy-industrials-${city}`],
+      ["Apartments", `/for-sale/apartments/${city}`],
+      ["Villas", `/for-sale/villas/${city}`],
+      ["Independent Houses", `/for-sale/independent-houses/${city}`],
+      ["Plots", `/for-sale/plots/${city}`],
+      ["Farmlands", `/for-sale/farmlands/${city}`],
+      ["Commercial Spaces", `/for-sale/commercial-spaces/${city}`],
+      ["Industrials", `/for-sale/industrial-spaces/${city}`],
     ],
   },
   {
     title: "Rent",
     links: [
-      ["Commercial", `/rent-commercial-space-${city}`],
-      ["Industrial", `/rent-industrials-${city}`],
-      ["Apartment", `/rent-apartments-${city}`],
-      ["Villa", `/rent-villas-${city}`],
-      ["Independent House", `/rent-independent-houses-${city}`],
+      ["Commercial", `/for-rent/commercial-spaces/${city}`],
+      ["Industrial", `/for-rent/industrial-spaces/${city}`],
+      ["Apartment", `/for-rent/apartments/${city}`],
+      ["Villa", `/for-rent/villas/${city}`],
+      ["Independent House", `/for-rent/independent-houses/${city}`],
     ],
   },
   {
@@ -48,10 +48,10 @@ const footerColumns = [
 ] as const;
 
 const quickLinks = [
-  ["Flats for Sale in Coimbatore", "flats-sale", ["Saravanampatti", "Kalapatti", "Peelamedu", "Vilankurunchi", "Vadavalli"]],
-  ["Villa for Sale in Coimbatore", "villas-sale", ["Saravanampatti", "Kalapatti", "Peelamedu", "Vilankurunchi", "Vadavalli"]],
-  ["Plots for Sale in Coimbatore", "plots-sale", ["Saravanampatti", "Pappampatti", "Sulur", "Periyanaikenpalayam", "Kinathukadavu"]],
-  ["Commercial Space for Rent in Coimbatore", "commercialspace-rent", ["Gandhipuram", "Peelamedu", "Ganapathy", "Sai Baba Colony", "Kalapatti"]],
+  ["Flats for Sale in Coimbatore", "for-sale/apartments", ["Saravanampatti", "Kalapatti", "Peelamedu", "Vilankurunchi", "Vadavalli"]],
+  ["Villa for Sale in Coimbatore", "for-sale/villas", ["Saravanampatti", "Kalapatti", "Peelamedu", "Vilankurunchi", "Vadavalli"]],
+  ["Plots for Sale in Coimbatore", "for-sale/plots", ["Saravanampatti", "Pappampatti", "Sulur", "Periyanaikenpalayam", "Kinathukadavu"]],
+  ["Commercial Space for Rent in Coimbatore", "for-rent/commercial-spaces", ["Gandhipuram", "Peelamedu", "Ganapathy", "Sai Baba Colony", "Kalapatti"]],
 ] as const;
 
 export function SiteFooter() {
@@ -68,7 +68,7 @@ export function SiteFooter() {
                     const slug = location.toLowerCase().replace(/\s+/g, "-");
                     return (
                       <li key={location}>
-                        <Link href={`/${prefix}-${slug}`}>
+                        <Link href={`/${prefix}/${city}/${slug}`}>
                           {title.replace("Coimbatore", location)}
                         </Link>
                       </li>

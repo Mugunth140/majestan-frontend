@@ -7,6 +7,7 @@ import { searchProperties, type PropertySearchItem, type PropertySearchResponse 
 import { PROPERTY_TYPES, LISTING_TYPES, buildListingUrl } from "@/lib/seo-urls";
 import { MapPin, Search, Home, ChevronLeft, ChevronRight, SlidersHorizontal, ArrowUpDown, X, Building2, Ruler, Compass, Layers, Phone } from "lucide-react";
 import { MapPlaceholder } from "./MapPlaceholder";
+import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 
 // Keep legacy mappings for URLs
 const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
@@ -43,9 +44,10 @@ function getPhotoUrl(item: PropertySearchItem): string {
 }
 
 function getArea(item: PropertySearchItem): string | null {
-  const raw = item.build_up_area ?? item.buildup_area ?? item.carpet_area ?? item.super_build_up_area ?? item.plot_area ?? item.totalarea ?? item.unitsize ?? item.project_area;
-  if (!raw || raw === "0" || raw.trim() === "") return null;
-  return raw;
+  if (item.sq_ft && item.sq_ft !== "0") return `${item.sq_ft} sq.ft`;
+  if (item.cents && item.cents !== "0") return `${item.cents} cents`;
+  if (item.acres && item.acres !== "0") return `${item.acres} acres`;
+  return null;
 }
 
 function getFacing(item: PropertySearchItem): string | null {
@@ -93,30 +95,37 @@ export function ListingPage({
       const res = await searchProperties({
         listingType: initialListingType,
         propertyType: initialPropertyType,
-        location: initialLocality,
+        location: initialLocality || initialCity,
         page,
         sort,
         limit: 12,
       });
       setData(res);
     } catch (err: any) {
-      setError(err.message || "Failed to load properties");
+      setError(err instanceof Error ? err.message : "Failed to load properties");
     } finally {
       setLoading(false);
     }
-  }, [initialListingType, initialPropertyType, initialCity, initialLocality, page, sort]);
+  }, [initialListingType, initialPropertyType, initialLocality, initialCity, page, sort]);
 
   useEffect(() => {
-    // Only load if we don't have initial data for this exact query
-    // If the URL changes (page, sort), we need to fetch
-    loadData();
-  }, [loadData]);
+    if (!initialSearchData) {
+      loadData();
+    }
+  }, [loadData, initialSearchData]);
 
-  // Derive title from current state
-  const propertyLabel = Object.values(PROPERTY_TYPES).find(p => p.apiValue === initialPropertyType)?.label || "Properties";
-  const intentLabel = initialListingType === "Sell" ? "for Sale" : "for Rent";
-  const locationLabel = initialLocality ? `${initialLocality}, ${initialCity}` : initialCity;
-  const pageTitle = `${propertyLabel} ${intentLabel} in ${locationLabel}`;
+  const propertyTypeLabel = Object.values(PROPERTY_TYPES).find(p => p.apiValue === initialPropertyType)?.label || initialPropertyType;
+  const listingTypeLabel = initialListingType === "Rent" ? "For Rent" : "For Sale";
+  const listingTypeSlug = initialListingType === "Rent" ? "for-rent" : "for-sale";
+  const locationLabel = initialLocality ? `${initialLocality.replace(/-/g, ' ')}, ${initialCity}` : initialCity;
+  
+  const pageTitle = `${propertyTypeLabel} ${listingTypeLabel} in ${locationLabel}`;
+
+  const breadcrumbItems = [
+    { label: listingTypeLabel, href: `/${listingTypeSlug}/${initialPropertyType}/${initialCity}` },
+    { label: propertyTypeLabel, href: `/${listingTypeSlug}/${initialPropertyType}/${initialCity}` },
+    { label: locationLabel }
+  ];
 
   const handleSortChange = (newSort: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -129,8 +138,9 @@ export function ListingPage({
   return (
     <div className="bg-[#f8f9fa]! min-h-screen">
       {/* Search Header / Filter Bar Area */}
-      <div className="bg-white! border-b! border-gray-200! sticky! top-[72px]! md:top-[88px]! z-40! shadow-sm!">
+      <div className="bg-white! border-b! border-gray-200! sticky! top-[58px]! z-40! shadow-sm!">
         <div className="container! mx-auto! px-4! py-3!">
+          <Breadcrumbs items={breadcrumbItems} />
           <div className="flex! flex-col! md:flex-row! items-center! justify-between! gap-4!">
             <div className="flex! flex-col!">
               <h1 className="text-2xl! font-bold! text-[#27427f]! capitalize!">{pageTitle}</h1>
@@ -276,7 +286,7 @@ export function ListingPage({
 
                         {/* Actions */}
                         <div className="mt-auto! pt-4! flex! items-center! justify-between!">
-                          <div className="text-xs! font-medium! text-gray-500! bg-gray-100! px-2.5! py-1! rounded-full!">
+                          <div className="text-xs! font-medium! text-gray-500! bg-gray-100! px-2.5! py-1! rounded-full! whitespace-nowrap! truncate! max-w-[120px]! md:max-w-[140px]!">
                             {Object.values(PROPERTY_TYPES).find(p => p.apiValue === item.propertyType)?.label || item.propertyType}
                           </div>
                           <div className="flex! gap-3!">

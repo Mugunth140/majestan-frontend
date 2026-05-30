@@ -2,6 +2,7 @@ import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
 import { PropertyNavigation } from "@/components/site/property/property-navigation";
+import { PropertyDetailsView } from "@/components/site/property/PropertyDetailsView";
 import { getPropertyBySeoSlug } from "@/lib/api/property-by-slug";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import type { Metadata } from "next";
@@ -142,36 +143,12 @@ export default async function SlugPage({ params }: SlugPageProps): Promise<React
     return (
       <>
         <SiteHeader />
-        <div className="pt-28!">
-          <div className="container mx-auto px-4 py-8">
-            <PropertyNavigation slug={property.canonicalSlug} />
-            <main className="space-y-6">
-              <h1 className="text-4xl font-bold">{property.title}</h1>
-              <p className="text-lg text-gray-600">{buildPropertyDescription(property.description, property.city)}</p>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm text-gray-500">Price</p>
-                  <p className="text-xl font-semibold">₹ {property.price}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm text-gray-500">Type</p>
-                  <p className="text-xl font-semibold capitalize">{property.propertyType}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm text-gray-500">Status</p>
-                  <p className="text-xl font-semibold capitalize">{property.status}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="text-xl font-semibold">{property.city}</p>
-                </div>
-              </div>
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-              />
-            </main>
-          </div>
+        <div className="pt-[120px]! bg-[#f8f9fa]! min-h-screen!">
+          <PropertyDetailsView property={property} />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          />
         </div>
         <SiteFooter />
       </>
@@ -187,7 +164,7 @@ export default async function SlugPage({ params }: SlugPageProps): Promise<React
   return (
     <>
       <SiteHeader />
-      <div className="pt-28!">
+      <div className="pt-[120px]!">
         <SitePage viewName={viewName} />
       </div>
       <SiteFooter />

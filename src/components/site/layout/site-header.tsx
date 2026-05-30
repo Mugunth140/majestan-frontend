@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound } from "lucide-react";
+import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, Building2, Phone } from "lucide-react";
 import Image from "next/image";
 
 const city = "coimbatore";
@@ -143,7 +143,7 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header
-        className={`fixed! left-1/2 z-[1000] w-[min(95vw,1400px)] max-w-[1400px] -translate-x-1/2 rounded-full border border-white/45 bg-white! font-['Lexend',sans-serif] shadow-[0_18px_45px_rgba(22,30,45,0.18)] transition-all duration-300 max-[640px]:w-[calc(100vw-20px)] ${isScrolled ? "top-2 py-2.5! px-2.5!" : "top-4 py-3 max-[640px]:top-2.5"}`}
+        className={`fixed! left-1/2 z-[1000] -translate-x-1/2 border border-white/45 bg-white! font-['Lexend',sans-serif] transition-all duration-300 ${isScrolled ? "top-0! w-full! max-w-full! rounded-none! py-2.5! px-5! shadow-[0_10px_30px_rgba(22,30,45,0.08)]!" : "top-4! w-[min(95vw,1400px)]! max-w-[1400px]! rounded-full! py-3! shadow-[0_18px_45px_rgba(22,30,45,0.18)]! max-[640px]:top-2.5! max-[640px]:w-[calc(100vw-20px)]!"}`}
         onMouseLeave={() => setHoveredCategory(null)}
       >
         <div className="w-full px-5 max-[640px]:px-3!">
@@ -174,6 +174,11 @@ export function SiteHeader(): React.JSX.Element {
                     </button>
                   </li>
                 ))}
+                <li>
+                  <Link href="/about-us" className="inline-flex! rounded-full! px-4 py-2 text-[14px] font-bold leading-none text-black/80! no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">
+                    About
+                  </Link>
+                </li>
                 <li>
                   <Link href="/contact-us" className="inline-flex! rounded-full! px-4 py-2 text-[14px] font-bold leading-none text-black/80! no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">
                     Contact
@@ -376,6 +381,24 @@ export function SiteHeader(): React.JSX.Element {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Additional Mobile Links */}
+                  <div className="grid gap-1.5 mt-2 border-t border-[#27427f]/10 pt-4">
+                    <Link
+                      href="/about-us"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex! items-center! gap-3 rounded-xl bg-[#27427f]/5 px-3 py-2.5! text-[13px]! font-bold text-[#27427f]! no-underline"
+                    >
+                      <Building2 size={16} /> About Us
+                    </Link>
+                    <Link
+                      href="/contact-us"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex! items-center! gap-3 rounded-xl bg-[#27427f]/5 px-3 py-2.5! text-[13px]! font-bold text-[#27427f]! no-underline"
+                    >
+                      <Phone size={16} /> Contact Us
+                    </Link>
+                  </div>
                 </div>
               </div>
 

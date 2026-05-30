@@ -161,7 +161,7 @@ export default async function PropertySectionPage({
     return (
       <>
         <SiteHeader />
-        <div className="pt-28!">
+        <div className="pt-[120px]!">
           <div className="container mx-auto px-4 py-8">
             <PropertyNavigation slug={property.canonicalSlug} />
             <main className="space-y-6">
@@ -196,7 +196,7 @@ export default async function PropertySectionPage({
   return (
     <>
       <SiteHeader />
-      <div className="pt-28!">
+      <div className="pt-[120px]!">
         <SitePage viewName={viewName} />
       </div>
       <SiteFooter />

@@ -359,11 +359,17 @@ export function ListingPage({
                             <div className="font-['Lexend',sans-serif]! text-xl! font-bold! text-[#27427f]!">
                               {formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent)}
                             </div>
-                            {item.posttype === "Sell" && getArea(item) && (
-                              <div className="text-xs! text-gray-500! mt-1!">
-                                {(Number(item.expectedsaleprice) / Number(getArea(item).split(' ')[0])).toFixed(0)} / sq.ft
-                              </div>
-                            )}
+                            {(() => {
+                              const area = getArea(item);
+                              if (item.posttype === "Sell" && area) {
+                                return (
+                                  <div className="text-xs! text-gray-500! mt-1!">
+                                    {(Number(item.expectedsaleprice) / Number(area.split(' ')[0])).toFixed(0)} / sq.ft
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
                           </div>
                         </div>
                         

@@ -18,9 +18,6 @@ export function AboutHero() {
 
       {/* Content */}
       <div className="relative! z-10! container! mx-auto! px-4! text-center!">
-        <span className="inline-block! px-4! py-1.5! rounded-full! bg-white/10! backdrop-blur-md! text-[#ffc900]! font-semibold! text-sm! tracking-widest! uppercase! mb-6!">
-          About Us
-        </span>
         <h1 className="text-4xl! md:text-6xl! lg:text-7xl! font-bold! text-white! mb-6! leading-tight!">
           Welcome to <br className="hidden! md:block!" />
           <span className="text-[#ffc900]!">Majestan Realty</span>

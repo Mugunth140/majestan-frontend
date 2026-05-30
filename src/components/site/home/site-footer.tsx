@@ -80,8 +80,7 @@ export function SiteFooter() {
         <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
           {/* Heading */}
           <div className="flex! items-center! gap-3! mb-8!">
-            <span className="w-10! h-[3px]! bg-[#ffc900]! rounded-full! inline-block!" />
-            <p className="text-xs! font-bold! uppercase! tracking-[0.18em]! text-[#27427f]!">Popular Searches</p>
+            <p className="text-md! font-semibold! uppercase! text-[#27427f]!">Popular Searches</p>
           </div>
 
           <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-4! gap-6!">
@@ -90,7 +89,7 @@ export function SiteFooter() {
                 {/* Category label */}
                 <p className="text-[13px]! font-bold! text-[#161e2d]! mb-3! pb-2! border-b! border-gray-100! tracking-wide!">
                   {category}{" "}
-                  <span className="text-[#27427f]/40! font-normal! text-[11px]!">in Coimbatore</span>
+                  <span >in Coimbatore</span>
                 </p>
                 {/* Location pill tags */}
                 <div className="flex! flex-wrap! gap-2!">
@@ -100,7 +99,7 @@ export function SiteFooter() {
                       <Link
                         key={location}
                         href={`/${prefix}/${city}/${slug}`}
-                        className="inline-block! px-3! py-1.5! rounded-lg! bg-[#f4f6fb]! text-[#27427f]! text-[12px]! font-semibold! border! border-[#27427f]/8! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-sm! transition-all! duration-200!"
+                        className="inline-block! px-3! py-1.5! rounded-lg! bg-[#f4f6fb]! text-[#27427f]! text-[13px]! font-semibold! border! border-[#27427f]/8! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-sm! transition-all! duration-200!"
                       >
                         {location}
                       </Link>

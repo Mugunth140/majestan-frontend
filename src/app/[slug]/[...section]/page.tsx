@@ -1,4 +1,6 @@
 import { SitePage } from "@/components/site/layout/site-page";
+import { SiteHeader } from "@/components/site/layout/site-header";
+import { SiteFooter } from "@/components/site/layout/site-footer";
 import { PropertyNavigation } from "@/components/site/property/property-navigation";
 import { getPropertyBySeoSlug } from "@/lib/api/property-by-slug";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
@@ -157,25 +159,31 @@ export default async function PropertySectionPage({
     }
 
     return (
-      <div className="container mx-auto px-4 py-8">
-        <PropertyNavigation slug={property.canonicalSlug} />
-        <main className="space-y-6">
-          <h1 className="text-4xl font-bold">
-            {sectionConfig.titlePrefix} - {property.title}
-          </h1>
-          <p className="text-lg text-gray-600">
-            {sectionConfig.descriptionPrefix} <strong>{property.title}</strong>.
-          </p>
-          <div className="mt-8 border-t border-gray-200 pt-8">
-            <Link
-              href={`/${property.canonicalSlug}`}
-              className="inline-block rounded-lg bg-blue-600 px-8 py-3 font-bold text-white transition hover:bg-blue-700"
-            >
-              View Full Property
-            </Link>
+      <>
+        <SiteHeader />
+        <div className="pt-28!">
+          <div className="container mx-auto px-4 py-8">
+            <PropertyNavigation slug={property.canonicalSlug} />
+            <main className="space-y-6">
+              <h1 className="text-4xl font-bold">
+                {sectionConfig.titlePrefix} - {property.title}
+              </h1>
+              <p className="text-lg text-gray-600">
+                {sectionConfig.descriptionPrefix} <strong>{property.title}</strong>.
+              </p>
+              <div className="mt-8 border-t border-gray-200 pt-8">
+                <Link
+                  href={`/${property.canonicalSlug}`}
+                  className="inline-block rounded-lg bg-blue-600 px-8 py-3 font-bold text-white transition hover:bg-blue-700"
+                >
+                  View Full Property
+                </Link>
+              </div>
+            </main>
           </div>
-        </main>
-      </div>
+        </div>
+        <SiteFooter />
+      </>
     );
   }
 
@@ -185,5 +193,13 @@ export default async function PropertySectionPage({
     notFound();
   }
 
-  return <SitePage viewName={viewName} />;
+  return (
+    <>
+      <SiteHeader />
+      <div className="pt-28!">
+        <SitePage viewName={viewName} />
+      </div>
+      <SiteFooter />
+    </>
+  );
 }

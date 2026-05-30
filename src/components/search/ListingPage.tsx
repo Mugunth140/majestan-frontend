@@ -93,7 +93,7 @@ export function ListingPage({
       const res = await searchProperties({
         listingType: initialListingType,
         propertyType: initialPropertyType,
-        location: initialLocality || initialCity,
+        location: initialLocality,
         page,
         sort,
         limit: 12,

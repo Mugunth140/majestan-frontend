@@ -51,7 +51,7 @@ export default async function ForSaleListingPageRoute({ params, searchParams }: 
     initialData = await searchProperties({
       listingType: parsed.apiListingType,
       propertyType: parsed.apiPropertyType,
-      location: parsed.locality || parsed.city,
+      location: parsed.locality,
       page,
       sort,
       limit: 12,

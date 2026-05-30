@@ -386,7 +386,7 @@ function SearchResultsInner() {
       const result = await searchProperties({
         propertyType: propertyType || undefined,
         listingType: listingType || undefined,
-        location: location || undefined,
+        location: location && location.toLowerCase() !== "coimbatore" ? location : undefined,
         sort: sort || undefined,
         page: currentPage,
         limit: 12,

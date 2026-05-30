@@ -1,6 +1,4 @@
 import { Metadata } from "next";
-import { SiteHeader } from "@/components/site/layout/site-header";
-import { SiteFooter } from "@/components/site/layout/site-footer";
 import { AboutHero } from "@/components/site/about/AboutHero";
 import { AboutMission } from "@/components/site/about/AboutMission";
 import { AboutValues } from "@/components/site/about/AboutValues";
@@ -13,15 +11,11 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <>
-      <SiteHeader />
-      <main className="pt-[100px]! md:pt-[120px]! min-h-screen! bg-white!">
-        <AboutHero />
-        <AboutMission />
-        <AboutValues />
-        <AboutStats />
-      </main>
-      <SiteFooter />
-    </>
+    <main className="min-h-screen! bg-white!">
+      <AboutHero />
+      <AboutMission />
+      <AboutValues />
+      <AboutStats />
+    </main>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Search, Handshake, TrendingUp, BarChart3 } from "lucide-react";
 import { FeatureCarousel } from "./property-carousel";
 import { HeroSection } from "./hero-section";
 import { SiteFooter } from "./site-footer";
@@ -18,20 +19,20 @@ const saleCards = [
 ] as const;
 
 const rentCards = [
-  ["Office Space", `/rent-commercial-space-${city}`, "/assets/images/home/office-space.png", "for Rent in Coimbatore"],
-  ["Ware House", `/rent-industrials-${city}`, "/assets/images/home/industrial-warehouse.png", "for Rent in Coimbatore"],
-  ["Showroom", `/rent-commercial-space-${city}`, "/assets/images/home/showrooms.png", "for Rent in Coimbatore"],
-  ["Apartment", `/rent-apartments-${city}`, "/assets/images/home/apartment.png", "for Rent in Coimbatore"],
-  ["Villa", `/rent-villas-${city}`, "/assets/images/home/villa.png", "for Rent in Coimbatore"],
-  ["Independent Houses", `/rent-independent-houses-${city}`, "/assets/images/home/independent-house.png", "for Rent in Coimbatore"],
+  ["Office Space", `/rent-commercial-space-${city}`, "/assets/images/home/office-space.png", "for Rent"],
+  ["Ware House", `/rent-industrials-${city}`, "/assets/images/home/industrial-warehouse.png", "for Rent"],
+  ["Showroom", `/rent-commercial-space-${city}`, "/assets/images/home/showrooms.png", "for Rent"],
+  ["Apartment", `/rent-apartments-${city}`, "/assets/images/home/apartment.png", "for Rent"],
+  ["Villa", `/rent-villas-${city}`, "/assets/images/home/villa.png", "for Rent"],
+  ["Independent Houses", `/rent-independent-houses-${city}`, "/assets/images/home/independent-house.png", "for Rent"],
 ] as const;
 
 const helpItems = [
-  ["Find Your Ideal Property", "Browse verified listings for plots, apartments, villas, and commercial spaces with detailed descriptions and images.", "/assets/images/icons/ideal-property.png"],
-  ["Seamless Buying & Leasing", "Get expert assistance in property transactions, from site visits to finalizing deals.", "/assets/images/icons/seamless-buying-and-leasing.png"],
-  ["Investor & Seller Support", "Connect with potential buyers, tenants, and investors to maximize your property's value.", "/assets/images/icons/support.png"],
-  ["Market Insights & Updates", "Stay informed with the latest real estate trends, investment tips, and new project launches.", "/assets/images/icons/ideal-property.png"],
-] as const;
+  ["Find Your Ideal Property", "Browse verified premium listings for plots, apartments, villas, and commercial spaces.", Search],
+  ["Seamless Buying & Leasing", "Get expert, white glove assistance in property transactions, from site visits to finalizing deals.", Handshake],
+  ["Investor & Seller Support", "Connect with potential buyers, tenants, and investors to maximize your property's true value.", TrendingUp],
+  ["Market Insights & Updates", "Stay informed with the latest real estate trends, investment tips, and new luxury project launches.", BarChart3],
+];
 
 const projectCards = [
   ["Ready to Move", "/assets/images/home/ready_to_move.webp", "1545+ Projects"],
@@ -92,28 +93,41 @@ export function HomePage({ data }: { data: HomePageData }) {
           </div>
         </section>
 
-        <section className="hwch-section section-help tf-spacing-1 pb-0">
-          <div className="tf-container">
-            <SectionHeading
-              title="How can we help you?"
-              // text="Supporting you at every stage of your real estate journey."
+        <section className="py-24! pb-64! md:pb-80! lg:pb-40! bg-linear-to-b! from-[#f0f4f8]! via-[#f9fafb]! to-white! relative! overflow-hidden!">
+          {/* Background Image positioned at the bottom */}
+          <div className="absolute! bottom-0! left-0! w-full! z-0!">
+            <img 
+              src="/assets/images/section/section-help.png" 
+              alt="Majestan Support" 
+              className="w-full! h-auto! min-h-[300px]! object-cover! object-top! md:object-contain! md:object-bottom! scale-125! md:scale-100! origin-bottom!"
             />
-            <div className="tf-grid-layout md-col-2 mb-6">
-              {helpItems.map(([title, text, icon]) => (
-                <article className="icons-box style-3 migrated-help-card" key={title}>
-                  <div className="tf-icon">
-                    <img src={icon} width="40" alt={title} />
+          </div>
+
+          <div className="w-full! max-w-[1400px]! mx-auto! px-4! sm:px-6! md:px-8! relative! z-10!">
+            <div className="text-center! mb-16!">
+              <h2 className="font-['Lexend',sans-serif]! text-[#0a0a0a]! leading-[1.1]! tracking-[-0.02em]! drop-shadow-sm! font-light! text-[clamp(30px,4vw,50px)]! mb-4!">
+                How can we help you?
+              </h2>
+              <p className="text-lg! font-light! text-gray-500! max-w-2xl! mx-auto!">
+                Supporting you at every stage of your real estate journey. From finding the perfect property to seamless transactions and market insights.
+              </p>
+            </div>
+            
+            <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-4! gap-6! md:gap-8!">
+              {helpItems.map(([title, text, Icon]) => (
+                <article className="group! bg-white! rounded-[2rem]! p-8! shadow-[0_10px_30px_-15px_rgba(39,66,127,0.12)]! transition-all! duration-500! hover:shadow-[0_20px_40px_-15px_rgba(39,66,127,0.2)]! hover:-translate-y-2! border! border-[#27427f]/10!" key={title as string}>
+                  <div className="w-14! h-14! rounded-2xl! bg-[#f9fafb]! border! border-[#27427f]/5! flex! items-center! justify-center! mb-6! transition-transform! duration-500! group-hover:scale-110! group-hover:bg-[#27427f]/5!">
+                    <Icon className="w-7! h-7! text-amber-500! opacity-80!" strokeWidth={1.5} />
                   </div>
-                  <div className="content">
-                    <h5 className="title">{title}</h5>
-                    <p className="text-1">{text}</p>
-                  </div>
+                  <h5 className="text-xl! font-['Lexend',sans-serif]! font-medium! text-[#27427f]! tracking-tight! mb-3!">
+                    {title as string}
+                  </h5>
+                  <p className="text-sm! font-normal! text-[#27427f]/60! leading-relaxed!">
+                    {text as string}
+                  </p>
                 </article>
               ))}
             </div>
-          </div>
-          <div className="item text-center">
-            <img src="/assets/images/section/section-help.png" alt="section-help" />
           </div>
         </section>
 
@@ -123,7 +137,7 @@ export function HomePage({ data }: { data: HomePageData }) {
               title="Properties for Rent in Coimbatore"
               text="Find the best rental properties in Coimbatore, from homes to commercial spaces."
             />
-            <h2 className="section-subtitle">By Property</h2>
+            {/* <h2 className="section-subtitle">By Property</h2> */}
             <CardRail cards={rentCards} />
 
             <h2 className="section-subtitle">Featured Villa Projects in Coimbatore</h2>

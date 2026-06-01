@@ -88,9 +88,9 @@ export function HomeSearch({
   }
 
   return (
-    <div className="!w-full !max-w-[1100px] !mx-auto !mt-4 !relative !z-20 !px-4">
+    <div className="w-full! max-w-[1100px]! mx-auto! mt-4! relative! z-20! px-4!">
       <form
-        className="!w-full !bg-white/95 !backdrop-blur-2xl !rounded-[2rem] md:!rounded-full !shadow-2xl !border !border-white/80 !p-2.5 !flex !flex-col md:!flex-row !items-center !gap-2 md:!gap-0"
+        className="w-full! bg-white/95! backdrop-blur-2xl! rounded-[2rem]! md:rounded-full! shadow-2xl! border! !border-white/80 !p-2.5 !flex !flex-col md:!flex-row !items-center !gap-2 md:!gap-0"
         onSubmit={onSubmit}
       >
         {/* ── Location Input ────────────────────────────────── */}

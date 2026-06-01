@@ -34,10 +34,10 @@ export function FeatureCarousel(props: PropertyCarouselProps) {
           <SwiperSlide key={banner.id}>
             {banner.href ? (
               <a href={banner.href} target="_blank" rel="noreferrer" className="block w-full">
-                <img src={banner.image} alt="Majestan Realty banner" className="w-full h-auto object-contain md:object-cover" />
+                <img src={banner.image} alt="Majestan Realty banner" className="w-full! h-auto! object-contain! md:object-cover!" />
               </a>
             ) : (
-              <img src={banner.image} alt="Majestan Realty banner" className="w-full h-auto object-contain md:object-cover" />
+              <img src={banner.image} alt="Majestan Realty banner" className="w-full! h-auto! object-contain! md:object-cover!" />
             )}
           </SwiperSlide>
         ))}

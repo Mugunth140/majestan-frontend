@@ -19,12 +19,12 @@ const saleCards = [
 ] as const;
 
 const rentCards = [
-  ["Office Space", `/rent-commercial-space-${city}`, "/assets/images/home/office-space.png", "for Rent"],
-  ["Ware House", `/rent-industrials-${city}`, "/assets/images/home/industrial-warehouse.png", "for Rent"],
-  ["Showroom", `/rent-commercial-space-${city}`, "/assets/images/home/showrooms.png", "for Rent"],
-  ["Apartment", `/rent-apartments-${city}`, "/assets/images/home/apartment.png", "for Rent"],
-  ["Villa", `/rent-villas-${city}`, "/assets/images/home/villa.png", "for Rent"],
-  ["Independent Houses", `/rent-independent-houses-${city}`, "/assets/images/home/independent-house.png", "for Rent"],
+  ["Office Space", `/rent-commercial-space-${city}`, "https://images.unsplash.com/photo-1631193816258-28b44b21e78b?auto=format&fit=crop&w=800&q=80", "for Rent"],
+  ["Ware House", `/rent-industrials-${city}`, "https://images.unsplash.com/photo-1689942010216-dc412bb1e7a9?auto=format&fit=crop&w=800&q=80", "for Rent"],
+  ["Showroom", `/rent-commercial-space-${city}`, "https://images.unsplash.com/photo-1555529902-5261145633bf?auto=format&fit=crop&w=800&q=80", "for Rent"],
+  ["Apartment", `/rent-apartments-${city}`, "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80", "for Rent"],
+  ["Villa", `/rent-villas-${city}`, "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", "for Rent"],
+  ["Independent Houses", `/rent-independent-houses-${city}`, "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", "for Rent"],
 ] as const;
 
 const helpItems = [
@@ -131,17 +131,49 @@ export function HomePage({ data }: { data: HomePageData }) {
           </div>
         </section>
 
-        <section className="rent-in-cbe section-best-sale tf-spacing-7">
-          <div className="tf-container">
+        <section className="py-24! bg-white! relative! overflow-hidden!">
+          <div className="w-full! max-w-[1400px]! mx-auto! px-4! sm:px-6! md:px-8!">
             <SectionHeading
               title="Properties for Rent in Coimbatore"
-              text="Find the best rental properties in Coimbatore, from homes to commercial spaces."
+              text="Find the perfect rental property to match your lifestyle and business needs."
             />
-            {/* <h2 className="section-subtitle">By Property</h2> */}
-            <CardRail cards={rentCards} />
+            
+            {/* Custom Rent Bento Grid */}
+            <div className="mt-12! grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-4! sm:gap-6! md:gap-8! mb-16!">
+              {rentCards.map(([title, link, img, subtitle], i) => (
+                <Link href={link} key={title} className={`group! relative! overflow-hidden! rounded-[2rem]! md:rounded-[2.5rem]! shadow-lg! transition-all! duration-700! hover:-translate-y-2! hover:shadow-[0_25px_50px_-12px_rgba(39,66,127,0.2)]!
+                  ${i === 0 ? 'lg:col-span-2! lg:row-span-2! aspect-[16/9]! lg:aspect-auto!' : ''}
+                  ${i === 1 ? 'aspect-[16/9]!' : ''}
+                  ${i === 2 ? 'aspect-[16/9]!' : ''}
+                  ${i === 3 ? 'lg:col-span-2! aspect-[32/9]!' : ''}
+                  ${i === 4 ? 'aspect-[16/9]!' : ''}
+                  ${i === 5 ? 'lg:col-span-3! aspect-[3/1]! md:aspect-[6/1]!' : ''}
+                  ${(i !== 0 && i !== 3 && i !== 5) ? 'aspect-[16/9]!' : ''}
+                `}>
+                  <img src={img} alt={title} className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-105!" />
+                  <div className="absolute! inset-0! bg-gradient-to-t! from-black/90! via-black/20! to-transparent! opacity-70! transition-opacity! duration-500! group-hover:opacity-90!" />
+                  <div className="absolute! inset-0! p-5! md:p-8! flex! flex-col! justify-end! items-start!">
+                    <span className="mb-2! md:mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3! py-1! text-[9px]! md:text-[10px]! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm! translate-y-4! opacity-0! transition-all! duration-500! group-hover:translate-y-0! group-hover:opacity-100!">
+                      {subtitle}
+                    </span>
+                    <h3 className="text-white! font-['Lexend',sans-serif]! text-lg! md:text-xl! lg:text-3xl! font-medium! tracking-tight!">
+                      {title}
+                    </h3>
+                  </div>
+                  <div className="absolute! inset-0! shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]! rounded-[2rem]! md:rounded-[2.5rem]! pointer-events-none!" />
+                </Link>
+              ))}
+            </div>
 
-            <h2 className="section-subtitle">Featured Villa Projects in Coimbatore</h2>
-            <FeatureCarousel properties={data.featuredVillas} emptyMessage="Featured villas will appear here soon." />
+            <div className="mt-24!">
+              <SectionHeading
+                  title="Featured Villa Projects"
+                  text="Explore exclusive, handpicked premium villa communities."
+              />
+              <div className="mt-12!">
+                <FeatureCarousel properties={data.featuredVillas} emptyMessage="Featured villas will appear here soon." />
+              </div>
+            </div>
           </div>
         </section>
 

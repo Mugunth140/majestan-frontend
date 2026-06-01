@@ -10,11 +10,11 @@ const city = "coimbatore";
 
 
 const saleCards = [
-  ["Apartment", `/buy-apartments-${city}`, "/assets/images/home/apartment-buy.png", "for sale"],
-  ["Villa", `/buy-villas-${city}`, "/assets/images/home/villa-buy.png", "for sale"],
-  ["Independent Houses", `/buy-independent-houses-${city}`, "/assets/images/home/independent-houses.png", "for sale"],
-  ["Plot", `/buy-plots-${city}`, "/assets/images/home/plot-buy.png", "for sale"],
-  ["Commercial Space", `/buy-commercial-${city}`, "/assets/images/home/commercial-buy.png", "for sale"],
+  ["Apartment", `/buy-apartments-${city}`, "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", "for sale"],
+  ["Villa", `/buy-villas-${city}`, "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80", "for sale"],
+  ["Independent Houses", `/buy-independent-houses-${city}`, "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80", "for sale"],
+  ["Plot", `/buy-plots-${city}`, "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80", "for sale"],
+  ["Commercial Space", `/buy-commercial-${city}`, "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", "for sale"],
 ] as const;
 
 const rentCards = [
@@ -57,16 +57,17 @@ export function HomePage({ data }: { data: HomePageData }) {
           unitTypes={data.filters.unitTypes}
         />
 
-        <section className="sale-in-cbe section-featured-properties tf-spacing-7">
-          <div className="tf-container">
+        <section className="sale-in-cbe py-24 bg-white relative overflow-hidden">
+          <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
             <SectionHeading
               title="Properties for Sale in Coimbatore"
-              text="Find the best properties for sale in Coimbatore, from residential homes to commercial spaces."
+              text="Explore our exclusive collection of premium residential and commercial spaces tailored to your lifestyle."
             />
-            <h2 className="section-subtitle">By Property</h2>
+            
+            {/* <h3 className="mb-8 mt-12 text-xs md:text-sm font-semibold tracking-[0.15em] text-gray-400 uppercase">Explore by Category</h3> */}
             <CardRail cards={saleCards} />
 
-            <h2 className="section-subtitle">Featured Apartment Projects in Coimbatore</h2>
+            <h3 className="mb-8 mt-24 text-xs md:text-sm font-semibold tracking-[0.15em] text-gray-400 uppercase">Featured Projects</h3>
             <FeatureCarousel properties={data.featuredApartments} emptyMessage="Featured apartments will appear here soon." />
           </div>
         </section>
@@ -91,7 +92,7 @@ export function HomePage({ data }: { data: HomePageData }) {
               {helpItems.map(([title, text, icon]) => (
                 <article className="icons-box style-3 migrated-help-card" key={title}>
                   <div className="tf-icon">
-                    <img src={icon} width="40" alt="" />
+                    <img src={icon} width="40" alt={title} />
                   </div>
                   <div className="content">
                     <h5 className="title">{title}</h5>
@@ -102,7 +103,7 @@ export function HomePage({ data }: { data: HomePageData }) {
             </div>
           </div>
           <div className="item text-center">
-            <img src="/assets/images/section/section-help.png" alt="" />
+            <img src="/assets/images/section/section-help.png" alt="section-help" />
           </div>
         </section>
 
@@ -127,7 +128,7 @@ export function HomePage({ data }: { data: HomePageData }) {
               {projectCards.map(([title, image, count]) => (
                 <article className="box-location h-450 hover-img" key={title}>
                   <div className="image-wrap">
-                    <img src={image} alt="" />
+                    <img src={image} alt={title} />
                   </div>
                   <div className="content">
                     <h6 className="text-white">{title}</h6>
@@ -181,9 +182,13 @@ export function HomePage({ data }: { data: HomePageData }) {
 
 function SectionHeading({ title, text }: { title: string; text?: string }) {
   return (
-    <div className="heading-section text-center mb-48">
-      <h2 className="title">{title}</h2>
-      {text ? <p className="text-1">{text}</p> : null}
+    <div className="flex! flex-col! md:flex-row! md:items-end! justify-between! gap-6! mb-4!">
+      <div className="flex flex-col! md:flex-row! justify-between! items-center! gap-4! p-2! md:py-8! md:px-6!">
+        <h2 className="font-['Lexend',sans-serif]! text-[#0a0a0a]! leading-[1.1]! tracking-[-0.02em]! drop-shadow-sm! font-light! text-[clamp(30px,4vw,50px)]!">
+          {title}
+        </h2>
+        {text ? <p className="mt-5! text-lg! font-light! text-gray-500! leading-relaxed! max-w-[65ch]!">{text}</p> : null}
+      </div>
     </div>
   );
 }
@@ -194,22 +199,39 @@ function CardRail({
   cards: readonly (readonly [string, string, string, string])[];
 }) {
   return (
-    <div className="migrated-card-rail mb-40">
-      {cards.map(([title, href, image, text]) => (
-        <article className="box-house hover-img" key={title}>
-          <div className="image-wrap">
-            <Link href={href}>
-              <img src={image} alt="" />
-            </Link>
-          </div>
-          <div className="content">
-            <h5 className="title">
-              <Link href={href}>{title}</Link>
-            </h5>
-            <p className="location text-1">{text}</p>
-          </div>
-        </article>
-      ))}
+    <div className="grid! grid-cols-1! md:grid-cols-10! gap-5! md:gap-6!">
+      {cards.map(([title, href, image, text], i) => {
+        const isMain = i === 0;
+        const colSpan = isMain ? "md:col-span-6!" : "md:col-span-4!";
+        const rowSpan = isMain ? "md:row-span-2!" : "md:row-span-1!";
+        const height = isMain ? "min-h-[250px]! md:min-h-[400px]!" : "min-h-[250px]! md:min-h-[320px]!";
+
+        return (
+          <Link
+            key={title}
+            href={href}
+            className={`group! relative! overflow-hidden! rounded-3xl! bg-[#f9fafb]! flex! flex-col! justify-end! p-6! md:p-8! transition-all! duration-400! hover:shadow-[0_20px_40px_-15px_rgba(39,66,127,0.15)]! hover:-translate-y-1! ${colSpan} ${rowSpan} ${height}`}
+          >
+            <div className="absolute! inset-0! z-0! bg-[#eef2f6]!">
+              <img
+                src={image}
+                alt={title}
+                className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-105!"
+              />
+              <div className="absolute! inset-0! bg-linear-to-t! from-[#0a0a0a]/90! via-[#0a0a0a]/20! to-transparent! opacity-80! transition-opacity! duration-700! group-hover:opacity-100!" />
+            </div>
+            
+            <div className="relative! z-10! flex! flex-col! items-start! transform! transition-transform! duration-700! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:-translate-y-2">
+              <span className="mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3.5! py-1! text-[10px]! md:text-xs! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm!">
+                {text}
+              </span>
+              <h5 className="text-2xl! md:text-[32px]! font-['Lexend',sans-serif]! font-light! text-white! tracking-tight! leading-none! drop-shadow-sm!">
+                {title}
+              </h5>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }

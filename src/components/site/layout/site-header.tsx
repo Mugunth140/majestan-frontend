@@ -143,7 +143,7 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header
-        className={`fixed! left-1/2 z-[1000] -translate-x-1/2 border border-white/45 bg-white! font-['Lexend',sans-serif] transition-all duration-300 ${isScrolled ? "top-0! w-full! max-w-full! rounded-none! py-2.5! px-5! shadow-[0_10px_30px_rgba(22,30,45,0.08)]!" : "top-4! w-[min(95vw,1400px)]! max-w-[1400px]! rounded-full! py-3! shadow-[0_18px_45px_rgba(22,30,45,0.18)]! max-[640px]:top-2.5! max-[640px]:w-[calc(100vw-20px)]!"}`}
+        className={`fixed! left-1/2 z-[1000] -translate-x-1/2 border border-white/30! bg-white/45! backdrop-blur-xs! font-['Lexend',sans-serif] transition-all duration-350 ${isScrolled ? "top-0! w-full! max-w-full! rounded-none! py-2.5! px-5! shadow-[0_10px_30px_rgba(22,30,45,0.08),inset_0_1px_0_rgba(255,255,255,0.8)]!" : "top-4! w-[min(95vw,1400px)]! max-w-[1400px]! rounded-full! py-3! shadow-[0_18px_45px_rgba(22,30,45,0.18),inset_0_1px_0_rgba(255,255,255,0.8)]! max-[640px]:top-2.5! max-[640px]:w-[calc(100vw-20px)]!"}`}
         onMouseLeave={() => setHoveredCategory(null)}
       >
         <div className="w-full px-5 max-[640px]:px-3!">
@@ -212,7 +212,7 @@ export function SiteHeader(): React.JSX.Element {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute! right-0 top-full mt-2 w-64 rounded-2xl border border-black/5 bg-white p-3 shadow-[0_15px_35px_rgba(22,30,45,0.15)] z-[1010]"
+                      className="absolute! right-0 top-full mt-2 w-64 rounded-2xl border border-white/40! bg-white/95! backdrop-blur-2xl! p-3 shadow-[0_15px_35px_rgba(22,30,45,0.15),inset_0_1px_0_rgba(255,255,255,0.8)]! z-[1010]"
                     >
                       <button
                         onClick={(e) => {
@@ -277,11 +277,11 @@ export function SiteHeader(): React.JSX.Element {
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 12, x: "-50%" }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="absolute! top-full left-1/2 z-[1002] w-[min(920px,88vw)] pt-2.5!"
+              className="absolute! top-full left-1/2 z-1005 w-[min(920px,88vw)] pt-2.5!"
             >
-              <div className="flex! gap-9 rounded-[28px] border border-black/5 bg-white p-6! shadow-[0_22px_55px_rgba(22,30,45,0.20)]">
+              <div className="flex! gap-9 rounded-[28px] border p-6! shadow-[0_22px_55px_rgba(22,30,45,0.20),inset_0_1px_0_rgba(255,255,255,0.8)]! border-white/30! bg-white/95! backdrop-blur-xl!">
                 <div className="flex-1">
-                  <div className="mb-[18px] border-b border-[#ffc900]/30 pb-3.5">
+                  <div className="mb-4.5 border-b border-[#ffc900]/30 pb-3.5">
                     <p className="m-0 mb-2 text-[18px]! font-semibold! leading-tight text-[#27427f]!">{getFeatured(hoveredCategory)?.title}</p>
                   </div>
                   <div className="grid! grid-cols-2 gap-1 transition-all duration-200">
@@ -342,7 +342,7 @@ export function SiteHeader(): React.JSX.Element {
             <motion.div
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 15 }}
-              className="fixed! top-0 right-0 bottom-0 z-[1101] w-full max-w-full bg-white shadow-[-18px_0_45px_rgba(22,30,45,0.20)] flex flex-col"
+              className="fixed! top-0 right-0 bottom-0 z-[1101] w-full max-w-full bg-white/95! backdrop-blur-2xl! border-l border-white/40! shadow-[-18px_0_45px_rgba(22,30,45,0.20),inset_1px_0_0_rgba(255,255,255,0.8)]! flex flex-col"
             >
               {/* Drawer header */}
               <div className="flex! items-center! justify-between! px-5 py-4 border-b border-[#27427f]/10 shrink-0">

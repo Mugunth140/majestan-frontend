@@ -1,7 +1,7 @@
 FROM oven/bun:alpine AS dependencies
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN CI= BUN_INSTALL_FROZEN_LOCKFILE= bun install --no-save
+RUN bun install --frozen-lockfile
 
 FROM oven/bun:alpine AS builder
 WORKDIR /app
@@ -16,7 +16,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 COPY --from=builder /app/package.json /app/bun.lock ./
-RUN CI= BUN_INSTALL_FROZEN_LOCKFILE= bun install --production --no-save
+RUN bun install --production --frozen-lockfile
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.ts ./next.config.ts

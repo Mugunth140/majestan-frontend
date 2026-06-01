@@ -139,16 +139,15 @@ export function HomePage({ data }: { data: HomePageData }) {
             />
             
             {/* Custom Rent Bento Grid */}
-            <div className="mt-12! grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-4! sm:gap-6! md:gap-8! mb-16!">
+            <div className="mt-12! grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-4! sm:gap-6! md:gap-8! auto-rows-[220px]! md:auto-rows-[180px]! lg:auto-rows-[200px]! mb-16!">
               {rentCards.map(([title, link, img, subtitle], i) => (
                 <Link href={link} key={title} className={`group! relative! overflow-hidden! rounded-[2rem]! md:rounded-[2.5rem]! shadow-lg! transition-all! duration-700! hover:-translate-y-2! hover:shadow-[0_25px_50px_-12px_rgba(39,66,127,0.2)]!
-                  ${i === 0 ? 'lg:col-span-2! lg:row-span-2! aspect-[16/9]! lg:aspect-auto!' : ''}
-                  ${i === 1 ? 'aspect-[16/9]!' : ''}
-                  ${i === 2 ? 'aspect-[16/9]!' : ''}
-                  ${i === 3 ? 'lg:col-span-2! aspect-[32/9]!' : ''}
-                  ${i === 4 ? 'aspect-[16/9]!' : ''}
-                  ${i === 5 ? 'lg:col-span-3! aspect-[3/1]! md:aspect-[6/1]!' : ''}
-                  ${(i !== 0 && i !== 3 && i !== 5) ? 'aspect-[16/9]!' : ''}
+                  ${i === 0 ? 'md:col-span-2! lg:col-span-2!' : ''}
+                  ${i === 1 ? 'md:col-span-1! lg:col-span-1!' : ''}
+                  ${i === 2 ? 'md:col-span-1! lg:col-span-1!' : ''}
+                  ${i === 3 ? 'md:col-span-2! lg:col-span-2!' : ''}
+                  ${i === 4 ? 'md:col-span-1! lg:col-span-1!' : ''}
+                  ${i === 5 ? 'md:col-span-1! lg:col-span-2!' : ''}
                 `}>
                   <img src={img} alt={title} className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-105!" />
                   <div className="absolute! inset-0! bg-gradient-to-t! from-black/90! via-black/20! to-transparent! opacity-70! transition-opacity! duration-500! group-hover:opacity-90!" />

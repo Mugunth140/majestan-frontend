@@ -67,20 +67,30 @@ export function HomePage({ data }: { data: HomePageData }) {
             {/* <h3 className="mb-8 mt-12 text-xs md:text-sm font-semibold tracking-[0.15em] text-gray-400 uppercase">Explore by Category</h3> */}
             <CardRail cards={saleCards} />
 
-            <h3 className="mb-8 mt-24 text-xs md:text-sm font-semibold tracking-[0.15em] text-gray-400 uppercase">Featured Projects</h3>
+            <h3 className="mb-8! mt-24! text-xs! md:text-sm! font-semibold! tracking-[0.15em]! text-gray-400! uppercase!">Featured Projects</h3>
             <FeatureCarousel properties={data.featuredApartments} emptyMessage="Featured apartments will appear here soon." />
           </div>
         </section>
 
-        {data.banners.length > 0 ? (
-          <section className="section-banner migrated-banner">
-            <FeatureCarousel
-              banners={data.banners}
-              emptyMessage=""
-              variant="banner"
+        <section className="py-24! bg-white!">
+          <div className="w-full! max-w-400! mx-auto! px-4! sm:px-6! md:px-8!">
+            <SectionHeading
+                title={`Exclusive Offers and Highlights`}
+                text="Discover the latest premium updates, exclusive deals, and featured communities."
             />
-          </section>
-        ) : null}
+            <div className="mt-12! rounded-2xl! overflow-hidden! shadow-md! group!">
+              <FeatureCarousel
+                banners={[
+                  { id: 1, image: "/assets/images/banners/banner_1.jpeg", href: "" },
+                  { id: 2, image: "/assets/images/banners/banner_2.jpeg", href: "" },
+                  { id: 3, image: "/assets/images/banners/banner_3.jpeg", href: "" },
+                ]}
+                emptyMessage="Banner images will appear here soon."
+                variant="banner"
+              />
+            </div>
+          </div>
+        </section>
 
         <section className="hwch-section section-help tf-spacing-1 pb-0">
           <div className="tf-container">

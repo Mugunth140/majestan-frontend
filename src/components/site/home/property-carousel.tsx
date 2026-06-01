@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { A11y, Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { A11y, Autoplay, Navigation, Pagination, EffectCoverflow } from "swiper/modules";
 import { createEnquiry, type FeaturedProperty, type HomeBanner } from "@/lib/api";
 
 type PropertyCarouselProps =
@@ -25,20 +25,19 @@ export function FeatureCarousel(props: PropertyCarouselProps) {
     return (
       <Swiper
         modules={[A11y, Autoplay, Navigation, Pagination]}
-        navigation
-        pagination={{ clickable: true }}
-        autoplay={{ delay: 4500, disableOnInteraction: false }}
+        pagination={{ clickable: false }}
+        autoplay={{ delay: 4000, disableOnInteraction: false }}
         loop={props.banners.length > 1}
         className="migrated-swiper migrated-banner-swiper"
       >
         {props.banners.map((banner) => (
           <SwiperSlide key={banner.id}>
             {banner.href ? (
-              <a href={banner.href} target="_blank" rel="noreferrer">
-                <img src={banner.image} alt="Majestan Realty banner" />
+              <a href={banner.href} target="_blank" rel="noreferrer" className="block w-full">
+                <img src={banner.image} alt="Majestan Realty banner" className="w-full h-auto object-contain md:object-cover" />
               </a>
             ) : (
-              <img src={banner.image} alt="Majestan Realty banner" />
+              <img src={banner.image} alt="Majestan Realty banner" className="w-full h-auto object-contain md:object-cover" />
             )}
           </SwiperSlide>
         ))}
@@ -59,15 +58,26 @@ function PropertyCarousel({ properties }: { properties: FeaturedProperty[] }) {
   return (
     <>
       <Swiper
-        modules={[A11y, Navigation, Pagination]}
+        modules={[A11y, Navigation, Pagination, EffectCoverflow]}
+        effect="coverflow"
+        grabCursor={true}
+        centeredSlides={true}
+        loop={true}
+        coverflowEffect={{
+          rotate: 0,
+          stretch: -30,
+          depth: 150,
+          modifier: 2,
+          slideShadows: false,
+        }}
         navigation
         pagination={{ clickable: true }}
         breakpoints={{
-          0: { slidesPerView: 1, spaceBetween: 15 },
+          0: { slidesPerView: 1.2, spaceBetween: 15 },
           640: { slidesPerView: 2, spaceBetween: 24 },
           1024: { slidesPerView: 3, spaceBetween: 32 },
         }}
-        className="migrated-swiper"
+        className="migrated-swiper !pb-16"
       >
         {properties.map((property, i) => {
           const FALLBACK_IMAGES = [

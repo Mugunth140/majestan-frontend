@@ -87,7 +87,7 @@ export function SiteFooter() {
             {quickLinks.map(({ category, prefix, locations }) => (
               <div key={category}>
                 {/* Category label */}
-                <p className="text-[13px]! font-bold! text-[#161e2d]! mb-3! pb-2! border-b! border-gray-100! tracking-wide!">
+                <p className="text-[13px]! font-bold! text-[#161e2d]! mb-3! pb-2! border-b! border-gray-100! tracking-wide! transition-all! duration-300!">
                   {category}{" "}
                   <span >in Coimbatore</span>
                 </p>

@@ -96,7 +96,7 @@ export function HomePage({ data }: { data: HomePageData }) {
           <div className="tf-container">
             <SectionHeading
               title="How can we help you?"
-              text="Supporting you at every stage of your real estate journey."
+              // text="Supporting you at every stage of your real estate journey."
             />
             <div className="tf-grid-layout md-col-2 mb-6">
               {helpItems.map(([title, text, icon]) => (
@@ -191,10 +191,11 @@ export function HomePage({ data }: { data: HomePageData }) {
 }
 
 function SectionHeading({ title, text }: { title: string; text?: string }) {
+  const noSubText = !text || text.trim() === "";
   return (
-    <div className="flex! flex-col! md:flex-row! md:items-end! justify-between! gap-6! mb-4!">
+    <div className={`flex! flex-col! md:flex-row! md:items-end! ${noSubText ? "justify-center! mb-6!" : "justify-between!"} gap-6! mb-4!`}>
       <div className="flex flex-col! md:flex-row! justify-between! items-center! gap-4! p-2! md:py-8! md:px-6!">
-        <h2 className="font-['Lexend',sans-serif]! text-[#0a0a0a]! leading-[1.1]! tracking-[-0.02em]! drop-shadow-sm! font-light! text-[clamp(30px,4vw,50px)]!">
+        <h2 className="font-['Lexend',sans-serif]! text-[#0a0a0a]! leading-[1.1]! tracking-[-0.02em]! drop-shadow-sm! font-light! text-[clamp(30px,4vw,50px)]! ">
           {title}
         </h2>
         {text ? <p className="mt-5! text-lg! font-light! text-gray-500! leading-relaxed! max-w-[65ch]!">{text}</p> : null}

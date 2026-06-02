@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Search, Handshake, TrendingUp, BarChart3 } from "lucide-react";
 import { FeatureCarousel } from "./property-carousel";
+import { LuxuryFeaturedSection } from "./luxury-featured-section";
 import { HeroSection } from "./hero-section";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
@@ -67,11 +68,14 @@ export function HomePage({ data }: { data: HomePageData }) {
             
             {/* <h3 className="mb-8 mt-12 text-xs md:text-sm font-semibold tracking-[0.15em] text-gray-400 uppercase">Explore by Category</h3> */}
             <CardRail cards={saleCards} />
-
-            <h3 className="mb-8! mt-24! text-sm! md:text-md! lg:text-xl! font-normal! tracking-[0.08em]! text-gray-600!">Featured Projects</h3>
-            <FeatureCarousel properties={data.featuredApartments} emptyMessage="Featured apartments will appear here soon." />
           </div>
         </section>
+
+        <LuxuryFeaturedSection 
+          properties={data.featuredApartments} 
+          title="Handpicked Properties" 
+          subtitle="Curated listings across Coimbatore's most sought-after localities" 
+        />
 
         <section className="py-24! bg-white!">
           <div className="w-full! max-w-400! mx-auto! px-4! sm:px-6! md:px-8!">
@@ -163,18 +167,14 @@ export function HomePage({ data }: { data: HomePageData }) {
                 </Link>
               ))}
             </div>
-
-            <div className="mt-24!">
-              <SectionHeading
-                  title="Featured Villa Projects"
-                  text="Explore exclusive, handpicked premium villa communities."
-              />
-              <div className="mt-12!">
-                <FeatureCarousel properties={data.featuredVillas} emptyMessage="Featured villas will appear here soon." />
-              </div>
-            </div>
           </div>
         </section>
+
+        <LuxuryFeaturedSection 
+          properties={data.featuredVillas} 
+          title="Featured Villa Projects" 
+          subtitle="Explore exclusive, handpicked premium villa communities." 
+        />
 
         <section className="pt-0 section-categories-neighborhoods tf-spacing-7">
           <div className="tf-container">

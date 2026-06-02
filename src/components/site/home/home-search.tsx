@@ -125,7 +125,6 @@ export function HomeSearch({
                 if (event.key === "Escape") setIsLocationMenuOpen(false);
               }}
             />
-
             {isLocationMenuOpen && (
               <div
                 id="location-options"

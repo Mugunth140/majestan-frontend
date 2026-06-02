@@ -90,15 +90,15 @@ export function HomeSearch({
   return (
     <div className="w-full! max-w-[1100px]! mx-auto! mt-4! relative! z-20! px-4!">
       <form
-        className="w-full! bg-white/95! backdrop-blur-2xl! rounded-[2rem]! md:rounded-full! shadow-2xl! border! !border-white/80 !p-2.5 !flex !flex-col md:!flex-row !items-center !gap-2 md:!gap-0"
+        className="w-full! bg-white/95! backdrop-blur-2xl! rounded-3xl! md:rounded-full! shadow-2xl! border! border-white/80! px-2! py-1! flex! flex-col! md:flex-row! items-center! gap-2! md:gap-0!"
         onSubmit={onSubmit}
       >
         {/* ── Location Input ────────────────────────────────── */}
         <div
           ref={locationMenuRef}
-          className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none md:!rounded-l-full hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors !cursor-text"
+          className="!w-full md:!w-[35%] !flex !items-center !px-5 !py-3 !relative group !rounded-2xl md:!rounded-none md:rounded-l-full! hover:!bg-gray-50 md:!border-r !border-gray-200 !transition-colors !cursor-text"
         >
-          <MapPin className="!text-[#27427f] !mr-3 !shrink-0" size={24} strokeWidth={1.8} />
+          <MapPin className="text-[#27427f]! mr-3! shrink-0!" size={28} strokeWidth={1.6} />
           <div className="!w-full !flex !flex-col !text-left !relative">
             <label
               id="location-label"
@@ -263,9 +263,9 @@ export function HomeSearch({
   
           <button
             type="submit"
-            className="bg-[#27427f]! group-hover:bg-[#1a2d59]! !text-white !rounded-full flex items-center justify-center transition-all duration-300 shadow-lg border-none outline-none leading-normal md:hover:scale-100 focus:ring-0 focus:ring-[#27427f]/30 px-6! py-3.5! gap-2.5">
-            <span className="ml-2 font-bold text-base bg-[#27427f]! group-hover:bg-[#1a2d59]! text-white">Search</span>
-            <Search size={22} strokeWidth={2.5} />
+            className="bg-[#27427f]! text-white! rounded-full! flex! items-center! justify-center! transition-all! duration-300! shadow-lg! border-none! outline-none! leading-normal! focus:ring-0! focus:ring-[#27427f]/30! px-6! py-3.5! gap-2.5! md:hover:bg-[#1a2d59]!">
+            <span className="ml-2! font-normal! bg-[#27427f]! text-white! md:hover:bg-[#1a2d59]! transition-all! duration-300!">Search</span>
+            <Search size={22} strokeWidth={2} />
           </button>
         </div>
       </form>

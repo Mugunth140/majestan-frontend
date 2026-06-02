@@ -202,13 +202,13 @@ export function SiteHeader(): React.JSX.Element {
                           setIsLocationMenuOpen(false);
                           detectLocation(e);
                         }}
-                        className="flex! w-full items-center! gap-2.5 rounded-xl border-0 bg-[#27427f]/5 px-3 py-2.5 text-left text-[13px]! font-bold text-[#27427f]! transition-colors hover:bg-[#27427f]/10!"
+                        className="flex! w-full items-center! gap-2.5 rounded-xl! border-0 bg-[#27427f]/5 px-3 py-2.5 text-left text-[13px]! font-bold text-[#27427f]! transition-colors hover:bg-[#27427f]/10!"
                       >
                         <MapPin size={16} />
-                        Use My Current Location
+                        Use Current Location
                       </button>
                       <div className="my-2 border-t border-black/5"></div>
-                      <div className="px-2 pb-1 pt-1 text-[11px]! font-bold uppercase tracking-wider text-black/40!">
+                      <div className="px-2 pb-1 pt-1 text-[11px]! font-semibold tracking-normal text-black/40!">
                         Popular Cities
                       </div>
                       <div className="grid! gap-1">
@@ -219,7 +219,7 @@ export function SiteHeader(): React.JSX.Element {
                               setLocation(city);
                               setIsLocationMenuOpen(false);
                             }}
-                            className={`flex! w-full items-center! rounded-lg border-0 px-3 py-2 text-left text-[13px]! font-semibold! transition-colors hover:bg-[#27427f]/5! ${
+                            className={`flex! w-full items-center! rounded-lg! border-0! px-3! py-2! text-left text-[13px]! font-semibold! transition-colors hover:bg-[#27427f]/5! ${
                               location === city ? "text-[#27427f]! bg-[#27427f]/5!" : "text-black/70! bg-transparent!"
                             }`}
                           >

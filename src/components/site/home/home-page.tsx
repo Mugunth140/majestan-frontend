@@ -68,7 +68,7 @@ export function HomePage({ data }: { data: HomePageData }) {
             {/* <h3 className="mb-8 mt-12 text-xs md:text-sm font-semibold tracking-[0.15em] text-gray-400 uppercase">Explore by Category</h3> */}
             <CardRail cards={saleCards} />
 
-            <h3 className="mb-8! mt-24! text-xs! md:text-sm! font-semibold! tracking-[0.15em]! text-gray-400! uppercase!">Featured Projects</h3>
+            <h3 className="mb-8! mt-24! text-sm! md:text-md! lg:text-xl! font-normal! tracking-[0.08em]! text-gray-600!">Featured Projects</h3>
             <FeatureCarousel properties={data.featuredApartments} emptyMessage="Featured apartments will appear here soon." />
           </div>
         </section>

@@ -171,7 +171,7 @@ export function HomeSearch({
           <div className="!w-full !flex !flex-col !text-left !relative">
             <label
               id="property-type-label"
-              className="!text-[11px] !font-semibold !text-gray-500 !uppercase !tracking-wide !mb-0.5 !leading-normal group-focus-within:!text-[#27427f] !transition-colors"
+              className="!text-[12px] !font-semibold !text-gray-500 !uppercase !mb-0.5 !leading-relaxed group-focus-within:!text-[#27427f] !transition-colors"
             >
               Property Type
             </label>
@@ -180,7 +180,7 @@ export function HomeSearch({
               aria-haspopup="listbox"
               aria-expanded={isPropertyMenuOpen}
               aria-labelledby="property-type-label"
-              className={`!w-full !border-none !bg-transparent !p-0 !m-0 !shadow-none !outline-none focus:!ring-0 !text-left !font-semibold !text-[15px] !leading-normal !transition-colors ${
+              className={`!w-full !border-none !bg-transparent !p-0 !m-0 !shadow-none !outline-none focus:!ring-0 !text-left !font-normal !text-[15px] !leading-normal !transition-colors ${
                 propertyType ? "!text-gray-900" : "!text-gray-400"
               }`}
               onClick={() => setIsPropertyMenuOpen((open) => !open)}

@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import { A11y, Autoplay, Navigation, Pagination } from "swiper/modules";
 import { createEnquiry, type FeaturedProperty } from "@/lib/api";
-import { MapPin, ChevronLeft, ChevronRight, X, Phone, BedDouble, Ruler, Calendar, ArrowRight } from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight, X, Phone, BedDouble, Ruler, Calendar, ArrowUpRight } from "lucide-react";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -160,9 +160,7 @@ function LuxuryCard({ property, isActive, imgSrc, onContact }: { property: Featu
         relative! w-full! max-w-[340px]! h-[480px]! rounded-[20px]! overflow-hidden! cursor-pointer!
         bg-white! border! border-gray-100! 
         shadow-[0_15px_40px_-10px_rgba(0,0,0,0.1)]!
-        transition-all! duration-300! ease-out! group! mx-auto!
-        ${isActive ? 'scale-[1.05]! opacity-100! z-10!' : 'scale-[0.98]! opacity-100! z-0! hover:scale-[1.02]! hover:-translate-y-2! hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)]!'}
-        ${isActive ? 'hover:-translate-y-1!' : ''}
+        transition-all! duration-300! ease-out! group! mx-auto! hover:scale-[1.02]! hover:-translate-y-2! hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)]!
       `}
     >
       {/* Image Area (top 55%) */}
@@ -192,9 +190,9 @@ function LuxuryCard({ property, isActive, imgSrc, onContact }: { property: Featu
       {/* Card Body (bottom 45%) */}
       <div className="absolute! bottom-0! w-full! h-[45%]! p-5! flex! flex-col! justify-between! bg-white!">
         <div>
-          <p className="flex! items-center! gap-1! text-[10px]! font-bold! uppercase! tracking-[0.15em]! text-gray-400!">
+          <p className="flex! items-center! gap-1! text-[12px]! font-normal! capitalize! tracking-[0.05em]! text-gray-400!">
             <MapPin size={12} className="text-[#27427f]!" strokeWidth={2.5} />
-            {property.sublocation ? `${property.sublocation}, COIMBATORE` : "COIMBATORE"}
+            {property.sublocation ? `${property.sublocation}, Coimbatore` : "Coimbatore"}
           </p>
           <h3 className="text-[#27427f]! font-['Lexend',sans-serif]! text-[20px]! font-medium! leading-[1.2]! mt-1.5! truncate! tracking-tight!">
             {property.propertyName || "Luxury Property"}
@@ -232,16 +230,16 @@ function LuxuryCard({ property, isActive, imgSrc, onContact }: { property: Featu
         <div className="flex! items-center! justify-between! mt-3.5!">
           <button 
             onClick={(e) => { e.stopPropagation(); onContact(); }}
-            className="inline-flex! items-center! gap-1.5! border! border-[#27427f]! rounded-[6px]! text-[#27427f]! bg-transparent! text-[12px]! font-bold! uppercase! tracking-wide! px-4! py-2! transition-colors! duration-300! hover:bg-[#27427f]! hover:text-white!"
+            className="inline-flex! items-center! gap-1.5! border! border-[#27427f]! rounded-3xl! text-[#27427f]! bg-transparent! text-[13px]! font-semibold! tracking-normal! px-5! py-3! transition-colors! duration-300! hover:bg-[#27427f]! hover:text-white!"
           >
-            <Phone size={14} /> CONTACT
+            <Phone size={14} fill="#27427f" /> Contact
           </button>
           
           <Link 
             href={property.detailPath}
-            className="w-9! h-9! rounded-full! bg-[#27427f]! text-white! flex! items-center! justify-center! transition-transform! duration-300! hover:scale-110!"
+            className="px-5! py-2.5! rounded-3xl! bg-[#27427f]! text-white! flex! items-center! justify-center! gap-1! transition-transform! duration-300! hover:scale-100! text-[13px]! font-normal!"
           >
-            <ArrowRight size={18} strokeWidth={2.5} />
+            <ArrowUpRight size={18} strokeWidth={2.5} /> View More
           </Link>
         </div>
       </div>

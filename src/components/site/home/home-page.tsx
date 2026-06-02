@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Handshake, TrendingUp, BarChart3 } from "lucide-react";
+import { Search, Handshake, TrendingUp, BarChart3, Home, BadgePercent, Store, ArrowUpRight } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
 import { FeatureCarousel } from "./property-carousel";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
@@ -9,6 +9,7 @@ import { HeroSection } from "./hero-section";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { HomePageData } from "@/lib/api";
+import Image from "next/image";
 
 
 
@@ -58,9 +59,9 @@ export function HomePage({ data }: { data: HomePageData }) {
   ] as const;
 
   const serviceCards = [
-    ["Property Management", "/services/property-management", "Residential and commercial leasing support from tenant search to ongoing care."],
-    ["Rent a Property", "/rent-or-sell-your-property", "Guided leasing support for homes, offices, warehouses, and commercial spaces."],
-    ["Sell a Property", "/rent-or-sell-your-property", "Market pricing, qualified leads, and hands-on support through closure."],
+    ["Property Management", "/services/property-management", "Residential and commercial leasing support from tenant search to ongoing care.", Home],
+    ["Rent a Property", "/rent-or-sell-your-property", "Guided leasing support for homes, offices, warehouses, and commercial spaces.", BadgePercent],
+    ["Sell a Property", "/rent-or-sell-your-property", "Market pricing, qualified leads, and hands-on support through closure.", Store],
   ] as const;
 
   return (
@@ -157,7 +158,7 @@ export function HomePage({ data }: { data: HomePageData }) {
             />
             
             {/* Custom Rent Bento Grid */}
-            <div className="mt-12! grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-4! sm:gap-6! md:gap-8! auto-rows-[220px]! md:auto-rows-[180px]! lg:auto-rows-[200px]! mb-16!">
+            <div className="mt-12! grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-4! sm:gap-6! md:gap-8! auto-rows-[220px]! md:auto-rows-[180px]! lg:auto-rows-[200px]! mb-0!">
               {rentCards.map(([title, link, img, subtitle], i) => (
                 <Link href={link} key={title} className={`group! relative! overflow-hidden! rounded-[2rem]! md:rounded-[2.5rem]! shadow-lg! transition-all! duration-700! hover:-translate-y-2! hover:shadow-[0_25px_50px_-12px_rgba(39,66,127,0.2)]!
                   ${i === 0 ? 'md:col-span-2! lg:col-span-2!' : ''}
@@ -168,7 +169,7 @@ export function HomePage({ data }: { data: HomePageData }) {
                   ${i === 5 ? 'md:col-span-1! lg:col-span-2!' : ''}
                 `}>
                   <img src={img} alt={title} className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-105!" />
-                  <div className="absolute! inset-0! bg-gradient-to-t! from-black/90! via-black/20! to-transparent! opacity-70! transition-opacity! duration-500! group-hover:opacity-90!" />
+                  <div className="absolute! inset-0! bg-linear-to-t! from-black/90! via-black/20! to-transparent! opacity-70! transition-opacity! duration-500! group-hover:opacity-90!" />
                   <div className="absolute! inset-0! p-5! md:p-8! flex! flex-col! justify-end! items-start!">
                     <span className="mb-2! md:mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3! py-1! text-[9px]! md:text-[10px]! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm! translate-y-4! opacity-0! transition-all! duration-500! group-hover:translate-y-0! group-hover:opacity-100!">
                       {subtitle}
@@ -189,7 +190,7 @@ export function HomePage({ data }: { data: HomePageData }) {
           title="Featured Villa Projects" 
           subtitle={`Explore premium villas for sale in ${location}`} 
         />
-
+{/* 
         <section className="pt-0 section-categories-neighborhoods tf-spacing-7">
           <div className="tf-container">
             <SectionHeading title={`Projects in ${location}`} />
@@ -209,37 +210,58 @@ export function HomePage({ data }: { data: HomePageData }) {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
-        <section className="section-sale">
-          <div className="box-sale">
-            <div className="tf-container">
-              <div className="heading-section text-center mb-48">
-                <h2 className="title text-white">Sell Your Property Fast with Majestan Realty</h2>
-                <p className="text-1 text-white">Expert guidance, quick closures and maximum value for your home.</p>
-              </div>
-              <Link href="/rent-or-sell-your-property" className="tf-btn bg-color-primary pd-12 mx-auto fw-7">
-                Meet The Team
+        <section className="relative! w-full! py-14! md:py-20! bg-white! overflow-hidden!">
+          <div className="relative! z-10! w-full! max-w-[1400px]! mx-auto! px-4! sm:px-6! md:px-8!">
+            
+            {/* Header Content - Centered */}
+            <div className="flex! flex-col! items-center! text-center! max-w-4xl! mx-auto! mb-20!">
+              <h2 className="text-4xl! md:text-5xl! lg:text-[56px]! font-light! text-slate-900! leading-tight! font-['Lexend',sans-serif]! tracking-tight! mb-6!">
+                Sell Your Property Fast with Majestan Realty
+              </h2>
+              <p className="text-slate-500! text-lg! md:text-xl! leading-relaxed! max-w-2xl! font-light! mb-10!">
+                Coimbatore's trusted real estate partner. Get expert guidance, quick closures, and maximum value for your home.
+              </p>
+              
+              <Link 
+                href="/rent-or-sell-your-property" 
+                className="inline-flex! items-center! justify-center! bg-[#ffc900]! text-slate-900! font-semibold! px-10! py-4! rounded-full! transition-all! duration-300! hover:bg-[#1e3465]! hover:text-white! hover:shadow-[0_10px_20px_-10px_rgba(39,66,127,0.4)]!"
+              >
+                <span className="text-md! font-normal! tracking-relaxed!">Meet Our Team</span>
               </Link>
             </div>
-          </div>
-          <div className="tf-container">
-            <div className="tf-grid-layout md-col-3 migrated-services">
-              {serviceCards.map(([title, href, text]) => (
-                <article className="icons-box style-7 effec-icon" key={title}>
-                  <div className="tf-icon text-center">
-                    <i className="icon-house-1" />
+
+            {/* Cards Grid */}
+            <div className="grid! grid-cols-1! md:grid-cols-3! gap-8! lg:gap-12!">
+              {serviceCards.map(([title, href, text, Icon], idx) => (
+                <div key={title as string} className="group/card! relative! flex! flex-col! p-8! md:p-10! rounded-4xl! bg-[#f8fafc]! border! border-slate-200/60! transition-all! duration-500! hover:bg-white! hover:shadow-[0_20px_40px_-15px_rgba(39,66,127,0.1)]! hover:-translate-y-2! hover:border-[#27427f]/20!">
+                  
+                  <div className="flex! items-center! gap-5! mb-8!">
+                    <div className="w-14! h-14! rounded-2xl! bg-white! border! border-slate-200! flex! items-center! justify-center! transition-colors! duration-500! group-hover/card:bg-[#27427f]! group-hover/card:border-[#27427f]! shrink-0!">
+                      <Icon className="w-6! h-6! text-[#27427f]! transition-colors! duration-500! group-hover/card:text-white!" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-xl! font-semibold! text-slate-900! font-['Lexend',sans-serif]! tracking-tight! leading-tight!">
+                      {title as string}
+                    </h3>
                   </div>
-                  <h4 className="title text-center">
-                    <Link href={href}>{title}</Link>
-                  </h4>
-                  <p className="text-center text-1">{text}</p>
-                  <Link href={href} className="tf-btn style-border pd-6 fw-7 mx-auto">
-                    Find out more
+                  
+                  <p className="text-slate-500! text-base! leading-relaxed! mb-10! font-light! grow!">
+                    {text as string}
+                  </p>
+                  
+                  <div className="w-full! h-px! bg-slate-200! mb-6! transition-colors! duration-500! group-hover/card:bg-slate-100!"></div>
+                  
+                  <Link 
+                    href={href as string} 
+                    className="flex! items-center! text-sm! font-normal! text-slate-900! hover:text-[#27427f]! transition-colors! duration-300! uppercase! tracking-wide!"
+                  >
+                    <span>Find out more</span>
                   </Link>
-                </article>
+                </div>
               ))}
             </div>
+
           </div>
         </section>
       </main>

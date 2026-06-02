@@ -41,7 +41,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
   if (!properties || properties.length === 0) return null;
 
   return (
-    <section className="relative! w-full! py-[80px]! bg-white! overflow-hidden!">
+    <section className="relative! w-full! py-15! bg-white! overflow-hidden!">
       <div className="relative! w-full! max-w-[1400px]! mx-auto! px-4! sm:px-6! md:px-8! z-10!">
         {/* Section Header */}
         <div className="flex! flex-col! md:flex-row! justify-between! items-start! md:items-end! mb-12!">

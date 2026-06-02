@@ -4,7 +4,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, Phone } from "lucide-react";
+import { useLocationContext } from "@/contexts/LocationContext";
 import Image from "next/image";
+import { API_BASE_URL } from "@/lib/api";
 
 const city = "coimbatore";
 
@@ -44,14 +46,43 @@ const SERVICE_LINKS: MegaMenuLink[] = [
 type Category = "Buy" | "Rent" | "Services" | null;
 
 export function SiteHeader(): React.JSX.Element {
+  const { location, setLocation, isLocating, updateLocation } = useLocationContext();
   const [hoveredCategory, setHoveredCategory] = useState<Category>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
-  const [location, setLocation] = useState("Coimbatore");
-  const [isLocating, setIsLocating] = useState(false);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<MegaMenuLink | null>(null);
+  const [availableCities, setAvailableCities] = useState<string[]>(["Coimbatore"]);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/metadata/cities`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            setAvailableCities(data.map((item: any) => item.city));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch cities", err);
+      }
+    };
+    fetchCities();
+  }, []);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (isLocationMenuOpen) {
+      timeoutId = setTimeout(() => {
+        setIsLocationMenuOpen(false);
+      }, 5000);
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isLocationMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,55 +104,7 @@ export function SiteHeader(): React.JSX.Element {
 
   const detectLocation = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsLocating(true);
-
-    const fallbackToIP = async () => {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        if (data.city) {
-          setLocation(data.city);
-        } else {
-          console.warn("Could not determine city from IP fallback.");
-        }
-      } catch (err) {
-        console.error("IP fallback error:", err);
-      } finally {
-        setIsLocating(false);
-      }
-    };
-
-    if (!navigator.geolocation) {
-      console.warn("Geolocation is not supported by your browser, using fallback.");
-      await fallbackToIP();
-      return;
-    }
-
-    try {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-            const data = await response.json();
-            const detectedCity = data.address.city || data.address.town || data.address.village || "Coimbatore";
-            setLocation(detectedCity);
-            setIsLocating(false);
-          } catch (error) {
-            console.error("Error fetching city from coordinates:", error);
-            await fallbackToIP();
-          }
-        },
-        async (error) => {
-          console.warn(`Geolocation error (${error.code}): ${error.message}. Using fallback.`);
-          await fallbackToIP();
-        },
-        { timeout: 10000, enableHighAccuracy: true }
-      );
-    } catch (err) {
-      console.error("Geolocation API exception:", err);
-      await fallbackToIP();
-    }
+    await updateLocation();
   };
 
   const getLinks = (cat: Category) => {
@@ -134,8 +117,9 @@ export function SiteHeader(): React.JSX.Element {
   };
 
   const getFeatured = (cat: Category) => {
-    if (cat === "Buy") return { title: "Find your dream home", btn: "Explore Buy", href: `/for-sale/apartments/${city}` };
-    if (cat === "Rent") return { title: "Verified rental properties", btn: "Browse Rent", href: `/for-rent/apartments/${city}` };
+    const citySlug = location.toLowerCase().replace(/[\s,]+/g, '-');
+    if (cat === "Buy") return { title: "Find your dream home", btn: "Explore Buy", href: `/for-sale/apartments/${citySlug}` };
+    if (cat === "Rent") return { title: "Verified rental properties", btn: "Browse Rent", href: `/for-rent/apartments/${citySlug}` };
     if (cat === "Services") return { title: "Expert real estate help", btn: "Our Services", href: "/contact-us" };
     return null;
   };
@@ -195,10 +179,9 @@ export function SiteHeader(): React.JSX.Element {
               </Link>
 
               {/* Location */}
-              <div className="relative hidden! md:block!" onMouseLeave={() => setIsLocationMenuOpen(false)}>
+              <div className="relative hidden! md:block!">
                 <button
                   onClick={() => setIsLocationMenuOpen(!isLocationMenuOpen)}
-                  onMouseEnter={() => setIsLocationMenuOpen(true)}
                   className="inline-flex! items-center! gap-2 border-0 bg-[#27427f]/5! px-3 py-3 rounded-full! transition-colors hover:bg-[#27427f]/10!"
                 >
                   <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
@@ -229,7 +212,7 @@ export function SiteHeader(): React.JSX.Element {
                         Popular Cities
                       </div>
                       <div className="grid! gap-1">
-                        {["Coimbatore", "Chennai", "Bangalore", "Hyderabad", "Kochi"].map((city) => (
+                        {availableCities.map((city) => (
                           <button
                             key={city}
                             onClick={() => {

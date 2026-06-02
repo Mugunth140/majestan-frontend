@@ -92,7 +92,7 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-x-hidden bg-white">
+    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white">
 
       {/* ── Hero background image (responsive) ─────────────────── */}
       <picture>

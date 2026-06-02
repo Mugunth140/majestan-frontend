@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Search, Handshake, TrendingUp, BarChart3 } from "lucide-react";
+import { useLocationContext } from "@/contexts/LocationContext";
 import { FeatureCarousel } from "./property-carousel";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
 import { HeroSection } from "./hero-section";
@@ -7,48 +10,59 @@ import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { HomePageData } from "@/lib/api";
 
-const city = "coimbatore";
 
 
 
-const saleCards = [
-  ["Apartment", `/buy-apartments-${city}`, "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", "for sale"],
-  ["Villa", `/buy-villas-${city}`, "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80", "for sale"],
-  ["Independent Houses", `/buy-independent-houses-${city}`, "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80", "for sale"],
-  ["Plot", `/buy-plots-${city}`, "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80", "for sale"],
-  ["Commercial Space", `/buy-commercial-${city}`, "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", "for sale"],
-] as const;
-
-const rentCards = [
-  ["Office Space", `/rent-commercial-space-${city}`, "https://images.unsplash.com/photo-1631193816258-28b44b21e78b?auto=format&fit=crop&w=800&q=80", "for Rent"],
-  ["Ware House", `/rent-industrials-${city}`, "https://images.unsplash.com/photo-1689942010216-dc412bb1e7a9?auto=format&fit=crop&w=800&q=80", "for Rent"],
-  ["Showroom", `/rent-commercial-space-${city}`, "https://images.unsplash.com/photo-1555529902-5261145633bf?auto=format&fit=crop&w=800&q=80", "for Rent"],
-  ["Apartment", `/rent-apartments-${city}`, "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80", "for Rent"],
-  ["Villa", `/rent-villas-${city}`, "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", "for Rent"],
-  ["Independent Houses", `/rent-independent-houses-${city}`, "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", "for Rent"],
-] as const;
-
-const helpItems = [
-  ["Find Your Ideal Property", "Browse verified premium listings for plots, apartments, villas, and commercial spaces.", Search],
-  ["Seamless Buying & Leasing", "Get expert, white glove assistance in property transactions, from site visits to finalizing deals.", Handshake],
-  ["Investor & Seller Support", "Connect with potential buyers, tenants, and investors to maximize your property's true value.", TrendingUp],
-  ["Market Insights & Updates", "Stay informed with the latest real estate trends, investment tips, and new luxury project launches.", BarChart3],
-];
-
-const projectCards = [
-  ["Ready to Move", "/assets/images/home/ready_to_move.webp", "1545+ Projects"],
-  ["Under Construction", "/assets/images/home/under_construction.webp", "148+ Projects"],
-  ["New Launch", "/assets/images/home/new_launch.webp", "77+ Projects"],
-  ["Resale", "/assets/images/home/resale.png", "77+ Projects"],
-] as const;
-
-const serviceCards = [
-  ["Property Management", "/services/property-management", "Residential and commercial leasing support from tenant search to ongoing care."],
-  ["Rent a Property", "/rent-or-sell-your-property", "Guided leasing support for homes, offices, warehouses, and commercial spaces."],
-  ["Sell a Property", "/rent-or-sell-your-property", "Market pricing, qualified leads, and hands-on support through closure."],
-] as const;
 
 export function HomePage({ data }: { data: HomePageData }) {
+  const { location } = useLocationContext();
+  const citySlug = location.toLowerCase().replace(/[\s,]+/g, '-');
+  
+  const filteredApartments = data.featuredApartments.filter(p => 
+    location === "Coimbatore" ? true : p.sublocation?.toLowerCase().includes(location.toLowerCase())
+  );
+  
+  const filteredVillas = data.featuredVillas.filter(p => 
+    location === "Coimbatore" ? true : p.sublocation?.toLowerCase().includes(location.toLowerCase())
+  );
+
+  const saleCards = [
+    ["Apartment", `/buy-apartments-${citySlug}`, "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Villa", `/buy-villas-${citySlug}`, "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Independent Houses", `/buy-independent-houses-${citySlug}`, "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Plot", `/buy-plots-${citySlug}`, "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Commercial Space", `/buy-commercial-${citySlug}`, "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", "for sale"],
+  ] as const;
+
+  const rentCards = [
+    ["Office Space", `/rent-commercial-space-${citySlug}`, "https://images.unsplash.com/photo-1631193816258-28b44b21e78b?auto=format&fit=crop&w=800&q=80", "for Rent"],
+    ["Ware House", `/rent-industrials-${citySlug}`, "https://images.unsplash.com/photo-1689942010216-dc412bb1e7a9?auto=format&fit=crop&w=800&q=80", "for Rent"],
+    ["Showroom", `/rent-commercial-space-${citySlug}`, "https://images.unsplash.com/photo-1555529902-5261145633bf?auto=format&fit=crop&w=800&q=80", "for Rent"],
+    ["Apartment", `/rent-apartments-${citySlug}`, "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80", "for Rent"],
+    ["Villa", `/rent-villas-${citySlug}`, "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", "for Rent"],
+    ["Independent Houses", `/rent-independent-houses-${citySlug}`, "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", "for Rent"],
+  ] as const;
+
+  const helpItems = [
+    ["Find Your Ideal Property", "Browse verified premium listings for plots, apartments, villas, and commercial spaces.", Search],
+    ["Seamless Buying & Leasing", "Get expert, white glove assistance in property transactions, from site visits to finalizing deals.", Handshake],
+    ["Investor & Seller Support", "Connect with potential buyers, tenants, and investors to maximize your property's true value.", TrendingUp],
+    ["Market Insights & Updates", "Stay informed with the latest real estate trends, investment tips, and new luxury project launches.", BarChart3],
+  ] as const;
+
+  const projectCards = [
+    ["Ready to Move", "/assets/images/home/ready_to_move.webp", "1545+ Projects"],
+    ["Under Construction", "/assets/images/home/under_construction.webp", "148+ Projects"],
+    ["New Launch", "/assets/images/home/new_launch.webp", "77+ Projects"],
+    ["Resale", "/assets/images/home/resale.png", "77+ Projects"],
+  ] as const;
+
+  const serviceCards = [
+    ["Property Management", "/services/property-management", "Residential and commercial leasing support from tenant search to ongoing care."],
+    ["Rent a Property", "/rent-or-sell-your-property", "Guided leasing support for homes, offices, warehouses, and commercial spaces."],
+    ["Sell a Property", "/rent-or-sell-your-property", "Market pricing, qualified leads, and hands-on support through closure."],
+  ] as const;
+
   return (
     <div id="wrapper" className="counter-scroll migrated-home">
       <SiteHeader />
@@ -62,7 +76,7 @@ export function HomePage({ data }: { data: HomePageData }) {
         <section className="sale-in-cbe py-24 bg-white relative overflow-hidden">
           <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
             <SectionHeading
-              title="Properties for Sale in Coimbatore"
+              title={`Properties for Sale in ${location}`}
               text="Explore our exclusive collection of premium residential and commercial spaces tailored to your lifestyle."
             />
             
@@ -72,9 +86,9 @@ export function HomePage({ data }: { data: HomePageData }) {
         </section>
 
         <LuxuryFeaturedSection 
-          properties={data.featuredApartments} 
+          properties={filteredApartments} 
           title="Handpicked Properties" 
-          subtitle="Curated listings across Coimbatore's most sought-after localities" 
+          subtitle={`Curated listings across ${location}'s most sought-after localities`} 
         />
 
         <section className="py-24! bg-white!">
@@ -138,7 +152,7 @@ export function HomePage({ data }: { data: HomePageData }) {
         <section className="py-24! bg-white! relative! overflow-hidden!">
           <div className="w-full! max-w-[1400px]! mx-auto! px-4! sm:px-6! md:px-8!">
             <SectionHeading
-              title="Properties for Rent in Coimbatore"
+              title={`Properties for Rent in ${location}`}
               text="Find the perfect rental property to match your lifestyle and business needs."
             />
             
@@ -171,14 +185,14 @@ export function HomePage({ data }: { data: HomePageData }) {
         </section>
 
         <LuxuryFeaturedSection 
-          properties={data.featuredVillas} 
+          properties={filteredVillas} 
           title="Featured Villa Projects" 
-          subtitle="Explore exclusive, handpicked premium villa communities." 
+          subtitle={`Explore premium villas for sale in ${location}`} 
         />
 
         <section className="pt-0 section-categories-neighborhoods tf-spacing-7">
           <div className="tf-container">
-            <SectionHeading title="Projects in Coimbatore" />
+            <SectionHeading title={`Projects in ${location}`} />
             <div className="migrated-project-grid">
               {projectCards.map(([title, image, count]) => (
                 <article className="box-location h-450 hover-img" key={title}>

@@ -69,6 +69,7 @@ export const viewport: Viewport = {
 };
 
 import { QueryProvider } from "@/providers/query-provider";
+import { LocationProvider } from "@/contexts/LocationContext";
 
 export default function RootLayout({
   children,
@@ -101,7 +102,9 @@ export default function RootLayout({
       </head>
       <body className="theme-color-3 majestan-app-root">
         <QueryProvider>
-          {children}
+          <LocationProvider>
+            {children}
+          </LocationProvider>
         </QueryProvider>
       </body>
     </html>

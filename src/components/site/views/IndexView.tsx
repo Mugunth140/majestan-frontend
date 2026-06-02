@@ -4,6 +4,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocationContext } from "@/contexts/LocationContext";
 
 type Option = {
   label: string;
@@ -61,7 +62,11 @@ type FaqItem = {
   answer: string;
 };
 
-const rotatingWords = ["Buy", "Sell", "Rent"] as const;
+export function IndexView(): React.JSX.Element {
+  const { location: contextLocation } = useLocationContext();
+  const citySlug = contextLocation.toLowerCase().replace(/[\s,]+/g, '-');
+  
+  const rotatingWords = ["Buy", "Sell", "Rent"] as const;
 
 const listingTypeOptions: Option[] = [
   { label: "Buy", value: "Sell" },
@@ -179,31 +184,31 @@ const salePropertyCards: PropertyCard[] = [
   {
     title: "Apartment",
     subtitle: "for sale",
-    href: "/buy-apartments-coimbatore",
+    href: `/buy-apartments-${citySlug}`,
     image: "/assets/images/about/residential-roperties.png",
   },
   {
     title: "Villa",
     subtitle: "for sale",
-    href: "/buy-villas-coimbatore",
+    href: `/buy-villas-${citySlug}`,
     image: "/assets/images/liaisoning/villa.png",
   },
   {
     title: "Independent Houses",
     subtitle: "for sale",
-    href: "/buy-independent-houses-coimbatore",
+    href: `/buy-independent-houses-${citySlug}`,
     image: "/assets/images/section/box-house.jpg",
   },
   {
     title: "Plot",
     subtitle: "for sale",
-    href: "/buy-plots-coimbatore",
+    href: `/buy-plots-${citySlug}`,
     image: "/assets/images/about/plotted-developments.png",
   },
   {
     title: "Commercial Space",
     subtitle: "for sale",
-    href: "/buy-commercial-space-coimbatore",
+    href: `/buy-commercial-space-${citySlug}`,
     image: "/assets/images/about/commercial-leasing-and-sales.png",
   },
 ];
@@ -211,24 +216,24 @@ const salePropertyCards: PropertyCard[] = [
 const featuredApartmentCards: FeaturedCard[] = [
   {
     title: "Majestan Skyline Apartments",
-    location: "Peelamedu, Coimbatore",
-    href: "/buy-apartments-coimbatore",
+    location: `Peelamedu, ${contextLocation}`,
+    href: `/buy-apartments-${citySlug}`,
     image: "/assets/images/about/residential-roperties.png",
     price: "1.05 Cr",
     pricePerSqft: "₹ 7,200 / Sqft",
   },
   {
     title: "Park Avenue Residences",
-    location: "Saravanampatti, Coimbatore",
-    href: "/buy-apartments-coimbatore",
+    location: `Saravanampatti, ${contextLocation}`,
+    href: `/buy-apartments-${citySlug}`,
     image: "/assets/images/section/about-1.png",
     price: "82 L",
     pricePerSqft: "₹ 6,450 / Sqft",
   },
   {
     title: "Green Heights",
-    location: "Race Course, Coimbatore",
-    href: "/buy-apartments-coimbatore",
+    location: `Race Course, ${contextLocation}`,
+    href: `/buy-apartments-${citySlug}`,
     image: "/assets/images/section/about-2.png",
     price: "1.28 Cr",
     pricePerSqft: "₹ 8,050 / Sqft",
@@ -242,7 +247,7 @@ const bannerSlides: BannerSlide[] = [
   },
   {
     image: "/assets/images/section/page-title-1.jpg",
-    href: "/buy-apartments-coimbatore",
+    href: `/buy-apartments-${citySlug}`,
   },
   {
     image: "/assets/images/section/section-realty.jpg",
@@ -280,38 +285,38 @@ const helpCards: ServiceCard[] = [
 const rentPropertyCards: PropertyCard[] = [
   {
     title: "Office Space",
-    subtitle: "for Rent in Coimbatore",
-    href: "/rent-commercial-space-coimbatore",
+    subtitle: `for Rent in ${contextLocation}`,
+    href: `/rent-commercial-space-${citySlug}`,
     image: "/assets/images/liaisoning/office_space.png",
   },
   {
     title: "Ware House",
-    subtitle: "for Rent in Coimbatore",
-    href: "/rent-industrials-coimbatore",
+    subtitle: `for Rent in ${contextLocation}`,
+    href: `/rent-industrials-${citySlug}`,
     image: "/assets/images/liaisoning/wherehouses.png",
   },
   {
     title: "Showroom",
-    subtitle: "for Rent in Coimbatore",
-    href: "/rent-commercial-space-coimbatore",
+    subtitle: `for Rent in ${contextLocation}`,
+    href: `/rent-commercial-space-${citySlug}`,
     image: "/assets/images/liaisoning/retail_space.png",
   },
   {
     title: "Apartment",
-    subtitle: "for Rent in Coimbatore",
-    href: "/rent-apartments-coimbatore",
+    subtitle: `for Rent in ${contextLocation}`,
+    href: `/rent-apartments-${citySlug}`,
     image: "/assets/images/about/residential-roperties.png",
   },
   {
     title: "Villa",
-    subtitle: "for Rent in Coimbatore",
-    href: "/rent-villas-coimbatore",
+    subtitle: `for Rent in ${contextLocation}`,
+    href: `/rent-villas-${citySlug}`,
     image: "/assets/images/liaisoning/villa.png",
   },
   {
     title: "Independent Houses",
-    subtitle: "for Rent in Coimbatore",
-    href: "/rent-independent-houses-coimbatore",
+    subtitle: `for Rent in ${contextLocation}`,
+    href: `/rent-independent-houses-${citySlug}`,
     image: "/assets/images/section/box-house.jpg",
   },
 ];
@@ -319,24 +324,24 @@ const rentPropertyCards: PropertyCard[] = [
 const featuredVillaCards: FeaturedCard[] = [
   {
     title: "Majestan Valley Villas",
-    location: "RS Puram, Coimbatore",
-    href: "/buy-villas-coimbatore",
+    location: `RS Puram, ${contextLocation}`,
+    href: `/buy-villas-${citySlug}`,
     image: "/assets/images/liaisoning/villa.png",
     price: "2.1 Cr",
     pricePerSqft: "₹ 8,900 / Sqft",
   },
   {
     title: "Palm Grove Villas",
-    location: "Saravanampatti, Coimbatore",
-    href: "/buy-villas-coimbatore",
+    location: `Saravanampatti, ${contextLocation}`,
+    href: `/buy-villas-${citySlug}`,
     image: "/assets/images/section/page-title-2.jpg",
     price: "1.75 Cr",
     pricePerSqft: "₹ 7,800 / Sqft",
   },
   {
     title: "Crescent Luxury Villas",
-    location: "Avinashi Road, Coimbatore",
-    href: "/buy-villas-coimbatore",
+    location: `Avinashi Road, ${contextLocation}`,
+    href: `/buy-villas-${citySlug}`,
     image: "/assets/images/section/page-title-3.jpg",
     price: "2.45 Cr",
     pricePerSqft: "₹ 9,250 / Sqft",
@@ -390,7 +395,7 @@ const sellerServiceCards: ServiceCard[] = [
 const faqItems: FaqItem[] = [
   {
     id: "one",
-    question: "How can I buy a property in Coimbatore through Majestan Realty?",
+    question: `How can I buy a property in ${contextLocation} through Majestan Realty?`,
     answer:
       "Browse apartments, villas, plots, and commercial properties on our website or contact our team for personalized recommendations based on your budget and preferred location.",
   },
@@ -414,15 +419,15 @@ const faqItems: FaqItem[] = [
   },
   {
     id: "five",
-    question: "Is Coimbatore a good city for real estate investment?",
+    question: `Is ${contextLocation} a good city for real estate investment?`,
     answer:
-      "Yes. Coimbatore is one of Tamil Nadu's fastest-growing real estate markets with strong demand across residential, commercial, and industrial segments.",
+      `Yes. ${contextLocation} is one of Tamil Nadu's fastest-growing real estate markets with strong demand across residential, commercial, and industrial segments.`,
   },
 ];
 
 const blogCards: BlogCard[] = [
   {
-    title: "Top Locations to Buy Apartments in Coimbatore",
+    title: `Top Locations to Buy Apartments in ${contextLocation}`,
     href: "/blogs",
     image: "/assets/images/section/page-title-5.jpg",
   },
@@ -432,7 +437,7 @@ const blogCards: BlogCard[] = [
     image: "/assets/images/section/our-process.jpg",
   },
   {
-    title: "Why Coimbatore Continues to Be a Strong Investment Market",
+    title: `Why ${contextLocation} Continues to Be a Strong Investment Market`,
     href: "/blogs",
     image: "/assets/images/section/section-calculate.jpg",
   },
@@ -532,7 +537,9 @@ function FeaturedProjectCard({ card }: { card: FeaturedCard }): React.JSX.Elemen
   );
 }
 
-export function IndexView(): React.JSX.Element {
+
+  
+  
   const [activeWordIndex, setActiveWordIndex] = useState<number>(0);
   const [listingType, setListingType] = useState<string>("");
   const [propertyType, setPropertyType] = useState<string>("");
@@ -593,7 +600,7 @@ export function IndexView(): React.JSX.Element {
                         </span>
                       ))}
                     </span>{" "}
-                    Properties in Coimbatore
+                    Properties in {location}
                   </h1>
                 </div>
 
@@ -665,7 +672,7 @@ export function IndexView(): React.JSX.Element {
 
                           <select
                             className="form-select"
-                            value={location}
+                            value={contextLocation}
                             onChange={(event) => setLocation(event.target.value)}
                           >
                             <option value="">Location</option>
@@ -749,9 +756,9 @@ export function IndexView(): React.JSX.Element {
             <div className="row">
               <div className="col-12">
                 <div className="heading-section text-center mb-48">
-                  <h2 className="title">Properties for Sale in Coimbatore</h2>
+                  <h2 className="title">Properties for Sale in {contextLocation}</h2>
                   <p className="text-1 wow animate__fadeInUp animate__animated" data-wow-duration="1.5s" data-wow-delay="0s">
-                    Find the best properties for sale in Coimbatore, from residential homes to
+                    Find the best properties for sale in {contextLocation}, from residential homes to
                     commercial spaces.
                   </p>
                 </div>
@@ -798,7 +805,7 @@ export function IndexView(): React.JSX.Element {
                 </div>
 
                 <div className="heading-section text-left mb-48">
-                  <h2 className="title">Featured Apartment Projects in Coimbatore</h2>
+                  <h2 className="title">Featured Apartment Projects in {contextLocation}</h2>
                 </div>
 
                 <div
@@ -914,8 +921,8 @@ export function IndexView(): React.JSX.Element {
             <div className="row">
               <div className="col-12">
                 <div className="heading-section text-center mb-48">
-                  <h2 className="title">Properties for Rent in Coimbatore</h2>
-                  <p className="text-1">Find the best rental properties in Coimbatore, from homes to commercial spaces.</p>
+                  <h2 className="title">Properties for Rent in {contextLocation}</h2>
+                  <p className="text-1">Find the best rental properties in {contextLocation}, from homes to commercial spaces.</p>
                 </div>
 
                 <div className="heading-section text-left mb-48">
@@ -960,7 +967,7 @@ export function IndexView(): React.JSX.Element {
                 </div>
 
                 <div className="heading-section text-left mb-48">
-                  <h2 className="title">Featured Villa Projects in Coimbatore</h2>
+                  <h2 className="title">Featured Villa Projects in {contextLocation}</h2>
                 </div>
 
                 <div
@@ -995,7 +1002,7 @@ export function IndexView(): React.JSX.Element {
             <div className="row">
               <div className="col-12">
                 <div className="heading-section text-center mb-48">
-                  <h2 className="title">Projects in Coimbatore</h2>
+                  <h2 className="title">Projects in {contextLocation}</h2>
                 </div>
 
                 <div
@@ -1048,7 +1055,7 @@ export function IndexView(): React.JSX.Element {
                     <h2 className="title text-white">
                       Sell Your Property Fast with Majestan Realty
                       <br />
-                      Coimbatore&apos;s Trusted Real Estate Partner
+                      {contextLocation}&apos;s Trusted Real Estate Partner
                     </h2>
                     <p
                       className="text-1 text-white wow animate__fadeInUp animate__animated"
@@ -1291,3 +1298,4 @@ export function IndexView(): React.JSX.Element {
     </>
   );
 }
+

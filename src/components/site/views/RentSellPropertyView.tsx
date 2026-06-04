@@ -414,8 +414,8 @@ export function RentSellPropertyView(): React.JSX.Element {
       <div className="rent-sell-container">
         <div className="form-card">
           <div className="form-header">
-            <h1>Rent / Sell Your Property</h1>
-            <p>Experience the future of real estate. Partner with Majestan Realty to showcase your property using our cutting-edge platform and unparalleled local expertise.</p>
+            <h1 className="font-light! text-5xl!">Find your Perfect Deal Today</h1>
+            <p className="font-normal! text-sm! lg:text-lg!">Experience the future of real estate. Partner with Majestan Realty to showcase your property using our cutting edge platform and unparalleled local expertise.</p>
           </div>
 
           <form onSubmit={handleSubmit}>

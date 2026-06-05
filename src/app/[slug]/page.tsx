@@ -318,10 +318,10 @@ export default async function SlugPage({
       <>
         <SiteHeader />
         <ListingPage 
-          initialListingType={parsedPseo.listingType}
-          initialPropertyType={parsedPseo.propertyType}
-          initialCity={parsedPseo.city}
-          initialLocality={parsedPseo.location}
+          initialListingType={(parsedPseo.listingType as "Sell" | "Rent") || "Sell"}
+          initialPropertyType={parsedPseo.propertyType || "apartment"}
+          initialCity={parsedPseo.city || ""}
+          initialLocality={parsedPseo.location || ""}
           initialSearchData={initialData}
         />
         <SiteFooter />

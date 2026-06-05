@@ -110,6 +110,7 @@ export type PropertySearchParams = {
   propertyType?: string;
   listingType?: string;
   location?: string;
+  city?: string;
   propertyName?: string;
   minPrice?: string;
   maxPrice?: string;
@@ -195,6 +196,7 @@ export async function searchProperties(
   }
   if (params.listingType) query.set("listingType", params.listingType);
   if (params.location) query.set("location", params.location);
+  if (params.city) query.set("city", params.city);
   if (params.propertyName) query.set("propertyName", params.propertyName);
   if (params.minPrice) query.set("minPrice", params.minPrice);
   if (params.maxPrice) query.set("maxPrice", params.maxPrice);

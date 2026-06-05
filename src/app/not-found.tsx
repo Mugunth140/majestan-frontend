@@ -88,16 +88,11 @@ export default function NotFound() {
         <motion.div variants={itemVariants} className="space-y-4! text-sm! text-[#27427f]/60!">
           <p>
             If you believe this is a mistake, please{' '}
-            <Link href="/contact-us" className="text-[#ffc900]! font-semibold! hover:text-[#ffc900]/80!">
+          <Link href="/contact-us" className="text-[#27427f]/60! hover:text-[#ffc900]/80! underline! underline-offset-1! transition-colors">
               contact us
             </Link>
           </p>
-          <p className="flex! items-center! justify-center! gap-2!">
-            <ArrowLeft size={16} />
-            <Link href="/" className="text-[#27427f]! font-semibold! hover:text-[#27427f]/80!">
-              Return to previous page
-            </Link>
-          </p>
+          
         </motion.div>
       </motion.div>
     </main>

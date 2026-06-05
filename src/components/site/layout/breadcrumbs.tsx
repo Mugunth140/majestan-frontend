@@ -63,7 +63,7 @@ export function Breadcrumbs({ items, jsonLd = true }: BreadcrumbsProps) {
               className="inline-flex items-center gap-1 text-gray-400 hover:text-[#27427f] transition-colors rounded-md px-1.5 py-1 hover:bg-[#27427f]/5"
               itemProp="item"
             >
-              <Home className="w-3.5 h-3.5" />
+              <Home className="w-4 h-4" />
               <span className="sr-only" itemProp="name">Home</span>
             </Link>
             <meta itemProp="position" content="1" />

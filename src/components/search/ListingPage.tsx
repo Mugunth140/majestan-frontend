@@ -190,98 +190,89 @@ export function ListingPage({
   ];
 
   return (
-    <div className="bg-[#f8f9fa]! min-h-screen! pb-12!">
+    <div className="min-h-screen! pb-12!">
       <div className="container! mx-auto! px-4! py-8!">
         <div className="flex! flex-col! lg:flex-row! gap-8!">
           
           {/* Left Sidebar */}
-          <aside className={`${showFilters ? 'block!' : 'hidden! lg:block!'} w-full! lg:w-[320px]! xl:w-[360px]! shrink-0! space-y-6!`}>
+          <aside className={`${showFilters ? 'block!' : 'hidden! lg:block!'} w-full! lg:w-[320px]! xl:w-[360px]! shrink-0! space-y-5!`}>
             
-            {/* Breadcrumbs & Header Info */}
-            <div className="bg-white! rounded-2xl! shadow-sm! border! border-gray-100/60! p-6! space-y-4!">
+            {/* Breadcrumbs — bare on the background */}
+            <div className="px-1!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
-              
-              <div className="pt-2!">
-                <h1 className="text-2xl! lg:text-3xl! font-extrabold! text-gray-900! font-['Lexend',sans-serif]! leading-tight!">
-                  {pageTitle}
-                </h1>
-                <p className="text-sm! font-medium! text-gray-500! mt-2! flex! items-center! gap-2!">
-                  <span className="w-2! h-2! rounded-full! bg-green-500! animate-pulse!"></span>
-                  {data?.total || 0} {data?.total === 1 ? "property" : "properties"} available
-                </p>
-              </div>
-
-              {/* Sort Dropdown */}
-              <div className="pt-4! border-t! border-gray-100!">
-                <label className="block! text-xs! font-bold! text-gray-400! uppercase! tracking-wider! mb-2!">
-                  Sort By
-                </label>
-                <div className="relative!">
-                  <select
-                    value={sort}
-                    onChange={(e) => handleSortChange(e.target.value)}
-                    className="w-full! appearance-none! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! pr-10! text-sm! font-medium! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all!"
-                  >
-                    {SORT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  <ArrowUpDown className="absolute! right-4! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
-                </div>
-              </div>
             </div>
+
+            {/* Filters Component — no scroll */}
+            <PropertySearchFilters 
+              values={filters} 
+              onChange={handleFilterChange}
+              onReset={() => {
+                handleFilterChange({
+                  keyword: "", propertyType: initialPropertyType, listingType: initialListingType, location: initialCity,
+                  minPrice: "", maxPrice: "", minArea: "", maxArea: "", bedrooms: "", facing: "", furnishing: "", propertyAge: ""
+                });
+              }}
+            />
+
 
             {/* Active Filters */}
             {(filters.keyword || filters.minPrice || filters.maxPrice || filters.bedrooms) && (
-              <div className="bg-white! rounded-2xl! shadow-sm! border! border-gray-100/60! p-5!">
-                <h3 className="text-xs! font-bold! text-gray-400! uppercase! tracking-wider! mb-3!">Active Filters</h3>
-                <div className="flex! flex-wrap! gap-2!">
+              <div className="bg-white! rounded-2xl! shadow-sm! border! border-gray-200/60! p-5!">
+                <h3 className="text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-2!">Active Filters</h3>
+                <div className="flex! flex-wrap! gap-1.5!">
                   {filters.keyword && (
-                    <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-3! py-1.5! rounded-lg! text-xs! font-bold!">
-                      "{filters.keyword}"
-                      <X className="w-3.5! h-3.5! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => handleFilterChange({...filters, keyword: ""})} />
+                    <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+                      &ldquo;{filters.keyword}&rdquo;
+                      <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => handleFilterChange({...filters, keyword: ""})} />
                     </span>
                   )}
                   {(filters.minPrice || filters.maxPrice) && (
-                    <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-3! py-1.5! rounded-lg! text-xs! font-bold!">
+                    <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                       Price: {filters.minPrice ? `₹${Number(filters.minPrice)/100000}L+` : '0'} to {filters.maxPrice ? `₹${Number(filters.maxPrice)/100000}L` : 'Any'}
-                      <X className="w-3.5! h-3.5! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => handleFilterChange({...filters, minPrice: "", maxPrice: ""})} />
+                      <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => handleFilterChange({...filters, minPrice: "", maxPrice: ""})} />
                     </span>
                   )}
                   {filters.bedrooms && (
-                    <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-3! py-1.5! rounded-lg! text-xs! font-bold!">
+                    <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                       {filters.bedrooms} BHK
-                      <X className="w-3.5! h-3.5! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => handleFilterChange({...filters, bedrooms: ""})} />
+                      <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => handleFilterChange({...filters, bedrooms: ""})} />
                     </span>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Filters Component */}
-            {showFilters ? (
-              <div className="sticky! top-[24px]! h-auto! max-h-[calc(100vh-48px)]! overflow-y-auto! hide-scrollbar! rounded-2xl!">
-                <PropertySearchFilters 
-                  values={filters} 
-                  onChange={handleFilterChange}
-                  onReset={() => {
-                    handleFilterChange({
-                      keyword: "", propertyType: initialPropertyType, listingType: initialListingType, location: initialCity,
-                      minPrice: "", maxPrice: "", minArea: "", maxArea: "", bedrooms: "", facing: "", furnishing: "", propertyAge: ""
-                    });
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="sticky! top-[24px]! h-[400px]! rounded-2xl! overflow-hidden! shadow-sm! border! border-gray-100/60!">
-                <MapPlaceholder city={filters.location || initialCity} locality={initialLocality} />
-              </div>
-            )}
+            {/* Map at the bottom */}
+            <div className="h-[280px]! rounded-2xl! overflow-hidden! shadow-sm! border! border-gray-200/60!">
+              <MapPlaceholder city={filters.location || initialCity} locality={initialLocality} />
+            </div>
           </aside>
           
           {/* Main Content: Properties List */}
           <main className="flex-1! flex! flex-col! gap-6!">
             
+            {/* Header: Title + Sort */}
+            <div className="flex! items-start! justify-between! gap-4! pb-4! border-b! border-gray-200/60!">
+              <div className="flex-1! min-w-0!">
+                <div className="flex! items-center! gap-2! mb-1!">
+                  <span className="text-sm! font-bold! text-[#27427f]! bg-[#27427f]/8! px-2.5! py-0.5! rounded-md!">{data?.total || 0} Results</span>
+                </div>
+                <h1 className="text-lg! lg:text-xl! font-bold! text-gray-800! font-['Lexend',sans-serif]! leading-snug!">
+                  {pageTitle}
+                </h1>
+              </div>
+              <select
+                value={sort}
+                onChange={(e) => handleSortChange(e.target.value)}
+                style={{ WebkitAppearance: 'menulist', appearance: 'auto' }}
+                className="shrink-0! bg-white! border! border-gray-200! rounded-lg! px-3! py-2! text-sm! font-semibold! text-gray-700! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Mobile Filter Toggle */}
             <div className="lg:hidden! flex! justify-between! items-center! bg-white! p-4! rounded-2xl! shadow-sm! border! border-gray-100/60!">
               <span className="font-bold! text-gray-900!">{data?.total || 0} Results</span>

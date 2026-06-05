@@ -193,13 +193,13 @@ export function SiteFooter() {
 
           {/* Footer Bottom Bar */}
           <div className="pt-8! border-t! border-white/10! flex! flex-col! sm:flex-row! items-center! justify-between! gap-4!">
-            <p className="text-gray-500! text-sm! font-medium!">
+            <p className="text-gray-500! text-base! font-medium!">
               © {new Date().getFullYear()}{" "}
-              <span className="text-white! font-bold!">Majestan Realty</span>. All rights reserved.
+              <span className="text-white! font-bold!">Majestan Realty</span> All rights reserved
             </p>
 
             <div className="flex! items-center! gap-3!">
-              <span className="text-gray-600! text-[11px]! font-bold! uppercase! tracking-widest! mr-1!">Follow</span>
+              <span className="text-gray-600! text-sm! font-semibold! uppercase! tracking-wide! mr-1!">Follow us on</span>
               <a
                 href="https://www.facebook.com/share/1Bz4FQeYEu/"
                 aria-label="Facebook"

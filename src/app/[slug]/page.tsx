@@ -9,6 +9,9 @@ import { resolveViewForPath } from "@/lib/site/route-resolver";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
+import { parsePseoSlug } from "@/lib/seo/pseo-parser";
+import { ListingPage } from "@/components/search/ListingPage";
+import { searchProperties } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +125,22 @@ export async function generateMetadata({
   if (viewName) {
     return {
       alternates: { canonical: pathname },
+    };
+  }
+
+  // PSEO Parsing
+  const parsedPseo = parsePseoSlug(slug);
+  if (parsedPseo) {
+    const loc = parsedPseo.location ? `${parsedPseo.location}, ` : "";
+    const type = parsedPseo.propertyType 
+      ? Object.values(PROPERTY_TYPES).find(p => p.apiValue === parsedPseo.propertyType)?.label || parsedPseo.propertyType 
+      : "Properties";
+    const cityText = parsedPseo.city || "Coimbatore";
+    
+    return {
+      title: `${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} ${parsedPseo.listingType === 'Rent' ? 'for Rent' : 'for Sale'} in ${loc}${cityText} | Majestan Realty`,
+      description: `Explore top ${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} in ${loc}${cityText}. Find your dream property today with Majestan Realty.`,
+      alternates: { canonical: pathname }
     };
   }
 
@@ -265,17 +284,50 @@ export default async function SlugPage({
 
   const pathname = `/${slug}`;
   const viewName = resolveViewForPath(pathname);
-  if (!viewName) {
-    notFound();
+  if (viewName) {
+    return (
+      <>
+        <SiteHeader />
+        <div className="pt-[120px]!">
+          <SitePage viewName={viewName} />
+        </div>
+        <SiteFooter />
+      </>
+    );
   }
 
-  return (
-    <>
-      <SiteHeader />
-      <div className="pt-[120px]!">
-        <SitePage viewName={viewName} />
-      </div>
-      <SiteFooter />
-    </>
-  );
+  // Handle PSEO URL
+  const parsedPseo = parsePseoSlug(slug);
+  if (parsedPseo) {
+    let initialData = null;
+    try {
+      initialData = await searchProperties({
+        listingType: parsedPseo.listingType,
+        propertyType: parsedPseo.propertyType,
+        location: parsedPseo.location,
+        city: parsedPseo.city,
+        bedrooms: parsedPseo.bedrooms,
+        page: 1,
+        limit: 12,
+      });
+    } catch (error) {
+      console.error("Failed to fetch initial properties", error);
+    }
+
+    return (
+      <>
+        <SiteHeader />
+        <ListingPage 
+          initialListingType={parsedPseo.listingType}
+          initialPropertyType={parsedPseo.propertyType}
+          initialCity={parsedPseo.city}
+          initialLocality={parsedPseo.location}
+          initialSearchData={initialData}
+        />
+        <SiteFooter />
+      </>
+    );
+  }
+
+  notFound();
 }

@@ -355,15 +355,15 @@ function Pagination({
 
 /* ── Main Component ───────────────────────────────────────── */
 
-function SearchResultsInner() {
+function SearchResultsInner({ initialFilters = {} }: { initialFilters?: Partial<FilterValues> }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [filters, setFilters] = useState<FilterValues>({
-    keyword: searchParams.get("keyword") || searchParams.get("propertyName") || "",
-    propertyType: searchParams.get("propertyType") || "",
-    listingType: searchParams.get("listingType") || "",
-    location: searchParams.get("location") || "",
+    keyword: initialFilters.keyword || searchParams.get("keyword") || searchParams.get("propertyName") || "",
+    propertyType: initialFilters.propertyType || searchParams.get("propertyType") || "",
+    listingType: initialFilters.listingType || searchParams.get("listingType") || "",
+    location: initialFilters.location || searchParams.get("location") || "",
     minPrice: searchParams.get("minPrice") || "",
     maxPrice: searchParams.get("maxPrice") || "",
     minArea: searchParams.get("minArea") || "",
@@ -658,7 +658,7 @@ function SearchResultsInner() {
 
 /* ── Export with Suspense boundary ─────────────────────────── */
 
-export function SearchResults() {
+export function SearchResults({ initialFilters }: { initialFilters?: Partial<FilterValues> }) {
   return (
     <Suspense
       fallback={
@@ -673,7 +673,7 @@ export function SearchResults() {
         </div>
       }
     >
-      <SearchResultsInner />
+      <SearchResultsInner initialFilters={initialFilters} />
     </Suspense>
   );
 }

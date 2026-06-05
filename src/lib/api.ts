@@ -212,3 +212,9 @@ export async function searchProperties(
     cache: "no-store",
   });
 }
+
+export async function getPropertyBySlug(slug: string): Promise<any> {
+  return fetchApi<any>(`/properties/by-slug/${slug}`, {
+    cache: "no-store",
+  });
+}

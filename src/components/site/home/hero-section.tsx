@@ -96,9 +96,9 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
 
       {/* ── Hero background image (responsive) ─────────────────── */}
       <picture>
-        <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.webp" />
+        <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.png" />
         <img
-          src="/assets/images/hero/hero_desktop1.png"
+          src="/assets/images/hero/hero_desktop.png"
           alt="Majestan Realty — Properties"
           className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
           fetchPriority="high"

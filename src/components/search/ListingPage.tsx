@@ -190,7 +190,7 @@ export function ListingPage({
   ];
 
   return (
-    <div className="min-h-screen! pb-12!">
+    <div className="min-h-screen! pb-12! mt-20! md:mt-24!">
       <div className="container! mx-auto! px-4! py-8!">
         <div className="flex! flex-col! lg:flex-row! gap-8!">
           
@@ -255,9 +255,9 @@ export function ListingPage({
             <div className="flex! flex-col! lg:flex-row! items-start! lg:items-center! justify-between! gap-4! pb-4! border-b! border-gray-200/60!">
               <div className="flex-1! min-w-0!">
                 <div className="flex! items-center! gap-2! mb-1.5!">
-                  <span className="text-sm! font-bold! text-[#27427f]! bg-[#27427f]/10! px-3! py-1! rounded-lg! shadow-sm!">{data?.total || 0} Results</span>
+                  <span className="text-sm! font-bold! text-[#27427f]! py-1!">{data?.total || 0} Results</span>
                 </div>
-                <h1 className="text-xl! lg:text-2xl! font-extrabold! text-gray-900! font-['Lexend',sans-serif]! leading-snug!">
+                <h1 className="text-xl! lg:text-2xl! font-semibold! capitalize! text-gray-900! font-['Lexend',sans-serif]! leading-snug!">
                   {pageTitle}
                 </h1>
               </div>

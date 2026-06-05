@@ -60,7 +60,7 @@ export function Breadcrumbs({ items, jsonLd = true }: BreadcrumbsProps) {
           >
             <Link
               href="/"
-              className="inline-flex items-center gap-1 text-gray-400 hover:text-[#27427f] transition-colors rounded-md px-1.5 py-1 hover:bg-[#27427f]/5"
+              className="inline-flex items-center gap-1 text-gray-400 hover:text-[#27427f] transition-colors px-1.5 py-1!"
               itemProp="item"
             >
               <Home className="w-4 h-4" />
@@ -81,10 +81,10 @@ export function Breadcrumbs({ items, jsonLd = true }: BreadcrumbsProps) {
                 itemScope
                 itemType="https://schema.org/ListItem"
               >
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 mx-0.5 flex-shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 mx-0.5 shrink-0" />
                 {isLast || !item.href ? (
                   <span
-                    className="text-[#161e2d] font-semibold truncate max-w-[200px] md:max-w-[300px] px-1.5 py-1"
+                    className="text-[#161e2d] font-normal capitalize! truncate max-w-[200px] md:max-w-[300px] px-1.5 py-1"
                     aria-current={isLast ? "page" : undefined}
                     itemProp="name"
                   >
@@ -93,10 +93,10 @@ export function Breadcrumbs({ items, jsonLd = true }: BreadcrumbsProps) {
                 ) : (
                   <Link
                     href={item.href}
-                    className="text-gray-500 hover:text-[#27427f] transition-colors truncate max-w-[150px] md:max-w-[250px] rounded-md px-1.5 py-1 hover:bg-[#27427f]/5"
+                    className="text-gray-500 hover:text-[#27427f] transition-colors truncate max-w-[150px] md:max-w-[250px]px-1.5 py-1"
                     itemProp="item"
                   >
-                    <span itemProp="name">{item.label}</span>
+                    <span itemProp="name" className="capitalize! hover:text-[#27427f] transition-colors cursor-pointer">{item.label}</span>
                   </Link>
                 )}
                 <meta itemProp="position" content={String(position)} />

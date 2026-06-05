@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Search, MapPin, SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, MapPin, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 
 export type FilterValues = {
@@ -32,7 +31,6 @@ export function PropertySearchFilters({
   onReset,
   compact = false,
 }: PropertySearchFiltersProps) {
-  const [showMore, setShowMore] = useState(false);
 
   const updateFilter = (key: keyof FilterValues, value: string) => {
     onChange({ ...values, [key]: value });
@@ -125,18 +123,22 @@ export function PropertySearchFilters({
           <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
             Property Type
           </label>
-          <select
-            value={values.propertyType}
-            onChange={(e) => updateFilter("propertyType", e.target.value)}
-            className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! px-3! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
-          >
-            <option value="">All Types</option>
-            {Object.entries(PROPERTY_TYPES).map(([slug, data]) => (
-              <option key={slug} value={data.apiValue}>
-                {data.label}
-              </option>
-            ))}
-          </select>
+          <div className="relative!">
+            <select
+              value={values.propertyType}
+              onChange={(e) => updateFilter("propertyType", e.target.value)}
+              style={{ appearance: 'none', WebkitAppearance: 'none' }}
+              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
+            >
+              <option value="">All Types</option>
+              {Object.entries(PROPERTY_TYPES).map(([slug, data]) => (
+                <option key={slug} value={data.apiValue}>
+                  {data.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
+          </div>
         </div>
 
         {/* Divider */}
@@ -215,101 +217,93 @@ export function PropertySearchFilters({
         {/* Divider */}
         <div className="border-t! border-gray-100!"></div>
 
-        {/* More Filters Toggle */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setShowMore(!showMore)}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowMore(!showMore); }}
-          className="flex! items-center! justify-between! py-2.5! px-3! rounded-lg! bg-gray-50! border! border-gray-200! cursor-pointer! hover:bg-gray-100! transition-colors! select-none!"
-        >
-          <span className="text-sm! font-bold! text-gray-700!">{showMore ? "Less Filters" : "More Filters"}</span>
-          {showMore ? (
-            <ChevronUp className="w-4! h-4! text-gray-500!" />
-          ) : (
-            <ChevronDown className="w-4! h-4! text-gray-500!" />
-          )}
+        {/* Area */}
+        <div className="w-full!">
+          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
+            Area (sq.ft)
+          </label>
+          <div className="flex! items-center! gap-2! w-full!">
+            <input
+              type="number"
+              placeholder="Min"
+              value={values.minArea}
+              onChange={(e) => updateFilter("minArea", e.target.value)}
+              className="flex-1! min-w-0! w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+            />
+            <span className="text-gray-300! text-xs! shrink-0!">—</span>
+            <input
+              type="number"
+              placeholder="Max"
+              value={values.maxArea}
+              onChange={(e) => updateFilter("maxArea", e.target.value)}
+              className="flex-1! min-w-0! w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+            />
+          </div>
         </div>
 
-        {showMore && (
-          <div className="space-y-4! pt-2!">
-            {/* Area */}
-            <div>
-              <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-                Area (sq.ft)
-              </label>
-              <div className="flex! items-center! gap-2!">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={values.minArea}
-                  onChange={(e) => updateFilter("minArea", e.target.value)}
-                  className="flex-1! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
-                />
-                <span className="text-gray-300! text-xs!">—</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={values.maxArea}
-                  onChange={(e) => updateFilter("maxArea", e.target.value)}
-                  className="flex-1! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
-                />
-              </div>
-            </div>
-
-            {/* Furnishing */}
-            <div>
-              <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-                Furnishing
-              </label>
-              <select
-                value={values.furnishing}
-                onChange={(e) => updateFilter("furnishing", e.target.value)}
-                className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
-              >
-                <option value="">Any</option>
-                <option value="furnished">Furnished</option>
-                <option value="semi">Semi-Furnished</option>
-                <option value="unfurnished">Unfurnished</option>
-              </select>
-            </div>
-
-            {/* Facing */}
-            <div>
-              <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-                Facing
-              </label>
-              <select
-                value={values.facing}
-                onChange={(e) => updateFilter("facing", e.target.value)}
-                className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
-              >
-                <option value="">Any</option>
-                {["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"].map((dir) => (
-                  <option key={dir} value={dir}>{dir}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Property Age */}
-            <div>
-              <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-                Property Age
-              </label>
-              <select
-                value={values.propertyAge}
-                onChange={(e) => updateFilter("propertyAge", e.target.value)}
-                className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
-              >
-                <option value="">Any</option>
-                <option value="new">Under Construction / New</option>
-                <option value="1-5">1 to 5 Years</option>
-                <option value="5-10">5 to 10 Years</option>
-                <option value="10+">10+ Years</option>
-              </select>
-            </div>
+        {/* Furnishing */}
+        <div className="w-full!">
+          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
+            Furnishing
+          </label>
+          <div className="relative! w-full!">
+            <select
+              value={values.furnishing}
+              onChange={(e) => updateFilter("furnishing", e.target.value)}
+              style={{ appearance: 'none', WebkitAppearance: 'none' }}
+              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
+            >
+              <option value="">Any</option>
+              <option value="furnished">Furnished</option>
+              <option value="semi">Semi-Furnished</option>
+              <option value="unfurnished">Unfurnished</option>
+            </select>
+            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
           </div>
-        )}
+        </div>
+
+        {/* Facing */}
+        <div className="w-full!">
+          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
+            Facing
+          </label>
+          <div className="relative! w-full!">
+            <select
+              value={values.facing}
+              onChange={(e) => updateFilter("facing", e.target.value)}
+              style={{ appearance: 'none', WebkitAppearance: 'none' }}
+              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
+            >
+              <option value="">Any</option>
+              {["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"].map((dir) => (
+                <option key={dir} value={dir}>{dir}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
+          </div>
+        </div>
+
+        {/* Property Age */}
+        <div className="w-full!">
+          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
+            Property Age
+          </label>
+          <div className="relative! w-full!">
+            <select
+              value={values.propertyAge}
+              onChange={(e) => updateFilter("propertyAge", e.target.value)}
+              style={{ appearance: 'none', WebkitAppearance: 'none' }}
+              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
+            >
+              <option value="">Any</option>
+              <option value="new">Under Construction / New</option>
+              <option value="1-5">1 to 5 Years</option>
+              <option value="5-10">5 to 10 Years</option>
+              <option value="10+">10+ Years</option>
+            </select>
+            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
+          </div>
+        </div>
       </div>
     </div>
   );

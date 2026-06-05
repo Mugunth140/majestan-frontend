@@ -252,25 +252,28 @@ export function ListingPage({
           <main className="flex-1! flex! flex-col! gap-6!">
             
             {/* Header: Title + Sort */}
-            <div className="flex! items-start! justify-between! gap-4! pb-4! border-b! border-gray-200/60!">
+            <div className="flex! flex-col! lg:flex-row! items-start! lg:items-center! justify-between! gap-4! pb-4! border-b! border-gray-200/60!">
               <div className="flex-1! min-w-0!">
-                <div className="flex! items-center! gap-2! mb-1!">
-                  <span className="text-sm! font-bold! text-[#27427f]! bg-[#27427f]/8! px-2.5! py-0.5! rounded-md!">{data?.total || 0} Results</span>
+                <div className="flex! items-center! gap-2! mb-1.5!">
+                  <span className="text-sm! font-bold! text-[#27427f]! bg-[#27427f]/10! px-3! py-1! rounded-lg! shadow-sm!">{data?.total || 0} Results</span>
                 </div>
-                <h1 className="text-lg! lg:text-xl! font-bold! text-gray-800! font-['Lexend',sans-serif]! leading-snug!">
+                <h1 className="text-xl! lg:text-2xl! font-extrabold! text-gray-900! font-['Lexend',sans-serif]! leading-snug!">
                   {pageTitle}
                 </h1>
               </div>
-              <select
-                value={sort}
-                onChange={(e) => handleSortChange(e.target.value)}
-                style={{ WebkitAppearance: 'menulist', appearance: 'auto' }}
-                className="shrink-0! bg-white! border! border-gray-200! rounded-lg! px-3! py-2! text-sm! font-semibold! text-gray-700! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+              <div className="relative! shrink-0! w-full! lg:w-auto!">
+                <select
+                  value={sort}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  style={{ appearance: 'none', WebkitAppearance: 'none' }}
+                  className="w-full! lg:w-auto! block! bg-white! border! border-gray-200! rounded-xl! pl-4! pr-10! py-2.5! text-sm! font-bold! text-gray-700! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer! shadow-sm!"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <ArrowUpDown className="absolute! right-3.5! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-500! pointer-events-none!" />
+              </div>
             </div>
 
             {/* Mobile Filter Toggle */}

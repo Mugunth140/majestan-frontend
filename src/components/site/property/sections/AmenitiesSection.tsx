@@ -95,24 +95,24 @@ function AmenityCard({ amenity }: { amenity: Amenity }) {
 
   return (
     <div
-      className={`flex! items-center! gap-4! p-5! rounded-[24px]! border! transition-all! duration-300! ${
+      className={`flex! items-center! gap-4! p-5! rounded-[20px]! border! transition-all! duration-300! ${
         amenity.available
-          ? "bg-white! border-gray-100! shadow-sm! hover:shadow-md! hover:border-[#27427f]/20! hover:-translate-y-1!"
+          ? "bg-white! border-gray-200! shadow-sm! hover:shadow-md! hover:border-gray-300! hover:-translate-y-0.5!"
           : "bg-gray-50/60! border-gray-100/60! opacity-80! hover:opacity-100!"
       }`}
     >
       <div
-        className={`w-12! h-12! rounded-[16px]! flex! items-center! justify-center! shrink-0! ${
+        className={`w-12! h-12! rounded-full! flex! items-center! justify-center! shrink-0! ${
           amenity.available
-            ? "bg-gradient-to-br! from-[#27427f]/10! to-[#27427f]/5! text-[#27427f]!"
+            ? "bg-gray-50! text-gray-600!"
             : "bg-gray-100! text-gray-400!"
         }`}
       >
-        <Icon className="w-5.5! h-5.5!" />
+        <Icon className="w-5! h-5!" />
       </div>
       <span
-        className={`font-bold! text-sm! flex-1! ${
-          amenity.available ? "text-[#161e2d]!" : "text-gray-400!"
+        className={`font-medium! text-sm! flex-1! ${
+          amenity.available ? "text-gray-900!" : "text-gray-400!"
         }`}
       >
         {amenity.name}
@@ -136,18 +136,18 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
   return (
     <div className="space-y-8!">
       {/* About Amenities */}
-      <div className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-start! gap-5! mb-2!">
-          <div className="w-14! h-14! rounded-[16px]! bg-gradient-to-br! from-[#ffc900]/20! to-[#ffc900]/10! flex! items-center! justify-center! shrink-0!">
-            <Sparkles className="w-6! h-6! text-[#f0bd00]!" />
+          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
+            <Sparkles className="w-6! h-6! text-gray-600!" />
           </div>
           <div>
-            <h2 className="text-2xl! md:text-3xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]! mb-3!">
+            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-3!">
               Amenities &amp; Features
             </h2>
-            <p className="text-gray-500! text-base! leading-relaxed!">
+            <p className="text-gray-500! text-base! font-light! leading-relaxed!">
               Explore the amenities available at{" "}
-              <span className="font-bold! text-[#161e2d]!">{property.title}</span>.
+              <span className="font-medium! text-gray-900!">{property.title}</span>.
               Verified amenities are shown as available; others may be confirmed upon inquiry.
             </p>
           </div>
@@ -156,12 +156,12 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
 
       {/* Amenity Categories */}
       {categories.map((category) => (
-        <div key={category.title} className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+        <div key={category.title} className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
           <div className="mb-8!">
-            <h3 className="text-xl! md:text-2xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]!">
+            <h3 className="text-xl! md:text-2xl! font-semibold! text-gray-900!">
               {category.title}
             </h3>
-            <p className="text-sm! font-bold! text-gray-400! mt-2!">{category.description}</p>
+            <p className="text-sm! font-normal! text-gray-500! mt-2!">{category.description}</p>
           </div>
           <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-3! gap-4!">
             {category.amenities.map((amenity) => (
@@ -172,23 +172,22 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
       ))}
 
       {/* CTA Card */}
-      <div className="bg-gradient-to-br! from-[#161e2d]! to-[#27427f]! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.15)]! text-white! relative! overflow-hidden! border! border-white/10!">
-        <div className="absolute! inset-0! bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]! opacity-5!" />
-        <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8! relative! z-10!">
+      <div className="bg-gray-50! rounded-[24px]! p-8! md:p-10! border! border-gray-200!">
+        <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
           <div className="flex! items-start! gap-5!">
-            <div className="w-14! h-14! rounded-[16px]! bg-white/10! backdrop-blur-md! flex! items-center! justify-center! shrink-0! border! border-white/10!">
-              <MessageCircle className="w-7! h-7! text-white!" />
+            <div className="w-14! h-14! rounded-full! bg-white! flex! items-center! justify-center! shrink-0! border! border-gray-200!">
+              <MessageCircle className="w-6! h-6! text-gray-600!" />
             </div>
             <div>
-              <h3 className="text-2xl! font-extrabold! font-['Lexend',sans-serif]! mb-2! text-white!">
+              <h3 className="text-xl! font-semibold! mb-2! text-gray-900!">
                 Want to know more about amenities?
               </h3>
-              <p className="text-white/70! text-base! leading-relaxed!">
+              <p className="text-gray-500! font-light! text-base! leading-relaxed!">
                 Get the complete list of amenities and confirm availability with the property owner.
               </p>
             </div>
           </div>
-          <button className="w-full! md:w-auto! px-8! py-4! bg-gradient-to-r! from-[#ffc900]! to-[#f0bd00]! text-[#161e2d]! font-black! rounded-[16px]! transition-all! shadow-[0_8px_20px_rgba(255,201,0,0.3)]! hover:shadow-[0_12px_25px_rgba(255,201,0,0.4)]! hover:-translate-y-1! shrink-0!">
+          <button className="w-full! md:w-auto! px-8! py-3.5! bg-gray-900! text-white! font-medium! rounded-full! hover:bg-gray-800! transition-all! shrink-0!">
             Contact Us
           </button>
         </div>

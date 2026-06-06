@@ -37,57 +37,53 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       label: "Total Area",
       value: details?.areaSqft ? `${formatArea(details.areaSqft)} sq.ft` : "—",
       icon: Maximize2,
-      color: "bg-[#27427f]/10! text-[#27427f]!",
     },
     {
       label: "Bedrooms",
       value: details?.bedrooms ? `${details.bedrooms} BHK` : "—",
       icon: BedDouble,
-      color: "bg-emerald-50! text-emerald-600!",
     },
     {
       label: "Bathrooms",
       value: details?.bathrooms ? `${details.bathrooms} Bath` : "—",
       icon: Bath,
-      color: "bg-blue-50! text-blue-600!",
     },
     {
       label: "Parking",
       value: details?.parking ? `${details.parking} Covered` : "—",
       icon: Car,
-      color: "bg-amber-50! text-amber-600!",
     },
   ];
 
   return (
     <div className="space-y-8!">
       {/* Floor Plan Display */}
-      <div className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-[16px]! bg-[#27427f]/10! flex! items-center! justify-center!">
-            <LayoutGrid className="w-6! h-6! text-[#27427f]!" />
+          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
+            <LayoutGrid className="w-6! h-6! text-gray-600!" />
           </div>
           <div>
-            <h2 className="text-2xl! md:text-3xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]!">
+            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
               Floor Plan
             </h2>
-            <p className="text-sm! font-bold! text-gray-400! mt-1!">Layout and space configuration</p>
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">Layout and space configuration</p>
           </div>
         </div>
 
         {hasFloorPlanImage ? (
-          <div className="relative! rounded-[24px]! overflow-hidden! border! border-gray-100! shadow-sm!">
+          <div className="relative! rounded-[20px]! overflow-hidden! border! border-gray-200!">
             {/* Floor plan image would go here */}
           </div>
         ) : (
-          <div className="rounded-[24px]! border-2! border-dashed! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-20! px-6! text-center!">
-            <div className="w-24! h-24! rounded-[24px]! bg-white! shadow-sm! border! border-gray-100! flex! items-center! justify-center! mb-6!">
-              <Building2 className="w-10! h-10! text-[#27427f]/40!" />
+          <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-20! px-6! text-center!">
+            <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-6!">
+              <Building2 className="w-8! h-8! text-gray-400!" />
             </div>
-            <h3 className="text-xl! font-extrabold! text-[#161e2d]! mb-3! font-['Lexend',sans-serif]!">
+            <h3 className="text-xl! font-medium! text-gray-900! mb-3!">
               Floor plan will be available soon
             </h3>
-            <p className="text-gray-500! text-base! max-w-lg! leading-relaxed!">
+            <p className="text-gray-500! font-light! text-base! max-w-lg! leading-relaxed!">
               The detailed floor plan for this property is being prepared.
               Request it below and we&apos;ll send it to you as soon as it&apos;s ready.
             </p>
@@ -96,16 +92,16 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       </div>
 
       {/* Key Measurements */}
-      <div className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-[16px]! bg-emerald-50! flex! items-center! justify-center!">
-            <Ruler className="w-6! h-6! text-emerald-600!" />
+          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
+            <Ruler className="w-6! h-6! text-gray-600!" />
           </div>
           <div>
-            <h3 className="text-2xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]!">
+            <h3 className="text-2xl! font-semibold! text-gray-900!">
               Key Measurements
             </h3>
-            <p className="text-sm! font-bold! text-gray-400! mt-1!">Space specifications at a glance</p>
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">Space specifications at a glance</p>
           </div>
         </div>
 
@@ -115,15 +111,15 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
             return (
               <div
                 key={item.label}
-                className="rounded-[24px]! border! border-gray-100! p-6! text-center! bg-gray-50/30! hover:bg-white! hover:shadow-lg! hover:-translate-y-1! transition-all! duration-300!"
+                className="rounded-[20px]! border! border-gray-200! p-6! text-center! bg-white! hover:border-gray-300! hover:shadow-sm! hover:-translate-y-0.5! transition-all! duration-300!"
               >
                 <div
-                  className={`w-14! h-14! rounded-[16px]! ${item.color} flex! items-center! justify-center! mx-auto! mb-4! shadow-sm!`}
+                  className={`w-12! h-12! rounded-full! bg-gray-50! text-gray-600! flex! items-center! justify-center! mx-auto! mb-4!`}
                 >
-                  <Icon className="w-6! h-6!" />
+                  <Icon className="w-5! h-5!" />
                 </div>
-                <p className="text-xs! font-bold! text-gray-400! uppercase! tracking-widest! mb-1.5!">{item.label}</p>
-                <p className="text-xl! font-black! text-[#161e2d]!">{item.value}</p>
+                <p className="text-xs! font-normal! text-gray-500! uppercase! tracking-widest! mb-1.5!">{item.label}</p>
+                <p className="text-lg! font-medium! text-gray-900!">{item.value}</p>
               </div>
             );
           })}
@@ -131,54 +127,54 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       </div>
 
       {/* Unit Configuration Table */}
-      <div className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-[16px]! bg-blue-50! flex! items-center! justify-center!">
-            <DoorOpen className="w-6! h-6! text-blue-600!" />
+          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
+            <DoorOpen className="w-6! h-6! text-gray-600!" />
           </div>
           <div>
-            <h3 className="text-2xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]!">
+            <h3 className="text-2xl! font-semibold! text-gray-900!">
               Unit Configuration
             </h3>
-            <p className="text-sm! font-bold! text-gray-400! mt-1!">Detailed breakdown of the property unit</p>
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">Detailed breakdown of the property unit</p>
           </div>
         </div>
 
-        <div className="overflow-x-auto! rounded-[24px]! border! border-gray-100! shadow-sm!">
+        <div className="overflow-x-auto! rounded-[20px]! border! border-gray-200!">
           <table className="w-full! border-collapse!">
             <thead>
-              <tr className="bg-gray-50/80! border-b! border-gray-100!">
-                <th className="px-6! py-5! text-xs! font-extrabold! text-gray-500! uppercase! tracking-widest! text-left!">
+              <tr className="bg-gray-50! border-b! border-gray-200!">
+                <th className="px-6! py-4! text-xs! font-medium! text-gray-500! uppercase! tracking-widest! text-left!">
                   Type
                 </th>
-                <th className="px-6! py-5! text-xs! font-extrabold! text-gray-500! uppercase! tracking-widest! text-left!">BHK</th>
-                <th className="px-6! py-5! text-xs! font-extrabold! text-gray-500! uppercase! tracking-widest! text-left!">Area</th>
-                <th className="px-6! py-5! text-xs! font-extrabold! text-gray-500! uppercase! tracking-widest! text-left!">Bathrooms</th>
-                <th className="px-6! py-5! text-xs! font-extrabold! text-gray-500! uppercase! tracking-widest! text-left!">
+                <th className="px-6! py-4! text-xs! font-medium! text-gray-500! uppercase! tracking-widest! text-left!">BHK</th>
+                <th className="px-6! py-4! text-xs! font-medium! text-gray-500! uppercase! tracking-widest! text-left!">Area</th>
+                <th className="px-6! py-4! text-xs! font-medium! text-gray-500! uppercase! tracking-widest! text-left!">Bathrooms</th>
+                <th className="px-6! py-4! text-xs! font-medium! text-gray-500! uppercase! tracking-widest! text-left!">
                   Parking
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr className="bg-white! hover:bg-gray-50/50! transition-colors!">
-                <td className="px-6! py-6!">
+                <td className="px-6! py-5!">
                   <div className="flex! items-center! gap-3!">
-                    <div className="w-10! h-10! rounded-[12px]! bg-[#27427f]/10! flex! items-center! justify-center! shrink-0!">
-                      <Square className="w-5! h-5! text-[#27427f]!" />
+                    <div className="w-10! h-10! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
+                      <Square className="w-4.5! h-4.5! text-gray-600!" />
                     </div>
-                    <span className="font-extrabold! text-[#161e2d]! text-base!">{propertyTypeLabel}</span>
+                    <span className="font-medium! text-gray-900! text-sm!">{propertyTypeLabel}</span>
                   </div>
                 </td>
-                <td className="px-6! py-6! font-bold! text-[#161e2d]! text-base!">
+                <td className="px-6! py-5! font-medium! text-gray-900! text-sm!">
                   {details?.bedrooms ? `${details.bedrooms} BHK` : "—"}
                 </td>
-                <td className="px-6! py-6! font-bold! text-[#161e2d]! text-base!">
+                <td className="px-6! py-5! font-medium! text-gray-900! text-sm!">
                   {details?.areaSqft ? `${formatArea(details.areaSqft)} sq.ft` : "—"}
                 </td>
-                <td className="px-6! py-6! font-bold! text-[#161e2d]! text-base!">
+                <td className="px-6! py-5! font-medium! text-gray-900! text-sm!">
                   {details?.bathrooms ?? "—"}
                 </td>
-                <td className="px-6! py-6! font-bold! text-[#161e2d]! text-base!">
+                <td className="px-6! py-5! font-medium! text-gray-900! text-sm!">
                   {details?.parking ? `${details.parking} Covered` : "—"}
                 </td>
               </tr>
@@ -188,24 +184,23 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       </div>
 
       {/* Request Floor Plan CTA */}
-      <div className="bg-gradient-to-br! from-[#161e2d]! to-[#27427f]! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.15)]! text-white! relative! overflow-hidden! border! border-white/10!">
-        <div className="absolute! inset-0! bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]! opacity-5!" />
-        <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8! relative! z-10!">
+      <div className="bg-gray-50! rounded-[24px]! p-8! md:p-10! border! border-gray-200!">
+        <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
           <div className="flex! items-start! gap-5!">
-            <div className="w-14! h-14! rounded-[16px]! bg-white/10! backdrop-blur-md! flex! items-center! justify-center! shrink-0! border! border-white/10!">
-              <Download className="w-7! h-7! text-white!" />
+            <div className="w-14! h-14! rounded-full! bg-white! flex! items-center! justify-center! shrink-0! border! border-gray-200!">
+              <Download className="w-6! h-6! text-gray-600!" />
             </div>
             <div>
-              <h3 className="text-2xl! font-extrabold! font-['Lexend',sans-serif]! mb-2! text-white!">
+              <h3 className="text-xl! font-semibold! mb-2! text-gray-900!">
                 Need the detailed floor plan?
               </h3>
-              <p className="text-white/70! text-base! leading-relaxed!">
+              <p className="text-gray-500! font-light! text-base! leading-relaxed!">
                 Request the complete floor plan with exact measurements and room layouts.
               </p>
             </div>
           </div>
-          <button className="w-full! md:w-auto! px-8! py-4! bg-gradient-to-r! from-[#ffc900]! to-[#f0bd00]! text-[#161e2d]! font-black! rounded-[16px]! transition-all! shadow-[0_8px_20px_rgba(255,201,0,0.3)]! hover:shadow-[0_12px_25px_rgba(255,201,0,0.4)]! hover:-translate-y-1! shrink-0! flex! items-center! justify-center! gap-3!">
-            <MessageSquare className="w-5.5! h-5.5!" />
+          <button className="w-full! md:w-auto! px-8! py-3.5! bg-gray-900! text-white! font-medium! rounded-full! hover:bg-gray-800! transition-all! shrink-0! flex! items-center! justify-center! gap-2!">
+            <MessageSquare className="w-4.5! h-4.5!" />
             Request Floor Plan
           </button>
         </div>

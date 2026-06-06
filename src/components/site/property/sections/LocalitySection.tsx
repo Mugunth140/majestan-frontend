@@ -22,7 +22,6 @@ type NearbyPlace = {
 type LocalityCategory = {
   title: string;
   icon: React.ElementType;
-  color: string;
   places: NearbyPlace[];
 };
 
@@ -31,7 +30,6 @@ function getLocalityCategoriesForCity(city: string): LocalityCategory[] {
     {
       title: "Education",
       icon: GraduationCap,
-      color: "bg-blue-50! text-blue-600!",
       places: [
         { name: `${city} International School`, distance: "0.8 km" },
         { name: `${city} Public School`, distance: "1.2 km" },
@@ -42,7 +40,6 @@ function getLocalityCategoriesForCity(city: string): LocalityCategory[] {
     {
       title: "Healthcare",
       icon: Heart,
-      color: "bg-rose-50! text-rose-600!",
       places: [
         { name: "City General Hospital", distance: "1.0 km" },
         { name: "Apollo Clinic", distance: "0.5 km" },
@@ -53,7 +50,6 @@ function getLocalityCategoriesForCity(city: string): LocalityCategory[] {
     {
       title: "Shopping",
       icon: ShoppingBag,
-      color: "bg-amber-50! text-amber-600!",
       places: [
         { name: "City Center Mall", distance: "1.5 km" },
         { name: "Super Market", distance: "0.4 km" },
@@ -64,7 +60,6 @@ function getLocalityCategoriesForCity(city: string): LocalityCategory[] {
     {
       title: "Transport",
       icon: Bus,
-      color: "bg-emerald-50! text-emerald-600!",
       places: [
         { name: "Bus Stand", distance: "0.6 km" },
         { name: "Railway Station", distance: "3.0 km" },
@@ -75,7 +70,6 @@ function getLocalityCategoriesForCity(city: string): LocalityCategory[] {
     {
       title: "Entertainment",
       icon: Clapperboard,
-      color: "bg-purple-50! text-purple-600!",
       places: [
         { name: "Multiplex Cinema", distance: "1.2 km" },
         { name: "City Park", distance: "0.7 km" },
@@ -86,7 +80,6 @@ function getLocalityCategoriesForCity(city: string): LocalityCategory[] {
     {
       title: "Banking",
       icon: Building,
-      color: "bg-teal-50! text-teal-600!",
       places: [
         { name: "SBI Branch", distance: "0.5 km" },
         { name: "HDFC ATM", distance: "0.2 km" },
@@ -123,18 +116,18 @@ export function LocalitySection({ property }: LocalitySectionProps) {
   return (
     <div className="space-y-8!">
       {/* Location Overview */}
-      <div className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-start! gap-5!">
-          <div className="w-14! h-14! rounded-[16px]! bg-gradient-to-br! from-[#27427f]/10! to-[#27427f]/5! flex! items-center! justify-center! shrink-0!">
-            <MapPin className="w-6! h-6! text-[#27427f]!" />
+          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
+            <MapPin className="w-6! h-6! text-gray-600!" />
           </div>
           <div>
-            <h2 className="text-2xl! md:text-3xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]! mb-3!">
+            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-3!">
               Location &amp; Neighbourhood
             </h2>
-            <p className="text-gray-500! leading-relaxed! text-base!">
-              <span className="font-bold! text-[#161e2d]!">{property.title}</span> is located in{" "}
-              <span className="font-bold! text-[#27427f]!">
+            <p className="text-gray-500! font-light! leading-relaxed! text-base!">
+              <span className="font-medium! text-gray-900!">{property.title}</span> is located in{" "}
+              <span className="font-medium! text-gray-900!">
                 {property.city}
                 {property.state ? `, ${property.state}` : ""}
               </span>
@@ -149,9 +142,9 @@ export function LocalitySection({ property }: LocalitySectionProps) {
           {[property.city, property.state, property.country].filter(Boolean).map((tag) => (
             <span
               key={tag}
-              className="inline-flex! items-center! gap-2! px-4! py-2.5! bg-gray-50! border! border-gray-100! rounded-[12px]! text-sm! font-bold! text-gray-600! shadow-sm!"
+              className="inline-flex! items-center! gap-2! px-4! py-2.5! bg-white! border! border-gray-200! rounded-full! text-sm! font-medium! text-gray-600!"
             >
-              <Globe className="w-4! h-4! text-[#27427f]/50!" />
+              <Globe className="w-4! h-4! text-gray-400!" />
               {tag}
             </span>
           ))}
@@ -159,21 +152,21 @@ export function LocalitySection({ property }: LocalitySectionProps) {
       </div>
 
       {/* Nearby Places */}
-      <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-6!">
+      <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-5!">
         {categories.map((category) => {
           const Icon = category.icon;
           return (
             <div
               key={category.title}
-              className="bg-white! rounded-[24px]! p-6! md:p-8! shadow-sm! border! border-gray-100! hover:shadow-lg! hover:-translate-y-1! transition-all! duration-300!"
+              className="bg-white! rounded-[20px]! p-6! md:p-8! border! border-gray-200! hover:shadow-sm! hover:border-gray-300! hover:-translate-y-0.5! transition-all! duration-300!"
             >
               <div className="flex! items-center! gap-4! mb-6!">
                 <div
-                  className={`w-12! h-12! rounded-[16px]! ${category.color} flex! items-center! justify-center! shadow-sm!`}
+                  className={`w-10! h-10! rounded-full! bg-gray-50! text-gray-600! flex! items-center! justify-center!`}
                 >
-                  <Icon className="w-6! h-6!" />
+                  <Icon className="w-5! h-5!" />
                 </div>
-                <h3 className="text-xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]!">
+                <h3 className="text-lg! font-semibold! text-gray-900!">
                   {category.title}
                 </h3>
               </div>
@@ -183,8 +176,8 @@ export function LocalitySection({ property }: LocalitySectionProps) {
                     key={place.name}
                     className="flex! items-center! justify-between! gap-4! group!"
                   >
-                    <span className="text-sm! font-medium! text-gray-600! group-hover:text-[#161e2d]! transition-colors! truncate!">{place.name}</span>
-                    <span className="text-xs! font-black! text-[#27427f]! bg-[#27427f]/5! px-3! py-1.5! rounded-[10px]! whitespace-nowrap! border! border-[#27427f]/10!">
+                    <span className="text-sm! font-light! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>
+                    <span className="text-xs! font-medium! text-gray-500! bg-gray-50! px-2! py-1! rounded-md! border! border-gray-200! whitespace-nowrap!">
                       {place.distance}
                     </span>
                   </li>
@@ -196,16 +189,16 @@ export function LocalitySection({ property }: LocalitySectionProps) {
       </div>
 
       {/* Connectivity Highlights */}
-      <div className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-[16px]! bg-emerald-50! flex! items-center! justify-center!">
-            <Navigation className="w-6! h-6! text-emerald-600!" />
+          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
+            <Navigation className="w-6! h-6! text-gray-600!" />
           </div>
           <div>
-            <h3 className="text-2xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]!">
+            <h3 className="text-2xl! font-semibold! text-gray-900!">
               Connectivity Highlights
             </h3>
-            <p className="text-sm! font-bold! text-gray-400! mt-1!">How well-connected is this location</p>
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">How well-connected is this location</p>
           </div>
         </div>
 
@@ -215,14 +208,14 @@ export function LocalitySection({ property }: LocalitySectionProps) {
             return (
               <div
                 key={item.label}
-                className="flex! items-start! gap-5! p-6! rounded-[24px]! bg-gray-50/80! border! border-gray-100! hover:bg-white! hover:shadow-md! transition-all! duration-300!"
+                className="flex! items-start! gap-5! p-6! rounded-[20px]! bg-white! border! border-gray-200! hover:shadow-sm! transition-all! duration-300!"
               >
-                <div className="w-12! h-12! rounded-[16px]! bg-white! shadow-sm! border! border-gray-100! flex! items-center! justify-center! shrink-0!">
-                  <Icon className="w-6! h-6! text-[#27427f]!" />
+                <div className="w-10! h-10! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
+                  <Icon className="w-5! h-5! text-gray-600!" />
                 </div>
                 <div>
-                  <p className="font-extrabold! text-[#161e2d]! text-base!">{item.label}</p>
-                  <p className="text-gray-500! text-sm! mt-1! leading-relaxed!">{item.detail}</p>
+                  <p className="font-medium! text-gray-900! text-sm!">{item.label}</p>
+                  <p className="text-gray-500! text-sm! font-light! mt-1! leading-relaxed!">{item.detail}</p>
                 </div>
               </div>
             );
@@ -231,30 +224,30 @@ export function LocalitySection({ property }: LocalitySectionProps) {
       </div>
 
       {/* Map Placeholder */}
-      <div className="bg-white! rounded-[32px]! p-8! md:p-10! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-[16px]! bg-rose-50! flex! items-center! justify-center!">
-            <MapPinned className="w-6! h-6! text-rose-600!" />
+          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
+            <MapPinned className="w-6! h-6! text-gray-600!" />
           </div>
           <div>
-            <h3 className="text-2xl! font-extrabold! text-[#161e2d]! font-['Lexend',sans-serif]!">
+            <h3 className="text-2xl! font-semibold! text-gray-900!">
               On the Map
             </h3>
-            <p className="text-sm! font-bold! text-gray-400! mt-1!">
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">
               Approximate location in {property.city}
             </p>
           </div>
         </div>
 
-        <div className="rounded-[24px]! border-2! border-dashed! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-20! text-center! hover:bg-gray-50! transition-colors!">
-          <div className="w-20! h-20! rounded-[20px]! bg-white! shadow-sm! border! border-gray-100! flex! items-center! justify-center! mb-5!">
-            <MapPin className="w-8! h-8! text-[#27427f]/60!" />
+        <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-20! text-center! hover:bg-gray-50! transition-colors!">
+          <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-5!">
+            <MapPin className="w-8! h-8! text-gray-400!" />
           </div>
-          <h4 className="text-xl! font-extrabold! text-[#161e2d]! mb-2! font-['Lexend',sans-serif]!">
+          <h4 className="text-xl! font-medium! text-gray-900! mb-2!">
             {property.city}
             {property.state ? `, ${property.state}` : ""}
           </h4>
-          <p className="text-gray-400! text-base! font-medium!">
+          <p className="text-gray-500! text-sm! font-light!">
             Interactive map coming soon
           </p>
         </div>

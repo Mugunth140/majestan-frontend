@@ -7,6 +7,7 @@ export const LISTING_TYPES = {
 
 // Map frontend URL slugs to backend API property types and readable labels
 export const PROPERTY_TYPES = {
+  properties: { apiValue: "", label: "Properties" },
   apartments: { apiValue: "apartment", label: "Apartments" },
   villas: { apiValue: "villa", label: "Villas" },
   "independent-houses": { apiValue: "independent-house", label: "Independent Houses" },

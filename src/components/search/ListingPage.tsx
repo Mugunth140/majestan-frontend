@@ -33,8 +33,10 @@ const SORT_OPTIONS = [
 
 function getDetailPath(item: PropertySearchItem): string {
   const slug = item.slug_url?.trim();
+  if (slug) return `/${slug}`;
+  
+  // Fallback if no slug
   const suffix = PROPERTY_DETAIL_SUFFIX[item.propertyType] ?? "ap";
-  if (slug) return `/${slug}-${suffix}${item.id}`;
   return `/${item.propertyType}-${item.id}-${suffix}${item.id}`;
 }
 
@@ -165,14 +167,20 @@ export function ListingPage({
       newFilters.propertyType !== initialPropertyType || 
       newFilters.location !== (initialLocality || initialCity)
     ) {
+      // Determine city and locality correctly for URL builder
+      const urlCity = newFilters.location ? newFilters.location : initialCity;
+      
       const url = buildListingUrl(
         newFilters.listingType as any,
         newFilters.propertyType,
-        newFilters.location
+        urlCity
       );
-      router.push(`${url}?${params.toString()}`);
+      
+      const queryString = params.toString();
+      router.push(queryString ? `${url}?${queryString}` : url);
     } else {
-      router.push(`${pathname}?${params.toString()}`);
+      const queryString = params.toString();
+      router.push(queryString ? `${pathname}?${queryString}` : pathname);
     }
   };
 
@@ -181,7 +189,8 @@ export function ListingPage({
     if (newSort) params.set("sort", newSort);
     else params.delete("sort");
     params.delete("page");
-    router.push(`${pathname}?${params.toString()}`);
+    const queryString = params.toString();
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
   };
 
   const propertyTypeLabel = Object.values(PROPERTY_TYPES).find(p => p.apiValue === filters.propertyType)?.label || filters.propertyType;

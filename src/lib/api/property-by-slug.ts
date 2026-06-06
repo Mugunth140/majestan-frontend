@@ -71,6 +71,15 @@ export async function getPropertyBySeoSlug(slug: string): Promise<SeoProperty | 
     throw new Error(`Property lookup failed: ${response.status} ${response.statusText}`);
   }
 
-  return unwrapPayload<SeoProperty>(response);
+  const data = await unwrapPayload<any>(response);
+  
+  if (data) {
+    // Map backend response fields to the frontend expected fields
+    data.images = data.images || data.propertyImages || data.__propertyImages__ || [];
+    data.details = data.details || data.propertyDetails || data.__propertyDetails__ || null;
+    data.locations = data.locations || data.propertyLocations || data.__propertyLocations__ || [];
+  }
+  
+  return data as SeoProperty;
 }
 

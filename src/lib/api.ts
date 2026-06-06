@@ -210,9 +210,39 @@ export async function searchProperties(
   if (params.page) query.set("page", String(params.page));
   if (params.limit) query.set("limit", String(params.limit));
 
-  return fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, {
+  const res = await fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, {
     cache: "no-store",
   });
+
+  if (res && Array.isArray(res.items)) {
+    res.items = res.items.map((item: any) => {
+      // Skip if already mapped
+      if (item.propertyname !== undefined && item.propertyname === item.title) return item;
+      
+      const images = item.__propertyImages__ || item.propertyImages || item.images || [];
+      const primaryImage = images.find((i: any) => i.isPrimary) || images[0];
+      const details = item.__propertyDetails__ || item.propertyDetails || item.details || {};
+      const locations = item.__propertyLocations__ || item.propertyLocations || item.locations || [];
+      
+      return {
+        ...item,
+        propertyname: item.title,
+        sublocation: locations[0]?.name || item.city,
+        address: item.city ? `${item.city}, ${item.state || ''}`.replace(/,\s*$/, '') : '',
+        posttype: item.listingType || (item.status === 'rented' || item.status?.toLowerCase().includes('rent') ? 'Rent' : 'Sell'),
+        expectedsaleprice: item.price,
+        monthly_rent: item.price,
+        photo1: primaryImage?.imageUrl || null,
+        slug_url: item.slug || item.propertyCode,
+        sq_ft: details.areaSqft?.toString() || "0",
+        build_up_area: details.areaSqft?.toString() || "0",
+        unittype: details.bedrooms ? `${details.bedrooms} BHK` : null,
+        facing: details.facing || null,
+      };
+    });
+  }
+
+  return res;
 }
 
 export async function getPropertyBySlug(slug: string): Promise<any> {

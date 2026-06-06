@@ -130,10 +130,9 @@ export function PropertySearchFilters({
               style={{ appearance: 'none', WebkitAppearance: 'none' }}
               className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
             >
-              <option value="">All Types</option>
               {Object.entries(PROPERTY_TYPES).map(([slug, data]) => (
                 <option key={slug} value={data.apiValue}>
-                  {data.label}
+                  {data.apiValue === "" ? "All Types" : data.label}
                 </option>
               ))}
             </select>

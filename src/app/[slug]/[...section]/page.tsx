@@ -156,7 +156,7 @@ export async function generateMetadata({
         description,
         url: canonicalPath,
         type: "article",
-        images: property.images
+        images: (property.images || [])
           .filter((image) => image.imageUrl)
           .map((image) => ({
             url: image.imageUrl,
@@ -220,29 +220,33 @@ function SectionContent({
 
 /** Sidebar with pricing and contact */
 function PropertySidebar({ property }: { property: SeoProperty }) {
-  const isSale = !property.status.toLowerCase().includes("rent");
+  const isSale = !property.status.toLowerCase().includes("rent") && property.listingType !== "Rent";
 
   return (
-    <div className="sticky top-[140px] space-y-6">
+    <div className="sticky! top-[140px]! space-y-6!">
       {/* Pricing Card */}
-      <div className="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
-        <div className="mb-5">
-          <p className="text-gray-400 font-medium text-sm mb-1">
+      <div className="bg-white! rounded-[32px]! p-8! shadow-[0_20px_40px_rgb(0,0,0,0.06)]! border! border-gray-100/80! relative! overflow-hidden!">
+        <div className="absolute! top-0! left-0! w-full! h-2! bg-gradient-to-r! from-[#27427f]! to-[#ffc900]!" />
+        
+        <div className="mb-8!">
+          <p className="text-gray-400! font-bold! text-xs! uppercase! tracking-widest! mb-2!">
             {isSale ? "Asking Price" : "Monthly Rent"}
           </p>
-          <div className="flex items-end gap-2">
-            <h2 className="font-['Lexend',sans-serif] text-3xl font-extrabold text-[#27427f]">
+          <div className="flex! items-end! gap-2!">
+            <h2 className="font-['Lexend',sans-serif]! text-4xl! md:text-5xl! font-black! text-[#161e2d]! tracking-tight!">
               {formatPrice(property.price)}
             </h2>
             {!isSale && (
-              <span className="text-sm text-gray-400 mb-1">/ month</span>
+              <span className="text-sm! font-bold! text-gray-400! mb-2!">
+                / mo
+              </span>
             )}
           </div>
           {isSale &&
             property.details?.areaSqft &&
             !isNaN(parseFloat(property.price)) && (
-              <p className="text-sm text-gray-400 mt-1.5 flex items-center gap-1">
-                <Square className="w-3.5 h-3.5" />₹{" "}
+              <p className="text-sm! text-gray-400! mt-2! flex! items-center! gap-1.5!">
+                <Square className="w-4! h-4!" />₹{" "}
                 {Math.round(
                   parseFloat(property.price) /
                     parseFloat(property.details.areaSqft)
@@ -252,48 +256,58 @@ function PropertySidebar({ property }: { property: SeoProperty }) {
             )}
         </div>
 
-        <button className="w-full bg-[#ffc900] hover:bg-[#f0bd00] text-[#161e2d] font-bold text-base py-3.5 rounded-xl transition-all shadow-[0_4px_14px_rgba(255,201,0,0.4)] hover:shadow-[0_6px_20px_rgba(255,201,0,0.5)] mb-3 flex items-center justify-center gap-2">
-          <Phone className="w-5 h-5" />
-          Contact Owner
-        </button>
+        <div className="space-y-4!">
+          <button className="w-full! bg-gradient-to-r! from-[#ffc900]! to-[#f0bd00]! text-[#161e2d]! font-black! text-lg! py-4! rounded-2xl! hover:-translate-y-1! transition-all! duration-300! shadow-[0_8px_20px_rgba(255,201,0,0.3)]! hover:shadow-[0_12px_25px_rgba(255,201,0,0.4)]! flex! items-center! justify-center! gap-3!">
+            <Phone className="w-5! h-5!" />
+            Contact Owner
+          </button>
 
-        <button className="w-full bg-white hover:bg-gray-50 text-[#27427f] border-2 border-[#27427f]/10 hover:border-[#27427f]/30 font-bold text-base py-3.5 rounded-xl transition-all flex items-center justify-center gap-2">
-          <Calendar className="w-5 h-5" />
-          Schedule a Visit
-        </button>
+          <button className="w-full! bg-white! text-[#27427f]! border-2! border-[#27427f]/10! hover:border-[#27427f]! hover:bg-[#27427f]/5! font-bold! text-lg! py-4! rounded-2xl! transition-all! duration-300! flex! items-center! justify-center! gap-3!">
+            <Calendar className="w-5! h-5!" />
+            Schedule Visit
+          </button>
+        </div>
+        
+        <div className="mt-6! pt-6! border-t! border-gray-100! flex! items-center! justify-center! gap-2! text-sm! font-bold! text-gray-400!">
+          <ShieldCheck className="w-4! h-4! text-green-500!" />
+          No brokerage for this property
+        </div>
       </div>
 
       {/* Agent Info */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#27427f]/10 to-[#27427f]/5 border border-gray-200 flex items-center justify-center shrink-0">
-            <Building2 className="w-6 h-6 text-[#27427f]/40" />
+      <div className="bg-white! rounded-[24px]! p-6! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
+        <div className="flex! items-center! gap-5!">
+          <div className="w-16! h-16! rounded-[16px]! bg-gradient-to-br! from-[#27427f]! to-[#161e2d]! flex! items-center! justify-center! shadow-lg! shrink-0!">
+            <Building2 className="w-8! h-8! text-white!" />
           </div>
           <div>
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">
+            <p className="text-[10px]! text-[#27427f]! font-black! uppercase! tracking-widest! mb-1.5! bg-[#27427f]/10! inline-block! px-2! py-0.5! rounded-md!">
               Listed By
             </p>
-            <p className="font-bold text-[#161e2d] text-sm">Majestan Realty</p>
-            <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              Since {new Date(property.createdAt).getFullYear()}
+            <p className="font-['Lexend',sans-serif]! font-extrabold! text-lg! text-[#161e2d]!">
+              Majestan Realty
+            </p>
+            <p className="text-xs! font-bold! text-gray-400! mt-1! flex! items-center! gap-1.5!">
+              <Clock className="w-3.5! h-3.5!" />
+              Verified Partner
             </p>
           </div>
         </div>
       </div>
 
       {/* Verified Badge */}
-      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-100">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-4 h-4 text-green-600" />
+      <div className="relative! overflow-hidden! bg-gradient-to-br! from-emerald-500! to-green-600! rounded-[24px]! p-6! shadow-[0_8px_30px_rgba(16,185,129,0.2)]!">
+        <div className="absolute! top-0! right-0! w-32! h-32! bg-white! opacity-10! rounded-full! blur-2xl! -translate-y-1/2! translate-x-1/2!" />
+        <div className="flex! items-center! gap-4! relative! z-10!">
+          <div className="w-12! h-12! rounded-xl! bg-white/20! backdrop-blur-md! flex! items-center! justify-center! shrink-0! border! border-white/30!">
+            <ShieldCheck className="w-6! h-6! text-white!" />
           </div>
           <div>
-            <p className="text-sm font-bold text-green-800">
+            <p className="text-base! font-black! text-white! tracking-wide!">
               Verified Listing
             </p>
-            <p className="text-[11px] text-green-600 mt-0.5">
-              Verified by Majestan Realty
+            <p className="text-xs! font-bold! text-white/80! mt-1! leading-relaxed!">
+              Property has been physically verified.
             </p>
           </div>
         </div>
@@ -365,19 +379,17 @@ export default async function PropertySectionPage({
     return (
       <>
         <SiteHeader />
-        <div className="pt-[120px]! bg-[#f8f9fa]! min-h-screen!">
-          <div className="container! mx-auto! px-4! max-w-7xl! pt-4!">
+        <div className="pt-[120px]! bg-[#f2f5f9]! min-h-screen!">
+          <div className="container! mx-auto! px-4! sm:px-6! py-6! max-w-7xl!">
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
-            <div className="mb-6!">
+            <div className="mb-6! mt-6!">
               <PropertyNavigation
                 slug={property.canonicalSlug}
                 activeSection={sectionKey}
               />
             </div>
-          </div>
 
-          <div className="container! mx-auto! px-4! max-w-7xl! pb-20!">
-            <div className="grid! grid-cols-1! lg:grid-cols-3! gap-8!">
+            <div className="grid! grid-cols-1! lg:grid-cols-3! gap-8! pb-24!">
               {/* Main Content */}
               <div className="lg:col-span-2!">
                 <SectionContent

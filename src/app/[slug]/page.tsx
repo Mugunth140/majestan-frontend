@@ -88,7 +88,7 @@ export async function generateMetadata({
         description,
         url: canonicalPath,
         type: "article",
-        images: property.images
+        images: (property.images || [])
           .filter((image) => image.imageUrl)
           .map((image) => ({
             url: image.imageUrl,
@@ -102,7 +102,7 @@ export async function generateMetadata({
         card: "summary_large_image",
         title: `${property.title} | Majestan Realty`,
         description,
-        images: property.images
+        images: (property.images || [])
           .filter((image) => image.imageUrl)
           .map((image) => image.imageUrl)
           .slice(0, 1),
@@ -167,7 +167,7 @@ function buildPropertyStructuredData(property: NonNullable<Awaited<ReturnType<ty
       property.propertyType
     ),
     url: `https://www.majestanrealty.com/${property.canonicalSlug}`,
-    image: property.images.map((image) => image.imageUrl),
+    image: property.images?.map((image) => image.imageUrl) || [],
     datePosted: property.createdAt,
     dateModified: property.updatedAt,
     offers: {

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { notFound } from "next/navigation";
 import { ListingPage } from "@/components/search/ListingPage";
 import { searchProperties } from "@/lib/api";
@@ -59,12 +60,14 @@ export default async function ForRentListingPageRoute({ params, searchParams }: 
   }
 
   return (
-    <ListingPage 
-      initialListingType={parsed.apiListingType}
-      initialPropertyType={parsed.apiPropertyType}
-      initialCity={parsed.city}
-      initialLocality={parsed.locality}
-      initialSearchData={initialData}
-    />
+    <Suspense fallback={<div className="min-h-screen mt-24 text-center">Loading properties...</div>}>
+      <ListingPage 
+        initialListingType={parsed.apiListingType}
+        initialPropertyType={parsed.apiPropertyType}
+        initialCity={parsed.city}
+        initialLocality={parsed.locality}
+        initialSearchData={initialData}
+      />
+    </Suspense>
   );
 }

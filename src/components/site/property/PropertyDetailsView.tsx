@@ -88,6 +88,11 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     : "for-sale";
   const isSale = listingType === "for-sale";
 
+  const propertyTypeSlug =
+    Object.entries(PROPERTY_TYPES).find(
+      ([, data]) => data.apiValue === property.propertyType
+    )?.[0] || property.propertyType;
+
   // Quick stat cards data
   const quickStats = [
     property.details?.bedrooms
@@ -177,11 +182,11 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
         {/* Top Actions Bar */}
         <div className="flex! flex-col! sm:flex-row! justify-between! items-start! sm:items-center! gap-4! mb-6!">
           <Link
-            href="/search"
+            href={`/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`}
             className="inline-flex! items-center! gap-2! text-sm! font-bold! text-[#27427f]/70! hover:text-[#27427f]! transition-colors! no-underline! bg-white/50! backdrop-blur-md! px-4! py-2! rounded-xl! shadow-sm!"
           >
             <ChevronLeft className="w-4! h-4!" />
-            Back to search
+            Back to listings
           </Link>
 
           <div className="flex! items-center! gap-3!">

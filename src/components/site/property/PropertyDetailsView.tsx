@@ -83,7 +83,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       .replace(/_/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  const listingType = property.status.toLowerCase().includes("rent") || property.listingType === "Rent"
+  const listingType = property.status.toLowerCase().includes("rent")
     ? "for-rent"
     : "for-sale";
   const isSale = listingType === "for-sale";

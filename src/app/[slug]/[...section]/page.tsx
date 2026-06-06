@@ -220,7 +220,7 @@ function SectionContent({
 
 /** Sidebar with pricing and contact */
 function PropertySidebar({ property }: { property: SeoProperty }) {
-  const isSale = !property.status.toLowerCase().includes("rent") && property.listingType !== "Rent";
+  const isSale = !property.status.toLowerCase().includes("rent");
 
   return (
     <div className="sticky! top-[140px]! space-y-6!">

@@ -44,7 +44,7 @@ export function Breadcrumbs({ items, jsonLd = true }: BreadcrumbsProps) {
   return (
     <>
       <nav
-        className="flex items-center text-sm text-gray-500 overflow-x-auto whitespace-nowrap hide-scrollbar mb-4 py-2"
+        className="flex items-center text-sm text-gray-500 overflow-x-auto whitespace-nowrap hide-scrollbar mb-2 py-2"
         aria-label="Breadcrumb"
       >
         <ol

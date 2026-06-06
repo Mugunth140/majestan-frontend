@@ -379,10 +379,10 @@ export default async function PropertySectionPage({
     return (
       <>
         <SiteHeader />
-        <div className="pt-[120px]! bg-[#f2f5f9]! min-h-screen!">
+        <div className="pt-[100px]! bg-[#f2f5f9]! min-h-screen!">
           <div className="container! mx-auto! px-4! sm:px-6! py-6! max-w-7xl!">
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
-            <div className="mb-6! mt-6!">
+            <div className="mb-6!">
               <PropertyNavigation
                 slug={property.canonicalSlug}
                 activeSection={sectionKey}

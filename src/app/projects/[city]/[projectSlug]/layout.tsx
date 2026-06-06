@@ -37,7 +37,7 @@ export default async function ProjectLayout({
       </div>
 
       {/* Sticky Navigation Hub */}
-      <div className="bg-white! shadow-sm! sticky! top-0! z-50!">
+      <div className="bg-white! sticky! top-0! z-50!">
         <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
           <div className="flex! space-x-8! overflow-x-auto!">
             <Link href={baseUrl} className="border-b-2! border-transparent! hover:border-blue-600! text-gray-600! hover:text-blue-600! whitespace-nowrap! py-4! px-1! font-medium! text-sm!">

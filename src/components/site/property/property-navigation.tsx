@@ -71,10 +71,10 @@ export function PropertyNavigation({
 
   return (
     <nav
-      className="sticky! top-[72px]! z-40! bg-white/95! backdrop-blur-md! border-b! border-gray-200/80! -mx-4! px-4! md:-mx-0! md:px-0! md:rounded-2xl! md:border! md:border-gray-100! md:shadow-sm!"
+      className="mx-4! px-4! md:mx-0! md:px-0!"
       aria-label="Property sections"
     >
-      <div className="flex! items-center! gap-2! overflow-x-auto! hide-scrollbar! py-2! md:py-2.5! md:px-3!">
+      <div className="flex! items-center! gap-2! overflow-x-auto! hide-scrollbar! py-2! md:py-2! md:px-2!">
         {links.map((link) => {
           const isActive = getIsActive(link);
 
@@ -82,15 +82,15 @@ export function PropertyNavigation({
             <Link
               key={link.href}
               href={link.href}
-              className={`relative! flex! items-center! gap-2! whitespace-nowrap! rounded-xl! px-4! py-2! text-[14px]! font-bold! transition-all! duration-300! no-underline! shrink-0! ${
+              className={`relative! flex! items-center! gap-2! whitespace-nowrap! rounded-full! px-5! py-3! text-[13px]! font-semibold! transition-all! duration-300! no-underline! shrink-0! ${
                 isActive
                   ? "bg-[#27427f]! text-white! shadow-md! shadow-[#27427f]/20!"
-                  : "bg-transparent! text-gray-600! hover:bg-[#27427f]/10! hover:text-[#27427f]!"
+                  : "bg-transparent! text-gray-600! hover:text-[#27427f]! hover:bg-[#27427f]/10!"
               }`}
               aria-current={isActive ? "page" : undefined}
             >
               <span
-                className={`transition-colors! ${isActive ? "text-white/90!" : "text-gray-400! group-hover:text-[#27427f]!"}`}
+                className={`transition-colors! ${isActive ? "text-white/90!" : "text-gray-400!  group-hover:text-[#27427f]!"}`}
               >
                 {link.icon}
               </span>

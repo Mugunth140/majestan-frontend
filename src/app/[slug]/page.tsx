@@ -259,8 +259,8 @@ export default async function SlugPage({
     return (
       <>
         <SiteHeader />
-        <div className="pt-[120px]! bg-[#f8f9fa]! min-h-screen!">
-          <div className="container! mx-auto! px-4! max-w-7xl! pt-4!">
+        <div className="pt-25! bg-[#f8f9fa]! min-h-screen!">
+          <div className="container! mx-auto! px-4! max-w-7xl! pt-2!">
             <Breadcrumbs items={breadcrumbItems} jsonLd />
             <div className="mb-2!">
               <PropertyNavigation

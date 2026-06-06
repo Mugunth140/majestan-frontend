@@ -11,7 +11,6 @@ import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
 import { PropertySectionLinks } from "@/components/site/property/property-navigation";
 
-// Keep legacy mappings for URLs
 const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
   apartment: "ap",
   villa: "v",
@@ -24,7 +23,7 @@ const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
 };
 
 const SORT_OPTIONS = [
-  { value: "", label: "Relevance" },
+  { value: "", label: "Sort By" },
   { value: "low_to_high", label: "Price: Low to High" },
   { value: "high_to_low", label: "Price: High to Low" },
   { value: "Area_low_to_high", label: "Area: Small to Large" },

@@ -224,94 +224,62 @@ function PropertySidebar({ property }: { property: SeoProperty }) {
 
   return (
     <div className="sticky! top-[140px]! space-y-6!">
-      {/* Pricing Card */}
-      <div className="bg-white! rounded-[32px]! p-8! shadow-[0_20px_40px_rgb(0,0,0,0.06)]! border! border-gray-100/80! relative! overflow-hidden!">
-        <div className="absolute! top-0! left-0! w-full! h-2! bg-gradient-to-r! from-[#27427f]! to-[#ffc900]!" />
-        
+      
+      {/* Pricing & Contact Card */}
+      <div className="bg-white! rounded-[24px]! p-8! border! border-gray-200! shadow-[0_4px_20px_rgb(0,0,0,0.03)]!">
         <div className="mb-8!">
-          <p className="text-gray-400! font-bold! text-xs! uppercase! tracking-widest! mb-2!">
+          <p className="text-gray-500! font-normal! text-sm! tracking-wide! uppercase! mb-2!">
             {isSale ? "Asking Price" : "Monthly Rent"}
           </p>
-          <div className="flex! items-end! gap-2!">
-            <h2 className="font-['Lexend',sans-serif]! text-4xl! md:text-5xl! font-black! text-[#161e2d]! tracking-tight!">
+          <div className="flex! items-baseline! gap-2!">
+            <h2 className="text-3xl! font-semibold! text-gray-900! tracking-tight!">
               {formatPrice(property.price)}
             </h2>
             {!isSale && (
-              <span className="text-sm! font-bold! text-gray-400! mb-2!">
+              <span className="text-sm! font-light! text-gray-500!">
                 / mo
               </span>
             )}
           </div>
-          {isSale &&
-            property.details?.areaSqft &&
-            !isNaN(parseFloat(property.price)) && (
-              <p className="text-sm! text-gray-400! mt-2! flex! items-center! gap-1.5!">
-                <Square className="w-4! h-4!" />₹{" "}
-                {Math.round(
-                  parseFloat(property.price) /
-                    parseFloat(property.details.areaSqft)
-                ).toLocaleString("en-IN")}{" "}
-                / sq.ft
-              </p>
-            )}
         </div>
 
         <div className="space-y-4!">
-          <button className="w-full! bg-gradient-to-r! from-[#ffc900]! to-[#f0bd00]! text-[#161e2d]! font-black! text-lg! py-4! rounded-2xl! hover:-translate-y-1! transition-all! duration-300! shadow-[0_8px_20px_rgba(255,201,0,0.3)]! hover:shadow-[0_12px_25px_rgba(255,201,0,0.4)]! flex! items-center! justify-center! gap-3!">
-            <Phone className="w-5! h-5!" />
+          <button className="w-full! bg-gray-900! text-white! font-medium! text-base! py-3.5! rounded-full! hover:bg-gray-800! transition-all! flex! items-center! justify-center! gap-2!">
+            <Phone className="w-4.5! h-4.5!" />
             Contact Owner
           </button>
 
-          <button className="w-full! bg-white! text-[#27427f]! border-2! border-[#27427f]/10! hover:border-[#27427f]! hover:bg-[#27427f]/5! font-bold! text-lg! py-4! rounded-2xl! transition-all! duration-300! flex! items-center! justify-center! gap-3!">
-            <Calendar className="w-5! h-5!" />
+          <button className="w-full! bg-white! text-gray-900! border! border-gray-300! hover:border-gray-900! hover:bg-gray-50! font-medium! text-base! py-3.5! rounded-full! transition-all! flex! items-center! justify-center! gap-2!">
+            <Calendar className="w-4.5! h-4.5!" />
             Schedule Visit
           </button>
         </div>
         
-        <div className="mt-6! pt-6! border-t! border-gray-100! flex! items-center! justify-center! gap-2! text-sm! font-bold! text-gray-400!">
-          <ShieldCheck className="w-4! h-4! text-green-500!" />
+        <div className="mt-6! pt-6! border-t! border-gray-100! flex! items-center! justify-center! gap-2! text-sm! font-normal! text-gray-500!">
+          <ShieldCheck className="w-4! h-4! text-emerald-500!" />
           No brokerage for this property
         </div>
       </div>
 
-      {/* Agent Info */}
-      <div className="bg-white! rounded-[24px]! p-6! shadow-[0_8px_30px_rgb(0,0,0,0.04)]! border! border-gray-100/50!">
-        <div className="flex! items-center! gap-5!">
-          <div className="w-16! h-16! rounded-[16px]! bg-gradient-to-br! from-[#27427f]! to-[#161e2d]! flex! items-center! justify-center! shadow-lg! shrink-0!">
-            <Building2 className="w-8! h-8! text-white!" />
-          </div>
-          <div>
-            <p className="text-[10px]! text-[#27427f]! font-black! uppercase! tracking-widest! mb-1.5! bg-[#27427f]/10! inline-block! px-2! py-0.5! rounded-md!">
-              Listed By
-            </p>
-            <p className="font-['Lexend',sans-serif]! font-extrabold! text-lg! text-[#161e2d]!">
-              Majestan Realty
-            </p>
-            <p className="text-xs! font-bold! text-gray-400! mt-1! flex! items-center! gap-1.5!">
-              <Clock className="w-3.5! h-3.5!" />
-              Verified Partner
-            </p>
-          </div>
+      {/* Agent/Owner Info */}
+      <div className="bg-white! rounded-[24px]! p-6! border! border-gray-200! flex! items-center! gap-4!">
+        <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
+          <Building2 className="w-6! h-6! text-gray-600!" />
+        </div>
+        <div>
+          <p className="text-xs! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
+            Listed By
+          </p>
+          <p className="font-medium! text-base! text-gray-900!">
+            Majestan Realty
+          </p>
+          <p className="text-xs! font-light! text-gray-500! mt-1! flex! items-center! gap-1.5!">
+            <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
+            Verified Partner
+          </p>
         </div>
       </div>
-
-      {/* Verified Badge */}
-      <div className="relative! overflow-hidden! bg-gradient-to-br! from-emerald-500! to-green-600! rounded-[24px]! p-6! shadow-[0_8px_30px_rgba(16,185,129,0.2)]!">
-        <div className="absolute! top-0! right-0! w-32! h-32! bg-white! opacity-10! rounded-full! blur-2xl! -translate-y-1/2! translate-x-1/2!" />
-        <div className="flex! items-center! gap-4! relative! z-10!">
-          <div className="w-12! h-12! rounded-xl! bg-white/20! backdrop-blur-md! flex! items-center! justify-center! shrink-0! border! border-white/30!">
-            <ShieldCheck className="w-6! h-6! text-white!" />
-          </div>
-          <div>
-            <p className="text-base! font-black! text-white! tracking-wide!">
-              Verified Listing
-            </p>
-            <p className="text-xs! font-bold! text-white/80! mt-1! leading-relaxed!">
-              Property has been physically verified.
-            </p>
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 }

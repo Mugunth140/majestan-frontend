@@ -30,8 +30,10 @@ const SORT_OPTIONS = [
   { value: "Area_high_to_low", label: "Area: Large to Small" },
 ];
 
-function getDetailPath(item: PropertySearchItem): string {
-  const slug = item.slug_url?.trim();
+function getDetailPath(item: PropertySearchItem & { canonicalSlug?: string }): string {
+  if (item.canonicalSlug) return `/${item.canonicalSlug}`;
+  
+  const slug = item.slug_url?.trim() || (typeof item.slug === "string" ? item.slug.trim() : "");
   if (slug) return `/${slug}`;
   
   // Fallback if no slug

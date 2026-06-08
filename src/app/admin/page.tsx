@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api";
 import { 
   Building2, 
   Users, 
@@ -8,33 +12,69 @@ import {
   PlusCircle, 
   ArrowRight,
   Clock,
-  Eye,
-  Activity,
-  CheckCircle2,
-  AlertCircle
+  Activity
 } from "lucide-react";
 
+// For time formatting
+function timeAgo(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  return `${Math.floor(diffInSeconds / 86400)} days ago`;
+}
+
+const ICON_MAP: Record<string, any> = {
+  Users,
+  FileText,
+  Building2,
+};
+
 export default function AdminDashboardPage() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        const token = window.localStorage.getItem("majestan_access_token");
+        const res = await fetch(`${API_BASE_URL}/admin/dashboard/summary`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setData(json);
+        }
+      } catch (e) {
+        console.error("Failed to fetch dashboard data", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDashboardData();
+  }, []);
+
   const stats = [
-    { label: "Total Properties", value: "124", increase: "+12%", icon: Building2, color: "text-blue-600!", bg: "bg-blue-50!" },
-    { label: "Active Leads", value: "48", increase: "+5%", icon: Users, color: "text-emerald-600!", bg: "bg-emerald-50!" },
-    { label: "Localities", value: "12", increase: "0%", icon: MapPin, color: "text-violet-600!", bg: "bg-violet-50!" },
-    { label: "Published Blogs", value: "32", increase: "+8%", icon: FileText, color: "text-amber-600!", bg: "bg-amber-50!" },
+    { label: "Total Properties", value: data?.stats?.totalProperties ?? 0, increase: "+12%", icon: Building2, color: "text-blue-600!", bg: "bg-blue-50!" },
+    { label: "Active Leads", value: data?.stats?.activeLeads ?? 0, increase: "+5%", icon: Users, color: "text-emerald-600!", bg: "bg-emerald-50!" },
+    { label: "Localities", value: data?.stats?.localities ?? 0, increase: "0%", icon: MapPin, color: "text-violet-600!", bg: "bg-violet-50!" },
+    { label: "Published Blogs", value: data?.stats?.publishedBlogs ?? 0, increase: "+8%", icon: FileText, color: "text-amber-600!", bg: "bg-amber-50!" },
   ];
 
   const quickActions = [
     { label: "Add New Property", desc: "List a new residential or commercial property", icon: PlusCircle, href: "/admin/properties/new" },
     { label: "Manage Leads", desc: "Review and respond to recent customer inquiries", icon: Users, href: "/admin/leads" },
     { label: "Write Blog Post", desc: "Publish a new article for SEO and engagement", icon: FileText, href: "/admin/blogs/new" },
-    { label: "Review Analytics", desc: "Check website traffic and user engagement", icon: Activity, href: "/admin/analytics" },
+    { label: "Review SEO", desc: "Check website SEO and meta settings", icon: Activity, href: "/admin/seo" },
   ];
 
-  const recentActivities = [
-    { title: "New Lead Received", desc: "John Doe inquired about Villa in Thondamuthur", time: "10 mins ago", icon: Users, status: "pending" },
-    { title: "Property Updated", desc: "Price updated for 'Luxury Apartment in RS Puram'", time: "2 hours ago", icon: Building2, status: "completed" },
-    { title: "Blog Published", desc: "'Top 10 Investment Opportunities in Coimbatore'", time: "Yesterday", icon: FileText, status: "completed" },
-    { title: "New Locality Added", desc: "Saravanampatti added to active localities", time: "2 days ago", icon: MapPin, status: "completed" },
-  ];
+  const recentActivities = data?.recentActivities || [];
 
   return (
     <div className="w-full! max-w-7xl! mx-auto! space-y-8!">
@@ -52,7 +92,9 @@ export default function AdminDashboardPage() {
               </span>
             </div>
             <div>
-              <p className="text-4xl! font-semibold! text-gray-900! mb-1! tracking-tight!">{stat.value}</p>
+              <p className="text-4xl! font-semibold! text-gray-900! mb-1! tracking-tight!">
+                {loading ? "..." : stat.value}
+              </p>
               <h3 className="text-sm! font-medium! text-gray-500!">{stat.label}</h3>
             </div>
           </div>
@@ -103,26 +145,35 @@ export default function AdminDashboardPage() {
           </div>
           
           <div className="flex-1! space-y-6!">
-            {recentActivities.map((activity, i) => (
-              <div key={i} className="flex! gap-4! relative!">
-                {i !== recentActivities.length - 1 && (
-                  <div className="absolute! left-5! top-10! bottom-[-24px]! w-[2px]! bg-gray-100!" />
-                )}
-                <div className={`relative! z-10! flex-shrink-0! w-10! h-10! rounded-full! flex! items-center! justify-center! border-4! border-white! ${activity.status === 'pending' ? 'bg-amber-100! text-amber-600!' : 'bg-gray-100! text-gray-600!'}`}>
-                  <activity.icon size={16} strokeWidth={2} />
-                </div>
-                <div className="flex-1! pt-1!">
-                  <div className="flex! justify-between! items-start! mb-1!">
-                    <h4 className="text-sm! font-medium! text-gray-900!">{activity.title}</h4>
-                    <span className="flex! items-center! gap-1! text-xs! text-gray-400! font-light!">
-                      <Clock size={12} />
-                      {activity.time}
-                    </span>
+            {loading ? (
+              <p className="text-sm! text-gray-500!">Loading activities...</p>
+            ) : recentActivities.length === 0 ? (
+              <p className="text-sm! text-gray-500!">No recent activities found.</p>
+            ) : (
+              recentActivities.map((activity: any, i: number) => {
+                const IconComponent = ICON_MAP[activity.iconType] || Activity;
+                return (
+                  <div key={i} className="flex! gap-4! relative!">
+                    {i !== recentActivities.length - 1 && (
+                      <div className="absolute! left-5! top-10! bottom-[-24px]! w-[2px]! bg-gray-100!" />
+                    )}
+                    <div className={`relative! z-10! flex-shrink-0! w-10! h-10! rounded-full! flex! items-center! justify-center! border-4! border-white! ${activity.status === 'pending' ? 'bg-amber-100! text-amber-600!' : 'bg-gray-100! text-gray-600!'}`}>
+                      <IconComponent size={16} strokeWidth={2} />
+                    </div>
+                    <div className="flex-1! pt-1!">
+                      <div className="flex! justify-between! items-start! mb-1!">
+                        <h4 className="text-sm! font-medium! text-gray-900!">{activity.title}</h4>
+                        <span className="flex! items-center! gap-1! text-xs! text-gray-400! font-light!">
+                          <Clock size={12} />
+                          {timeAgo(activity.time)}
+                        </span>
+                      </div>
+                      <p className="text-sm! text-gray-500! font-light! leading-relaxed!">{activity.desc}</p>
+                    </div>
                   </div>
-                  <p className="text-sm! text-gray-500! font-light! leading-relaxed!">{activity.desc}</p>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            )}
           </div>
           
           <button className="mt-6! w-full! py-3! text-sm! font-medium! text-gray-700! bg-gray-50! hover:bg-gray-100! rounded-2xl! transition-colors!">

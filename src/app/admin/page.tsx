@@ -38,24 +38,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="w-full! max-w-7xl! mx-auto! space-y-8!">
-      {/* Header Section */}
-      <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
-        <div>
-          <h2 className="text-3xl! font-semibold! text-gray-900! tracking-tight!">Dashboard Overview</h2>
-          <p className="text-gray-500! mt-1! font-light!">Welcome back! Here's what's happening with your properties today.</p>
-        </div>
-        <div className="flex! items-center! gap-3!">
-          <button className="flex! items-center! gap-2! px-5! py-2.5! bg-white! border! border-gray-200! text-gray-700! rounded-full! hover:bg-gray-50! transition-colors! font-medium! text-sm! shadow-sm!">
-            <Eye size={16} />
-            View Live Site
-          </button>
-          <button className="flex! items-center! gap-2! px-5! py-2.5! bg-gray-900! text-white! rounded-full! hover:bg-gray-800! transition-colors! font-medium! text-sm! shadow-md!">
-            <PlusCircle size={16} />
-            Add Property
-          </button>
-        </div>
-      </div>
-      
       {/* Stats Grid */}
       <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-4! gap-6!">
         {stats.map((stat, i) => (

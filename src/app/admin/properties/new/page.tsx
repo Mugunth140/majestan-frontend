@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
-import { Upload, X, Save, ArrowLeft, Loader2, ImagePlus } from "lucide-react";
+import { Upload, X, Save, ArrowLeft, Loader2, ImagePlus, Check, ChevronDown } from "lucide-react";
 import Link from "next/link";
 
 export default function NewPropertyPage() {
@@ -20,10 +20,44 @@ export default function NewPropertyPage() {
     city: "",
     state: "",
     country: "India",
+    slug: "",
+    builderName: "",
+    subLocation: "",
+    bedrooms: "",
+    areaSqft: "",
+    metaTitle: "",
+    metaDescription: "",
+    metaKeywords: "",
+    canonicalUrl: "",
+    ogTitle: "",
+    ogDescription: "",
   });
 
   const [images, setImages] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [amenities, setAmenities] = useState<{ id: number; name: string }[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchAmenities = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/admin/amenities`);
+        if (res.ok) {
+          const json = await res.json();
+          setAmenities(json.data || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch amenities", err);
+      }
+    };
+    fetchAmenities();
+  }, []);
+
+  const toggleAmenity = (id: number) => {
+    setSelectedAmenities(prev => 
+      prev.includes(id) ? prev.filter(aId => aId !== id) : [...prev, id]
+    );
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -92,7 +126,32 @@ export default function NewPropertyPage() {
 
       // 2. Create Property
       const payload = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        price: formData.price,
+        propertyType: formData.propertyType,
+        status: formData.status,
+        city: formData.city,
+        state: formData.state,
+        country: formData.country,
+        slug: formData.slug,
+        builderName: formData.builderName,
+        details: {
+          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
+          areaSqft: formData.areaSqft ? parseFloat(formData.areaSqft) : undefined,
+        },
+        location: {
+          subLocation: formData.subLocation
+        },
+        seo: {
+          metaTitle: formData.metaTitle,
+          metaDescription: formData.metaDescription,
+          metaKeywords: formData.metaKeywords,
+          canonicalUrl: formData.canonicalUrl,
+          ogTitle: formData.ogTitle,
+          ogDescription: formData.ogDescription,
+        },
+        amenities: selectedAmenities.map(id => ({ amenityId: id })),
         ownerId: 1, // Defaulting for now
         files: uploadedImageKeys.map(key => ({
           fileType: "IMAGE",
@@ -143,47 +202,163 @@ export default function NewPropertyPage() {
           <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Property Title</label>
-              <input required name="title" value={formData.title} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-2! focus:ring-gray-900! focus:border-gray-900! outline-none! transition-all!" placeholder="E.g. Luxury 3BHK Villa in Indiranagar" />
+              <input required name="title" value={formData.title} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Luxury 3BHK Villa" />
             </div>
 
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Price (₹)</label>
-              <input required name="price" value={formData.price} onChange={handleChange} type="number" className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-2! focus:ring-gray-900! focus:border-gray-900! outline-none! transition-all!" placeholder="E.g. 15000000" />
+              <input required name="price" value={formData.price} onChange={handleChange} type="number" className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. 15000000" />
             </div>
 
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Property Type</label>
-              <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-2! focus:ring-gray-900! focus:border-gray-900! outline-none! transition-all!">
-                <option value="apartment">Apartment</option>
-                <option value="villa">Villa</option>
-                <option value="independent-house">Independent House</option>
-                <option value="commercial-space">Commercial</option>
-              </select>
+              <div className="relative!">
+                <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="plot">Plot</option>
+                  <option value="commercial">Commercial Space</option>
+                  <option value="coworking">Coworking</option>
+                  <option value="farmland">Farmland</option>
+                  <option value="industrial">Industrial Space</option>
+                  <option value="individual_portion">Independent House</option>
+                </select>
+                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                  <ChevronDown size={18} />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2!">
+              <label className="text-sm! font-bold! text-gray-700!">Property ID</label>
+              <input 
+                type="text" 
+                readOnly 
+                value={`Auto-generated on save (${
+                  formData.propertyType === 'apartment' ? 'AP' : 
+                  formData.propertyType === 'villa' ? 'V' : 
+                  formData.propertyType === 'plot' ? 'P' : 
+                  formData.propertyType === 'commercial' ? 'CS' : 
+                  formData.propertyType === 'coworking' ? 'CW' : 
+                  formData.propertyType === 'farmland' ? 'FL' : 
+                  formData.propertyType === 'industrial' ? 'IS' : 
+                  formData.propertyType === 'individual_portion' ? 'IP' : ''
+                }...)`}
+                className="w-full! bg-gray-100! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! text-gray-500! font-medium! cursor-not-allowed! outline-none!" 
+              />
             </div>
 
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Status</label>
-              <select name="status" value={formData.status} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-2! focus:ring-gray-900! focus:border-gray-900! outline-none! transition-all!">
-                <option value="AVAILABLE">Available</option>
-                <option value="SOLD">Sold</option>
-                <option value="RENTED">Rented</option>
-              </select>
+              <div className="relative!">
+                <select name="status" value={formData.status} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+                  <option value="AVAILABLE">Available</option>
+                  <option value="UNAVAILABLE">Unavailable (Hidden)</option>
+                  <option value="SOLD">Sold</option>
+                  <option value="RENTED">Rented</option>
+                </select>
+                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                  <ChevronDown size={18} />
+                </div>
+              </div>
             </div>
             
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">City</label>
-              <input required name="city" value={formData.city} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-2! focus:ring-gray-900! focus:border-gray-900! outline-none! transition-all!" placeholder="E.g. Coimbatore" />
+              <input required name="city" value={formData.city} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Coimbatore" />
+            </div>
+
+            <div className="space-y-2!">
+              <label className="text-sm! font-bold! text-gray-700!">Sublocation (Area)</label>
+              <input required name="subLocation" value={formData.subLocation} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Thondamuthur" />
             </div>
 
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">State</label>
-              <input required name="state" value={formData.state} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-2! focus:ring-gray-900! focus:border-gray-900! outline-none! transition-all!" placeholder="E.g. Tamil Nadu" />
+              <input required name="state" value={formData.state} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Tamil Nadu" />
+            </div>
+
+            <div className="space-y-2!">
+              <label className="text-sm! font-bold! text-gray-700!">BHKs / Bedrooms</label>
+              <input name="bedrooms" type="number" value={formData.bedrooms} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. 3" />
+            </div>
+
+            <div className="space-y-2!">
+              <label className="text-sm! font-bold! text-gray-700!">Area (Sqft)</label>
+              <input name="areaSqft" type="number" value={formData.areaSqft} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. 1500" />
+            </div>
+
+            <div className="space-y-2!">
+              <label className="text-sm! font-bold! text-gray-700!">Builder Name</label>
+              <input name="builderName" value={formData.builderName} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Sobha Developers" />
             </div>
           </div>
 
           <div className="space-y-2!">
             <label className="text-sm! font-bold! text-gray-700!">Description</label>
-            <textarea required name="description" value={formData.description} onChange={handleChange} rows={4} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-2! focus:ring-gray-900! focus:border-gray-900! outline-none! transition-all!" placeholder="Detailed description of the property..."></textarea>
+            <textarea required name="description" value={formData.description} onChange={handleChange} rows={4} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="Detailed description of the property..."></textarea>
+          </div>
+
+          {/* Amenities Section */}
+          <div className="pt-6! border-t! border-gray-100!">
+            <h3 className="text-lg! font-bold! text-gray-900! mb-4!">Amenities</h3>
+            <div className="grid! grid-cols-2! md:grid-cols-3! lg:grid-cols-4! gap-3!">
+              {amenities.map(amenity => (
+                <button
+                  key={amenity.id}
+                  type="button"
+                  onClick={() => toggleAmenity(amenity.id)}
+                  className={`flex! items-center! gap-3! p-3! rounded-xl! border! text-sm! font-medium! transition-all! ${
+                    selectedAmenities.includes(amenity.id) 
+                      ? 'bg-gray-900! border-gray-900! text-white!' 
+                      : 'bg-white! border-gray-200! text-gray-700! hover:border-gray-300! hover:bg-gray-50!'
+                  }`}
+                >
+                  <div className={`w-5! h-5! rounded-md! border! flex! items-center! justify-center! ${
+                    selectedAmenities.includes(amenity.id)
+                      ? 'bg-white! border-white!'
+                      : 'bg-white! border-gray-300!'
+                  }`}>
+                    {selectedAmenities.includes(amenity.id) && <Check size={14} className="text-gray-900!" />}
+                  </div>
+                  {amenity.name}
+                </button>
+              ))}
+              {amenities.length === 0 && (
+                <div className="col-span-full! text-sm! text-gray-500! italic!">No amenities available.</div>
+              )}
+            </div>
+          </div>
+
+          {/* SEO Metadata Section */}
+          <div className="pt-6! border-t! border-gray-100!">
+            <h3 className="text-lg! font-bold! text-gray-900! mb-4!">SEO Metadata</h3>
+            <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
+              <div>
+                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Meta Title</label>
+                <input name="metaTitle" value={formData.metaTitle} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="SEO Title" />
+              </div>
+              <div>
+                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Canonical URL</label>
+                <input name="canonicalUrl" value={formData.canonicalUrl} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="https://..." />
+              </div>
+              <div className="md:col-span-2!">
+                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Meta Description</label>
+                <textarea name="metaDescription" value={formData.metaDescription} onChange={handleChange} rows={2} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="Brief description for search engines" />
+              </div>
+              <div className="md:col-span-2!">
+                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Meta Keywords</label>
+                <input name="metaKeywords" value={formData.metaKeywords} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="keyword1, keyword2, keyword3" />
+              </div>
+              <div>
+                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">OG Title</label>
+                <input name="ogTitle" value={formData.ogTitle} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="Open Graph Title" />
+              </div>
+              <div>
+                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">OG Description</label>
+                <input name="ogDescription" value={formData.ogDescription} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="Open Graph Description" />
+              </div>
+            </div>
           </div>
 
           {/* Image Upload Section */}

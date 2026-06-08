@@ -25,12 +25,6 @@ export default function NewPropertyPage() {
     subLocation: "",
     bedrooms: "",
     areaSqft: "",
-    metaTitle: "",
-    metaDescription: "",
-    metaKeywords: "",
-    canonicalUrl: "",
-    ogTitle: "",
-    ogDescription: "",
   });
 
   const [images, setImages] = useState<File[]>([]);
@@ -126,32 +120,8 @@ export default function NewPropertyPage() {
 
       // 2. Create Property
       const payload = {
-        title: formData.title,
-        description: formData.description,
-        price: formData.price,
-        propertyType: formData.propertyType,
-        status: formData.status,
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        slug: formData.slug,
-        builderName: formData.builderName,
-        details: {
-          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
-          areaSqft: formData.areaSqft ? parseFloat(formData.areaSqft) : undefined,
-        },
-        location: {
-          subLocation: formData.subLocation
-        },
-        seo: {
-          metaTitle: formData.metaTitle,
-          metaDescription: formData.metaDescription,
-          metaKeywords: formData.metaKeywords,
-          canonicalUrl: formData.canonicalUrl,
-          ogTitle: formData.ogTitle,
-          ogDescription: formData.ogDescription,
-        },
-        amenities: selectedAmenities.map(id => ({ amenityId: id })),
+        ...formData,
+        amenityIds: selectedAmenities,
         ownerId: 1, // Defaulting for now
         files: uploadedImageKeys.map(key => ({
           fileType: "IMAGE",
@@ -234,7 +204,7 @@ export default function NewPropertyPage() {
               <input 
                 type="text" 
                 readOnly 
-                value={`Auto-generated on save (${
+                value={`Auto-generated (${
                   formData.propertyType === 'apartment' ? 'AP' : 
                   formData.propertyType === 'villa' ? 'V' : 
                   formData.propertyType === 'plot' ? 'P' : 
@@ -243,7 +213,7 @@ export default function NewPropertyPage() {
                   formData.propertyType === 'farmland' ? 'FL' : 
                   formData.propertyType === 'industrial' ? 'IS' : 
                   formData.propertyType === 'individual_portion' ? 'IP' : ''
-                }...)`}
+                }-XXXX)`}
                 className="w-full! bg-gray-100! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! text-gray-500! font-medium! cursor-not-allowed! outline-none!" 
               />
             </div>
@@ -327,37 +297,6 @@ export default function NewPropertyPage() {
               {amenities.length === 0 && (
                 <div className="col-span-full! text-sm! text-gray-500! italic!">No amenities available.</div>
               )}
-            </div>
-          </div>
-
-          {/* SEO Metadata Section */}
-          <div className="pt-6! border-t! border-gray-100!">
-            <h3 className="text-lg! font-bold! text-gray-900! mb-4!">SEO Metadata</h3>
-            <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
-              <div>
-                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Meta Title</label>
-                <input name="metaTitle" value={formData.metaTitle} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="SEO Title" />
-              </div>
-              <div>
-                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Canonical URL</label>
-                <input name="canonicalUrl" value={formData.canonicalUrl} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="https://..." />
-              </div>
-              <div className="md:col-span-2!">
-                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Meta Description</label>
-                <textarea name="metaDescription" value={formData.metaDescription} onChange={handleChange} rows={2} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="Brief description for search engines" />
-              </div>
-              <div className="md:col-span-2!">
-                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">Meta Keywords</label>
-                <input name="metaKeywords" value={formData.metaKeywords} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="keyword1, keyword2, keyword3" />
-              </div>
-              <div>
-                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">OG Title</label>
-                <input name="ogTitle" value={formData.ogTitle} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="Open Graph Title" />
-              </div>
-              <div>
-                <label className="block! text-xs! font-bold! text-gray-700! uppercase! tracking-wider! mb-2!">OG Description</label>
-                <input name="ogDescription" value={formData.ogDescription} onChange={handleChange} className="w-full! px-4! py-3! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:ring-2! focus:ring-gray-900! focus:bg-white! transition-all!" placeholder="Open Graph Description" />
-              </div>
             </div>
           </div>
 

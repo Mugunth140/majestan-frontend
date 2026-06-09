@@ -24,6 +24,7 @@ export default function NewPropertyPage() {
     builderName: "",
     subLocation: "",
     bedrooms: "",
+    bathrooms: "",
     areaSqft: "",
   });
 
@@ -31,21 +32,50 @@ export default function NewPropertyPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [amenities, setAmenities] = useState<{ id: number; name: string }[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
+  const [localities, setLocalities] = useState<any[]>([]);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableSublocations, setAvailableSublocations] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchAmenities = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/amenities`);
-        if (res.ok) {
-          const json = await res.json();
+        const token = window.localStorage.getItem("majestan_access_token");
+        const [amenitiesRes, localitiesRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/admin/amenities`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`${API_BASE_URL}/admin/localities/all`, { headers: { "Authorization": `Bearer ${token}` } })
+        ]);
+
+        if (amenitiesRes.ok) {
+          const json = await amenitiesRes.json();
           setAmenities(json.data || []);
         }
+
+        if (localitiesRes.ok) {
+          const json = await localitiesRes.json();
+          const locs = json.data || json || [];
+          setLocalities(locs);
+          
+          // Extract unique cities
+          const cities = Array.from(new Set(locs.map((l: any) => l.cityName).filter(Boolean))) as string[];
+          setAvailableCities(cities);
+        }
       } catch (err) {
-        console.error("Failed to fetch amenities", err);
+        console.error("Failed to fetch form data", err);
       }
     };
-    fetchAmenities();
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    if (formData.city) {
+      const subs = localities
+        .filter((l) => l.cityName === formData.city && l.localityName)
+        .map((l) => l.localityName);
+      setAvailableSublocations(Array.from(new Set(subs)));
+    } else {
+      setAvailableSublocations([]);
+    }
+  }, [formData.city, localities]);
 
   const toggleAmenity = (id: number) => {
     setSelectedAmenities(prev => 
@@ -54,7 +84,19 @@ export default function NewPropertyPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "city") {
+      const cityData = localities.find(l => l.cityName === value);
+      setFormData({
+        ...formData,
+        [name]: value,
+        subLocation: "", // Reset sublocation on city change
+        state: cityData?.stateName || formData.state,
+        country: cityData?.countryName || formData.country
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,8 +162,24 @@ export default function NewPropertyPage() {
 
       // 2. Create Property
       const payload = {
-        ...formData,
-        amenityIds: selectedAmenities,
+        title: formData.title,
+        price: formData.price,
+        propertyType: formData.propertyType,
+        status: formData.status,
+        city: formData.city,
+        state: formData.state,
+        country: formData.country,
+        builderName: formData.builderName,
+        description: formData.description,
+        details: {
+          bedrooms: Number(formData.bedrooms) || 0,
+          bathrooms: Number(formData.bathrooms) || 0,
+          areaSqft: Number(formData.areaSqft) || 0
+        },
+        location: {
+          subLocation: formData.subLocation
+        },
+        amenities: selectedAmenities.map(id => ({ amenityId: id })),
         ownerId: 1, // Defaulting for now
         files: uploadedImageKeys.map(key => ({
           fileType: "IMAGE",
@@ -235,12 +293,32 @@ export default function NewPropertyPage() {
             
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">City</label>
-              <input required name="city" value={formData.city} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Coimbatore" />
+              <div className="relative!">
+                <select required name="city" value={formData.city} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+                  <option value="" disabled>Select City</option>
+                  {availableCities.map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                  <ChevronDown size={18} />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Sublocation (Area)</label>
-              <input required name="subLocation" value={formData.subLocation} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Thondamuthur" />
+              <div className="relative!">
+                <select required name="subLocation" value={formData.subLocation} onChange={handleChange} disabled={!formData.city} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block! disabled:opacity-50! disabled:cursor-not-allowed!">
+                  <option value="" disabled>{formData.city ? "Select Area" : "Select City First"}</option>
+                  {availableSublocations.map(sub => (
+                    <option key={sub} value={sub}>{sub}</option>
+                  ))}
+                </select>
+                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                  <ChevronDown size={18} />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2!">
@@ -251,6 +329,11 @@ export default function NewPropertyPage() {
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">BHKs / Bedrooms</label>
               <input name="bedrooms" type="number" value={formData.bedrooms} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. 3" />
+            </div>
+
+            <div className="space-y-2!">
+              <label className="text-sm! font-bold! text-gray-700!">Bathrooms</label>
+              <input name="bathrooms" type="number" value={formData.bathrooms} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. 2" />
             </div>
 
             <div className="space-y-2!">

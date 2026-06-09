@@ -100,7 +100,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/assets/images/logo/fav.png" />
         <link rel="apple-touch-icon-precomposed" href="/assets/images/logo/fav.png" />
       </head>
-      <body className="theme-color-3 majestan-app-root">
+      <body className="theme-color-3 majestan-app-root" suppressHydrationWarning>
         <QueryProvider>
           <LocationProvider>
             {children}

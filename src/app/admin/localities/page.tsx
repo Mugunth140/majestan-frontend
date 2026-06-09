@@ -50,6 +50,24 @@ export default function AdminLocalitiesPage() {
     fetchLocalities();
   };
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this locality?")) return;
+    try {
+      const token = window.localStorage.getItem("majestan_access_token");
+      const res = await fetch(`${API_BASE_URL}/admin/localities/${id}`, {
+        method: 'DELETE',
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        fetchLocalities();
+      } else {
+        console.error("Failed to delete locality");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const getStatusBadge = (status: number) => {
     if (status === 1) {
       return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-emerald-50! text-emerald-600!"><CheckCircle size={12} /> Active</span>;
@@ -60,10 +78,10 @@ export default function AdminLocalitiesPage() {
   return (
     <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
-        <h2 className="text-2xl! font-bold! text-gray-900! tracking-tight!">Locality Management</h2>
+        <h2 className="text-2xl! font-bold! text-gray-900! tracking-tight!">Cities & Areas</h2>
         <Link href="/admin/localities/new" className="inline-flex! items-center! gap-2! bg-gray-900! hover:bg-gray-800! text-white! px-5! py-2.5! rounded-xl! font-medium! transition-all! shadow-sm!">
           <Plus size={18} />
-          Add Locality
+          Add City / Area
         </Link>
       </div>
       
@@ -127,27 +145,27 @@ export default function AdminLocalitiesPage() {
                           <MapPin size={20} />
                         </div>
                         <div>
-                          <div className="font-medium! text-gray-900! group-hover:text-blue-600! transition-colors!">{locality.name}</div>
-                          <div className="text-xs! text-gray-400! mt-0.5! truncate! max-w-xs!">{locality.slug}</div>
+                          <div className="font-medium! text-gray-900! group-hover:text-blue-600! transition-colors!">{locality.localityName || locality.cityName}</div>
+                          <div className="text-xs! text-gray-400! mt-0.5! truncate! max-w-xs!">{locality.countryName}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900! capitalize!">{locality.city || 'N/A'}</div>
-                      <div className="text-xs! text-gray-400! mt-0.5!">{locality.state || 'N/A'}</div>
+                      <div className="text-gray-900! capitalize!">{locality.cityName || 'N/A'}</div>
+                      <div className="text-xs! text-gray-400! mt-0.5!">{locality.stateName || 'N/A'}</div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900!">{locality.pincode || '-'}</div>
+                      <div className="text-gray-900!">{locality.postalCode || '-'}</div>
                     </td>
                     <td className="px-6! py-4!">
-                      {getStatusBadge(locality.status)}
+                      {getStatusBadge(locality.isActive)}
                     </td>
                     <td className="px-6! py-4! text-right!">
                       <div className="flex! items-center! justify-end! gap-2!">
-                        <button className="p-2! text-gray-400! hover:text-emerald-600! hover:bg-emerald-50! rounded-lg! transition-colors!" title="Edit Locality">
+                        <Link href={`/admin/localities/${locality.id}`} className="p-2! text-gray-400! hover:text-emerald-600! hover:bg-emerald-50! rounded-lg! transition-colors!" title="Edit Locality">
                           <Edit size={16} />
-                        </button>
-                        <button className="p-2! text-gray-400! hover:text-rose-600! hover:bg-rose-50! rounded-lg! transition-colors!" title="Delete Locality">
+                        </Link>
+                        <button onClick={() => handleDelete(locality.id)} className="p-2! text-gray-400! hover:text-rose-600! hover:bg-rose-50! rounded-lg! transition-colors!" title="Delete Locality">
                           <Trash2 size={16} />
                         </button>
                       </div>

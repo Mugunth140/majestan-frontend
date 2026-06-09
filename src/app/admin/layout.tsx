@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </li>
               <li>
                 <Link href="/admin/localities" className="flex! items-center! gap-3! rounded-2xl! px-4! py-3! text-[14px]! font-semibold! text-[#5c5e61]! transition-all! hover:bg-[#27427f]/5! hover:text-[#27427f]!">
-                  <MapPin size={20} className="text-[#27427f]/70!" /> Localities
+                  <MapPin size={20} className="text-[#27427f]/70!" /> Cities & Areas
                 </Link>
               </li>
               <li>

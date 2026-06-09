@@ -89,20 +89,21 @@ export default function AdminNewSublocationPage() {
         <div className="p-6! space-y-6!">
           
           <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
-            <div className="col-span-full! text-red-500! p-4! bg-red-50! rounded-xl!">DEBUG: Cities array length: {cities.length}</div>
+            {/* <div className="col-span-full! text-red-500! p-4! bg-red-50! rounded-xl!">DEBUG: Cities array length: {cities.length}</div> */}
             
-            <div className="space-y-2!">
+                                    <div className="space-y-2!">
               <label className="text-sm! font-medium! text-gray-900!">Select City <span className="text-red-500!">*</span></label>
               <select
                 required
                 value={formData.city_id}
                 onChange={(e) => setFormData({...formData, city_id: e.target.value})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="w-full! px-4! py-2.5! bg-white! text-black! border-2! border-black! rounded-xl! text-base! focus:outline-none! transition-all! appearance-auto! min-h-[50px]! block! opacity-100! visible!"
+                style={{ display: "block", visibility: "visible", width: "100%", height: "50px", border: "2px solid black", backgroundColor: "white", color: "black", opacity: 1, position: "relative", zIndex: 9999 }}
               >
                 <option value="">-- Select a City --</option>
                 {cities.map((city) => (
                   <option key={city.id} value={city.id}>
-                    {city.city_name} {city.state_name ? `(${city.state_name})` : ''}
+                    {city.city_name} {city.state_name ? '(' + city.state_name + ')' : ''}
                   </option>
                 ))}
               </select>
@@ -115,7 +116,7 @@ export default function AdminNewSublocationPage() {
                 required
                 value={formData.locality_name}
                 onChange={(e) => setFormData({...formData, locality_name: e.target.value})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="w-full! px-4! py-2.5! bg-gray-50! border-2! border-blue-500! rounded-xl! text-sm! focus:outline-none! transition-all! appearance-auto! min-h-[50px]! block! opacity-100! visible!"
                 placeholder="e.g., Velachery"
               />
             </div>
@@ -126,7 +127,7 @@ export default function AdminNewSublocationPage() {
                 type="text"
                 value={formData.postal_code}
                 onChange={(e) => setFormData({...formData, postal_code: e.target.value})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="w-full! px-4! py-2.5! bg-gray-50! border-2! border-blue-500! rounded-xl! text-sm! focus:outline-none! transition-all! appearance-auto! min-h-[50px]! block! opacity-100! visible!"
                 placeholder="e.g., 600042"
               />
             </div>
@@ -136,7 +137,7 @@ export default function AdminNewSublocationPage() {
               <select
                 value={formData.is_active}
                 onChange={(e) => setFormData({...formData, is_active: parseInt(e.target.value)})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="w-full! px-4! py-2.5! bg-gray-50! border-2! border-blue-500! rounded-xl! text-sm! focus:outline-none! transition-all! appearance-auto! min-h-[50px]! block! opacity-100! visible!"
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>

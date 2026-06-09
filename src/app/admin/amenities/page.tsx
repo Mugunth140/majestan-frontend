@@ -35,7 +35,7 @@ export default function AdminAmenitiesPage() {
       });
       if (res.ok) {
         const json = await res.json();
-        setAmenities(json.data || []);
+        setAmenities(json.data?.items || json.data || []);
       }
     } catch (e) {
       console.error(e);

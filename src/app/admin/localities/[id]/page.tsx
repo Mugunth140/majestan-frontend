@@ -35,13 +35,13 @@ export default function EditLocalityPage() {
           const json = await res.json();
           const data = json.data || json;
           setFormData({
-            cityName: data.cityName || "",
-            localityName: data.localityName || "",
-            stateName: data.stateName || "Tamil Nadu",
-            countryName: data.countryName || "India",
-            countryCode: data.countryCode || "IN",
-            postalCode: data.postalCode || "",
-            isActive: data.isActive !== undefined ? data.isActive : 1,
+            cityName: data.city_name || "",
+            localityName: data.locality_name || "",
+            stateName: data.state_name || "Tamil Nadu",
+            countryName: data.country_name || "India",
+            countryCode: data.country_code || "IN",
+            postalCode: data.postal_code || "",
+            isActive: data.is_active !== undefined ? data.is_active : 1,
           });
         }
       } catch (err) {

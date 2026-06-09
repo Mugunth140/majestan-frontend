@@ -53,14 +53,15 @@ export default function NewLocalityPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to add locality");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to add locality");
       }
 
       alert("Locality added successfully!");
       router.push("/admin/localities");
     } catch (e) {
       console.error(e);
-      alert("Failed to add locality. Please try again.");
+      alert(e instanceof Error ? e.message : "Failed to add locality. Please try again.");
     } finally {
       setSubmitting(false);
     }

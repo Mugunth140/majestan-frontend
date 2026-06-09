@@ -44,7 +44,7 @@ export default function NewPropertyPage() {
         const res = await fetch(`${API_BASE_URL}/admin/amenities`);
         if (res.ok) {
           const json = await res.json();
-          setAmenities(json.data || []);
+          setAmenities(json.data?.items || json.data || []);
         }
       } catch (err) {
         console.error("Failed to fetch amenities", err);

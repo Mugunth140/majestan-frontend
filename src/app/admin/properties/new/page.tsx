@@ -47,7 +47,7 @@ export default function NewPropertyPage() {
 
         if (amenitiesRes.ok) {
           const json = await amenitiesRes.json();
-          setAmenities(json.data || []);
+          setAmenities(json.data?.items || json.data || []);
         }
 
         if (localitiesRes.ok) {

@@ -32,7 +32,7 @@ export default function AdminLeadsPage() {
       });
       if (res.ok) {
         const json = await res.json();
-        setLeads(json.items || []);
+        setLeads(json.data?.items || json.data || []);
       }
     } catch (e) {
       console.error(e);

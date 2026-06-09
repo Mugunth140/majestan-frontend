@@ -38,7 +38,7 @@ export default function AdminPropertiesPage() {
       });
       if (res.ok) {
         const json = await res.json();
-        setProperties(json.data || []);
+        setProperties(json.data?.items || json.data || []);
       }
     } catch (e) {
       console.error(e);

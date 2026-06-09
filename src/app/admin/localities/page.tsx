@@ -36,7 +36,7 @@ export default function AdminLocalitiesPage() {
       });
       if (res.ok) {
         const json = await res.json();
-        setLocalities(json.data || []);
+        setLocalities(json.data?.items || json.data || []);
       }
     } catch (e) {
       console.error(e);
@@ -145,20 +145,20 @@ export default function AdminLocalitiesPage() {
                           <MapPin size={20} />
                         </div>
                         <div>
-                          <div className="font-medium! text-gray-900! group-hover:text-blue-600! transition-colors!">{locality.localityName || locality.cityName}</div>
-                          <div className="text-xs! text-gray-400! mt-0.5! truncate! max-w-xs!">{locality.countryName}</div>
+                          <div className="font-medium! text-gray-900! group-hover:text-blue-600! transition-colors!">{locality.locality_name || locality.city_name}</div>
+                          <div className="text-xs! text-gray-400! mt-0.5! truncate! max-w-xs!">{locality.country_name}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900! capitalize!">{locality.cityName || 'N/A'}</div>
-                      <div className="text-xs! text-gray-400! mt-0.5!">{locality.stateName || 'N/A'}</div>
+                      <div className="text-gray-900! capitalize!">{locality.city_name || 'N/A'}</div>
+                      <div className="text-xs! text-gray-400! mt-0.5!">{locality.state_name || 'N/A'}</div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900!">{locality.postalCode || '-'}</div>
+                      <div className="text-gray-900!">{locality.postal_code || '-'}</div>
                     </td>
                     <td className="px-6! py-4!">
-                      {getStatusBadge(locality.isActive)}
+                      {getStatusBadge(locality.is_active)}
                     </td>
                     <td className="px-6! py-4! text-right!">
                       <div className="flex! items-center! justify-end! gap-2!">

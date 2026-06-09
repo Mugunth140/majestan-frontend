@@ -256,7 +256,7 @@ export default function NewPropertyPage() {
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Property Type</label>
               <div className="relative!">
-                <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+                <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!" style={{ display: 'block', width: '100%', minHeight: '45px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111827', borderRadius: '0.75rem', padding: '0.625rem 1rem', opacity: 1, position: 'relative', zIndex: 0, appearance: 'none' }}>
                   <option value="apartment">Apartment</option>
                   <option value="villa">Villa</option>
                   <option value="plot">Plot</option>
@@ -294,7 +294,7 @@ export default function NewPropertyPage() {
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Status</label>
               <div className="relative!">
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+                <select name="status" value={formData.status} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!" style={{ display: 'block', width: '100%', minHeight: '45px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111827', borderRadius: '0.75rem', padding: '0.625rem 1rem', opacity: 1, position: 'relative', zIndex: 0, appearance: 'none' }}>
                   <option value="AVAILABLE">Available</option>
                   <option value="UNAVAILABLE">Unavailable (Hidden)</option>
                   <option value="SOLD">Sold</option>
@@ -309,7 +309,7 @@ export default function NewPropertyPage() {
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">City</label>
               <div className="relative!">
-                <select required name="city" value={formData.city} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+                <select required name="city" value={formData.city} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!" style={{ display: 'block', width: '100%', minHeight: '45px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111827', borderRadius: '0.75rem', padding: '0.625rem 1rem', opacity: 1, position: 'relative', zIndex: 0, appearance: 'none' }}>
                   <option value="" disabled>Select City</option>
                   {availableCities.map(city => (
                     <option key={city} value={city}>{city}</option>
@@ -324,7 +324,7 @@ export default function NewPropertyPage() {
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Sublocation (Area)</label>
               <div className="relative!">
-                <select required name="subLocation" value={formData.subLocation} onChange={handleChange} disabled={!formData.city} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block! disabled:opacity-50! disabled:cursor-not-allowed!">
+                <select required name="subLocation" value={formData.subLocation} onChange={handleChange} disabled={!formData.city} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block! disabled:opacity-50! disabled:cursor-not-allowed!" style={{ display: 'block', width: '100%', minHeight: '45px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111827', borderRadius: '0.75rem', padding: '0.625rem 1rem', opacity: 1, position: 'relative', zIndex: 0, appearance: 'none' }}>
                   <option value="" disabled>{formData.city ? "Select Area" : "Select City First"}</option>
                   {availableSublocations.map(sub => (
                     <option key={sub} value={sub}>{sub}</option>

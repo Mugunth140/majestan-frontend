@@ -103,6 +103,7 @@ export default function AdminNewCityPage() {
                 value={formData.is_active}
                 onChange={(e) => setFormData({...formData, is_active: parseInt(e.target.value)})}
                 className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                style={{ display: "block", visibility: "visible", width: "100%", height: "50px", border: "2px solid black", backgroundColor: "white", color: "black", opacity: 1, position: "relative", zIndex: 10, appearance: "auto" }}
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -111,7 +112,7 @@ export default function AdminNewCityPage() {
           </div>
         </div>
         
-        <div className="p-6! bg-gray-50/50! border-t! border-gray-100! flex! justify-end! gap-3!">
+        <div className="p-6! bg-gray-50/50! border-t! border-gray-100! flex! justify-end! gap-3!" style={{ display: 'block', width: '100%', minHeight: '45px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111827', borderRadius: '0.75rem', padding: '0.625rem 1rem', opacity: 1, position: 'relative', zIndex: 10, appearance: 'auto' }}>
           <Link
             href="/admin/cities"
             className="px-6! py-2.5! text-sm! font-medium! text-gray-600! hover:bg-gray-100! rounded-xl! transition-colors!"

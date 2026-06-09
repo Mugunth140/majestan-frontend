@@ -63,7 +63,7 @@ export default function AdminNewSublocationPage() {
         throw new Error("Failed to add sublocation");
       }
 
-      alert("Sublocation added successfully!");
+      alert("Sublocation added !successfully");
       router.push("/admin/sublocations");
     } catch (e: any) {
       console.error(e);
@@ -89,6 +89,7 @@ export default function AdminNewSublocationPage() {
         <div className="p-6! space-y-6!">
           
           <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
+            <div className="col-span-full! text-red-500! p-4! bg-red-50! rounded-xl!">DEBUG: Cities array length: {cities.length}</div>
             
             <div className="space-y-2!">
               <label className="text-sm! font-medium! text-gray-900!">Select City <span className="text-red-500!">*</span></label>

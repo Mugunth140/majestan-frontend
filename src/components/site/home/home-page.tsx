@@ -10,6 +10,7 @@ import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { HomePageData } from "@/lib/api";
 import Image from "next/image";
+import { toLocationSlug } from "@/lib/seo-urls";
 
 
 
@@ -17,7 +18,7 @@ import Image from "next/image";
 
 export function HomePage({ data }: { data: HomePageData }) {
   const { location } = useLocationContext();
-  const citySlug = location.toLowerCase().replace(/[\s,]+/g, '-');
+  const citySlug = toLocationSlug(location);
   
   const filteredApartments = data.featuredApartments.filter(p => 
     location === "Coimbatore" ? true : p.sublocation?.toLowerCase().includes(location.toLowerCase())

@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Sublocation, UnitType } from "@/lib/api";
 import { MapPin, ChevronDown, Search } from "lucide-react";
 import { buildListingUrl } from "@/lib/seo-urls";
+import { useLocationContext } from "@/contexts/LocationContext";
 
 const propertyTypeOptions = [
   ["apartment", "Apartment"],
@@ -24,6 +25,7 @@ export function HomeSearch({
   unitTypes: UnitType[];
 }) {
   const router = useRouter();
+  const { location: selectedCity } = useLocationContext();
   const [listingType, setListingType] = useState<"Sell" | "Rent">("Sell");
   const [propertyType, setPropertyType] = useState("");
   const [location, setLocation] = useState("");
@@ -38,14 +40,17 @@ export function HomeSearch({
 
   const filteredSublocations = useMemo(() => {
     const query = location.trim().toLowerCase();
+    const citySublocations = sublocations.filter(
+      (item) => item.city.toLowerCase() === selectedCity.toLowerCase(),
+    );
     const matches = query
-      ? sublocations.filter((item) =>
+      ? citySublocations.filter((item) =>
           item.sublocation.toLowerCase().includes(query),
         )
-      : sublocations;
+      : citySublocations;
 
     return matches.slice(0, 8);
-  }, [location, sublocations]);
+  }, [location, selectedCity, sublocations]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -79,9 +84,10 @@ export function HomeSearch({
     setError("");
 
     const url = buildListingUrl(
-      listingType, 
-      propertyType, 
-      location || "coimbatore"
+      listingType,
+      propertyType,
+      selectedCity,
+      location || undefined,
     );
 
     router.push(url);
@@ -113,7 +119,7 @@ export function HomeSearch({
               aria-expanded={isLocationMenuOpen}
               aria-controls="location-options"
               aria-labelledby="location-label"
-              placeholder="Search area, landmark..."
+              placeholder={`Search locality in ${selectedCity}...`}
               className="!w-full !outline-none !bg-transparent !text-gray-900 !placeholder-gray-400 !font-semibold !text-[15px] !border-none !p-0 !m-0 !shadow-none focus:!ring-0 !truncate !rounded-none !leading-normal !h-auto !min-h-0"
               value={location}
               onChange={(e) => {

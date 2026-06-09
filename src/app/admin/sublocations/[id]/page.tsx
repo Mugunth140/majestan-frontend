@@ -5,13 +5,14 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import type { AdminCity } from "@/lib/location-options";
 
 export default function AdminEditSublocationPage() {
   const router = useRouter();
   const { id } = useParams();
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [cities, setCities] = useState<any[]>([]);
+  const [cities, setCities] = useState<AdminCity[]>([]);
   
   const [formData, setFormData] = useState({
     city_id: "",
@@ -84,14 +85,15 @@ export default function AdminEditSublocationPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update sublocation");
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.message || "Failed to update sublocation");
       }
 
       alert("Sublocation updated successfully!");
       router.push("/admin/sublocations");
-    } catch (e: any) {
-      console.error(e);
-      alert(e.message || "Something went wrong");
+    } catch (error: unknown) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setSaving(false);
     }

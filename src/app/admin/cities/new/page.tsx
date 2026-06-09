@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { INDIA_STATES_AND_UNION_TERRITORIES } from "@/lib/location-options";
 
 export default function AdminNewCityPage() {
   const router = useRouter();
@@ -34,14 +35,15 @@ export default function AdminNewCityPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to add city");
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.message || "Failed to add city");
       }
 
       alert("City added successfully!");
       router.push("/admin/cities");
-    } catch (e: any) {
-      console.error(e);
-      alert(e.message || "Something went wrong");
+    } catch (error: unknown) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setSaving(false);
     }
@@ -76,24 +78,27 @@ export default function AdminNewCityPage() {
             </div>
             
             <div className="space-y-2!">
-              <label className="text-sm! font-medium! text-gray-900!">State Name</label>
-              <input
-                type="text"
+              <label className="text-sm! font-medium! text-gray-900!">State Name <span className="text-red-500!">*</span></label>
+              <select
+                required
                 value={formData.state_name}
                 onChange={(e) => setFormData({...formData, state_name: e.target.value})}
                 className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
-                placeholder="e.g., Tamil Nadu"
-              />
+              >
+                <option value="" disabled>Select a state or union territory</option>
+                {INDIA_STATES_AND_UNION_TERRITORIES.map((state) => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2!">
               <label className="text-sm! font-medium! text-gray-900!">Country</label>
               <input
                 type="text"
+                readOnly
                 value={formData.country_name}
-                onChange={(e) => setFormData({...formData, country_name: e.target.value})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
-                placeholder="e.g., India"
+                className="w-full! px-4! py-2.5! bg-gray-100! border! border-gray-200! rounded-xl! text-sm! text-gray-600!"
               />
             </div>
 
@@ -112,7 +117,7 @@ export default function AdminNewCityPage() {
           </div>
         </div>
         
-        <div className="p-6! bg-gray-50/50! border-t! border-gray-100! flex! justify-end! gap-3!" style={{ display: 'block', width: '100%', minHeight: '45px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#111827', borderRadius: '0.75rem', padding: '0.625rem 1rem', opacity: 1, position: 'relative', zIndex: 10, appearance: 'auto' }}>
+        <div className="p-6! bg-gray-50/50! border-t! border-gray-100! flex! justify-end! gap-3!">
           <Link
             href="/admin/cities"
             className="px-6! py-2.5! text-sm! font-medium! text-gray-600! hover:bg-gray-100! rounded-xl! transition-colors!"

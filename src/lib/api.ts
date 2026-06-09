@@ -1,6 +1,17 @@
 export type Sublocation = {
   id: number;
   sublocation: string;
+  cityId: number;
+  city: string;
+  state: string;
+  postalCode: string | null;
+};
+
+export type City = {
+  id: number;
+  city: string;
+  state: string;
+  country: string;
 };
 
 export type UnitType = {
@@ -87,6 +98,10 @@ export async function fetchApi<T>(
 
 export async function getHomePageData(): Promise<HomePageData> {
   return fetchApi<HomePageData>("/home");
+}
+
+export async function getCities(): Promise<City[]> {
+  return fetchApi<City[]>("/metadata/cities", { cache: "no-store" });
 }
 
 export async function createEnquiry(payload: {

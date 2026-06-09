@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
-import { Upload, X, Save, ArrowLeft, Loader2, ImagePlus, Check, ChevronDown } from "lucide-react";
+import { X, Save, ArrowLeft, Loader2, ImagePlus, Check, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import type { AdminCity, AdminSublocation } from "@/lib/location-options";
 
 export default function EditPropertyPage() {
   const router = useRouter();
@@ -22,7 +23,9 @@ export default function EditPropertyPage() {
     description: "",
     price: "",
     propertyType: "apartment",
-    status: "AVAILABLE",
+    status: "available",
+    cityId: "",
+    sublocationId: "",
     city: "",
     state: "",
     country: "India",
@@ -38,9 +41,33 @@ export default function EditPropertyPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [amenities, setAmenities] = useState<{ id: number; name: string }[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
-  const [localities, setLocalities] = useState<any[]>([]);
-  const [availableCities, setAvailableCities] = useState<string[]>([]);
-  const [availableSublocations, setAvailableSublocations] = useState<string[]>([]);
+  const [localities, setLocalities] = useState<AdminSublocation[]>([]);
+  const [availableCities, setAvailableCities] = useState<AdminCity[]>([]);
+  const resolvedCityId =
+    formData.cityId ||
+    String(
+      availableCities.find(
+        (city) => city.city_name.toLowerCase() === formData.city.toLowerCase(),
+      )?.id ?? "",
+    );
+  const availableSublocations = useMemo(
+    () =>
+      resolvedCityId
+        ? localities.filter(
+            (locality) => locality.city_id === Number(resolvedCityId),
+          )
+        : [],
+    [localities, resolvedCityId],
+  );
+  const resolvedSublocationId =
+    formData.sublocationId ||
+    String(
+      availableSublocations.find(
+        (sublocation) =>
+          sublocation.locality_name.toLowerCase() ===
+          formData.subLocation.toLowerCase(),
+      )?.id ?? "",
+    );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,25 +86,12 @@ export default function EditPropertyPage() {
 
         if (citiesRes.ok) {
           const json = await citiesRes.json();
-          const citiesData = json.data || json || [];
-          setAvailableCities(citiesData.map((c: any) => c.city_name));
+          const citiesData = (json.data || json || []) as AdminCity[];
+          setAvailableCities(citiesData);
           
           if (sublocationsRes.ok) {
             const subJson = await sublocationsRes.json();
-            const subData = subJson.data || subJson || [];
-            
-            // map sublocations to city_name
-            const enrichedSubs = subData.map((sub: any) => {
-              const city = citiesData.find((c: any) => c.id === sub.city_id);
-              return {
-                ...sub,
-                cityName: city?.city_name || "",
-                stateName: city?.state_name || "",
-                countryName: city?.country_name || "India",
-                localityName: sub.locality_name || ""
-              };
-            });
-            setLocalities(enrichedSubs);
+            setLocalities((subJson.data || subJson || []) as AdminSublocation[]);
           }
         }
       } catch (err) {
@@ -95,27 +109,44 @@ export default function EditPropertyPage() {
         if (res.ok) {
           const json = await res.json();
           const p = json.data || json;
+          const propertyLocation = p.propertyLocations?.[0];
+          const selectedSublocation = propertyLocation?.sublocation;
+          const details = p.propertyDetails || {};
           setFormData({
             title: p.title || "",
             description: p.description || "",
             price: p.price ? String(p.price) : "",
             propertyType: p.propertyType || propertyType,
-            status: p.status || "AVAILABLE",
+            status: p.status || "available",
+            cityId: selectedSublocation?.cityId
+              ? String(selectedSublocation.cityId)
+              : "",
+            sublocationId: propertyLocation?.locationId
+              ? String(propertyLocation.locationId)
+              : "",
             city: p.city || "",
             state: p.state || "",
             country: p.country || "India",
             slug: p.slug || "",
             builderName: p.builderName || "",
-            subLocation: p.location?.subLocation || "",
-            bedrooms: p.bedrooms ? String(p.bedrooms) : "",
-            bathrooms: p.bathrooms ? String(p.bathrooms) : "",
-            areaSqft: p.areaSqft ? String(p.areaSqft) : "",
+            subLocation: selectedSublocation?.localityName || "",
+            bedrooms: details.bedrooms ? String(details.bedrooms) : "",
+            bathrooms: details.bathrooms ? String(details.bathrooms) : "",
+            areaSqft: details.areaSqft ? String(details.areaSqft) : "",
           });
-          if (p.amenities) {
-             setSelectedAmenities(p.amenities.map((a: any) => a.id));
+          if (p.propertyAmenities) {
+             setSelectedAmenities(
+               p.propertyAmenities.map(
+                 (amenity: { amenityId: number }) => amenity.amenityId,
+               ),
+             );
           }
-          if (p.photos) {
-             setExistingImages(p.photos);
+          if (p.propertyFiles) {
+             setExistingImages(
+               p.propertyFiles.map(
+                 (file: { fileUrl: string }) => file.fileUrl,
+               ),
+             );
           }
         }
       } catch (err) {
@@ -128,17 +159,6 @@ export default function EditPropertyPage() {
     Promise.all([fetchData(), fetchPropertyData()]);
   }, [id, propertyType]);
 
-  useEffect(() => {
-    if (formData.city) {
-      const subs = localities
-        .filter((l) => l.cityName === formData.city && l.localityName)
-        .map((l) => l.localityName);
-      setAvailableSublocations(Array.from(new Set(subs)));
-    } else {
-      setAvailableSublocations([]);
-    }
-  }, [formData.city, localities]);
-
   const toggleAmenity = (id: number) => {
     setSelectedAmenities(prev => 
       prev.includes(id) ? prev.filter(aId => aId !== id) : [...prev, id]
@@ -147,14 +167,23 @@ export default function EditPropertyPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    if (name === "city") {
-      const cityData = localities.find(l => l.cityName === value);
+    if (name === "cityId") {
+      const cityData = availableCities.find((city) => city.id === Number(value));
       setFormData({
         ...formData,
-        [name]: value,
-        subLocation: "", // Reset sublocation on city change
-        state: cityData?.stateName || formData.state,
-        country: cityData?.countryName || formData.country
+        cityId: value,
+        city: cityData?.city_name || "",
+        sublocationId: "",
+        subLocation: "",
+        state: cityData?.state_name || "",
+        country: cityData?.country_name || "India",
+      });
+    } else if (name === "sublocationId") {
+      const sublocation = localities.find((item) => item.id === Number(value));
+      setFormData({
+        ...formData,
+        sublocationId: value,
+        subLocation: sublocation?.locality_name || "",
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -228,6 +257,8 @@ export default function EditPropertyPage() {
         price: formData.price,
         propertyType: formData.propertyType,
         status: formData.status,
+        cityId: Number(resolvedCityId),
+        sublocationId: Number(resolvedSublocationId),
         city: formData.city,
         state: formData.state,
         country: formData.country,
@@ -264,8 +295,8 @@ export default function EditPropertyPage() {
       }
 
       router.push("/admin/properties");
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
       setUploadingImages(false);
       setLoading(false);
     }
@@ -318,11 +349,11 @@ export default function EditPropertyPage() {
                   <option value="apartment">Apartment</option>
                   <option value="villa">Villa</option>
                   <option value="plot">Plot</option>
-                  <option value="commercial-space">Commercial Space</option>
+                  <option value="commercial">Commercial Space</option>
                   <option value="coworking">Coworking</option>
                   <option value="farmland">Farmland</option>
-                  <option value="industrial-space">Industrial Space</option>
-                  <option value="independent-house">Independent House</option>
+                  <option value="industrial">Industrial Space</option>
+                  <option value="individual_portion">Independent House</option>
                 </select>
                 <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
                   <ChevronDown size={18} />
@@ -339,11 +370,11 @@ export default function EditPropertyPage() {
                   formData.propertyType === 'apartment' ? 'AP' : 
                   formData.propertyType === 'villa' ? 'V' : 
                   formData.propertyType === 'plot' ? 'P' : 
-                  formData.propertyType === 'commercial-space' ? 'CS' : 
+                  formData.propertyType === 'commercial' ? 'CS' :
                   formData.propertyType === 'coworking' ? 'CW' : 
                   formData.propertyType === 'farmland' ? 'FL' : 
-                  formData.propertyType === 'industrial-space' ? 'IS' : 
-                  formData.propertyType === 'independent-house' ? 'IP' : ''
+                  formData.propertyType === 'industrial' ? 'IS' :
+                  formData.propertyType === 'individual_portion' ? 'IP' : ''
                 }-XXXX)`}
                 className="w-full! bg-gray-100! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! text-gray-500! font-medium! cursor-not-allowed! outline-none!" 
               />
@@ -353,10 +384,10 @@ export default function EditPropertyPage() {
               <label className="text-sm! font-bold! text-gray-700!">Status</label>
               <div className="relative!">
                 <select name="status" value={formData.status} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
-                  <option value="AVAILABLE">Available</option>
-                  <option value="UNAVAILABLE">Unavailable (Hidden)</option>
-                  <option value="SOLD">Sold</option>
-                  <option value="RENTED">Rented</option>
+                  <option value="available">Available</option>
+                  <option value="unavailable">Unavailable (Hidden)</option>
+                  <option value="sold">Sold</option>
+                  <option value="rented">Rented</option>
                 </select>
                 <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
                   <ChevronDown size={18} />
@@ -367,10 +398,10 @@ export default function EditPropertyPage() {
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">City</label>
               <div className="relative!">
-                <select required name="city" value={formData.city} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+                <select required name="cityId" value={resolvedCityId} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
                   <option value="" disabled>Select City</option>
                   {availableCities.map(city => (
-                    <option key={city} value={city}>{city}</option>
+                    <option key={city.id} value={city.id}>{city.city_name}</option>
                   ))}
                 </select>
                 <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
@@ -382,10 +413,10 @@ export default function EditPropertyPage() {
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">Sublocation (Area)</label>
               <div className="relative!">
-                <select required name="subLocation" value={formData.subLocation} onChange={handleChange} disabled={!formData.city} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block! disabled:opacity-50! disabled:cursor-not-allowed!">
-                  <option value="" disabled>{formData.city ? "Select Area" : "Select City First"}</option>
+                <select required name="sublocationId" value={resolvedSublocationId} onChange={handleChange} disabled={!resolvedCityId} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block! disabled:opacity-50! disabled:cursor-not-allowed!">
+                  <option value="" disabled>{resolvedCityId ? "Select Area" : "Select City First"}</option>
                   {availableSublocations.map(sub => (
-                    <option key={sub} value={sub}>{sub}</option>
+                    <option key={sub.id} value={sub.id}>{sub.locality_name}</option>
                   ))}
                 </select>
                 <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
@@ -396,7 +427,7 @@ export default function EditPropertyPage() {
 
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">State</label>
-              <input required name="state" value={formData.state} onChange={handleChange} className="w-full! bg-gray-50! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all!" placeholder="E.g. Tamil Nadu" />
+              <input required readOnly name="state" value={formData.state} className="w-full! bg-gray-100! border! border-gray-200! rounded-xl! px-4! py-3! text-sm! text-gray-600!" />
             </div>
 
             <div className="space-y-2!">

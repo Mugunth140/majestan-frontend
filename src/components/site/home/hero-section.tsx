@@ -7,17 +7,8 @@ import { Home as HomeIcon, Key, TrendingUp } from "lucide-react";
 import { HomeSearch } from "./home-search";
 import type { Sublocation, UnitType } from "@/lib/api";
 import Image from "next/image";
-
-const propertyCategories = [
-  ["Apartment", "/for-sale/apartments/coimbatore", "/assets/icons/properties/apartment.png"],
-  ["Villa", "/for-sale/villas/coimbatore", "/assets/icons/properties/villas.png"],
-  ["Independent House", "/for-sale/independent-houses/coimbatore", "/assets/icons/properties/house.png"],
-  ["Plots", "/for-sale/plots/coimbatore", "/assets/icons/properties/plot.png"],
-  ["Commercial Space", "/for-sale/commercial-spaces/coimbatore", "/assets/icons/properties/commercial.png"],
-  ["Industrial", "/for-sale/industrial-spaces/coimbatore", "/assets/icons/properties/industrial.png"],
-  ["Farmland", "/for-sale/farmlands/coimbatore", "/assets/icons/properties/farm-land.png"],
-  ["Co-Working", "/for-rent/coworking/coimbatore", "/assets/icons/properties/co-living.png"],
-] as const;
+import { useLocationContext } from "@/contexts/LocationContext";
+import { toLocationSlug } from "@/lib/seo-urls";
 
 const TAGLINES = [
   { id: 0, text: "Buy Your Dream Home", Icon: HomeIcon },
@@ -31,8 +22,19 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
-  const [city, setCity] = useState("Coimbatore");
+  const { location: city } = useLocationContext();
   const [activeIdx, setActiveIdx] = useState(0);
+  const citySlug = toLocationSlug(city);
+  const propertyCategories = [
+    ["Apartment", `/for-sale/apartments/${citySlug}`, "/assets/icons/properties/apartment.png"],
+    ["Villa", `/for-sale/villas/${citySlug}`, "/assets/icons/properties/villas.png"],
+    ["Independent House", `/for-sale/independent-houses/${citySlug}`, "/assets/icons/properties/house.png"],
+    ["Plots", `/for-sale/plots/${citySlug}`, "/assets/icons/properties/plot.png"],
+    ["Commercial Space", `/for-sale/commercial-spaces/${citySlug}`, "/assets/icons/properties/commercial.png"],
+    ["Industrial", `/for-sale/industrial-spaces/${citySlug}`, "/assets/icons/properties/industrial.png"],
+    ["Farmland", `/for-sale/farmlands/${citySlug}`, "/assets/icons/properties/farm-land.png"],
+    ["Co-Working", `/for-rent/coworking/${citySlug}`, "/assets/icons/properties/co-living.png"],
+  ] as const;
 
   /* ── Cycle taglines ─────────────────────────────────────────── */
   useEffect(() => {
@@ -41,24 +43,6 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
       3000
     );
     return () => clearInterval(id);
-  }, []);
-
-  /* ── Sync city label with stored location ───────────────────── */
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const stored = localStorage.getItem("majestan-location");
-    if (stored) setCity(stored);
-
-    const handleLocationChange = (event: Event) => {
-      const customEvent = event as CustomEvent<string>;
-      if (typeof customEvent.detail === "string" && customEvent.detail.trim()) {
-        setCity(customEvent.detail);
-      }
-    };
-
-    window.addEventListener("majestan-location-changed", handleLocationChange);
-    return () => window.removeEventListener("majestan-location-changed", handleLocationChange);
   }, []);
 
   const { Icon: ActiveIcon } = TAGLINES[activeIdx];
@@ -191,7 +175,11 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
 
         {/* Search bar */}
         <div className="w-full">
-          <HomeSearch sublocations={sublocations} unitTypes={unitTypes} />
+          <HomeSearch
+            key={city}
+            sublocations={sublocations}
+            unitTypes={unitTypes}
+          />
         </div>
 
         {/* Quick Links */}

@@ -21,6 +21,19 @@ export const PROPERTY_TYPES = {
 export type ListingTypeSlug = (typeof LISTING_TYPES)[keyof typeof LISTING_TYPES];
 export type PropertyTypeSlug = keyof typeof PROPERTY_TYPES;
 
+export function toLocationSlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function fromLocationSlug(value: string): string {
+  return decodeURIComponent(value).replace(/-/g, " ").trim();
+}
+
 /**
  * Builds a canonical SEO URL for property listings.
  */
@@ -48,8 +61,8 @@ export function buildListingUrl(
     normalizedPropertyType = foundEntry[0];
   }
 
-  const base = `/${normalizedListingType}/${normalizedPropertyType}/${city.toLowerCase()}`;
-  return locality ? `${base}/${locality.toLowerCase()}` : base;
+  const base = `/${normalizedListingType}/${normalizedPropertyType}/${toLocationSlug(city)}`;
+  return locality ? `${base}/${toLocationSlug(locality)}` : base;
 }
 
 /**
@@ -70,8 +83,10 @@ export function parseListingUrl(
   const propertyData = PROPERTY_TYPES[propertyTypeParam as PropertyTypeSlug];
   if (!propertyData) return null;
 
-  const city = locationSegments[0] || "coimbatore";
-  const locality = locationSegments[1] || undefined;
+  const city = fromLocationSlug(locationSegments[0] || "coimbatore");
+  const locality = locationSegments[1]
+    ? fromLocationSlug(locationSegments[1])
+    : undefined;
   // Join the rest if needed, or just use locality
   const fullLocation = locationSegments.join(" ");
 

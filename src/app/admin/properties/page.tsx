@@ -90,11 +90,11 @@ export default function AdminPropertiesPage() {
               <option value="apartment">Apartment</option>
               <option value="villa">Villa</option>
               <option value="plot">Plot</option>
-              <option value="commercial-space">Commercial Space</option>
+              <option value="commercial">Commercial Space</option>
               <option value="coworking">Coworking</option>
               <option value="farmland">Farmland</option>
-              <option value="industrial-space">Industrial Space</option>
-              <option value="independent-house">Independent House</option>
+              <option value="industrial">Industrial Space</option>
+              <option value="individual_portion">Independent House</option>
             </select>
             <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-200! transition-colors!">
               <Filter size={18} />

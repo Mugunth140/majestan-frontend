@@ -1,10 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { getCities, type City } from "@/lib/api";
 
 interface LocationContextType {
   location: string;
   setLocation: (city: string) => void;
+  cities: City[];
+  isLoadingCities: boolean;
   isLocating: boolean;
   updateLocation: () => Promise<void>;
 }
@@ -13,27 +16,63 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export function LocationProvider({ children }: { children: ReactNode }) {
   const [location, setLocation] = useState("Coimbatore");
+  const [cities, setCities] = useState<City[]>([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(true);
   const [isLocating, setIsLocating] = useState(false);
 
-  // Load from local storage if available, on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("majestan_city");
-      if (stored) {
-        setLocation(stored);
+    let cancelled = false;
+
+    async function loadCities() {
+      try {
+        const availableCities = await getCities();
+        if (cancelled) return;
+
+        setCities(availableCities);
+
+        const stored = localStorage.getItem("majestan_city");
+        const storedCity = availableCities.find(
+          (item) => item.city.toLowerCase() === stored?.toLowerCase(),
+        );
+        const defaultCity =
+          availableCities.find(
+            (item) => item.city.toLowerCase() === "coimbatore",
+          ) ?? availableCities[0];
+
+        if (storedCity) {
+          setLocation(storedCity.city);
+        } else if (defaultCity) {
+          setLocation(defaultCity.city);
+          localStorage.setItem("majestan_city", defaultCity.city);
+        }
+      } catch (error) {
+        console.error("Failed to load cities", error);
+      } finally {
+        if (!cancelled) setIsLoadingCities(false);
       }
-    } catch (e) {
-      // Ignore
     }
+
+    loadCities();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSetLocation = (city: string) => {
-    setLocation(city);
+    const configuredCity = cities.find(
+      (item) => item.city.toLowerCase() === city.trim().toLowerCase(),
+    );
+    const nextCity = configuredCity?.city ?? city.trim();
+    if (!nextCity) return;
+
+    setLocation(nextCity);
     try {
-      localStorage.setItem("majestan_city", city);
-    } catch (e) {
-      // Ignore
-    }
+      localStorage.setItem("majestan_city", nextCity);
+      localStorage.setItem("majestan-location", nextCity);
+      window.dispatchEvent(
+        new CustomEvent("majestan-location-changed", { detail: nextCity }),
+      );
+    } catch {}
   };
 
   const updateLocation = async () => {
@@ -43,10 +82,13 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       try {
         const res = await fetch("https://ipapi.co/json/");
         const data = await res.json();
-        if (data.city) {
-          handleSetLocation(data.city);
+        const detectedCity = cities.find(
+          (item) => item.city.toLowerCase() === data.city?.toLowerCase(),
+        );
+        if (detectedCity) {
+          handleSetLocation(detectedCity.city);
         } else {
-          console.warn("Could not determine city from IP fallback.");
+          console.warn("Detected city is not available on Majestan.");
         }
       } catch (err) {
         console.error("IP fallback error:", err);
@@ -68,8 +110,15 @@ export function LocationProvider({ children }: { children: ReactNode }) {
             const { latitude, longitude } = position.coords;
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
             const data = await response.json();
-            const detectedCity = data.address.city || data.address.town || data.address.village || "Coimbatore";
-            handleSetLocation(detectedCity);
+            const detectedName =
+              data.address.city || data.address.town || data.address.village;
+            const detectedCity = cities.find(
+              (item) =>
+                item.city.toLowerCase() === detectedName?.toLowerCase(),
+            );
+            if (detectedCity) {
+              handleSetLocation(detectedCity.city);
+            }
             setIsLocating(false);
           } catch (error) {
             console.error("Error fetching city from coordinates:", error);
@@ -92,6 +141,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       value={{
         location,
         setLocation: handleSetLocation,
+        cities,
+        isLoadingCities,
         isLocating,
         updateLocation,
       }}

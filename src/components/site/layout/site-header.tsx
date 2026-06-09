@@ -6,34 +6,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, Phone } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
 import Image from "next/image";
-import { API_BASE_URL } from "@/lib/api";
-
-const city = "coimbatore";
+import { toLocationSlug } from "@/lib/seo-urls";
 
 type MegaMenuLink = {
   text: string;
   href: string;
   icon: React.ReactNode;
 };
-
-const BUY_LINKS: MegaMenuLink[] = [
-  { text: "Apartments", href: `/for-sale/apartments/${city}`, icon: <Building size={18} /> },
-  { text: "Villas", href: `/for-sale/villas/${city}`, icon: <House size={18} /> },
-  { text: "Independent Houses", href: `/for-sale/independent-houses/${city}`, icon: <House size={18} /> },
-  { text: "Plots", href: `/for-sale/plots/${city}`, icon: <Map size={18} /> },
-  { text: "Farmlands", href: `/for-sale/farmlands/${city}`, icon: <Palmtree size={18} /> },
-  { text: "Commercial Spaces", href: `/for-sale/commercial-spaces/${city}`, icon: <Store size={18} /> },
-  { text: "Industrials", href: `/for-sale/industrial-spaces/${city}`, icon: <Factory size={18} /> },
-];
-
-const RENT_LINKS: MegaMenuLink[] = [
-  { text: "Commercial", href: `/for-rent/commercial-spaces/${city}`, icon: <Store size={18} /> },
-  { text: "Industrial", href: `/for-rent/industrial-spaces/${city}`, icon: <Factory size={18} /> },
-  { text: "Apartment", href: `/for-rent/apartments/${city}`, icon: <Building size={18} /> },
-  { text: "Villa", href: `/for-rent/villas/${city}`, icon: <House size={18} /> },
-  { text: "Independent House", href: `/for-rent/independent-houses/${city}`, icon: <House size={18} /> },
-  { text: "Co-Working", href: `/for-rent/coworking/${city}`, icon: <Laptop size={18} /> },
-];
 
 const SERVICE_LINKS: MegaMenuLink[] = [
   { text: "Property Management", href: "/services/property-management", icon: <ListChecks size={18} /> },
@@ -46,31 +25,20 @@ const SERVICE_LINKS: MegaMenuLink[] = [
 type Category = "Buy" | "Rent" | "Services" | null;
 
 export function SiteHeader(): React.JSX.Element {
-  const { location, setLocation, isLocating, updateLocation } = useLocationContext();
+  const {
+    location,
+    setLocation,
+    cities,
+    isLoadingCities,
+    isLocating,
+    updateLocation,
+  } = useLocationContext();
   const [hoveredCategory, setHoveredCategory] = useState<Category>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<MegaMenuLink | null>(null);
-  const [availableCities, setAvailableCities] = useState<string[]>(["Coimbatore"]);
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/metadata/cities`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            setAvailableCities(data.map((item: any) => item.city));
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch cities", err);
-      }
-    };
-    fetchCities();
-  }, []);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -108,16 +76,34 @@ export function SiteHeader(): React.JSX.Element {
   };
 
   const getLinks = (cat: Category) => {
+    const citySlug = toLocationSlug(location);
     switch (cat) {
-      case "Buy": return BUY_LINKS;
-      case "Rent": return RENT_LINKS;
+      case "Buy":
+        return [
+          { text: "Apartments", href: `/for-sale/apartments/${citySlug}`, icon: <Building size={18} /> },
+          { text: "Villas", href: `/for-sale/villas/${citySlug}`, icon: <House size={18} /> },
+          { text: "Independent Houses", href: `/for-sale/independent-houses/${citySlug}`, icon: <House size={18} /> },
+          { text: "Plots", href: `/for-sale/plots/${citySlug}`, icon: <Map size={18} /> },
+          { text: "Farmlands", href: `/for-sale/farmlands/${citySlug}`, icon: <Palmtree size={18} /> },
+          { text: "Commercial Spaces", href: `/for-sale/commercial-spaces/${citySlug}`, icon: <Store size={18} /> },
+          { text: "Industrials", href: `/for-sale/industrial-spaces/${citySlug}`, icon: <Factory size={18} /> },
+        ];
+      case "Rent":
+        return [
+          { text: "Commercial", href: `/for-rent/commercial-spaces/${citySlug}`, icon: <Store size={18} /> },
+          { text: "Industrial", href: `/for-rent/industrial-spaces/${citySlug}`, icon: <Factory size={18} /> },
+          { text: "Apartment", href: `/for-rent/apartments/${citySlug}`, icon: <Building size={18} /> },
+          { text: "Villa", href: `/for-rent/villas/${citySlug}`, icon: <House size={18} /> },
+          { text: "Independent House", href: `/for-rent/independent-houses/${citySlug}`, icon: <House size={18} /> },
+          { text: "Co-Working", href: `/for-rent/coworking/${citySlug}`, icon: <Laptop size={18} /> },
+        ];
       case "Services": return SERVICE_LINKS;
       default: return [];
     }
   };
 
   const getFeatured = (cat: Category) => {
-    const citySlug = location.toLowerCase().replace(/[\s,]+/g, '-');
+    const citySlug = toLocationSlug(location);
     if (cat === "Buy") return { title: "Find your dream home", btn: "Explore Buy", href: `/for-sale/apartments/${citySlug}` };
     if (cat === "Rent") return { title: "Verified rental properties", btn: "Browse Rent", href: `/for-rent/apartments/${citySlug}` };
     if (cat === "Services") return { title: "Expert real estate help", btn: "Our Services", href: "/contact-us" };
@@ -209,21 +195,31 @@ export function SiteHeader(): React.JSX.Element {
                       </button>
                       <div className="my-2 border-t border-black/5"></div>
                       <div className="px-2 pb-1 pt-1 text-[11px]! font-semibold tracking-normal text-black/40!">
-                        Popular Cities
+                        Available Cities
                       </div>
                       <div className="grid! gap-1">
-                        {availableCities.map((city) => (
+                        {isLoadingCities && (
+                          <p className="m-0 px-3 py-2 text-[13px]! text-black/45">
+                            Loading cities...
+                          </p>
+                        )}
+                        {!isLoadingCities && cities.length === 0 && (
+                          <p className="m-0 px-3 py-2 text-[13px]! text-black/45">
+                            No active cities available
+                          </p>
+                        )}
+                        {cities.map((city) => (
                           <button
-                            key={city}
+                            key={city.id}
                             onClick={() => {
-                              setLocation(city);
+                              setLocation(city.city);
                               setIsLocationMenuOpen(false);
                             }}
                             className={`flex! w-full items-center! rounded-lg! border-0! px-3! py-2! text-left text-[13px]! font-semibold! transition-colors hover:bg-[#27427f]/5! ${
-                              location === city ? "text-[#27427f]! bg-[#27427f]/5!" : "text-black/70! bg-transparent!"
+                              location === city.city ? "text-[#27427f]! bg-[#27427f]/5!" : "text-black/70! bg-transparent!"
                             }`}
                           >
-                            {city}
+                            {city.city}
                           </button>
                         ))}
                       </div>
@@ -286,7 +282,14 @@ export function SiteHeader(): React.JSX.Element {
                   <div className="absolute inset-0 bg-[linear-gradient(135deg,#27427f,rgba(39,66,127,0.85))] z-0 transition-all duration-300"></div>
                   <div className="relative z-10 flex w-full h-full flex-col items-center justify-center p-2">
                     <div className="mb-4 inline-flex items-center justify-center rounded-full p-4 text-[#ffc900] transition-transform duration-300 group-hover:scale-110">
-                      {hoveredLink ? React.cloneElement(hoveredLink.icon as React.ReactElement<any>, { size: 32 }) : <Bolt size={32} />}
+                      {hoveredLink
+                        ? React.cloneElement(
+                            hoveredLink.icon as React.ReactElement<{
+                              size?: number;
+                            }>,
+                            { size: 32 },
+                          )
+                        : <Bolt size={32} />}
                     </div>
                     <h4 className="mb-3 text-[16px]! font-black leading-tight text-white transition-all duration-300">
                       {hoveredLink ? hoveredLink.text : getFeatured(hoveredCategory)?.title}
@@ -359,6 +362,28 @@ export function SiteHeader(): React.JSX.Element {
                       </div>
                     </div>
                   ))}
+
+                  <div className="grid gap-1.5 border-t border-[#27427f]/10 pt-4">
+                    <h6 className="m-0 px-1 text-[12px]! font-semibold! tracking-[0.18em] text-[#27427f]/45! uppercase">
+                      City
+                    </h6>
+                    <div className="flex flex-wrap gap-2">
+                      {cities.map((city) => (
+                        <button
+                          key={city.id}
+                          type="button"
+                          onClick={() => setLocation(city.city)}
+                          className={`rounded-full border px-3 py-2 text-[12px]! font-bold ${
+                            location === city.city
+                              ? "border-[#27427f] bg-[#27427f] text-white"
+                              : "border-[#27427f]/15 bg-[#27427f]/5 text-[#27427f]"
+                          }`}
+                        >
+                          {city.city}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   
                   {/* Additional Mobile Links */}
                   <div className="grid gap-1.5 mt-2 border-t border-[#27427f]/10 pt-4">

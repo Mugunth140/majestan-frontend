@@ -56,6 +56,8 @@ export default function AdminPropertiesPage() {
     switch (status?.toLowerCase()) {
       case 'available':
         return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-emerald-50! text-emerald-600!"><CheckCircle size={12} /> Available</span>;
+      case 'unavailable':
+        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-gray-100! text-gray-500!"><XCircle size={12} /> Hidden</span>;
       case 'sold':
         return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-rose-50! text-rose-600!"><XCircle size={12} /> Sold</span>;
       case 'rented':
@@ -85,9 +87,14 @@ export default function AdminPropertiesPage() {
               className="bg-gray-50! border! border-gray-200! text-gray-700! text-sm! rounded-xl! focus:ring-gray-900! focus:border-gray-900! block! p-2.5! outline-none! transition-all!"
             >
               <option value="all">All Types</option>
-              <option value="apartment">Apartments</option>
-              <option value="villa">Villas</option>
-              <option value="commercial">Commercial</option>
+              <option value="apartment">Apartment</option>
+              <option value="villa">Villa</option>
+              <option value="plot">Plot</option>
+              <option value="commercial-space">Commercial Space</option>
+              <option value="coworking">Coworking</option>
+              <option value="farmland">Farmland</option>
+              <option value="industrial-space">Industrial Space</option>
+              <option value="independent-house">Independent House</option>
             </select>
             <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-200! transition-colors!">
               <Filter size={18} />
@@ -166,9 +173,9 @@ export default function AdminPropertiesPage() {
                         <button className="p-2! text-gray-400! hover:text-blue-600! hover:bg-blue-50! rounded-lg! transition-colors!" title="View Details">
                           <Eye size={16} />
                         </button>
-                        <button className="p-2! text-gray-400! hover:text-emerald-600! hover:bg-emerald-50! rounded-lg! transition-colors!" title="Edit Property">
+                        <Link href={`/admin/properties/edit/${property.id}?type=${property.propertyType}`} className="p-2! text-gray-400! hover:text-emerald-600! hover:bg-emerald-50! rounded-lg! transition-colors!" title="Edit Property">
                           <Edit size={16} />
-                        </button>
+                        </Link>
                         <button className="p-2! text-gray-400! hover:text-rose-600! hover:bg-rose-50! rounded-lg! transition-colors!" title="Delete Property">
                           <Trash2 size={16} />
                         </button>

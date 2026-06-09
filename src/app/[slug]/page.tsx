@@ -314,6 +314,23 @@ export default async function SlugPage({
       console.error("Failed to fetch initial properties", error);
     }
 
+    const type = parsedPseo.propertyType 
+      ? Object.values(PROPERTY_TYPES).find(p => p.apiValue === parsedPseo.propertyType)?.label || parsedPseo.propertyType 
+      : "Properties";
+    const loc = parsedPseo.location ? `${parsedPseo.location}, ` : "";
+    const cityText = parsedPseo.city || "Coimbatore";
+    
+    const itemListJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": `${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} ${parsedPseo.listingType === 'Rent' ? 'for Rent' : 'for Sale'} in ${loc}${cityText}`,
+      "itemListElement": (initialData?.items || []).map((item: any, index: number) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "url": `https://www.majestanrealty.com/${item.canonicalSlug}`
+      }))
+    };
+
     return (
       <>
         <SiteHeader />
@@ -323,6 +340,12 @@ export default async function SlugPage({
           initialCity={parsedPseo.city || ""}
           initialLocality={parsedPseo.location || ""}
           initialSearchData={initialData}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(itemListJsonLd),
+          }}
         />
         <SiteFooter />
       </>

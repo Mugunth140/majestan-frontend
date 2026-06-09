@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
 import { Upload, X, Save, ArrowLeft, Loader2, ImagePlus, Check, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { SiteHeader } from "@/components/site/layout/site-header";
+import { SiteFooter } from "@/components/site/layout/site-footer";
 
-export default function NewPropertyPage() {
+export default function PostPropertyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,40 +41,27 @@ export default function NewPropertyPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = window.localStorage.getItem("majestan_access_token");
-        const [amenitiesRes, citiesRes, sublocationsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/admin/amenities`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`${API_BASE_URL}/admin/cities/all`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`${API_BASE_URL}/admin/sublocations/all`, { headers: { "Authorization": `Bearer ${token}` } })
-        ]);
-
-        if (amenitiesRes.ok) {
-          const json = await amenitiesRes.json();
-          setAmenities(json.data?.items || json.data || []);
-        }
-
-        if (citiesRes.ok) {
-          const json = await citiesRes.json();
-          const citiesData = json.data || json || [];
-          setAvailableCities(citiesData.map((c: any) => c.city_name));
+        const res = await fetch(`${API_BASE_URL}/properties/form-data`);
+        if (res.ok) {
+          const jsonRaw = await res.json();
+          const json = jsonRaw.data || jsonRaw;
+          setAmenities(json.amenities || []);
           
-          if (sublocationsRes.ok) {
-            const subJson = await sublocationsRes.json();
-            const subData = subJson.data || subJson || [];
-            
-            // map sublocations to city_name
-            const enrichedSubs = subData.map((sub: any) => {
-              const city = citiesData.find((c: any) => c.id === sub.city_id);
-              return {
-                ...sub,
-                cityName: city?.city_name || "",
-                stateName: city?.state_name || "",
-                countryName: city?.country_name || "India",
-                localityName: sub.locality_name || ""
-              };
-            });
-            setLocalities(enrichedSubs);
-          }
+          const citiesData = json.cities || [];
+          setAvailableCities(citiesData.map((c: any) => c.city_name));
+
+          const subData = json.sublocations || [];
+          const enrichedSubs = subData.map((sub: any) => {
+            const city = citiesData.find((c: any) => c.id === sub.city_id);
+            return {
+              ...sub,
+              cityName: city?.city_name || "",
+              stateName: city?.state_name || "",
+              countryName: city?.country_name || "India",
+              localityName: sub.locality_name || ""
+            };
+          });
+          setLocalities(enrichedSubs);
         }
       } catch (err) {
         console.error("Failed to fetch form data", err);
@@ -127,13 +116,11 @@ export default function NewPropertyPage() {
 
   const uploadImagesToR2 = async (): Promise<string[]> => {
     const uploadedUrls: string[] = [];
-    const token = window.localStorage.getItem("majestan_access_token");
 
     for (const file of images) {
       // 1. Get Presigned URL
       const presignedRes = await fetch(
-        `${API_BASE_URL}/admin/media/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_BASE_URL}/properties/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`
       );
 
       if (!presignedRes.ok) {
@@ -169,8 +156,6 @@ export default function NewPropertyPage() {
     setUploadingImages(true);
 
     try {
-      const token = window.localStorage.getItem("majestan_access_token");
-
       // 1. Upload Images
       const uploadedImageKeys = await uploadImagesToR2();
       setUploadingImages(false);
@@ -202,11 +187,10 @@ export default function NewPropertyPage() {
         }))
       };
 
-      const res = await fetch(`${API_BASE_URL}/admin/properties/${formData.propertyType}`, {
+      const res = await fetch(`${API_BASE_URL}/properties/submit/${formData.propertyType}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
@@ -216,7 +200,8 @@ export default function NewPropertyPage() {
         throw new Error(errorData.message || "Failed to create property");
       }
 
-      router.push("/admin/properties");
+      alert("Property submitted successfully! It will be visible after admin verification.");
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "An error occurred");
       setUploadingImages(false);
@@ -225,13 +210,16 @@ export default function NewPropertyPage() {
   };
 
   return (
-    <div className="w-full! max-w-5xl! mx-auto! space-y-6!">
-      <div className="flex! items-center! gap-4!">
-        <Link href="/admin/properties" className="p-2! text-gray-500! hover:bg-white! rounded-xl! transition-colors!">
-          <ArrowLeft size={20} />
-        </Link>
-        <h2 className="text-2xl! font-bold! text-gray-900! tracking-tight!">Add New Property</h2>
-      </div>
+    <>
+      <SiteHeader />
+      <div className="pt-[120px]! pb-20! bg-[#f8f9fa]! min-h-screen!">
+        <div className="w-full! max-w-5xl! mx-auto! space-y-6!">
+          <div className="flex! items-center! gap-4!">
+            <Link href="/" className="p-2! text-gray-500! hover:bg-white! rounded-xl! transition-colors!">
+              <ArrowLeft size={20} />
+            </Link>
+            <h2 className="text-2xl! font-bold! text-gray-900! tracking-tight!">Post Your Property</h2>
+          </div>
 
       {error && (
         <div className="p-4! bg-rose-50! text-rose-600! border! border-rose-100! rounded-xl! text-sm! font-medium!">
@@ -291,21 +279,7 @@ export default function NewPropertyPage() {
               />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-sm! font-bold! text-gray-700!">Status</label>
-              <div className="relative!">
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-900! rounded-xl! pl-4! pr-10! py-3! text-sm! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
-                  <option value="AVAILABLE">Available</option>
-                  <option value="UNAVAILABLE">Unavailable (Hidden)</option>
-                  <option value="SOLD">Sold</option>
-                  <option value="RENTED">Rented</option>
-                </select>
-                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
-                  <ChevronDown size={18} />
-                </div>
-              </div>
-            </div>
-            
+
             <div className="space-y-2!">
               <label className="text-sm! font-bold! text-gray-700!">City</label>
               <div className="relative!">
@@ -423,13 +397,16 @@ export default function NewPropertyPage() {
         </div>
 
         <div className="p-6! bg-gray-50! border-t! border-gray-100! flex! justify-end! gap-4!">
-          <Link href="/admin/properties" className="px-6! py-3! text-sm! font-bold! text-gray-600! hover:text-gray-900! transition-colors!">Cancel</Link>
+          <Link href="/" className="px-6! py-3! text-sm! font-bold! text-gray-600! hover:text-gray-900! transition-colors!">Cancel</Link>
           <button disabled={loading} type="submit" className="inline-flex! items-center! gap-2! px-8! py-3! bg-gray-900! hover:bg-gray-800! text-white! rounded-xl! text-sm! font-bold! transition-all! disabled:opacity-70!">
             {loading ? <Loader2 size={18} className="animate-spin!" /> : <Save size={18} />}
-            {uploadingImages ? "Uploading Images..." : loading ? "Saving..." : "Create Property"}
+            {uploadingImages ? "Uploading Images..." : loading ? "Saving..." : "Post Property"}
           </button>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
+    <SiteFooter />
+  </>
   );
 }

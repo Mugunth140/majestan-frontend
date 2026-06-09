@@ -85,6 +85,12 @@ export default function AdminEditSublocationPage() {
       });
 
       if (!res.ok) {
+        if (res.status === 401) {
+          window.localStorage.removeItem("majestan_access_token");
+          alert("Session expired. Please log in again.");
+          router.push("/login");
+          return;
+        }
         const payload = await res.json().catch(() => null);
         throw new Error(payload?.message || "Failed to update sublocation");
       }
@@ -126,7 +132,7 @@ export default function AdminEditSublocationPage() {
                 required
                 value={formData.city_id}
                 onChange={(e) => setFormData({...formData, city_id: e.target.value})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
               >
                 <option value="">-- Select a City --</option>
                 {cities.map((city) => (
@@ -165,7 +171,7 @@ export default function AdminEditSublocationPage() {
               <select
                 value={formData.is_active}
                 onChange={(e) => setFormData({...formData, is_active: parseInt(e.target.value)})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>

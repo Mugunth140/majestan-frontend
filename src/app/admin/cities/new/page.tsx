@@ -35,6 +35,12 @@ export default function AdminNewCityPage() {
       });
 
       if (!res.ok) {
+        if (res.status === 401) {
+          window.localStorage.removeItem("majestan_access_token");
+          alert("Session expired. Please log in again.");
+          router.push("/login");
+          return;
+        }
         const payload = await res.json().catch(() => null);
         throw new Error(payload?.message || "Failed to add city");
       }
@@ -83,7 +89,7 @@ export default function AdminNewCityPage() {
                 required
                 value={formData.state_name}
                 onChange={(e) => setFormData({...formData, state_name: e.target.value})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
               >
                 <option value="" disabled>Select a state or union territory</option>
                 {INDIA_STATES_AND_UNION_TERRITORIES.map((state) => (
@@ -107,8 +113,7 @@ export default function AdminNewCityPage() {
               <select
                 value={formData.is_active}
                 onChange={(e) => setFormData({...formData, is_active: parseInt(e.target.value)})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
-                style={{ display: "block", visibility: "visible", width: "100%", height: "50px", border: "2px solid black", backgroundColor: "white", color: "black", opacity: 1, position: "relative", zIndex: 10, appearance: "auto" }}
+                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>

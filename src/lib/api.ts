@@ -78,6 +78,15 @@ export async function fetchApi<T>(
     next: init?.cache === "no-store" ? undefined : { revalidate: 60 },
   });
 
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("majestan_access_token");
+      window.localStorage.removeItem("majestan_user");
+      window.location.href = "/login";
+    }
+    throw new Error("Session expired");
+  }
+
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status} ${response.statusText}`);
   }

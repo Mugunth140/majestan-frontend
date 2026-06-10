@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { expect, test, describe, beforeEach } from 'vitest';
 import PropertyWizard from './PropertyWizard';
 import { usePropertyWizardStore } from '@/store/usePropertyWizardStore';
@@ -9,8 +9,7 @@ describe('PropertyWizard', () => {
   });
 
   test('renders step 1 by default', () => {
-    render(<PropertyWizard isAdmin={true} />);
-    expect(screen.getByText(/Step 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/Basic Information/i)).toBeInTheDocument();
+    render(<PropertyWizard isAdmin={true} availableCities={[]} availableSublocations={[]} amenities={[]} />);
+    expect(screen.getByText(/Property Title/i)).toBeInTheDocument();
   });
 });

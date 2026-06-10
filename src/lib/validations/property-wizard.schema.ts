@@ -25,3 +25,33 @@ export const pricingSchema = z.object({
   securityDeposit: z.string().optional(),
   bookingAmount: z.string().optional(),
 });
+
+export const specificationsSchema = z.object({
+  bedrooms: z.string().optional(),
+  bathrooms: z.string().optional(),
+  balconies: z.string().optional(),
+  floorNumber: z.string().optional(),
+  totalFloors: z.string().optional(),
+  builtUpArea: z.string().optional(),
+  carpetArea: z.string().optional(),
+  superBuiltUpArea: z.string().optional(),
+  plotArea: z.string().optional(),
+  areaUnit: z.enum(['Sq Ft', 'Sq M', 'Acres', 'Cents']).default('Sq Ft'),
+  propertyFacing: z.enum(['East', 'West', 'North', 'South', 'North East', 'North West', 'South East', 'South West']).optional(),
+  propertyAge: z.enum(['New', '1-3 Years', '3-5 Years', '5-10 Years', '10+ Years']).optional(),
+  furnishing: z.enum(['Furnished', 'Semi Furnished', 'Unfurnished']).default('Unfurnished'),
+  possessionStatus: z.enum(['Ready To Move', 'Under Construction', 'Immediate', 'Future Date']).optional(),
+  parkingSpaces: z.string().optional(),
+  waterSupply: z.string().optional(),
+  powerBackup: z.string().optional(),
+  roadWidth: z.string().optional(),
+  openSides: z.string().optional(),
+});
+
+export const amenitiesSchema = z.object({
+  amenityIds: z.array(z.number()).default([]),
+});
+
+export const mediaSchema = z.object({
+  images: z.array(z.any()).default([]), // Will hold File objects locally
+});

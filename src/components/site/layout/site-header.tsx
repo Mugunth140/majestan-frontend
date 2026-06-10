@@ -4,6 +4,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, Phone } from "lucide-react";
+import { useUserAuthStore } from "@/store/userAuthStore";
+import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
+import { LogOut } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
 import Image from "next/image";
 import { toLocationSlug } from "@/lib/seo-urls";
@@ -33,6 +36,9 @@ export function SiteHeader(): React.JSX.Element {
     isLocating,
     updateLocation,
   } = useLocationContext();
+
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useUserAuthStore();
   const [hoveredCategory, setHoveredCategory] = useState<Category>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -236,7 +242,39 @@ export function SiteHeader(): React.JSX.Element {
                 Rent / Sell your Property
               </Link>
 
+
+              {/* Desktop Auth */}
+              <div className="hidden! lg:flex! items-center! gap-3!">
+                {isAuthenticated ? (
+                  <div className="relative! group!">
+                    <button className="flex! items-center! gap-2.5! rounded-full! bg-[#27427f]/5! px-3! py-2! transition-all! hover:bg-[#27427f]/10!">
+                      <div className="flex! h-8! w-8! items-center! justify-center! rounded-full! bg-[#27427f]! text-white!">
+                        <UserRound size={14} />
+                      </div>
+                      <span className="text-[13px]! font-semibold! text-[#27427f]!">{user?.phone}</span>
+                    </button>
+                    <div className="absolute! right-0! top-full! mt-2! w-48! rounded-2xl! bg-white! shadow-[0_10px_40px_rgba(0,0,0,0.08)]! border! border-gray-100! opacity-0! invisible! group-hover:opacity-100! group-hover:visible! transition-all! overflow-hidden!">
+                      <div className="p-2!">
+                        <button onClick={() => logout()} className="flex! w-full! items-center! gap-3! rounded-xl! px-3! py-2.5! text-[13px]! font-medium! text-rose-600! hover:bg-rose-50! transition-colors!">
+                          <LogOut size={16} />
+                          Log out
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="flex! items-center! gap-2! rounded-full! bg-[#27427f]/5! px-4! py-2.5! text-[13px]! font-semibold! text-[#27427f]! uppercase! tracking-wide! transition-colors! hover:bg-[#27427f]/10!"
+                  >
+                    <UserRound size={16} />
+                    Login
+                  </button>
+                )}
+              </div>
+
               {/* Mobile Toggle */}
+
               <button
                 className="inline-flex! h-12 w-12 items-center! justify-center! rounded-full! border-0 bg-[#27427f]/5! text-[#27427f] transition-colors hover:bg-[#27427f]! lg:hidden!"
                 onClick={() => setIsMobileMenuOpen(true)}
@@ -418,6 +456,7 @@ export function SiteHeader(): React.JSX.Element {
           </>
         )}
       </AnimatePresence>
+      <UserAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </>
   );
 }

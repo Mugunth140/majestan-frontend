@@ -6,6 +6,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import type { AdminCity } from "@/lib/location-options";
+import { toast } from "@/components/ui/toast-store";
 
 export default function AdminNewSublocationPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function AdminNewSublocationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.city_id) {
-      alert("Please select a city");
+      toast.warning("Please select a city");
       return;
     }
     
@@ -64,7 +65,7 @@ export default function AdminNewSublocationPage() {
       if (!res.ok) {
         if (res.status === 401) {
           window.localStorage.removeItem("majestan_access_token");
-          alert("Session expired. Please log in again.");
+          toast.error("Session expired. Please log in again.");
           router.push("/login");
           return;
         }
@@ -72,11 +73,11 @@ export default function AdminNewSublocationPage() {
         throw new Error(payload?.message || "Failed to add sublocation");
       }
 
-      alert("Sublocation added successfully!");
+      toast.success("Sublocation added successfully!");
       router.push("/admin/sublocations");
     } catch (error: unknown) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setSaving(false);
     }

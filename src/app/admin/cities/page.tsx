@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, MapPin } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { toast } from "@/components/ui/toast-store";
+import Swal from "sweetalert2";
 
 export default function AdminCitiesPage() {
   const [cities, setCities] = useState<any[]>([]);
@@ -36,7 +38,8 @@ export default function AdminCitiesPage() {
   }, [search]);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this city?")) return;
+    const result = await Swal.fire({ title: "Are you sure?", text: "This city will be deleted permanently.", icon: "warning", showCancelButton: true, confirmButtonColor: "#ef4444", cancelButtonColor: "#9ca3af", confirmButtonText: "Yes, delete it!" });
+    if (!result.isConfirmed) return;
     try {
       const token = window.localStorage.getItem("majestan_access_token");
       const res = await fetch(`${API_BASE_URL}/admin/cities/${id}`, {
@@ -46,7 +49,7 @@ export default function AdminCitiesPage() {
       if (res.ok) {
         fetchCities();
       } else {
-        alert("Failed to delete city");
+        toast.error("Failed to delete city");
       }
     } catch (e) {
       console.error(e);

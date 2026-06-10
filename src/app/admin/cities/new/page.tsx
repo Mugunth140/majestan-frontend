@@ -6,6 +6,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import { INDIA_STATES_AND_UNION_TERRITORIES } from "@/lib/location-options";
+import { toast } from "@/components/ui/toast-store";
 
 export default function AdminNewCityPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function AdminNewCityPage() {
       if (!res.ok) {
         if (res.status === 401) {
           window.localStorage.removeItem("majestan_access_token");
-          alert("Session expired. Please log in again.");
+          toast.error("Session expired. Please log in again.");
           router.push("/login");
           return;
         }
@@ -45,11 +46,11 @@ export default function AdminNewCityPage() {
         throw new Error(payload?.message || "Failed to add city");
       }
 
-      alert("City added successfully!");
+      toast.success("City added successfully!");
       router.push("/admin/cities");
     } catch (error: unknown) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setSaving(false);
     }

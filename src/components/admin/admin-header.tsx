@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "./logout-button";
-import { User } from "lucide-react";
+import { User, Bell } from "lucide-react";
 
 export function AdminHeader() {
   const pathname = usePathname();
@@ -12,7 +12,8 @@ export function AdminHeader() {
     if (pathname?.startsWith("/admin/properties/new")) return "Add Property";
     if (pathname?.startsWith("/admin/properties")) return "Properties";
     if (pathname?.startsWith("/admin/amenities")) return "Amenities";
-    if (pathname?.startsWith("/admin/localities")) return "Localities";
+    if (pathname?.startsWith("/admin/cities")) return "Cities";
+    if (pathname?.startsWith("/admin/sublocations")) return "Sublocations";
     if (pathname?.startsWith("/admin/media")) return "Media Library";
     if (pathname?.startsWith("/admin/blogs")) return "Blog Posts";
     if (pathname?.startsWith("/admin/seo")) return "SEO Settings";
@@ -21,24 +22,30 @@ export function AdminHeader() {
   };
 
   return (
-    <header className="flex! items-center! justify-between! border-b! border-[#27427f]/10! bg-white! px-8! py-2.5! backdrop-blur-md!">
+    <header className="flex! items-center! justify-between! border-b! border-gray-100! bg-white/80! px-8! py-4! backdrop-blur-xl! sticky! top-0! z-20!">
       <div className="flex! items-center!">
-        <h1 className="text-2xl! font-sans! font-bold! tracking-tight! text-[#27427f]!">{getTitle()}</h1>
+        <h1 className="text-[22px]! font-sans! font-semibold! tracking-tight! text-gray-800!">{getTitle()}</h1>
       </div>
 
-      <div className="flex! items-center! gap-4!">
-        <div className="flex! items-center! gap-3! rounded-3xl! bg-[#f7f8fb]! p-2! pr-4!">
-          <div className="flex! h-10! w-10! items-center! justify-center! rounded-full! bg-[#27427f]! font-bold! text-white!">
-            <User size={20}/>
+      <div className="flex! items-center! gap-5!">
+        <button className="relative! p-2! text-gray-400! hover:text-gray-600! transition-colors! rounded-full! hover:bg-gray-50!">
+          <Bell size={20} />
+          <span className="absolute! top-1.5! right-2! w-2! h-2! rounded-full! bg-rose-500! border-2! border-white!"></span>
+        </button>
+
+        <div className="h-8! w-[1px]! bg-gray-200!"></div>
+
+        <div className="flex! items-center! gap-3! rounded-full! bg-gray-50! p-1.5! pr-4! border! border-gray-100! shadow-sm!">
+          <div className="flex! h-9! w-9! items-center! justify-center! rounded-full! bg-blue-600! font-bold! text-white! shadow-sm!">
+            <User size={18} />
           </div>
           <div className="flex-col! hidden! sm:flex!">
-            <p className="text-[14px]! font-bold! text-[#27427f]! leading-none! mb-1!">Admin User</p>
-            <p className="text-[12px]! font-medium! text-[#5c5e61]! leading-none!">admin@majestan.com</p>
+            <p className="text-[13px]! font-semibold! text-gray-800! leading-none! mb-1!">Admin User</p>
+            <p className="text-[11px]! font-medium! text-gray-500! leading-none!">admin@majestan.com</p>
           </div>
         </div>
-        <div className="flex! gap-2!">
-          <LogoutButton />
-        </div>
+        
+        <LogoutButton />
       </div>
     </header>
   );

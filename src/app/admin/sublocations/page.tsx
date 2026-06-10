@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, MapPin } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { toast } from "@/components/ui/toast-store";
+import Swal from "sweetalert2";
 
 export default function AdminSublocationsPage() {
   const [sublocations, setSublocations] = useState<any[]>([]);
@@ -36,7 +38,8 @@ export default function AdminSublocationsPage() {
   }, [search]);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this sublocation?")) return;
+    const result = await Swal.fire({ title: "Are you sure?", text: "This sublocation will be deleted permanently.", icon: "warning", showCancelButton: true, confirmButtonColor: "#ef4444", cancelButtonColor: "#9ca3af", confirmButtonText: "Yes, delete it!" });
+    if (!result.isConfirmed) return;
     try {
       const token = window.localStorage.getItem("majestan_access_token");
       const res = await fetch(`${API_BASE_URL}/admin/sublocations/${id}`, {
@@ -46,7 +49,7 @@ export default function AdminSublocationsPage() {
       if (res.ok) {
         fetchSublocations();
       } else {
-        alert("Failed to delete sublocation");
+        toast.error("Failed to delete sublocation");
       }
     } catch (e) {
       console.error(e);

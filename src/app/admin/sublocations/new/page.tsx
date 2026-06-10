@@ -28,7 +28,8 @@ export default function AdminNewSublocationPage() {
         });
         if (res.ok) {
           const json = await res.json();
-          setCities(json.data || []);
+          const arr = json.data || json || [];
+          setCities(Array.isArray(arr) ? arr : []);
         }
       } catch (e) {
         console.error("Failed to fetch cities", e);

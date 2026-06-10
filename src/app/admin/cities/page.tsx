@@ -21,7 +21,8 @@ export default function AdminCitiesPage() {
       });
       if (res.ok) {
         const json = await res.json();
-        setCities(json.data?.items || json.data || []);
+        const arr = json.data?.items || json.items || json.data || json || [];
+        setCities(Array.isArray(arr) ? arr : []);
       }
     } catch (e) {
       console.error(e);

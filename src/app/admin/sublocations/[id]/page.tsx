@@ -32,7 +32,8 @@ export default function AdminEditSublocationPage() {
         });
         if (citiesRes.ok) {
           const json = await citiesRes.json();
-          setCities(json.data || []);
+          const arr = json.data || json || [];
+          setCities(Array.isArray(arr) ? arr : []);
         }
 
         // Fetch sublocation
@@ -41,7 +42,7 @@ export default function AdminEditSublocationPage() {
         });
         if (res.ok) {
           const json = await res.json();
-          const sub = json.data;
+          const sub = json.data || json;
           if (sub) {
             setFormData({
               city_id: sub.city_id ? sub.city_id.toString() : "",

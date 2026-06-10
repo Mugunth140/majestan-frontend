@@ -35,7 +35,8 @@ export default function AdminBlogsPage() {
       });
       if (res.ok) {
         const json = await res.json();
-        setBlogs(json.data?.items || json.data || []);
+        const arr = json.data?.items || json.items || json.data || json || [];
+        setBlogs(Array.isArray(arr) ? arr : []);
       }
     } catch (e) {
       console.error(e);

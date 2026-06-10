@@ -38,7 +38,8 @@ export default function AdminPropertiesPage() {
       });
       if (res.ok) {
         const json = await res.json();
-        setProperties(json.data?.items || json.data || []);
+        const arr = json.data?.items || json.items || json.data || json || [];
+        setProperties(Array.isArray(arr) ? arr : []);
       }
     } catch (e) {
       console.error(e);

@@ -30,7 +30,7 @@ export default function AdminEditCityPage() {
         });
         if (res.ok) {
           const json = await res.json();
-          const city = json.data;
+          const city = json.data || json;
           if (city) {
             setFormData({
               city_name: city.city_name || "",

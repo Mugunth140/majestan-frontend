@@ -99,34 +99,34 @@ export default function AdminEditCityPage() {
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-2xl! font-bold! text-gray-900!">Edit City</h1>
-          <p className="text-sm! text-gray-500! mt-1!">Update city details.</p>
+          <h1 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Edit City</h1>
+          <p className="text-[14px]! text-gray-500! mt-1!">Update city details.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! overflow-hidden!">
+      <form onSubmit={handleSubmit} className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]! overflow-hidden!">
         <div className="p-6! space-y-6!">
           
           <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
             <div className="space-y-2!">
-              <label className="text-sm! font-medium! text-gray-900!">City Name <span className="text-red-500!">*</span></label>
+              <label className="text-[14px]! font-medium! text-gray-800!">City Name <span className="text-red-500!">*</span></label>
               <input
                 type="text"
                 required
                 value={formData.city_name}
                 onChange={(e) => setFormData({...formData, city_name: e.target.value})}
-                className="w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="w-full! px-4! py-2.5! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! text-[14px]! text-gray-800! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! transition-all!"
                 placeholder="e.g., Chennai"
               />
             </div>
             
             <div className="space-y-2!">
-              <label className="text-sm! font-medium! text-gray-900!">State Name <span className="text-red-500!">*</span></label>
+              <label className="text-[14px]! font-medium! text-gray-800!">State Name <span className="text-red-500!">*</span></label>
               <select
                 required
                 value={formData.state_name}
                 onChange={(e) => setFormData({...formData, state_name: e.target.value})}
-                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-[14px]! text-gray-800! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
               >
                 <option value="" disabled>Select a state or union territory</option>
                 {INDIA_STATES_AND_UNION_TERRITORIES.map((state) => (
@@ -136,21 +136,21 @@ export default function AdminEditCityPage() {
             </div>
 
             <div className="space-y-2!">
-              <label className="text-sm! font-medium! text-gray-900!">Country</label>
+              <label className="text-[14px]! font-medium! text-gray-800!">Country</label>
               <input
                 type="text"
                 readOnly
                 value={formData.country_name}
-                className="w-full! px-4! py-2.5! bg-gray-100! border! border-gray-200! rounded-xl! text-sm! text-gray-600!"
+                className="w-full! px-4! py-2.5! bg-gray-50/50! border! border-gray-100! shadow-sm! rounded-xl! text-[14px]! text-gray-500!"
               />
             </div>
 
             <div className="space-y-2!">
-              <label className="text-sm! font-medium! text-gray-900!">Status</label>
+              <label className="text-[14px]! font-medium! text-gray-800!">Status</label>
               <select
                 value={formData.is_active}
                 onChange={(e) => setFormData({...formData, is_active: parseInt(e.target.value)})}
-                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-sm! text-gray-900! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
+                className="ignore block! w-full! px-4! py-2.5! bg-gray-50! border! border-gray-200! rounded-xl! text-[14px]! text-gray-800! appearance-auto! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! transition-all!"
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -162,14 +162,14 @@ export default function AdminEditCityPage() {
         <div className="p-6! bg-gray-50/50! border-t! border-gray-100! flex! justify-end! gap-3!">
           <Link
             href="/admin/cities"
-            className="px-6! py-2.5! text-sm! font-medium! text-gray-600! hover:bg-gray-100! rounded-xl! transition-colors!"
+            className="px-6! py-2.5! text-[14px]! font-medium! text-gray-500! hover:bg-gray-100! rounded-xl! transition-colors!"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex! items-center! gap-2! px-6! py-2.5! bg-blue-600! hover:bg-blue-700! text-white! text-sm! font-medium! rounded-xl! transition-all! disabled:opacity-50!"
+            className="inline-flex! items-center! gap-2! px-6! py-2.5! bg-blue-600! hover:bg-blue-700! text-white! text-[14px]! font-medium! rounded-xl! transition-all! disabled:opacity-50!"
           >
             {saving ? (
               <div className="w-5! h-5! border-2! border-current! border-t-transparent! rounded-full! animate-spin!" />

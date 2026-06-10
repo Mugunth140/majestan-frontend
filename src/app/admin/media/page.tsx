@@ -13,18 +13,18 @@ export default function AdminMediaPage() {
   return (
     <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
-        <h2 className="text-2xl! font-bold! text-gray-900! tracking-tight!">Media Library</h2>
-        <button className="inline-flex! items-center! gap-2! bg-gray-900! hover:bg-gray-800! text-white! px-5! py-2.5! rounded-xl! font-medium! transition-all! shadow-sm!">
+        <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Media Library</h2>
+        <button className="inline-flex! items-center! gap-2! bg-blue-600! hover:bg-blue-700! text-white! shadow-sm! hover:shadow-blue-500/20! px-5! py-2.5! rounded-xl! font-medium! transition-all! shadow-sm!">
           <Upload size={18} />
           Upload Files
         </button>
       </div>
       
-      <div className="bg-white! rounded-3xl! shadow-sm! border! border-gray-100! overflow-hidden!">
+      <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]! overflow-hidden!">
         {/* Toolbar */}
         <div className="p-5! border-b! border-gray-100! flex! flex-col! sm:flex-row! gap-4! items-center! justify-between!">
           <div className="flex! items-center! gap-3! w-full! sm:w-auto!">
-            <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-200! transition-colors!">
+            <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-100! shadow-sm! transition-colors!">
               <Filter size={18} />
             </button>
           </div>
@@ -35,7 +35,7 @@ export default function AdminMediaPage() {
             </div>
             <input 
               type="text" 
-              className="bg-gray-50! border! border-gray-200! text-gray-900! text-sm! rounded-xl! focus:ring-gray-900! focus:border-gray-900! block! w-full! pl-10! p-2.5! outline-none! transition-all!" 
+              className="bg-[#fbfbfc]! border! border-gray-100! text-gray-800! text-[14px]! rounded-xl! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! block! w-full! pl-10! p-2.5! outline-none! transition-all!" 
               placeholder="Search media..." 
             />
           </form>
@@ -46,7 +46,7 @@ export default function AdminMediaPage() {
           <div className="inline-flex! items-center! justify-center! w-16! h-16! rounded-full! bg-gray-50! text-gray-400! mb-4!">
             <ImageIcon size={32} />
           </div>
-          <h3 className="text-lg! font-medium! text-gray-900! mb-2!">No media files yet</h3>
+          <h3 className="text-lg! font-medium! text-gray-800! mb-2!">No media files yet</h3>
           <p className="text-gray-500! max-w-sm! mx-auto!">
             Upload images and documents to your Cloudflare R2 bucket. They will appear here once configured.
           </p>

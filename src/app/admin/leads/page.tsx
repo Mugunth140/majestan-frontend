@@ -50,14 +50,14 @@ export default function AdminLeadsPage() {
   return (
     <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
-        <h2 className="text-2xl! font-bold! text-gray-900! tracking-tight!">Leads Management</h2>
+        <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Leads Management</h2>
       </div>
       
-      <div className="bg-white! rounded-3xl! shadow-sm! border! border-gray-100! overflow-hidden!">
+      <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]! overflow-hidden!">
         {/* Toolbar */}
         <div className="p-5! border-b! border-gray-100! flex! flex-col! sm:flex-row! gap-4! items-center! justify-between!">
           <div className="flex! items-center! gap-3! w-full! sm:w-auto!">
-            <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-200! transition-colors!">
+            <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-100! shadow-sm! transition-colors!">
               <Filter size={18} />
             </button>
           </div>
@@ -68,7 +68,7 @@ export default function AdminLeadsPage() {
             </div>
             <input 
               type="text" 
-              className="bg-gray-50! border! border-gray-200! text-gray-900! text-sm! rounded-xl! focus:ring-gray-900! focus:border-gray-900! block! w-full! pl-10! p-2.5! outline-none! transition-all!" 
+              className="bg-[#fbfbfc]! border! border-gray-100! text-gray-800! text-[14px]! rounded-xl! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! block! w-full! pl-10! p-2.5! outline-none! transition-all!" 
               placeholder="Search leads..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -78,8 +78,8 @@ export default function AdminLeadsPage() {
 
         {/* Table */}
         <div className="overflow-x-auto!">
-          <table className="w-full! text-sm! text-left! text-gray-500!">
-            <thead className="text-xs! text-gray-400! uppercase! bg-gray-50/50!">
+          <table className="w-full! text-[14px]! text-left! text-gray-500!">
+            <thead className="text-[12px]! text-gray-400! uppercase! bg-gray-50/50!">
               <tr>
                 <th scope="col" className="px-6! py-4! font-medium!">Customer</th>
                 <th scope="col" className="px-6! py-4! font-medium!">Contact</th>
@@ -106,14 +106,14 @@ export default function AdminLeadsPage() {
                 </tr>
               ) : (
                 leads.map((lead, idx) => (
-                  <tr key={lead.id || idx} className="bg-white! hover:bg-gray-50/50! transition-colors! group!">
+                  <tr key={lead.id || idx} className="bg-white! hover:bg-[#fbfbfc]! transition-colors! group!">
                     <td className="px-6! py-4!">
                       <div className="flex! items-center! gap-3!">
                         <div className="w-10! h-10! rounded-full! bg-gray-100! flex! items-center! justify-center! text-gray-400! flex-shrink-0!">
                           <Users size={20} />
                         </div>
                         <div>
-                          <div className="font-medium! text-gray-900!">{lead.name || 'Anonymous'}</div>
+                          <div className="font-medium! text-gray-800!">{lead.name || 'Anonymous'}</div>
                         </div>
                       </div>
                     </td>
@@ -123,18 +123,18 @@ export default function AdminLeadsPage() {
                           <Phone size={14} />
                           {lead.phone || 'N/A'}
                         </div>
-                        <div className="flex! items-center! gap-1! text-gray-400! text-xs!">
+                        <div className="flex! items-center! gap-1! text-gray-400! text-[12px]!">
                           <Mail size={12} />
                           {lead.email || 'N/A'}
                         </div>
                       </div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900! font-medium! capitalize!">{lead.property_type || 'General'}</div>
-                      <div className="text-xs! text-gray-400! mt-0.5! capitalize!">{lead.listing_type || 'Purchase/Rent'}</div>
+                      <div className="text-gray-800! font-medium! capitalize!">{lead.property_type || 'General'}</div>
+                      <div className="text-[12px]! text-gray-400! mt-0.5! capitalize!">{lead.listing_type || 'Purchase/Rent'}</div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900!">{lead.created_at ? new Date(lead.created_at).toLocaleDateString() : 'N/A'}</div>
+                      <div className="text-gray-800!">{lead.created_at ? new Date(lead.created_at).toLocaleDateString() : 'N/A'}</div>
                     </td>
                     <td className="px-6! py-4! text-right!">
                       <div className="flex! items-center! justify-end! gap-2!">

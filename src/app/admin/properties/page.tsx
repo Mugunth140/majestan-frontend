@@ -56,36 +56,36 @@ export default function AdminPropertiesPage() {
   const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'available':
-        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-emerald-50! text-emerald-600!"><CheckCircle size={12} /> Available</span>;
+        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-[12px]! font-medium! bg-emerald-50! text-emerald-600!"><CheckCircle size={12} /> Available</span>;
       case 'unavailable':
-        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-gray-100! text-gray-500!"><XCircle size={12} /> Hidden</span>;
+        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-[12px]! font-medium! bg-gray-100! text-gray-500!"><XCircle size={12} /> Hidden</span>;
       case 'sold':
-        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-rose-50! text-rose-600!"><XCircle size={12} /> Sold</span>;
+        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-[12px]! font-medium! bg-rose-50! text-rose-600!"><XCircle size={12} /> Sold</span>;
       case 'rented':
-        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-blue-50! text-blue-600!"><Clock size={12} /> Rented</span>;
+        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-[12px]! font-medium! bg-blue-50! text-blue-600!"><Clock size={12} /> Rented</span>;
       default:
-        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-xs! font-medium! bg-gray-50! text-gray-600!">{status}</span>;
+        return <span className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! text-[12px]! font-medium! bg-gray-50! text-gray-600!">{status}</span>;
     }
   };
 
   return (
     <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
-        <h2 className="text-2xl! font-bold! text-gray-900! tracking-tight!">Properties Management</h2>
-        <Link href="/admin/properties/new" className="inline-flex! items-center! gap-2! bg-gray-900! hover:bg-gray-800! text-white! px-5! py-2.5! rounded-xl! font-medium! transition-all! shadow-sm!">
+        <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Properties Management</h2>
+        <Link href="/admin/properties/new" className="inline-flex! items-center! gap-2! bg-blue-600! hover:bg-blue-700! text-white! shadow-sm! hover:shadow-blue-500/20! px-5! py-2.5! rounded-xl! font-medium! transition-all!">
           <Building2 size={18} />
           Add Property
         </Link>
       </div>
       
-      <div className="bg-white! rounded-3xl! shadow-sm! border! border-gray-100! overflow-hidden!">
+      <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]! overflow-hidden!">
         {/* Toolbar */}
         <div className="p-5! border-b! border-gray-100! flex! flex-col! sm:flex-row! gap-4! items-center! justify-between!">
           <div className="flex! items-center! gap-3! w-full! sm:w-auto!">
             <select 
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="bg-gray-50! border! border-gray-200! text-gray-700! text-sm! rounded-xl! focus:ring-gray-900! focus:border-gray-900! block! p-2.5! outline-none! transition-all!"
+              className="bg-[#fbfbfc]! border! border-gray-100! text-gray-800! text-[14px]! rounded-xl! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! block! p-2.5! outline-none! transition-all!"
             >
               <option value="all">All Types</option>
               <option value="apartment">Apartment</option>
@@ -97,7 +97,7 @@ export default function AdminPropertiesPage() {
               <option value="industrial">Industrial Space</option>
               <option value="individual_portion">Independent House</option>
             </select>
-            <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-200! transition-colors!">
+            <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-100! shadow-sm! transition-colors!">
               <Filter size={18} />
             </button>
           </div>
@@ -108,7 +108,7 @@ export default function AdminPropertiesPage() {
             </div>
             <input 
               type="text" 
-              className="bg-gray-50! border! border-gray-200! text-gray-900! text-sm! rounded-xl! focus:ring-gray-900! focus:border-gray-900! block! w-full! pl-10! p-2.5! outline-none! transition-all!" 
+              className="bg-[#fbfbfc]! border! border-gray-100! text-gray-800! text-[14px]! rounded-xl! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! block! w-full! pl-10! p-2.5! outline-none! transition-all!" 
               placeholder="Search properties..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -118,8 +118,8 @@ export default function AdminPropertiesPage() {
 
         {/* Table */}
         <div className="overflow-x-auto!">
-          <table className="w-full! text-sm! text-left! text-gray-500!">
-            <thead className="text-xs! text-gray-400! uppercase! bg-gray-50/50!">
+          <table className="w-full! text-[14px]! text-left! text-gray-500!">
+            <thead className="text-[12px]! text-gray-400! uppercase! bg-gray-50/50!">
               <tr>
                 <th scope="col" className="px-6! py-4! font-medium!">Property</th>
                 <th scope="col" className="px-6! py-4! font-medium!">Type / Location</th>
@@ -146,25 +146,25 @@ export default function AdminPropertiesPage() {
                 </tr>
               ) : (
                 properties.map((property) => (
-                  <tr key={property.id} className="bg-white! hover:bg-gray-50/50! transition-colors! group!">
+                  <tr key={property.id} className="bg-white! hover:bg-[#fbfbfc]! transition-colors! group!">
                     <td className="px-6! py-4!">
                       <div className="flex! items-center! gap-3!">
                         <div className="w-10! h-10! rounded-lg! bg-gray-100! flex! items-center! justify-center! text-gray-400! flex-shrink-0!">
                           <Building2 size={20} />
                         </div>
                         <div>
-                          <div className="font-medium! text-gray-900! group-hover:text-blue-600! transition-colors!">{property.title}</div>
-                          <div className="text-xs! text-gray-400! mt-0.5!">{property.propertyCode || `ID: ${property.id}`}</div>
+                          <div className="font-medium! text-gray-800! group-hover:text-blue-600! transition-colors!">{property.title}</div>
+                          <div className="text-[12px]! text-gray-400! mt-0.5!">{property.propertyCode || `ID: ${property.id}`}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900! capitalize!">{property.propertyType}</div>
-                      <div className="text-xs! text-gray-400! mt-0.5!">{property.city}, {property.state}</div>
+                      <div className="text-gray-800! capitalize!">{property.propertyType}</div>
+                      <div className="text-[12px]! text-gray-400! mt-0.5!">{property.city}, {property.state}</div>
                     </td>
                     <td className="px-6! py-4!">
-                      <div className="text-gray-900! font-medium!">₹{property.price || 'N/A'}</div>
-                      <div className="text-xs! text-gray-400! mt-0.5! capitalize!">For {property.listingType}</div>
+                      <div className="text-gray-800! font-medium!">₹{property.price || 'N/A'}</div>
+                      <div className="text-[12px]! text-gray-400! mt-0.5! capitalize!">For {property.listingType}</div>
                     </td>
                     <td className="px-6! py-4!">
                       {getStatusBadge(property.status)}
@@ -192,10 +192,10 @@ export default function AdminPropertiesPage() {
         {/* Pagination placeholder */}
         {!loading && properties.length > 0 && (
           <div className="p-5! border-t! border-gray-100! flex! items-center! justify-between!">
-            <span className="text-sm! text-gray-500!">Showing <span className="font-medium! text-gray-900!">{properties.length}</span> properties</span>
+            <span className="text-[14px]! text-gray-500!">Showing <span className="font-medium! text-gray-800!">{properties.length}</span> properties</span>
             <div className="flex! gap-2!">
-              <button className="px-4! py-2! text-sm! font-medium! text-gray-500! bg-white! border! border-gray-200! rounded-lg! hover:bg-gray-50! hover:text-gray-900! transition-colors!">Previous</button>
-              <button className="px-4! py-2! text-sm! font-medium! text-gray-500! bg-white! border! border-gray-200! rounded-lg! hover:bg-gray-50! hover:text-gray-900! transition-colors!">Next</button>
+              <button className="px-4! py-2! text-[14px]! font-medium! text-gray-500! bg-white! border! border-gray-200! rounded-lg! hover:bg-gray-50! hover:text-gray-800! transition-colors!">Previous</button>
+              <button className="px-4! py-2! text-[14px]! font-medium! text-gray-500! bg-white! border! border-gray-200! rounded-lg! hover:bg-gray-50! hover:text-gray-800! transition-colors!">Next</button>
             </div>
           </div>
         )}

@@ -76,6 +76,13 @@ export function SiteHeader(): React.JSX.Element {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+
+  const handleProtectedRoute = (e: React.MouseEvent, path: string) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setIsAuthModalOpen(true);
+    }
+  };
   const detectLocation = async (e: React.MouseEvent) => {
     e.preventDefault();
     await updateLocation();
@@ -161,7 +168,7 @@ export function SiteHeader(): React.JSX.Element {
             {/* Right Actions */}
             <div className="flex! shrink-0 items-center! justify-end! gap-3 max-[1180px]:gap-2.5 max-[1024px]:gap-2">
               {/* Wishlist */}
-              <Link href="/wishlist" className="inline-flex! relative text-[#27427f] transition-transform hover:scale-110" aria-label="Wishlist">
+              <Link href="/wishlist" className="inline-flex! relative text-[#27427f] transition-transform hover:scale-110" aria-label="Wishlist" onClick={(e) => handleProtectedRoute(e, "/wishlist")}>
                 <Heart size={23} className={wishlistCount > 0 ? "fill-[#27427f]" : ""} />
                 {wishlistCount > 0 && (
                   <span className="absolute! -right-2 -top-2 flex! h-4 w-4 items-center! justify-center! rounded-full border border-white bg-[#ffc900] text-[9px]! font-black leading-none text-[#27427f]">
@@ -169,6 +176,32 @@ export function SiteHeader(): React.JSX.Element {
                   </span>
                 )}
               </Link>
+
+
+              {/* Account */}
+              <div className="relative group">
+                <button 
+                  onClick={() => !isAuthenticated ? setIsAuthModalOpen(true) : undefined}
+                  className="inline-flex! items-center! justify-center! h-[42px]! w-[42px]! rounded-full! border-0 bg-[#27427f]/5! text-[#27427f] transition-colors hover:bg-[#27427f]/10!"
+                  aria-label="Account"
+                >
+                  <UserRound size={20} />
+                </button>
+                {isAuthenticated && (
+                  <div className="absolute! right-0! top-full! mt-2! w-56! rounded-2xl! bg-white! shadow-[0_10px_40px_rgba(0,0,0,0.08)]! border! border-gray-100! opacity-0! invisible! group-hover:opacity-100! group-hover:visible! transition-all! overflow-hidden! z-[1010]!">
+                    <div className="p-2!">
+                      <div className="px-3! py-2.5! mb-1! border-b! border-gray-100!">
+                        <p className="text-[11px]! font-bold! text-gray-400! uppercase! tracking-wider! mb-0.5!">Signed in as</p>
+                        <p className="text-[13px]! font-semibold! text-[#27427f]! truncate!">{user?.phone || user?.email}</p>
+                      </div>
+                      <button onClick={() => logout()} className="flex! w-full! items-center! gap-3! rounded-xl! px-3! py-2.5! text-[13px]! font-medium! text-rose-600! hover:bg-rose-50! transition-colors!">
+                        <LogOut size={16} />
+                        Log out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Location */}
               <div className="relative hidden! md:block!">
@@ -235,43 +268,12 @@ export function SiteHeader(): React.JSX.Element {
               </div>
 
               {/* Post Property */}
-              <Link
-                href="/rent-or-sell-your-property"
+              <Link href="/rent-or-sell-your-property"
                 className="hidden! items-center! gap-2 rounded-full bg-[#ffc900] px-3 py-3 text-[13px]! font-bold! text-black/80! leading-none no-underline transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white! lg:inline-flex!"
-              >
+               onClick={(e) => { handleProtectedRoute(e, "/rent-or-sell-your-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}>
                 Rent / Sell your Property
               </Link>
 
-
-              {/* Desktop Auth */}
-              <div className="hidden! lg:flex! items-center! gap-3!">
-                {isAuthenticated ? (
-                  <div className="relative! group!">
-                    <button className="flex! items-center! gap-2.5! rounded-full! bg-[#27427f]/5! px-3! py-2! transition-all! hover:bg-[#27427f]/10!">
-                      <div className="flex! h-8! w-8! items-center! justify-center! rounded-full! bg-[#27427f]! text-white!">
-                        <UserRound size={14} />
-                      </div>
-                      <span className="text-[13px]! font-semibold! text-[#27427f]!">{user?.phone}</span>
-                    </button>
-                    <div className="absolute! right-0! top-full! mt-2! w-48! rounded-2xl! bg-white! shadow-[0_10px_40px_rgba(0,0,0,0.08)]! border! border-gray-100! opacity-0! invisible! group-hover:opacity-100! group-hover:visible! transition-all! overflow-hidden!">
-                      <div className="p-2!">
-                        <button onClick={() => logout()} className="flex! w-full! items-center! gap-3! rounded-xl! px-3! py-2.5! text-[13px]! font-medium! text-rose-600! hover:bg-rose-50! transition-colors!">
-                          <LogOut size={16} />
-                          Log out
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="flex! items-center! gap-2! rounded-full! bg-[#27427f]/5! px-4! py-2.5! text-[13px]! font-semibold! text-[#27427f]! uppercase! tracking-wide! transition-colors! hover:bg-[#27427f]/10!"
-                  >
-                    <UserRound size={16} />
-                    Login
-                  </button>
-                )}
-              </div>
 
               {/* Mobile Toggle */}
 
@@ -438,19 +440,13 @@ export function SiteHeader(): React.JSX.Element {
 
               {/* Bottom CTAs — pinned */}
               <div className="shrink-0 border-t border-[#27427f]/10 px-5 py-4 grid gap-3">
-                <Link
+                <Link 
                   href="/rent-or-sell-your-property"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => { handleProtectedRoute(e, "/rent-or-sell-your-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}
                   className="w-full rounded-xl bg-[#ffc900] py-3 text-[13px]! font-semibold! leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline text-center transition-colors hover:bg-[#27427f] hover:text-white"
                 >
                   Post Property
                 </Link>
-                <div className="flex! items-center! justify-center! gap-2.5 rounded-full bg-[#27427f]/5 px-3 py-2.5! text-[13px]! font-semibold! tracking-[0.08em] text-[#27427f] uppercase">
-                  <UserRound size={15} />
-                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-[#27427f] no-underline">Login</Link>
-                  <span className="text-[#27427f]/30">/</span>
-                  <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="text-[#27427f] no-underline">Register</Link>
-                </div>
               </div>
             </motion.div>
           </>

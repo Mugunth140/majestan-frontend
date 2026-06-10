@@ -11,7 +11,7 @@ import {
 
 export default function AdminMediaPage() {
   return (
-    <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
+    <div className="w-full! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
         <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Media Library</h2>
         <button className="inline-flex! items-center! gap-2! bg-blue-600! hover:bg-blue-700! text-white! shadow-sm! hover:shadow-blue-500/20! px-5! py-2.5! rounded-xl! font-medium! transition-all! shadow-sm!">
@@ -47,7 +47,7 @@ export default function AdminMediaPage() {
             <ImageIcon size={32} />
           </div>
           <h3 className="text-lg! font-medium! text-gray-800! mb-2!">No media files yet</h3>
-          <p className="text-gray-500! max-w-sm! mx-auto!">
+          <p className="text-gray-500! ">
             Upload images and documents to your Cloudflare R2 bucket. They will appear here once configured.
           </p>
         </div>

@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
   const recentActivities = data?.recentActivities || [];
 
   return (
-    <div className="w-full! max-w-7xl! mx-auto! space-y-8!">
+    <div className="w-full!  space-y-8!">
       {/* Stats Grid */}
       <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-4! gap-6!">
         {stats.map((stat, i) => (
@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="relative! z-10!">
               <h3 className="text-xl! font-semibold! mb-2!">System Health Optimal</h3>
-              <p className="text-gray-400! font-light! mb-6! max-w-md!">All services are running smoothly. Your property listings are currently syncing across all marketing channels without any issues.</p>
+              <p className="text-gray-400! font-light! mb-6! ">All services are running smoothly. Your property listings are currently syncing across all marketing channels without any issues.</p>
               <button className="px-5! py-2! bg-white/10! hover:bg-white/20! backdrop-blur-sm! rounded-full! text-[14px]! font-medium! transition-colors!">
                 View Detailed Report
               </button>

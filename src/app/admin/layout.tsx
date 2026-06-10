@@ -16,8 +16,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Main Content */}
         <main className="flex-1! flex! flex-col! h-full! overflow-hidden! relative!">
           <AdminHeader />
-          <div className="flex-1! overflow-y-auto! p-8! max-[640px]:p-4!">
-            <div className="mx-auto! max-w-7xl!">
+          <div className="flex-1! overflow-y-auto! p-6! max-[640px]:p-4!">
+            <div className="w-full! h-full!">
               {children}
             </div>
           </div>

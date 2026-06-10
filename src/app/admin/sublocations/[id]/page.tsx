@@ -112,7 +112,7 @@ export default function AdminEditSublocationPage() {
   }
 
   return (
-    <div className="p-6! max-w-4xl! mx-auto! space-y-6!">
+    <div className="p-6! w-full! space-y-6!">
       <div className="flex! items-center! gap-4!">
         <Link href="/admin/sublocations" className="p-2! hover:bg-gray-100! rounded-xl! transition-colors!">
           <ArrowLeft size={20} />

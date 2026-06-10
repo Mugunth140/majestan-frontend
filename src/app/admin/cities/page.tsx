@@ -69,12 +69,11 @@ export default function AdminCitiesPage() {
   };
 
   return (
-    <div className="p-6! max-w-7xl! mx-auto! space-y-6!">
+    <div className="px-3! w-full! space-y-3!">
       {/* Header */}
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
         <div>
-          <h1 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Cities</h1>
-          <p className="text-[14px]! text-gray-500! mt-1!">Manage cities and their status.</p>
+          <h1 className="text-2xl! font-medium! text-gray-800! tracking-tight! ml-3!">Cities</h1>
         </div>
         <Link 
           href="/admin/cities/new" 
@@ -86,8 +85,8 @@ export default function AdminCitiesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white! p-5! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]!">
-        <div className="relative!">
+      <div>
+        <div className="relative! m-2.5! outline! outline-gray-200! rounded-2xl! focus-within:outline-blue-500/50! focus-within:outline-2! transition-all!">
           <Search className="absolute! left-3! top-1/2! -translate-y-1/2! text-gray-400!" size={20} />
           <input
             type="text"
@@ -132,7 +131,7 @@ export default function AdminCitiesPage() {
                   <tr key={city.id} className="bg-white! hover:bg-[#fbfbfc]! transition-colors! group!">
                     <td className="px-6! py-4!">
                       <div className="flex! items-center! gap-3!">
-                        <div className="w-10! h-10! rounded-lg! bg-gray-100! flex! items-center! justify-center! text-gray-400! flex-shrink-0!">
+                        <div className="w-10! h-10! rounded-lg! bg-gray-100! flex! items-center! justify-center! text-gray-400! shrink-0!">
                           <MapPin size={20} />
                         </div>
                         <div>

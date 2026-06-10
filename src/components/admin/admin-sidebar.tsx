@@ -67,7 +67,13 @@ const navItems: (NavItem | NavGroup)[] = [
 ];
 
 function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }) {
-  const isActive = group.items.some(item => pathname === item.href || pathname.startsWith(`${item.href}/`));
+  const isActive = group.items.some(item => {
+    if (item.href === '/admin/properties') {
+      return pathname === item.href || (pathname.startsWith('/admin/properties/') && !pathname.startsWith('/admin/properties/new'));
+    }
+    return pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
+  });
+  
   const [isOpen, setIsOpen] = useState(group.defaultOpen || isActive);
 
   return (
@@ -91,7 +97,13 @@ function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }
             className="overflow-hidden! space-y-1! mt-1!"
           >
             {group.items.map((item) => {
-              const isItemActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
+              let isItemActive = false;
+              if (item.href === '/admin/properties') {
+                isItemActive = pathname === item.href || (pathname.startsWith('/admin/properties/') && !pathname.startsWith('/admin/properties/new'));
+              } else {
+                isItemActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
+              }
+
               const Icon = item.icon;
               return (
                 <li key={item.href}>
@@ -120,7 +132,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex! w-[280px]! flex-col! bg-white! border-r! border-gray-100! shadow-[4px_0_24px_rgba(0,0,0,0.02)]! z-10!">
+    <aside className="flex! w-70! flex-col! bg-white! border-r! border-gray-100! shadow-[4px_0_24px_rgba(0,0,0,0.02)]! z-10!">
       <div className="flex! items-center! justify-center! border-b! border-gray-100/50! px-8! py-6!">
         <Image src="/assets/images/logo/logo.png" alt="Majestan Logo" width={160} height={50} className="object-contain!" priority />
       </div>

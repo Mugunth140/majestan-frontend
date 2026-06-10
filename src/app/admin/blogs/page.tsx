@@ -58,7 +58,7 @@ export default function AdminBlogsPage() {
   };
 
   return (
-    <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
+    <div className="w-full! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
         <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Blog Management</h2>
         <Link href="/admin/blogs/new" className="inline-flex! items-center! gap-2! bg-blue-600! hover:bg-blue-700! text-white! shadow-sm! hover:shadow-blue-500/20! px-5! py-2.5! rounded-xl! font-medium! transition-all! shadow-sm!">
@@ -128,7 +128,7 @@ export default function AdminBlogsPage() {
                         </div>
                         <div>
                           <div className="font-medium! text-gray-800! group-hover:text-blue-600! transition-colors!">{blog.title}</div>
-                          <div className="text-[12px]! text-gray-400! mt-0.5! truncate! max-w-xs!">{blog.slug}</div>
+                          <div className="text-[12px]! text-gray-400! mt-0.5! truncate! ">{blog.slug}</div>
                         </div>
                       </div>
                     </td>

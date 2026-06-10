@@ -69,12 +69,12 @@ export default function AdminSublocationsPage() {
   };
 
   return (
-    <div className="p-6! max-w-7xl! mx-auto! space-y-6!">
+    <div className="p-6! w-full! space-y-6!">
       {/* Header */}
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
         <div>
-          <h1 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Sublocations</h1>
-          <p className="text-[14px]! text-gray-500! mt-1!">Manage areas, localities, and sublocations.</p>
+          <h1 className="text-2xl! font-medium! ml-3! text-gray-800! tracking-normal!">Sublocations</h1>
+          {/* <p className="text-[14px]! text-gray-500! mt-1!">Manage areas, localities, and sublocations.</p> */}
         </div>
         <Link 
           href="/admin/sublocations/new" 
@@ -86,8 +86,8 @@ export default function AdminSublocationsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white! p-5! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]!">
-        <div className="relative!">
+      <div>
+        <div className="relative! outline! outline-gray-200! rounded-2xl! focus-within:outline-blue-500/50! focus-within:outline-2! transition-all!">
           <Search className="absolute! left-3! top-1/2! -translate-y-1/2! text-gray-400!" size={20} />
           <input
             type="text"

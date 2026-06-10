@@ -6,7 +6,6 @@ import {
   Building2, 
   Search, 
   Filter, 
-  MoreVertical, 
   Edit, 
   Trash2, 
   Eye,
@@ -21,10 +20,6 @@ export default function AdminPropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
-
-  useEffect(() => {
-    fetchProperties();
-  }, [filterType]);
 
   const fetchProperties = async (searchQuery = search) => {
     setLoading(true);
@@ -48,6 +43,10 @@ export default function AdminPropertiesPage() {
     }
   };
 
+  useEffect(() => {
+    fetchProperties();
+  }, [filterType]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchProperties();
@@ -69,9 +68,9 @@ export default function AdminPropertiesPage() {
   };
 
   return (
-    <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
+    <div className="w-full! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
-        <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Properties Management</h2>
+        <h2 className="text-2xl! font-medium! text-gray-800! tracking-tight! ml-2.5!">Properties Management</h2>
         <Link href="/admin/properties/new" className="inline-flex! items-center! gap-2! bg-blue-600! hover:bg-blue-700! text-white! shadow-sm! hover:shadow-blue-500/20! px-5! py-2.5! rounded-xl! font-medium! transition-all!">
           <Building2 size={18} />
           Add Property

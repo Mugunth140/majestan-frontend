@@ -58,9 +58,9 @@ export default function AdminAmenitiesPage() {
   };
 
   return (
-    <div className="w-full! max-w-7xl! mx-auto! space-y-6!">
+    <div className="w-full! space-y-6!">
       <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
-        <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Amenities Management</h2>
+        <h2 className="text-2xl! font-medium! text-gray-800! tracking-tight!">Amenities Management</h2>
         <Link href="/admin/amenities/new" className="inline-flex! items-center! gap-2! bg-blue-600! hover:bg-blue-700! text-white! shadow-sm! hover:shadow-blue-500/20! px-5! py-2.5! rounded-xl! font-medium! transition-all! shadow-sm!">
           <Plus size={18} />
           Add Amenity
@@ -69,7 +69,7 @@ export default function AdminAmenitiesPage() {
       
       <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]! overflow-hidden!">
         {/* Toolbar */}
-        <div className="p-5! border-b! border-gray-100! flex! flex-col! sm:flex-row! gap-4! items-center! justify-between!">
+        <div className="p-3! border-b! border-gray-100! flex! flex-col! sm:flex-row! gap-4! items-center! justify-between!">
           <div className="flex! items-center! gap-3! w-full! sm:w-auto!">
             <button className="p-2.5! text-gray-500! hover:bg-gray-50! rounded-xl! border! border-gray-100! shadow-sm! transition-colors!">
               <Filter size={18} />
@@ -78,11 +78,11 @@ export default function AdminAmenitiesPage() {
           
           <form onSubmit={handleSearch} className="relative! w-full! sm:w-80!">
             <div className="absolute! inset-y-0! left-0! flex! items-center! pl-3! pointer-events-none!">
-              <Search size={18} className="text-gray-400!" />
+              <Search size={20} className="text-gray-400!" />
             </div>
             <input 
               type="text" 
-              className="bg-[#fbfbfc]! border! border-gray-100! text-gray-800! text-[14px]! rounded-xl! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! block! w-full! pl-10! p-2.5! outline-none! transition-all!" 
+              className="bg-[#fbfbfc]! border! border-gray-100! text-gray-800! text-[14px]! rounded-xl! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! block! w-full! pl-12! p-2! outline-none! transition-all!" 
               placeholder="Search amenities..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -127,7 +127,7 @@ export default function AdminAmenitiesPage() {
                         </div>
                         <div>
                           <div className="font-medium! text-gray-800! group-hover:text-blue-600! transition-colors!">{amenity.name}</div>
-                          <div className="text-[12px]! text-gray-400! mt-0.5! truncate! max-w-xs!">{amenity.description || 'No description'}</div>
+                          <div className="text-[12px]! text-gray-400! mt-0.5! truncate! ">{amenity.description || 'No description'}</div>
                         </div>
                       </div>
                     </td>

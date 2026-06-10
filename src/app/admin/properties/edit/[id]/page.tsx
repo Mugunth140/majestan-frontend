@@ -305,7 +305,7 @@ export default function EditPropertyPage() {
 
   if (loadingProperty) {
     return (
-      <div className="w-full! max-w-5xl! mx-auto! space-y-6! flex! items-center! justify-center! h-64!">
+      <div className="w-full! space-y-6! flex! items-center! justify-center! h-64!">
         <div className="flex! items-center! gap-2! text-gray-500!">
           <Loader2 className="animate-spin!" size={20} />
           <span>Loading property details...</span>
@@ -315,7 +315,7 @@ export default function EditPropertyPage() {
   }
 
   return (
-    <div className="w-full! max-w-5xl! mx-auto! space-y-6!">
+    <div className="w-full! space-y-6!">
       <div className="flex! items-center! gap-4!">
         <Link href="/admin/properties" className="p-2! text-gray-500! hover:bg-white! rounded-xl! transition-colors!">
           <ArrowLeft size={20} />

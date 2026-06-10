@@ -81,10 +81,10 @@ function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className={`flex! w-full! items-center! justify-between! rounded-xl! px-4! py-2.5! transition-colors! ${
-          isActive && !isOpen ? 'bg-blue-50/50! text-blue-700!' : 'hover:bg-gray-50! text-gray-600!'
+          isActive && !isOpen ? 'bg-blue-50/50! text-blue-700!' : 'hover:bg-gray-50! hover:text-gray-600!'
         }`}
       >
-        <span className="text-[13px]! font-semibold! tracking-wide! uppercase! text-gray-400!">{group.title}</span>
+        <span className="text-base! font-medium! tracking-wide! text-gray-500!">{group.title}</span>
         <ChevronDown size={14} className={`text-gray-400! transition-transform! duration-200! ${isOpen ? 'rotate-180!' : ''}`} />
       </button>
       <AnimatePresence initial={false}>
@@ -133,8 +133,8 @@ export function AdminSidebar() {
 
   return (
     <aside className="flex! w-70! flex-col! bg-white! border-r! border-gray-100! shadow-[4px_0_24px_rgba(0,0,0,0.02)]! z-10!">
-      <div className="flex! items-center! justify-center! border-b! border-gray-100/50! px-8! py-6!">
-        <Image src="/assets/images/logo/logo.png" alt="Majestan Logo" width={160} height={50} className="object-contain!" priority />
+      <div className="flex! items-center! justify-center! border-b! border-gray-100/50! py-6! h-19!">
+        <Image src="/assets/images/logo/logo.png" alt="Majestan Logo" width={200} height={50} className="object-contain!" priority />
       </div>
       
       <nav className="flex-1! overflow-y-auto! py-6! px-4! custom-scrollbar!">
@@ -149,9 +149,9 @@ export function AdminSidebar() {
                 <li key={item.href} className="mb-4!">
                   <Link 
                     href={item.href} 
-                    className={`flex! items-center! gap-3! rounded-xl! px-4! py-2.5! text-[14px]! font-medium! transition-all! ${
+                    className={`flex! items-center! gap-3! rounded-xl! px-4! py-2.5! text-base! font-semibold! transition-all! ${
                       isItemActive 
-                        ? 'bg-blue-50! text-blue-700! font-semibold!' 
+                        ? 'bg-blue-50! text-blue-700!' 
                         : 'text-gray-600! hover:bg-gray-50! hover:text-gray-900!'
                     }`}
                   >

@@ -5,20 +5,20 @@ import Step3Location from './Step3Location';
 import React from 'react';
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
-  const methods = useForm();
-  return <FormProvider {...methods}><form>{children}</form></FormProvider>;
+ const methods = useForm();
+ return <FormProvider {...methods}><form>{children}</form></FormProvider>;
 };
 
 describe('Step3Location', () => {
-  test('renders location fields', () => {
-    render(
-      <Wrapper>
-        <Step3Location availableCities={[]} availableSublocations={[]} />
-      </Wrapper>
-    );
-    expect(screen.getByLabelText(/City/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Area/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Address Line 1/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Pincode/i)).toBeInTheDocument();
-  });
+ test('renders location fields', () => {
+ render(
+ <Wrapper>
+ <Step3Location availableCities={[]} availableSublocations={[]} />
+ </Wrapper>
+ );
+ expect(screen.getByLabelText(/City/i)).toBeInTheDocument();
+ expect(screen.getByLabelText(/Area/i)).toBeInTheDocument();
+ expect(screen.getByLabelText(/Address Line 1/i)).toBeInTheDocument();
+ expect(screen.getByLabelText(/Pincode/i)).toBeInTheDocument();
+ });
 });

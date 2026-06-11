@@ -77,15 +77,15 @@ function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }
   const [isOpen, setIsOpen] = useState(group.defaultOpen || isActive);
 
   return (
-    <li className="mb-2!">
+    <li className="!mb-2">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex! w-full! items-center! justify-between! rounded-xl! px-4! py-2.5! transition-colors! ${
-          isActive && !isOpen ? 'bg-blue-50/50! text-blue-700!' : 'hover:bg-gray-50! hover:text-gray-600!'
+        className={`!flex !w-full !items-center !justify-between !rounded-xl !px-4 !py-2.5 !transition-colors ${
+          isActive && !isOpen ? '!bg-blue-50/50 !text-blue-700' : '!hover:bg-gray-50 !hover:text-gray-600'
         }`}
       >
-        <span className="text-base! font-medium! tracking-wide! text-gray-500!">{group.title}</span>
-        <ChevronDown size={14} className={`text-gray-400! transition-transform! duration-200! ${isOpen ? 'rotate-180!' : ''}`} />
+        <span className="!text-base !font-medium !tracking-wide !text-gray-500 dark:!text-gray-400">{group.title}</span>
+        <ChevronDown size={14} className={`!text-gray-400 !transition-transform !duration-200 ${isOpen ? '!rotate-180' : ''}`} />
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
@@ -94,7 +94,7 @@ function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden! space-y-1! mt-1!"
+            className="!overflow-hidden !space-y-1 !mt-1"
           >
             {group.items.map((item) => {
               let isItemActive = false;
@@ -109,13 +109,13 @@ function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }
                 <li key={item.href}>
                   <Link 
                     href={item.href} 
-                    className={`flex! items-center! gap-3! rounded-xl! px-4! py-2.5! text-[14px]! font-medium! transition-all! ${
+                    className={`!flex !items-center !gap-3 !rounded-xl !px-4 !py-2.5 !text-[14px] !font-medium !transition-all ${
                       isItemActive 
-                        ? 'bg-blue-50! text-blue-700! font-semibold!' 
-                        : 'text-gray-500! hover:bg-gray-50! hover:text-gray-900!'
+                        ? '!bg-blue-50 !text-blue-700 !font-semibold' 
+                        : '!text-gray-500 dark:!text-gray-400 !hover:bg-gray-50 !hover:text-gray-900'
                     }`}
                   >
-                    <Icon size={18} className={isItemActive ? 'text-blue-600!' : 'text-gray-400!'} />
+                    <Icon size={18} className={isItemActive ? '!text-blue-600' : '!text-gray-400'} />
                     {item.title}
                   </Link>
                 </li>
@@ -132,13 +132,13 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex! w-70! flex-col! bg-white! border-r! border-gray-100! shadow-[4px_0_24px_rgba(0,0,0,0.02)]! z-10!">
-      <div className="flex! items-center! justify-center! border-b! border-gray-100/50! py-6! h-19!">
-        <Image src="/assets/images/logo/logo.png" alt="Majestan Logo" width={200} height={50} className="object-contain!" priority />
+    <aside className="!flex !w-70 !flex-col !bg-white dark:!bg-[#171821] !border-r !border-gray-100 dark:!border-[#262730] shadow-[4px_0_24px_rgba(0,0,0,0.02)!] !z-10">
+      <div className="!flex !items-center !justify-center !border-b !border-gray-100 dark:!border-[#262730]/50 !py-6 !h-19">
+        <Image src="/assets/images/logo/logo.png" alt="Majestan Logo" width={200} height={50} className="!object-contain" priority />
       </div>
       
-      <nav className="flex-1! overflow-y-auto! py-6! px-4! custom-scrollbar!">
-        <ul className="space-y-1!">
+      <nav className="!flex-1 !overflow-y-auto !py-6 !px-4 !custom-scrollbar">
+        <ul className="!space-y-1">
           {navItems.map((item, index) => {
             if ("items" in item) {
               return <NavGroupItem key={index} group={item} pathname={pathname || ''} />;
@@ -146,16 +146,16 @@ export function AdminSidebar() {
               const isItemActive = pathname === item.href;
               const Icon = item.icon;
               return (
-                <li key={item.href} className="mb-4!">
+                <li key={item.href} className="!mb-4">
                   <Link 
                     href={item.href} 
-                    className={`flex! items-center! gap-3! rounded-xl! px-4! py-2.5! text-base! font-semibold! transition-all! ${
+                    className={`!flex !items-center !gap-3 !rounded-xl !px-4 !py-2.5 !text-base !font-semibold !transition-all ${
                       isItemActive 
-                        ? 'bg-blue-50! text-blue-700!' 
-                        : 'text-gray-600! hover:bg-gray-50! hover:text-gray-900!'
+                        ? '!bg-blue-50 !text-blue-700' 
+                        : '!text-gray-600 !hover:bg-gray-50 !hover:text-gray-900'
                     }`}
                   >
-                    <Icon size={18} className={isItemActive ? 'text-blue-600!' : 'text-gray-400!'} />
+                    <Icon size={18} className={isItemActive ? '!text-blue-600' : '!text-gray-400'} />
                     {item.title}
                   </Link>
                 </li>

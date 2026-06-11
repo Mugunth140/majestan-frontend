@@ -305,9 +305,9 @@ export default function EditPropertyPage() {
 
   if (loadingProperty) {
     return (
-      <div className="w-full! space-y-6! flex! items-center! justify-center! h-64!">
-        <div className="flex! items-center! gap-2! text-gray-500!">
-          <Loader2 className="animate-spin!" size={20} />
+      <div className="!w-full !space-y-6 !flex !items-center !justify-center !h-64">
+        <div className="!flex !items-center !gap-2 !text-gray-500 dark:!text-gray-400">
+          <Loader2 className="!animate-spin" size={20} />
           <span>Loading property details...</span>
         </div>
       </div>
@@ -315,38 +315,38 @@ export default function EditPropertyPage() {
   }
 
   return (
-    <div className="w-full! space-y-6!">
-      <div className="flex! items-center! gap-4!">
-        <Link href="/admin/properties" className="p-2! text-gray-500! hover:bg-white! rounded-xl! transition-colors!">
+    <div className="!w-full !space-y-6">
+      <div className="!flex !items-center !gap-4">
+        <Link href="/admin/properties" className="!p-2 !text-gray-500 dark:!text-gray-400 hover:!bg-white dark:!bg-[#171821] !rounded-xl !transition-colors">
           <ArrowLeft size={20} />
         </Link>
-        <h2 className="text-[22px]! font-semibold! text-gray-800! tracking-tight!">Edit Property</h2>
+        <h2 className="!text-[22px] !font-semibold !text-gray-800 dark:!text-white !tracking-tight">Edit Property</h2>
       </div>
 
       {error && (
-        <div className="p-4! bg-rose-50! text-rose-600! border! border-rose-100! rounded-xl! text-[14px]! font-medium!">
+        <div className="!p-4 !bg-rose-50 !text-rose-600 !border !border-rose-100 !rounded-xl !text-[14px] !font-medium">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]! overflow-hidden!">
-        <div className="p-8! space-y-8!">
+      <form onSubmit={handleSubmit} className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] shadow-[0_4px_20px_rgba(0,0,0,0.03)!] !overflow-hidden">
+        <div className="!p-8 !space-y-8">
           
-          <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Property Title</label>
-              <input required name="title" value={formData.title} onChange={handleChange} className="w-full! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-800! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! transition-all!" placeholder="E.g. Luxury 3BHK Villa" />
+          <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Property Title</label>
+              <input required name="title" value={formData.title} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. Luxury 3BHK Villa" />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Price (₹)</label>
-              <input required name="price" value={formData.price} onChange={handleChange} type="number" className="w-full! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-800! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! transition-all!" placeholder="E.g. 15000000" />
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Price (₹)</label>
+              <input required name="price" value={formData.price} onChange={handleChange} type="number" className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 15000000" />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Property Type</label>
-              <div className="relative!">
-                <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-800! rounded-xl! pl-4! pr-10! py-3! text-[14px]! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Property Type</label>
+              <div className="!relative">
+                <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block">
                   <option value="apartment">Apartment</option>
                   <option value="villa">Villa</option>
                   <option value="plot">Plot</option>
@@ -356,14 +356,14 @@ export default function EditPropertyPage() {
                   <option value="industrial">Industrial Space</option>
                   <option value="individual_portion">Independent House</option>
                 </select>
-                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
                   <ChevronDown size={18} />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Property ID</label>
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Property ID</label>
               <input 
                 type="text" 
                 readOnly 
@@ -377,153 +377,153 @@ export default function EditPropertyPage() {
                   formData.propertyType === 'industrial' ? 'IS' :
                   formData.propertyType === 'individual_portion' ? 'IP' : ''
                 }-XXXX)`}
-                className="w-full! bg-gray-50/50! border! border-gray-100! shadow-sm! rounded-xl! px-4! py-3! text-[14px]! text-gray-500! font-medium! cursor-not-allowed! outline-none!" 
+                className="!w-full !bg-gray-50 dark:!bg-[#1c1d27]/50 !border !border-gray-100 dark:!border-[#262730] !shadow-sm !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-500 dark:!text-gray-400 !font-medium !cursor-not-allowed !outline-none" 
               />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Status</label>
-              <div className="relative!">
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-800! rounded-xl! pl-4! pr-10! py-3! text-[14px]! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Status</label>
+              <div className="!relative">
+                <select name="status" value={formData.status} onChange={handleChange} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block">
                   <option value="available">Available</option>
                   <option value="unavailable">Unavailable (Hidden)</option>
                   <option value="sold">Sold</option>
                   <option value="rented">Rented</option>
                 </select>
-                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
                   <ChevronDown size={18} />
                 </div>
               </div>
             </div>
             
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">City</label>
-              <div className="relative!">
-                <select required name="cityId" value={resolvedCityId} onChange={handleChange} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-800! rounded-xl! pl-4! pr-10! py-3! text-[14px]! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block!">
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">City</label>
+              <div className="!relative">
+                <select required name="cityId" value={resolvedCityId} onChange={handleChange} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block">
                   <option value="" disabled>Select City</option>
                   {availableCities.map(city => (
                     <option key={city.id} value={city.id}>{city.city_name}</option>
                   ))}
                 </select>
-                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
                   <ChevronDown size={18} />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Sublocation (Area)</label>
-              <div className="relative!">
-                <select required name="sublocationId" value={resolvedSublocationId} onChange={handleChange} disabled={!resolvedCityId} className="w-full! appearance-none! bg-gray-50! border! border-gray-200! text-gray-800! rounded-xl! pl-4! pr-10! py-3! text-[14px]! focus:ring-1! focus:ring-gray-900/50! outline-none! transition-all! cursor-pointer! block! disabled:opacity-50! disabled:cursor-not-allowed!">
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Sublocation (Area)</label>
+              <div className="!relative">
+                <select required name="sublocationId" value={resolvedSublocationId} onChange={handleChange} disabled={!resolvedCityId} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block disabled:!opacity-50 disabled:!cursor-not-allowed">
                   <option value="" disabled>{resolvedCityId ? "Select Area" : "Select City First"}</option>
                   {availableSublocations.map(sub => (
                     <option key={sub.id} value={sub.id}>{sub.locality_name}</option>
                   ))}
                 </select>
-                <div className="absolute! right-3! top-1/2! -translate-y-1/2! pointer-events-none! text-gray-500!">
+                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
                   <ChevronDown size={18} />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">State</label>
-              <input required readOnly name="state" value={formData.state} className="w-full! bg-gray-50/50! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-500! shadow-sm!" />
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">State</label>
+              <input required readOnly name="state" value={formData.state} className="!w-full !bg-gray-50 dark:!bg-[#1c1d27]/50 !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-500 dark:!text-gray-400 !shadow-sm" />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">BHKs / Bedrooms</label>
-              <input name="bedrooms" type="number" value={formData.bedrooms} onChange={handleChange} className="w-full! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-800! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! transition-all!" placeholder="E.g. 3" />
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">BHKs / Bedrooms</label>
+              <input name="bedrooms" type="number" value={formData.bedrooms} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 3" />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Bathrooms</label>
-              <input name="bathrooms" type="number" value={formData.bathrooms} onChange={handleChange} className="w-full! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-800! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! transition-all!" placeholder="E.g. 2" />
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Bathrooms</label>
+              <input name="bathrooms" type="number" value={formData.bathrooms} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 2" />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Area (Sqft)</label>
-              <input name="areaSqft" type="number" value={formData.areaSqft} onChange={handleChange} className="w-full! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-800! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! transition-all!" placeholder="E.g. 1500" />
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Area (Sqft)</label>
+              <input name="areaSqft" type="number" value={formData.areaSqft} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 1500" />
             </div>
 
-            <div className="space-y-2!">
-              <label className="text-[14px]! font-medium! text-gray-800!">Builder Name</label>
-              <input name="builderName" value={formData.builderName} onChange={handleChange} className="w-full! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-800! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! transition-all!" placeholder="E.g. Sobha Developers" />
+            <div className="!space-y-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Builder Name</label>
+              <input name="builderName" value={formData.builderName} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. Sobha Developers" />
             </div>
           </div>
 
-          <div className="space-y-2!">
-            <label className="text-[14px]! font-medium! text-gray-800!">Description</label>
-            <textarea required name="description" value={formData.description} onChange={handleChange} rows={4} className="w-full! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! px-4! py-3! text-[14px]! text-gray-800! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! outline-none! transition-all!" placeholder="Detailed description of the property..."></textarea>
+          <div className="!space-y-2">
+            <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Description</label>
+            <textarea required name="description" value={formData.description} onChange={handleChange} rows={4} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="Detailed description of the property..."></textarea>
           </div>
 
           {/* Amenities Section */}
-          <div className="pt-6! border-t! border-gray-100!">
-            <h3 className="text-lg! font-semibold! text-gray-800! mb-4!">Amenities</h3>
-            <div className="grid! grid-cols-2! md:grid-cols-3! lg:grid-cols-4! gap-3!">
+          <div className="!pt-6 !border-t !border-gray-100 dark:!border-[#262730]">
+            <h3 className="!text-lg !font-semibold !text-gray-800 dark:!text-white !mb-4">Amenities</h3>
+            <div className="!grid !grid-cols-2 md:!grid-cols-3 lg:!grid-cols-4 !gap-3">
               {amenities.map(amenity => (
                 <button
                   key={amenity.id}
                   type="button"
                   onClick={() => toggleAmenity(amenity.id)}
-                  className={`flex! items-center! gap-3! p-3! rounded-xl! border! text-[14px]! font-medium! transition-all! ${
+                  className={`!flex !items-center !gap-3 !p-3 !rounded-xl !border !text-[14px] !font-medium !transition-all ${
                     selectedAmenities.includes(amenity.id) 
-                      ? 'bg-gray-900! border-gray-900! text-white!' 
-                      : 'bg-white! border-gray-200! text-gray-700! hover:border-gray-300! hover:bg-gray-50!'
+                      ? '!bg-gray-900 !border-gray-900 !text-white' 
+                      : '!bg-white dark:!bg-[#171821] !border-gray-200 dark:!border-[#262730] !text-gray-700 dark:!text-gray-300 hover:!border-gray-300 dark:hover:!border-[#3a3b45] hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] dark:!bg-[#1c1d27]'
                   }`}
                 >
-                  <div className={`w-5! h-5! rounded-md! border! flex! items-center! justify-center! ${
+                  <div className={`!w-5 !h-5 !rounded-md !border !flex !items-center !justify-center ${
                     selectedAmenities.includes(amenity.id)
-                      ? 'bg-white! border-white!'
-                      : 'bg-white! border-gray-300!'
+                      ? '!bg-white dark:!bg-[#171821] !border-white'
+                      : '!bg-white dark:!bg-[#171821] !border-gray-300'
                   }`}>
-                    {selectedAmenities.includes(amenity.id) && <Check size={14} className="text-gray-800!" />}
+                    {selectedAmenities.includes(amenity.id) && <Check size={14} className="!text-gray-800 dark:!text-white" />}
                   </div>
                   {amenity.name}
                 </button>
               ))}
               {amenities.length === 0 && (
-                <div className="col-span-full! text-[14px]! text-gray-500! italic!">No amenities available.</div>
+                <div className="!col-span-full !text-[14px] !text-gray-500 dark:!text-gray-400 !italic">No amenities available.</div>
               )}
             </div>
           </div>
 
           {/* Image Upload Section */}
-          <div className="pt-6! border-t! border-gray-100!">
-            <h3 className="text-lg! font-semibold! text-gray-800! mb-4!">Property Images</h3>
+          <div className="!pt-6 !border-t !border-gray-100 dark:!border-[#262730]">
+            <h3 className="!text-lg !font-semibold !text-gray-800 dark:!text-white !mb-4">Property Images</h3>
             
-            <div className="grid! grid-cols-2! sm:grid-cols-3! md:grid-cols-4! lg:grid-cols-5! gap-4!">
+            <div className="!grid !grid-cols-2 sm:!grid-cols-3 md:!grid-cols-4 lg:!grid-cols-5 !gap-4">
               {existingImages.map((img, i) => (
-                <div key={`exist-${i}`} className="relative! aspect-square! rounded-2xl! overflow-hidden! border! border-gray-200! group!">
-                  <img src={img} alt="Existing Preview" className="w-full! h-full! object-cover!" />
-                  <button type="button" onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute! top-2! right-2! p-1.5! bg-white/90! hover:bg-rose-50! text-gray-600! hover:text-rose-600! rounded-lg! backdrop-blur-sm! transition-colors! opacity-0! group-hover:opacity-100!">
+                <div key={`exist-${i}`} className="!relative !aspect-square !rounded-2xl !overflow-hidden !border !border-gray-200 dark:!border-[#262730] !group">
+                  <img src={img} alt="Existing Preview" className="!w-full !h-full !object-cover" />
+                  <button type="button" onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))} className="!absolute !top-2 !right-2 !p-1.5 !bg-white dark:!bg-[#171821]/90 hover:!bg-rose-50 !text-gray-600 dark:!text-gray-300 hover:!text-rose-600 !rounded-lg !backdrop-blur-sm !transition-colors !opacity-0 group-hover:!opacity-100">
                     <X size={16} />
                   </button>
                 </div>
               ))}
               {images.map((img, i) => (
-                <div key={i} className="relative! aspect-square! rounded-2xl! overflow-hidden! border! border-gray-200! group!">
-                  <img src={URL.createObjectURL(img)} alt="Preview" className="w-full! h-full! object-cover!" />
-                  <button type="button" onClick={() => removeImage(i)} className="absolute! top-2! right-2! p-1.5! bg-white/90! hover:bg-rose-50! text-gray-600! hover:text-rose-600! rounded-lg! backdrop-blur-sm! transition-colors! opacity-0! group-hover:opacity-100!">
+                <div key={i} className="!relative !aspect-square !rounded-2xl !overflow-hidden !border !border-gray-200 dark:!border-[#262730] !group">
+                  <img src={URL.createObjectURL(img)} alt="Preview" className="!w-full !h-full !object-cover" />
+                  <button type="button" onClick={() => removeImage(i)} className="!absolute !top-2 !right-2 !p-1.5 !bg-white dark:!bg-[#171821]/90 hover:!bg-rose-50 !text-gray-600 dark:!text-gray-300 hover:!text-rose-600 !rounded-lg !backdrop-blur-sm !transition-colors !opacity-0 group-hover:!opacity-100">
                     <X size={16} />
                   </button>
                 </div>
               ))}
               
-              <label className="relative! aspect-square! rounded-2xl! border-2! border-dashed! border-gray-300! hover:border-gray-400! hover:bg-gray-50! flex! flex-col! items-center! justify-center! gap-2! cursor-pointer! transition-all!">
-                <ImagePlus className="text-gray-400!" size={28} />
-                <span className="text-[12px]! font-semibold! text-gray-500!">Add Images</span>
-                <input type="file" multiple accept="image/*" className="hidden!" onChange={handleImageChange} />
+              <label className="!relative !aspect-square !rounded-2xl !border-2 !border-dashed !border-gray-300 hover:!border-gray-400 hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] dark:!bg-[#1c1d27] !flex !flex-col !items-center !justify-center !gap-2 !cursor-pointer !transition-all">
+                <ImagePlus className="!text-gray-400" size={28} />
+                <span className="!text-[12px] !font-semibold !text-gray-500 dark:!text-gray-400">Add Images</span>
+                <input type="file" multiple accept="image/*" className="!hidden" onChange={handleImageChange} />
               </label>
             </div>
           </div>
 
         </div>
 
-        <div className="p-6! bg-gray-50! border-t! border-gray-100! flex! justify-end! gap-4!">
-          <Link href="/admin/properties" className="px-6! py-3! text-[14px]! font-semibold! text-gray-600! hover:text-gray-800! transition-colors!">Cancel</Link>
-          <button disabled={loading} type="submit" className="inline-flex! items-center! gap-2! px-8! py-3! bg-blue-600! hover:bg-blue-700! text-white! shadow-sm! hover:shadow-blue-500/20! rounded-xl! text-[14px]! font-semibold! transition-all! disabled:opacity-70!">
-            {loading ? <Loader2 size={18} className="animate-spin!" /> : <Save size={18} />}
+        <div className="!p-6 !bg-gray-50 dark:!bg-[#1c1d27] !border-t !border-gray-100 dark:!border-[#262730] !flex !justify-end !gap-4">
+          <Link href="/admin/properties" className="!px-6 !py-3 !text-[14px] !font-semibold !text-gray-600 dark:!text-gray-300 hover:!text-gray-800 dark:!text-white !transition-colors">Cancel</Link>
+          <button disabled={loading} type="submit" className="!inline-flex !items-center !gap-2 !px-8 !py-3 !bg-blue-600 hover:!bg-blue-700 !text-white !shadow-sm hover:!shadow-blue-500/20 !rounded-xl !text-[14px] !font-semibold !transition-all disabled:!opacity-70">
+            {loading ? <Loader2 size={18} className="!animate-spin" /> : <Save size={18} />}
             {uploadingImages ? "Uploading Images..." : loading ? "Saving..." : "Update Property"}
           </button>
         </div>

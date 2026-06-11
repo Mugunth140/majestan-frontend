@@ -7,12 +7,12 @@ export default function Step4Specifications() {
 
  const InputField = ({ id, label, placeholder, type = "number" }: any) => (
  <div className="!space-y-1.5">
- <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800">{label}</label>
+ <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800 dark:!text-gray-100">{label}</label>
  <input 
  id={id}
  type={type}
  {...register(id)} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-2.5 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-2.5 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  placeholder={placeholder}
  />
  {errors[id] && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors[id]?.message as string}</p>}
@@ -21,12 +21,12 @@ export default function Step4Specifications() {
 
  const SelectField = ({ id, label, options }: any) => (
  <div className="!space-y-1.5">
- <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800">{label}</label>
+ <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800 dark:!text-gray-100">{label}</label>
  <div className="!relative">
  <select 
  id={id}
  {...register(id)} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-2.5 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-2.5 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="">Select</option>
  {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
@@ -43,7 +43,7 @@ export default function Step4Specifications() {
  <div className="!space-y-8">
  
  <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">Basic Specs</h3>
+ <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">Basic Specs</h3>
  <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
  <InputField id="bedrooms" label="Bedrooms" placeholder="E.g. 3" />
  <InputField id="bathrooms" label="Bathrooms" placeholder="E.g. 2" />
@@ -55,7 +55,7 @@ export default function Step4Specifications() {
  </div>
 
  <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">Area Details</h3>
+ <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">Area Details</h3>
  <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
  <SelectField id="areaUnit" label="Area Unit" options={['Sq Ft', 'Sq M', 'Acres', 'Cents']} />
  <InputField id="carpetArea" label="Carpet Area" placeholder="E.g. 1200" />
@@ -66,7 +66,7 @@ export default function Step4Specifications() {
  </div>
 
  <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">Property Features</h3>
+ <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">Property Features</h3>
  <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
  <SelectField id="propertyFacing" label="Property Facing" options={['East', 'West', 'North', 'South', 'North East', 'North West', 'South East', 'South West']} />
  <SelectField id="propertyAge" label="Property Age" options={['New', '1-3 Years', '3-5 Years', '5-10 Years', '10+ Years']} />

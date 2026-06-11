@@ -49,10 +49,10 @@ export default function NewPropertyPage() {
   return (
     <div className="!w-full !space-y-6">
       <div className="!flex !items-center !gap-4">
-        <Link href="/admin/properties" className="!p-2 !text-gray-500 hover:!bg-white !rounded-xl !transition-colors">
+        <Link href="/admin/properties" className="!p-2 !text-gray-500 dark:!text-gray-400 hover:!bg-white dark:!bg-[#171821] !rounded-xl !transition-colors">
           <ArrowLeft size={20} />
         </Link>
-        <h2 className="!text-2xl !font-medium !text-gray-800 !tracking-tight">Add New Property</h2>
+        <h2 className="!text-2xl !font-medium !text-gray-800 dark:!text-white !tracking-tight">Add New Property</h2>
       </div>
 
       {loading ? (

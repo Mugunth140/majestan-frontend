@@ -35,12 +35,12 @@ export default function Step3Location({ availableCities, availableSublocations }
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
  
  <div className="!space-y-1.5">
- <label htmlFor="cityId" className="!text-[14px] !font-semibold !text-gray-800">City</label>
+ <label htmlFor="cityId" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">City</label>
  <div className="!relative">
  <select 
  id="cityId"
  {...register('cityId')} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="" disabled>Select City</option>
  {availableCities.map(city => (
@@ -55,13 +55,13 @@ export default function Step3Location({ availableCities, availableSublocations }
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="sublocationId" className="!text-[14px] !font-semibold !text-gray-800">Sublocation (Area)</label>
+ <label htmlFor="sublocationId" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Sublocation (Area)</label>
  <div className="!relative">
  <select 
  id="sublocationId"
  {...register('sublocationId')} 
  disabled={!cityId}
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm disabled:!opacity-50 disabled:!cursor-not-allowed"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm disabled:!opacity-50 disabled:!cursor-not-allowed"
  >
  <option value="" disabled>{cityId ? "Select Area" : "Select City First"}</option>
  {filteredSublocations.map(sub => (
@@ -76,51 +76,51 @@ export default function Step3Location({ availableCities, availableSublocations }
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="state" className="!text-[14px] !font-semibold !text-gray-800">State</label>
+ <label htmlFor="state" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">State</label>
  <input 
  id="state"
  {...register('state')} 
  readOnly
- className="!w-full !bg-gray-50 !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-500 !shadow-sm !outline-none !cursor-not-allowed" 
+ className="!w-full !bg-gray-50 dark:!bg-[#1c1d27] dark:!bg-[#0f1015] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-500 dark:!text-gray-400 !shadow-sm !outline-none !cursor-not-allowed" 
  />
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="country" className="!text-[14px] !font-semibold !text-gray-800">Country</label>
+ <label htmlFor="country" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Country</label>
  <input 
  id="country"
  {...register('country')} 
  readOnly
- className="!w-full !bg-gray-50 !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-500 !shadow-sm !outline-none !cursor-not-allowed" 
+ className="!w-full !bg-gray-50 dark:!bg-[#1c1d27] dark:!bg-[#0f1015] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-500 dark:!text-gray-400 !shadow-sm !outline-none !cursor-not-allowed" 
  />
  </div>
 
  <div className="!space-y-1.5 md:!col-span-2">
- <label htmlFor="addressLine1" className="!text-[14px] !font-semibold !text-gray-800">Address Line 1</label>
+ <label htmlFor="addressLine1" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Address Line 1</label>
  <input 
  id="addressLine1"
  {...register('addressLine1')} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  placeholder="Flat/House No, Building Name"
  />
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="addressLine2" className="!text-[14px] !font-semibold !text-gray-800">Address Line 2 (Optional)</label>
+ <label htmlFor="addressLine2" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Address Line 2 (Optional)</label>
  <input 
  id="addressLine2"
  {...register('addressLine2')} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  placeholder="Street Name, Landmark"
  />
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="pincode" className="!text-[14px] !font-semibold !text-gray-800">Pincode</label>
+ <label htmlFor="pincode" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Pincode</label>
  <input 
  id="pincode"
  {...register('pincode')} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  placeholder="E.g. 400001"
  />
  </div>

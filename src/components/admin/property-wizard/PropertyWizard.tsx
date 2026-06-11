@@ -195,9 +195,9 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
       
       {/* Modern Stepper Header */}
       <div className="!mb-10">
-        <div className="!bg-white !rounded-3xl !p-5 !border !border-gray-100 !shadow-[0_4px_20px_rgba(0,0,0,0.03)] !relative !overflow-hidden">
+        <div className="!bg-white dark:!bg-[#171821] !rounded-3xl !p-5 !border !border-gray-100 dark:!border-[#262730] !shadow-[0_4px_20px_rgba(0,0,0,0.03)] !relative !overflow-hidden">
           {/* Progress Bar Background */}
-          <div className="!absolute !bottom-0 !left-0 !w-full !h-1 !bg-gray-50">
+          <div className="!absolute !bottom-0 !left-0 !w-full !h-1 !bg-gray-50 dark:!bg-[#1c1d27] dark:!bg-[#0f1015]">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
@@ -215,12 +215,12 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
               return (
                 <div key={step.id} className={`!flex !flex-col !items-center !min-w-[70px] !gap-2 !transition-all !duration-300 ${isActive ? '!opacity-100 !scale-105' : isCompleted ? '!opacity-70' : '!opacity-40 grayscale'}`}>
                   <div className={`!w-9 !h-9 !rounded-full !flex !items-center !justify-center !text-sm !font-semibold !transition-all !duration-500 ${
-                    isActive ? '!bg-gray-900 !text-white !shadow-md !ring-4 !ring-gray-900/10' :
-                    isCompleted ? '!bg-gray-900 !text-white' : '!bg-gray-100 !text-gray-400 !border !border-gray-200'
+                    isActive ? '!bg-gray-900 dark:!bg-blue-600 !text-white !shadow-md !ring-4 !ring-gray-900/10 dark:!ring-blue-500/20' :
+                    isCompleted ? '!bg-gray-900 dark:!bg-blue-600 !text-white' : '!bg-gray-100 dark:!bg-gray-800 !text-gray-400 !border !border-gray-200 dark:!border-[#262730]'
                   }`}>
                     {isCompleted ? <Check size={16} strokeWidth={3} /> : step.id}
                   </div>
-                  <span className={`!text-[12px] !font-medium ${isActive ? '!text-gray-900' : '!text-gray-500'}`}>
+                  <span className={`!text-[12px] !font-medium ${isActive ? '!text-gray-900 dark:!text-white' : '!text-gray-500 dark:!text-gray-400'}`}>
                     {step.title}
                   </span>
                 </div>
@@ -231,12 +231,12 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
       </div>
 
       {/* Main Form Container */}
-      <div className="!bg-white !rounded-[2rem] !border !border-gray-100 !shadow-[0_8px_30px_rgba(0,0,0,0.04)] !overflow-hidden">
+      <div className="!bg-white dark:!bg-[#171821] !rounded-[2rem] !border !border-gray-100 dark:!border-[#262730] !shadow-[0_8px_30px_rgba(0,0,0,0.04)] !overflow-hidden">
         
         {/* Header Strip */}
-        <div className="!px-10 !py-8 !border-b !border-gray-50 !bg-gray-50/30">
-          <h2 className="!text-2xl !font-bold !text-gray-900">{currentStepConfig.title}</h2>
-          <p className="!text-sm !text-gray-500 !mt-1">Please provide the details below to continue.</p>
+        <div className="!px-10 !py-8 !border-b !border-gray-50 dark:!border-[#262730] !bg-gray-50 dark:!bg-[#1c1d27] dark:!bg-[#0f1015]/30">
+          <h2 className="!text-2xl !font-bold !text-gray-900 dark:!text-white">{currentStepConfig.title}</h2>
+          <p className="!text-sm !text-gray-500 dark:!text-gray-400 !mt-1">Please provide the details below to continue.</p>
         </div>
 
         <div className="!p-10">
@@ -263,12 +263,12 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         </div>
 
         {/* Action Bar */}
-        <div className="!px-10 !py-6 !bg-gray-50/50 !border-t !border-gray-100 !flex !items-center !justify-between">
+        <div className="!px-10 !py-6 !bg-gray-50 dark:!bg-[#1c1d27] dark:!bg-[#0f1015]/50 !border-t !border-gray-100 dark:!border-[#262730] !flex !items-center !justify-between">
           <button 
             type="button" 
             onClick={handleBack}
             disabled={currentStep === 1 || isSubmitting}
-            className="!inline-flex !items-center !gap-2 !px-6 !py-2.5 !rounded-xl !text-sm !font-medium !text-gray-700 !bg-white !border !border-gray-200 hover:!border-gray-300 hover:!bg-gray-50 !shadow-sm !transition-all active:!scale-[0.98] disabled:!opacity-40 disabled:!cursor-not-allowed"
+            className="!inline-flex !items-center !gap-2 !px-6 !py-2.5 !rounded-xl !text-sm !font-medium !text-gray-700 dark:!text-gray-300 !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] hover:!border-gray-300 dark:hover:!border-gray-600 dark:!border-gray-600 hover:!bg-gray-50 dark:!bg-[#1c1d27] dark:hover:!bg-[#1c1d27] dark:!bg-gray-800 !shadow-sm !transition-all active:!scale-[0.98] disabled:!opacity-40 disabled:!cursor-not-allowed"
           >
             <ArrowLeft size={16} /> Back
           </button>
@@ -277,7 +277,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
             type="button"
             onClick={handleNext}
             disabled={isSubmitting}
-            className="!inline-flex !items-center !gap-2 !px-8 !py-2.5 !rounded-xl !text-sm !font-medium !text-white !bg-gray-900 hover:!bg-black !shadow-md hover:!shadow-lg !transition-all active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
+            className="!inline-flex !items-center !gap-2 !px-8 !py-2.5 !rounded-xl !text-sm !font-medium !text-white !bg-gray-900 hover:!bg-black dark:!bg-blue-600 dark:hover:!bg-blue-700 !shadow-md hover:!shadow-lg !transition-all active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
           >
             {isSubmitting ? <Loader2 size={16} className="!animate-spin" /> : currentStep === steps.length ? <Save size={16} /> : null}
             {isSubmitting ? 'Processing...' : currentStep === steps.length ? 'Submit Property' : 'Continue'}

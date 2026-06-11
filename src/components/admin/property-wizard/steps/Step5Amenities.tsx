@@ -32,7 +32,7 @@ export default function Step5Amenities({ amenities = [] }: { amenities: any[] })
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
  placeholder="Search amenities..." 
- className="!w-full !bg-white !border !border-gray-200 !rounded-full !pl-11 !pr-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all"
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-full !pl-11 !pr-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all"
  />
  </div>
 
@@ -48,11 +48,11 @@ export default function Step5Amenities({ amenities = [] }: { amenities: any[] })
  className={`!flex !items-center !gap-3 !p-3.5 !rounded-xl !border !text-sm !font-medium !transition-all ${
  isSelected 
  ? '!bg-gray-900 !border-gray-900 !text-white !shadow-sm !ring-2 !ring-gray-900/10' 
- : '!bg-white !border-gray-200 !text-gray-700 hover:!bg-gray-50 hover:!border-gray-300 !shadow-sm'
+ : '!bg-white dark:!bg-[#171821] !border-gray-200 dark:!border-[#262730] !text-gray-700 dark:!text-gray-300 hover:!bg-gray-50 dark:!bg-[#1c1d27] dark:hover:!bg-[#1c1d27] dark:!bg-gray-800 hover:!border-gray-300 dark:hover:!border-gray-600 dark:!border-gray-600 !shadow-sm'
  }`}
  >
  <div className={`!w-5 !h-5 !rounded !flex !items-center !justify-center !transition-colors ${
- isSelected ? '!bg-blue-600 !border-blue-600' : '!bg-white !border-gray-300'
+ isSelected ? '!bg-blue-600 !border-blue-600' : '!bg-white dark:!bg-[#171821] !border-gray-300 dark:!border-gray-600'
  }`}>
  {isSelected && <Check size={14} className="!text-white" />}
  </div>
@@ -61,7 +61,7 @@ export default function Step5Amenities({ amenities = [] }: { amenities: any[] })
  );
  })}
  {filteredAmenities.length === 0 && (
- <div className="!col-span-full !py-8 !text-center !text-[14px] !text-gray-500 !font-medium">
+ <div className="!col-span-full !py-8 !text-center !text-[14px] !text-gray-500 dark:!text-gray-400 !font-medium">
  No amenities found matching "{searchTerm}"
  </div>
  )}

@@ -38,7 +38,7 @@ export default function AdminSublocationsPage() {
   }, [search]);
 
   const handleDelete = async (id: number) => {
-    const result = await Swal.fire({ title: "Are you sure?", text: "This sublocation will be deleted permanently.", icon: "warning", showCancelButton: true, confirmButtonColor: "#ef4444", cancelButtonColor: "#9ca3af", confirmButtonText: "Yes, delete it!" });
+    const result = await Swal.fire({ title: "Are you sure?", text: "This sublocation will be deleted permanently.", icon: "warning", showCancelButton: true, confirmButtonColor: "#ef4444", cancelButtonColor: "#9ca3af", confirmButtonText: "Yes, delete !it" });
     if (!result.isConfirmed) return;
     try {
       const token = window.localStorage.getItem("majestan_access_token");
@@ -58,27 +58,27 @@ export default function AdminSublocationsPage() {
 
   const getStatusBadge = (isActive: number) => {
     return isActive ? (
-      <span className="px-3! py-1! bg-emerald-50! text-emerald-600! rounded-full! text-[12px]! font-medium! border! border-emerald-100!">
+      <span className="!px-3 !py-1 !bg-emerald-50 !text-emerald-600 !rounded-full !text-[12px] !font-medium !border !border-emerald-100">
         Active
       </span>
     ) : (
-      <span className="px-3! py-1! bg-gray-50! text-gray-500! rounded-full! text-[12px]! font-medium! border! border-gray-200!">
+      <span className="!px-3 !py-1 !bg-gray-50 dark:!bg-[#1c1d27] !text-gray-500 dark:!text-gray-400 !rounded-full !text-[12px] !font-medium !border !border-gray-200 dark:!border-[#262730]">
         Inactive
       </span>
     );
   };
 
   return (
-    <div className="p-6! w-full! space-y-6!">
+    <div className="!p-6 !w-full !space-y-6">
       {/* Header */}
-      <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4!">
+      <div className="!flex !flex-col sm:!flex-row sm:!items-center !justify-between !gap-4">
         <div>
-          <h1 className="text-2xl! font-medium! ml-3! text-gray-800! tracking-normal!">Sublocations</h1>
-          {/* <p className="text-[14px]! text-gray-500! mt-1!">Manage areas, localities, and sublocations.</p> */}
+          <h1 className="!text-2xl !font-medium !ml-3 !text-gray-800 dark:!text-white !tracking-normal">Sublocations</h1>
+          {/* <p className="!text-[14px] !text-gray-500 dark:!text-gray-400 !mt-1">Manage areas, localities, and sublocations.</p> */}
         </div>
         <Link 
           href="/admin/sublocations/new" 
-          className="inline-flex! items-center! justify-center! gap-2! bg-blue-600! hover:bg-blue-700! text-white! px-4! py-2! rounded-xl! font-medium! transition-all! shadow-sm! hover:shadow-blue-500/20!"
+          className="!inline-flex !items-center !justify-center !gap-2 !bg-blue-600 hover:!bg-blue-700 !text-white !px-4 !py-2 !rounded-xl !font-medium !transition-all !shadow-sm hover:!shadow-blue-500/20"
         >
           <Plus size={20} />
           Add Sublocation
@@ -87,76 +87,76 @@ export default function AdminSublocationsPage() {
 
       {/* Filters */}
       <div>
-        <div className="relative! outline! outline-gray-200! rounded-2xl! focus-within:outline-blue-500/50! focus-within:outline-2! transition-all!">
-          <Search className="absolute! left-3! top-1/2! -translate-y-1/2! text-gray-400!" size={20} />
+        <div className="!relative !outline !outline-gray-200 !rounded-2xl focus-within:!outline-blue-500/50 focus-within:!outline-2 !transition-all">
+          <Search className="!absolute !left-3 !top-1/2 !-translate-y-1/2 !text-gray-400" size={20} />
           <input
             type="text"
             placeholder="Search sublocations or cities..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full! pl-10! pr-4! py-2.5! bg-[#fbfbfc]! border! border-gray-100! rounded-xl! text-[14px]! text-gray-800! focus:outline-none! focus:ring-2! focus:ring-blue-500/20! focus:border-blue-500! shadow-sm! transition-all!"
+            className="!w-full !pl-10 !pr-4 !py-2.5 !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !text-[14px] !text-gray-800 dark:!text-white focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !transition-all"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_4px_20px_rgba(0,0,0,0.03)]! overflow-hidden!">
-        <div className="overflow-x-auto!">
-          <table className="w-full! text-left! border-collapse!">
+      <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] shadow-[0_4px_20px_rgba(0,0,0,0.03)!] !overflow-hidden">
+        <div className="!overflow-x-auto">
+          <table className="!w-full !text-left !border-collapse">
             <thead>
-              <tr className="bg-[#fbfbfc]! border-b! border-gray-100!">
-                <th className="px-6! py-4! text-[12px]! font-semibold! text-gray-500! uppercase! tracking-wider!">Sublocation</th>
-                <th className="px-6! py-4! text-[12px]! font-semibold! text-gray-500! uppercase! tracking-wider!">City Details</th>
-                <th className="px-6! py-4! text-[12px]! font-semibold! text-gray-500! uppercase! tracking-wider!">Postal Code</th>
-                <th className="px-6! py-4! text-[12px]! font-semibold! text-gray-500! uppercase! tracking-wider!">Status</th>
-                <th className="px-6! py-4! text-[12px]! font-semibold! text-gray-500! uppercase! tracking-wider! text-right!">Actions</th>
+              <tr className="!bg-[#fbfbfc] dark:!bg-[#0f1015] !border-b !border-gray-100 dark:!border-[#262730]">
+                <th className="!px-6 !py-4 !text-[12px] !font-semibold !text-gray-500 dark:!text-gray-400 !uppercase !tracking-wider">Sublocation</th>
+                <th className="!px-6 !py-4 !text-[12px] !font-semibold !text-gray-500 dark:!text-gray-400 !uppercase !tracking-wider">City Details</th>
+                <th className="!px-6 !py-4 !text-[12px] !font-semibold !text-gray-500 dark:!text-gray-400 !uppercase !tracking-wider">Postal Code</th>
+                <th className="!px-6 !py-4 !text-[12px] !font-semibold !text-gray-500 dark:!text-gray-400 !uppercase !tracking-wider">Status</th>
+                <th className="!px-6 !py-4 !text-[12px] !font-semibold !text-gray-500 dark:!text-gray-400 !uppercase !tracking-wider !text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y! divide-gray-100!">
+            <tbody className="!divide-y !divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6! py-12! text-center!">
-                    <div className="flex! items-center! justify-center! gap-2! text-gray-400!">
-                      <div className="w-5! h-5! border-2! border-current! border-t-transparent! rounded-full! animate-spin!" />
+                  <td colSpan={5} className="!px-6 !py-12 !text-center">
+                    <div className="!flex !items-center !justify-center !gap-2 !text-gray-400">
+                      <div className="!w-5 !h-5 !border-2 !border-current !border-t-transparent !rounded-full !animate-spin" />
                       Loading...
                     </div>
                   </td>
                 </tr>
               ) : sublocations.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6! py-12! text-center! text-gray-500!">
+                  <td colSpan={5} className="!px-6 !py-12 !text-center !text-gray-500 dark:!text-gray-400">
                     No sublocations found. Try adjusting your search.
                   </td>
                 </tr>
               ) : (
                 sublocations.map((sub) => (
-                  <tr key={sub.id} className="bg-white! hover:bg-[#fbfbfc]! transition-colors! group!">
-                    <td className="px-6! py-4!">
-                      <div className="flex! items-center! gap-3!">
-                        <div className="w-10! h-10! rounded-lg! bg-gray-100! flex! items-center! justify-center! text-gray-400! flex-shrink-0!">
+                  <tr key={sub.id} className="!bg-white dark:!bg-[#171821] hover:!bg-[#fbfbfc] dark:!bg-[#0f1015] !transition-colors !group">
+                    <td className="!px-6 !py-4">
+                      <div className="!flex !items-center !gap-3">
+                        <div className="!w-10 !h-10 !rounded-lg !bg-gray-100 dark:!bg-[#262730] !flex !items-center !justify-center !text-gray-400 !flex-shrink-0">
                           <MapPin size={20} />
                         </div>
                         <div>
-                          <div className="font-medium! text-gray-800! group-hover:text-blue-600! transition-colors! capitalize!">{sub.locality_name}</div>
+                          <div className="!font-medium !text-gray-800 dark:!text-white group-hover:!text-blue-600 !transition-colors !capitalize">{sub.locality_name}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6! py-4!">
-                      <div className="text-gray-800! capitalize!">{sub.city_name || 'N/A'}</div>
-                      <div className="text-[12px]! text-gray-400! mt-0.5! capitalize!">{sub.state_name || 'N/A'}, {sub.country_name || 'India'}</div>
+                    <td className="!px-6 !py-4">
+                      <div className="!text-gray-800 dark:!text-white !capitalize">{sub.city_name || 'N/A'}</div>
+                      <div className="!text-[12px] !text-gray-400 !mt-0.5 !capitalize">{sub.state_name || 'N/A'}, {sub.country_name || 'India'}</div>
                     </td>
-                    <td className="px-6! py-4!">
-                      <div className="text-[14px]! text-gray-600!">{sub.postal_code || 'N/A'}</div>
+                    <td className="!px-6 !py-4">
+                      <div className="!text-[14px] !text-gray-600 dark:!text-gray-300">{sub.postal_code || 'N/A'}</div>
                     </td>
-                    <td className="px-6! py-4!">
+                    <td className="!px-6 !py-4">
                       {getStatusBadge(sub.is_active)}
                     </td>
-                    <td className="px-6! py-4! text-right!">
-                      <div className="flex! items-center! justify-end! gap-2!">
-                        <Link href={`/admin/sublocations/${sub.id}`} className="p-2! text-gray-400! hover:text-emerald-600! hover:bg-emerald-50! rounded-lg! transition-colors!" title="Edit Sublocation">
+                    <td className="!px-6 !py-4 !text-right">
+                      <div className="!flex !items-center !justify-end !gap-2">
+                        <Link href={`/admin/sublocations/${sub.id}`} className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 !rounded-lg !transition-colors" title="Edit Sublocation">
                           <Edit size={16} />
                         </Link>
-                        <button onClick={() => handleDelete(sub.id)} className="p-2! text-gray-400! hover:text-rose-600! hover:bg-rose-50! rounded-lg! transition-colors!" title="Delete Sublocation">
+                        <button onClick={() => handleDelete(sub.id)} className="!p-2 !text-gray-400 hover:!text-rose-600 hover:!bg-rose-50 !rounded-lg !transition-colors" title="Delete Sublocation">
                           <Trash2 size={16} />
                         </button>
                       </div>

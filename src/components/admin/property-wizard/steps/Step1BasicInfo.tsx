@@ -9,23 +9,23 @@ export default function Step1BasicInfo() {
  <div className="!space-y-6">
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
  <div className="!space-y-1.5 md:!col-span-2">
- <label htmlFor="title" className="!text-[14px] !font-semibold !text-gray-800">Property Title</label>
+ <label htmlFor="title" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Property Title</label>
  <input 
  id="title"
  {...register('title')} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  placeholder="E.g. Luxury 3BHK Villa" 
  />
  {errors.title && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.title.message as string}</p>}
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="propertyType" className="!text-[14px] !font-semibold !text-gray-800">Property Type</label>
+ <label htmlFor="propertyType" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Property Type</label>
  <div className="!relative">
  <select 
  id="propertyType"
  {...register('propertyType')} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="apartment">Apartment</option>
  <option value="villa">Villa</option>
@@ -44,12 +44,12 @@ export default function Step1BasicInfo() {
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="listingType" className="!text-[14px] !font-semibold !text-gray-800">Listing Type</label>
+ <label htmlFor="listingType" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Listing Type</label>
  <div className="!relative">
  <select 
  id="listingType"
  {...register('listingType')} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="Sell">Sell</option>
  <option value="Rent">Rent</option>
@@ -63,12 +63,12 @@ export default function Step1BasicInfo() {
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="description" className="!text-[14px] !font-semibold !text-gray-800">Description</label>
+ <label htmlFor="description" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Description</label>
  <textarea 
  id="description"
  {...register('description')} 
  rows={5} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  placeholder="Detailed description of the property..."
  ></textarea>
  {errors.description && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.description.message as string}</p>}

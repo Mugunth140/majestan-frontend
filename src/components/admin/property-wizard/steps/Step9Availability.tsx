@@ -7,40 +7,40 @@ export default function Step9Availability() {
 
  return (
  <div className="!space-y-6">
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">
+ <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">
  Availability Details
  </h3>
  
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
  <div className="!space-y-1.5">
- <label htmlFor="availableFrom" className="!text-[14px] !font-semibold !text-gray-800">Available From</label>
+ <label htmlFor="availableFrom" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Available From</label>
  <input 
  id="availableFrom"
  type="date"
  {...register('availableFrom')} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  />
  {errors.availableFrom && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.availableFrom.message as string}</p>}
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="availableUntil" className="!text-[14px] !font-semibold !text-gray-800">Available Until (Optional)</label>
+ <label htmlFor="availableUntil" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Available Until (Optional)</label>
  <input 
  id="availableUntil"
  type="date"
  {...register('availableUntil')} 
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  />
  {errors.availableUntil && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.availableUntil.message as string}</p>}
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="availabilityStatus" className="!text-[14px] !font-semibold !text-gray-800">Availability Status</label>
+ <label htmlFor="availabilityStatus" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Availability Status</label>
  <div className="!relative">
  <select 
  id="availabilityStatus"
  {...register('availabilityStatus')} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="Available">Available</option>
  <option value="Reserved">Reserved</option>

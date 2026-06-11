@@ -9,12 +9,12 @@ export default function Step10Publishing() {
  <div className="!space-y-6">
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
  <div className="!space-y-1.5">
- <label htmlFor="verificationStatus" className="!text-[14px] !font-semibold !text-gray-800">Verification Status</label>
+ <label htmlFor="verificationStatus" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Verification Status</label>
  <div className="!relative">
  <select 
  id="verificationStatus"
  {...register('verificationStatus')} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="Pending">Pending Review</option>
  <option value="Verified">Verified</option>
@@ -33,24 +33,24 @@ export default function Step10Publishing() {
  <input 
  type="checkbox" 
  {...register('isPublished')} 
- className="!peer !appearance-none !w-6 !h-6 !border-2 !border-gray-300 !rounded-lg checked:!bg-emerald-500 checked:!border-emerald-500 !transition-all !cursor-pointer"
+ className="!peer !appearance-none !w-6 !h-6 !border-2 !border-gray-300 dark:!border-gray-600 !rounded-lg checked:!bg-emerald-500 checked:!border-emerald-500 !transition-all !cursor-pointer"
  />
  <svg className="!absolute !inset-0 !w-6 !h-6 !pointer-events-none !opacity-0 peer-checked:!opacity-100 !text-white !p-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
  <polyline points="20 6 9 17 4 12"></polyline>
  </svg>
  </div>
- <span className="!text-[14px] !font-semibold !text-gray-800">Publish Immediately</span>
+ <span className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Publish Immediately</span>
  </label>
  {errors.isPublished && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.isPublished.message as string}</p>}
  </div>
 
  <div className="!space-y-1.5 md:!col-span-2">
- <label htmlFor="adminNotes" className="!text-[14px] !font-semibold !text-gray-800">Admin Notes (Internal)</label>
+ <label htmlFor="adminNotes" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Admin Notes (Internal)</label>
  <textarea 
  id="adminNotes"
  {...register('adminNotes')} 
  rows={4}
- className="!w-full !bg-white !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
+ className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
  placeholder="Add any internal notes regarding this property's verification or status..." 
  />
  {errors.adminNotes && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.adminNotes.message as string}</p>}

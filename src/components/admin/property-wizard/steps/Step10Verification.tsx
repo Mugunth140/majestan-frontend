@@ -7,18 +7,18 @@ export default function Step10Verification() {
 
  return (
  <div className="!space-y-6">
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">
+ <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">
  Verification & Publishing (Admin Only)
  </h3>
  
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
  <div className="!space-y-1.5">
- <label htmlFor="verificationStatus" className="!text-[14px] !font-semibold !text-gray-800">Verification Status</label>
+ <label htmlFor="verificationStatus" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Verification Status</label>
  <div className="!relative">
  <select 
  id="verificationStatus"
  {...register('verificationStatus')} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="Pending">Pending</option>
  <option value="Verified">Verified</option>
@@ -32,12 +32,12 @@ export default function Step10Verification() {
  </div>
 
  <div className="!space-y-1.5">
- <label htmlFor="approvalStatus" className="!text-[14px] !font-semibold !text-gray-800">Approval Status</label>
+ <label htmlFor="approvalStatus" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Approval Status</label>
  <div className="!relative">
  <select 
  id="approvalStatus"
  {...register('approvalStatus')} 
- className="!w-full !appearance-none !bg-white !border !border-gray-200 !text-gray-800 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
+ className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
  >
  <option value="Pending">Pending</option>
  <option value="Approved">Approved</option>
@@ -57,13 +57,13 @@ export default function Step10Verification() {
  id="publishImmediately"
  type="checkbox"
  {...register('publishImmediately')}
- className="!peer !appearance-none !w-5 !h-5 !border !border-gray-300 !rounded-md checked:!bg-blue-600 checked:!border-blue-600 !transition-all !cursor-pointer"
+ className="!peer !appearance-none !w-5 !h-5 !border !border-gray-300 dark:!border-gray-600 !rounded-md checked:!bg-blue-600 checked:!border-blue-600 !transition-all !cursor-pointer"
  />
  <svg className="!absolute !w-3 !h-3 !text-white !opacity-0 peer-checked:!opacity-100 !pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
  </svg>
  </div>
- <span className="!text-sm !font-medium !text-gray-700 group-hover:!text-gray-900">Publish immediately on website</span>
+ <span className="!text-sm !font-medium !text-gray-700 dark:!text-gray-300 group-hover:!text-gray-900 dark:!text-white">Publish immediately on website</span>
  </label>
  </div>
  </div>

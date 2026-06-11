@@ -6,7 +6,6 @@ import PropertyWizard from "@/components/admin/property-wizard/PropertyWizard";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { AdminCity, AdminSublocation } from "@/lib/location-options";
-import { usePropertyWizardStore } from "@/store/usePropertyWizardStore";
 import { ModernLoader } from "@/components/admin/ui/ModernLoader";
 
 export default function NewPropertyPage() {
@@ -14,12 +13,8 @@ export default function NewPropertyPage() {
   const [amenities, setAmenities] = useState<any[]>([]);
   const [availableCities, setAvailableCities] = useState<AdminCity[]>([]);
   const [availableSublocations, setAvailableSublocations] = useState<AdminSublocation[]>([]);
-  const { clearWizard } = usePropertyWizardStore();
 
   useEffect(() => {
-    // Clear any previous interrupted session data when entering the "New Property" page
-    clearWizard();
-    
     const fetchData = async () => {
       try {
         const token = window.localStorage.getItem("majestan_access_token");

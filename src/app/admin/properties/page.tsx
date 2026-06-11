@@ -14,6 +14,8 @@ import {
   Clock
 } from "lucide-react";
 import Link from "next/link";
+import Swal from "sweetalert2";
+import { toast } from "@/components/ui/toast-store";
 
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<any[]>([]);
@@ -50,6 +52,36 @@ export default function AdminPropertiesPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchProperties();
+  };
+
+  const handleDelete = async (property: any) => {
+    const result = await Swal.fire({
+      title: "Delete property?",
+      text: `"${property.title}" will be permanently deleted.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#9ca3af",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      const token = window.localStorage.getItem("majestan_access_token");
+      const res = await fetch(
+        `${API_BASE_URL}/admin/properties/${property.propertyType}/${property.id}`,
+        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.ok) {
+        toast.success("Property deleted successfully");
+        fetchProperties();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.message || "Failed to delete property");
+      }
+    } catch {
+      toast.error("Network error — could not delete property");
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -170,13 +202,13 @@ export default function AdminPropertiesPage() {
                     </td>
                     <td className="!px-6 !py-4 !text-right">
                       <div className="!flex !items-center !justify-end !gap-2">
-                        <button className="!p-2 !text-gray-400 hover:!text-blue-600 hover:!bg-blue-50 !rounded-lg !transition-colors" title="View Details">
+                        <Link href={`/admin/properties/view/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-blue-600 hover:!bg-blue-50 dark:hover:!bg-blue-950/30 !rounded-lg !transition-colors" title="View Details">
                           <Eye size={16} />
-                        </button>
-                        <Link href={`/admin/properties/edit/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 !rounded-lg !transition-colors" title="Edit Property">
+                        </Link>
+                        <Link href={`/admin/properties/edit/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 dark:hover:!bg-emerald-950/30 !rounded-lg !transition-colors" title="Edit Property">
                           <Edit size={16} />
                         </Link>
-                        <button className="!p-2 !text-gray-400 hover:!text-rose-600 hover:!bg-rose-50 !rounded-lg !transition-colors" title="Delete Property">
+                        <button onClick={() => handleDelete(property)} className="!p-2 !text-gray-400 hover:!text-rose-600 hover:!bg-rose-50 dark:hover:!bg-rose-950/30 !rounded-lg !transition-colors" title="Delete Property">
                           <Trash2 size={16} />
                         </button>
                       </div>

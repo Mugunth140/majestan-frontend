@@ -1,532 +1,578 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
-import { X, Save, ArrowLeft, Loader2, ImagePlus, Check, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import {
+  ArrowLeft, Save, Loader2, ImagePlus, X, Check, ChevronDown,
+} from "lucide-react";
 import type { AdminCity, AdminSublocation } from "@/lib/location-options";
+import { toast } from "@/components/ui/toast-store";
+
+const PROPERTY_TYPES = [
+  { value: "apartment", label: "Apartment" },
+  { value: "villa", label: "Villa" },
+  { value: "plot", label: "Plot" },
+  { value: "commercial", label: "Commercial Space" },
+  { value: "coworking", label: "Coworking" },
+  { value: "farmland", label: "Farmland" },
+  { value: "industrial", label: "Industrial Space" },
+  { value: "individual_portion", label: "Independent House" },
+];
+
+interface FormData {
+  title: string;
+  description: string;
+  price: string;
+  propertyType: string;
+  listingType: string;
+  status: string;
+  cityId: string;
+  sublocationId: string;
+  city: string;
+  state: string;
+  country: string;
+  slug: string;
+  builderName: string;
+  // Location
+  address: string;
+  landmark: string;
+  pincode: string;
+  latitude: string;
+  longitude: string;
+  // Details
+  bedrooms: string;
+  bathrooms: string;
+  parking: string;
+  areaSqft: string;
+  buildUpArea: string;
+  carpetArea: string;
+  totalFloors: string;
+  facing: string;
+  furnished: string;
+}
+
+const emptyForm: FormData = {
+  title: "", description: "", price: "", propertyType: "apartment",
+  listingType: "Sell", status: "available",
+  cityId: "", sublocationId: "", city: "", state: "", country: "India",
+  slug: "", builderName: "",
+  address: "", landmark: "", pincode: "", latitude: "", longitude: "",
+  bedrooms: "", bathrooms: "", parking: "", areaSqft: "",
+  buildUpArea: "", carpetArea: "", totalFloors: "", facing: "", furnished: "",
+};
 
 export default function EditPropertyPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const id = params.id;
-  const propertyType = searchParams.get('type') || 'apartment';
+  const id = params.id as string;
+  const propertyType = searchParams.get("type") || "apartment";
+
   const [loading, setLoading] = useState(false);
   const [loadingProperty, setLoadingProperty] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>(emptyForm);
+  const [newImages, setNewImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
-
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    price: "",
-    propertyType: "apartment",
-    status: "available",
-    cityId: "",
-    sublocationId: "",
-    city: "",
-    state: "",
-    country: "India",
-    slug: "",
-    builderName: "",
-    subLocation: "",
-    bedrooms: "",
-    bathrooms: "",
-    areaSqft: "",
-  });
-
-  const [images, setImages] = useState<File[]>([]);
-  const [uploadingImages, setUploadingImages] = useState(false);
+  const [availableCities, setAvailableCities] = useState<AdminCity[]>([]);
+  const [localities, setLocalities] = useState<AdminSublocation[]>([]);
   const [amenities, setAmenities] = useState<{ id: number; name: string }[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
-  const [localities, setLocalities] = useState<AdminSublocation[]>([]);
-  const [availableCities, setAvailableCities] = useState<AdminCity[]>([]);
-  const resolvedCityId =
-    formData.cityId ||
-    String(
-      availableCities.find(
-        (city) => city.city_name.toLowerCase() === formData.city.toLowerCase(),
-      )?.id ?? "",
-    );
-  const availableSublocations = useMemo(
-    () =>
-      resolvedCityId
-        ? localities.filter(
-            (locality) => locality.city_id === Number(resolvedCityId),
-          )
-        : [],
-    [localities, resolvedCityId],
+  const [amenitySearch, setAmenitySearch] = useState("");
+
+  const filteredAmenities = useMemo(() =>
+    amenities.filter(a => a.name.toLowerCase().includes(amenitySearch.toLowerCase())),
+    [amenities, amenitySearch]
   );
-  const resolvedSublocationId =
-    formData.sublocationId ||
-    String(
-      availableSublocations.find(
-        (sublocation) =>
-          sublocation.locality_name.toLowerCase() ===
-          formData.subLocation.toLowerCase(),
-      )?.id ?? "",
-    );
 
+  const availableSublocations = useMemo(() =>
+    formData.cityId ? localities.filter(l => l.city_id === Number(formData.cityId)) : [],
+    [localities, formData.cityId]
+  );
+
+  // ── Fetch reference data & property ────────────────────────
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = window.localStorage.getItem("majestan_access_token");
-        const [amenitiesRes, citiesRes, sublocationsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/admin/amenities`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`${API_BASE_URL}/admin/cities/all`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`${API_BASE_URL}/admin/sublocations/all`, { headers: { "Authorization": `Bearer ${token}` } })
-        ]);
+    const fetchAll = async () => {
+      const token = window.localStorage.getItem("majestan_access_token");
+      const headers = { Authorization: `Bearer ${token}` };
 
-        if (amenitiesRes.ok) {
-          const json = await amenitiesRes.json();
-          const arr = json.data?.items || json.items || json.data || json || [];
-          setAmenities(Array.isArray(arr) ? arr : []);
-        }
+      const [amenitiesRes, citiesRes, subsRes, propRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/admin/amenities`, { headers }),
+        fetch(`${API_BASE_URL}/admin/cities/all`, { headers }),
+        fetch(`${API_BASE_URL}/admin/sublocations/all`, { headers }),
+        fetch(`${API_BASE_URL}/admin/properties/${propertyType}/${id}`, { headers }),
+      ]);
 
-        if (citiesRes.ok) {
-          const json = await citiesRes.json();
-          const citiesData = (json.data || json || []) as AdminCity[];
-          setAvailableCities(citiesData);
-          
-          if (sublocationsRes.ok) {
-            const subJson = await sublocationsRes.json();
-            setLocalities((subJson.data || subJson || []) as AdminSublocation[]);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch form data", err);
+      if (amenitiesRes.ok) {
+        const j = await amenitiesRes.json();
+        const arr = j.data?.items || j.items || j.data || j || [];
+        setAmenities(Array.isArray(arr) ? arr : []);
       }
-    };
-    
-    const fetchPropertyData = async () => {
-      if (!id) return;
-      try {
-        const token = window.localStorage.getItem("majestan_access_token");
-        const res = await fetch(`${API_BASE_URL}/admin/properties/${propertyType}/${id}`, {
-          headers: { "Authorization": `Bearer ${token}` }
+      if (citiesRes.ok) {
+        const j = await citiesRes.json();
+        setAvailableCities((j.data || j || []) as AdminCity[]);
+      }
+      if (subsRes.ok) {
+        const j = await subsRes.json();
+        setLocalities((j.data || j || []) as AdminSublocation[]);
+      }
+
+      if (propRes.ok) {
+        const j = await propRes.json();
+        const p = j.data || j;
+        const det = p.propertyDetails || {};
+        const locs = p.propertyLocations || [];
+        const loc = locs[0] || {};
+        const subloc = loc.sublocation || {};
+
+        setFormData({
+          title: p.title || "",
+          description: p.description || "",
+          price: p.price ? String(p.price) : "",
+          propertyType: p.propertyType || propertyType,
+          listingType: p.listingType || "Sell",
+          status: p.status || "available",
+          cityId: subloc.cityId ? String(subloc.cityId) : "",
+          sublocationId: loc.locationId ? String(loc.locationId) : "",
+          city: p.city || "",
+          state: p.state || "",
+          country: p.country || "India",
+          slug: p.slug || "",
+          builderName: p.builderName || "",
+          address: loc.address || "",
+          landmark: loc.landmark || "",
+          pincode: loc.pincode || "",
+          latitude: loc.latitude ? String(loc.latitude) : "",
+          longitude: loc.longitude ? String(loc.longitude) : "",
+          bedrooms: det.bedrooms != null ? String(det.bedrooms) : "",
+          bathrooms: det.bathrooms != null ? String(det.bathrooms) : "",
+          parking: det.parking != null ? String(det.parking) : "",
+          areaSqft: det.areaSqft ? String(det.areaSqft) : "",
+          buildUpArea: det.buildUpArea ? String(det.buildUpArea) : "",
+          carpetArea: det.carpetArea ? String(det.carpetArea) : "",
+          totalFloors: det.totalFloors ? String(det.totalFloors) : "",
+          facing: det.facing || "",
+          furnished: det.furnished === true ? "true" : det.furnished === false ? "false" : "",
         });
-        if (res.ok) {
-          const json = await res.json();
-          const p = json.data || json;
-          const propertyLocation = p.propertyLocations?.[0];
-          const selectedSublocation = propertyLocation?.sublocation;
-          const details = p.propertyDetails || {};
-          setFormData({
-            title: p.title || "",
-            description: p.description || "",
-            price: p.price ? String(p.price) : "",
-            propertyType: p.propertyType || propertyType,
-            status: p.status || "available",
-            cityId: selectedSublocation?.cityId
-              ? String(selectedSublocation.cityId)
-              : "",
-            sublocationId: propertyLocation?.locationId
-              ? String(propertyLocation.locationId)
-              : "",
-            city: p.city || "",
-            state: p.state || "",
-            country: p.country || "India",
-            slug: p.slug || "",
-            builderName: p.builderName || "",
-            subLocation: selectedSublocation?.localityName || "",
-            bedrooms: details.bedrooms ? String(details.bedrooms) : "",
-            bathrooms: details.bathrooms ? String(details.bathrooms) : "",
-            areaSqft: details.areaSqft ? String(details.areaSqft) : "",
-          });
-          if (p.propertyAmenities) {
-             setSelectedAmenities(
-               p.propertyAmenities.map(
-                 (amenity: { amenityId: number }) => amenity.amenityId,
-               ),
-             );
-          }
-          if (p.propertyFiles) {
-             setExistingImages(
-               p.propertyFiles.map(
-                 (file: { fileUrl: string }) => file.fileUrl,
-               ),
-             );
-          }
+
+        if (p.propertyAmenities) {
+          setSelectedAmenities(p.propertyAmenities.map((a: any) => a.amenityId));
         }
-      } catch (err) {
-        console.error("Failed to fetch property", err);
-      } finally {
-        setLoadingProperty(false);
+        if (p.propertyFiles) {
+          setExistingImages(p.propertyFiles.map((f: any) => f.fileUrl || f.file_url || "").filter(Boolean));
+        }
       }
+
+      setLoadingProperty(false);
     };
 
-    Promise.all([fetchData(), fetchPropertyData()]);
+    fetchAll().catch(err => {
+      console.error(err);
+      setLoadingProperty(false);
+    });
   }, [id, propertyType]);
 
-  const toggleAmenity = (id: number) => {
-    setSelectedAmenities(prev => 
-      prev.includes(id) ? prev.filter(aId => aId !== id) : [...prev, id]
-    );
-  };
-
+  // ── Handlers ───────────────────────────────────────────────
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === "cityId") {
-      const cityData = availableCities.find((city) => city.id === Number(value));
-      setFormData({
-        ...formData,
+      const cityData = availableCities.find(c => c.id === Number(value));
+      setFormData(prev => ({
+        ...prev,
         cityId: value,
-        city: cityData?.city_name || "",
         sublocationId: "",
-        subLocation: "",
+        city: cityData?.city_name || "",
         state: cityData?.state_name || "",
         country: cityData?.country_name || "India",
-      });
-    } else if (name === "sublocationId") {
-      const sublocation = localities.find((item) => item.id === Number(value));
-      setFormData({
-        ...formData,
-        sublocationId: value,
-        subLocation: sublocation?.locality_name || "",
-      });
+      }));
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setImages((prev) => [...prev, ...newFiles]);
-    }
+  const toggleAmenity = (amenityId: number) => {
+    setSelectedAmenities(prev =>
+      prev.includes(amenityId) ? prev.filter(id => id !== amenityId) : [...prev, amenityId]
+    );
   };
 
-  const removeImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
+  const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setNewImages(prev => [...prev, ...Array.from(e.target.files!)]);
   };
 
   const uploadImagesToR2 = async (): Promise<string[]> => {
-    const uploadedUrls: string[] = [];
+    const keys: string[] = [];
     const token = window.localStorage.getItem("majestan_access_token");
-
-    for (const file of images) {
-      // 1. Get Presigned URL
-      const presignedRes = await fetch(
-        `${API_BASE_URL}/admin/media/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
+    for (const file of newImages) {
+      const presignRes = await fetch(
+        `${API_BASE_URL}/properties/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      if (!presignedRes.ok) {
-        throw new Error("Failed to get presigned URL for " + file.name);
-      }
-
-      const { data } = await presignedRes.json();
-      const { url, key } = data;
-
-      // 2. Upload directly to R2
-      const uploadRes = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": file.type,
-        },
-        body: file,
-      });
-
-      if (!uploadRes.ok) {
-        throw new Error("Failed to upload " + file.name + " to R2");
-      }
-
-      // Store the R2 key (we'll assume the public bucket URL will be formed by the backend or frontend)
-      uploadedUrls.push(key);
+      if (!presignRes.ok) throw new Error(`Presigned URL failed for ${file.name}`);
+      const { data } = await presignRes.json();
+      const uploadRes = await fetch(data.url, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+      if (!uploadRes.ok) throw new Error(`Upload failed for ${file.name}`);
+      keys.push(data.key);
     }
-    return uploadedUrls;
+    return keys;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setUploadingImages(true);
-
     try {
-      const token = window.localStorage.getItem("majestan_access_token");
+      let newKeys: string[] = [];
+      if (newImages.length > 0) {
+        newKeys = await uploadImagesToR2();
+      }
 
-      // 1. Upload Images
-      const uploadedImageKeys = await uploadImagesToR2();
-      setUploadingImages(false);
-
-      // 2. Create Property
       const payload = {
         title: formData.title,
+        description: formData.description,
         price: formData.price,
         propertyType: formData.propertyType,
+        listingType: formData.listingType,
         status: formData.status,
-        cityId: Number(resolvedCityId),
-        sublocationId: Number(resolvedSublocationId),
+        cityId: Number(formData.cityId) || undefined,
+        sublocationId: Number(formData.sublocationId) || undefined,
         city: formData.city,
         state: formData.state,
         country: formData.country,
-        builderName: formData.builderName,
-        description: formData.description,
-        details: {
-          bedrooms: Number(formData.bedrooms) || 0,
-          bathrooms: Number(formData.bathrooms) || 0,
-          areaSqft: Number(formData.areaSqft) || 0
-        },
+        slug: formData.slug || undefined,
+        builderName: formData.builderName || undefined,
         location: {
-          subLocation: formData.subLocation
+          address: formData.address || undefined,
+          landmark: formData.landmark || undefined,
+          pincode: formData.pincode || undefined,
+          latitude: formData.latitude ? Number(formData.latitude) : undefined,
+          longitude: formData.longitude ? Number(formData.longitude) : undefined,
         },
-        amenities: selectedAmenities.map(id => ({ amenityId: id })),
-        ownerId: 1, // Defaulting for now
+        details: {
+          bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
+          bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
+          parking: formData.parking ? Number(formData.parking) : undefined,
+          areaSqft: formData.areaSqft ? Number(formData.areaSqft) : undefined,
+          buildUpArea: formData.buildUpArea ? Number(formData.buildUpArea) : undefined,
+          carpetArea: formData.carpetArea ? Number(formData.carpetArea) : undefined,
+          totalFloors: formData.totalFloors ? Number(formData.totalFloors) : undefined,
+          facing: formData.facing || undefined,
+          furnished: formData.furnished === "true" ? true : formData.furnished === "false" ? false : undefined,
+        },
+        amenities: selectedAmenities.map(amenityId => ({ amenityId })),
         files: [
           ...existingImages.map(url => ({ fileType: "IMAGE", fileUrl: url })),
-          ...uploadedImageKeys.map(key => ({ fileType: "IMAGE", fileUrl: key }))
-        ]
+          ...newKeys.map(key => ({ fileType: "IMAGE", fileUrl: key })),
+        ],
       };
 
-      const res = await fetch(`${API_BASE_URL}/admin/properties/${propertyType}/${id}`, {
+      const token = window.localStorage.getItem("majestan_access_token");
+      const res = await fetch(`${API_BASE_URL}/admin/properties/${formData.propertyType}/${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to update property");
+      if (res.ok) {
+        toast.success("Property updated successfully");
+        router.push("/admin/properties");
+      } else {
+        const err = await res.json().catch(() => ({}));
+        const msg = Array.isArray(err.message) ? err.message.join(", ") : (err.message || "Failed to update property");
+        toast.error(msg);
       }
-
-      router.push("/admin/properties");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
-      setUploadingImages(false);
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred");
+    } finally {
       setLoading(false);
     }
   };
 
+  // ── Input styles ───────────────────────────────────────────
+  const inputCls = "!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all";
+  const selectCls = "!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 !outline-none !transition-all !cursor-pointer";
+  const labelCls = "!text-[13px] !font-medium !text-gray-700 dark:!text-gray-300";
+
+  function Field({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+      <div className="!space-y-1.5">
+        <label className={labelCls}>{label}</label>
+        {children}
+      </div>
+    );
+  }
+
+  function SelectWrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <div className="!relative">
+        {children}
+        <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400"><ChevronDown size={16} /></div>
+      </div>
+    );
+  }
+
+  function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+    return (
+      <div className="!pb-4 !border-b !border-gray-100 dark:!border-[#262730]">
+        <h3 className="!text-[15px] !font-semibold !text-gray-800 dark:!text-white">{title}</h3>
+        {subtitle && <p className="!text-[13px] !text-gray-400 !mt-0.5">{subtitle}</p>}
+      </div>
+    );
+  }
+
   if (loadingProperty) {
     return (
-      <div className="!w-full !space-y-6 !flex !items-center !justify-center !h-64">
-        <div className="!flex !items-center !gap-2 !text-gray-500 dark:!text-gray-400">
-          <Loader2 className="!animate-spin" size={20} />
-          <span>Loading property details...</span>
-        </div>
+      <div className="!flex !items-center !justify-center !h-64 !gap-3 !text-gray-500">
+        <Loader2 className="!animate-spin" size={22} />
+        <span className="!text-[14px]">Loading property details...</span>
       </div>
     );
   }
 
   return (
     <div className="!w-full !space-y-6">
+      {/* Page Header */}
       <div className="!flex !items-center !gap-4">
-        <Link href="/admin/properties" className="!p-2 !text-gray-500 dark:!text-gray-400 hover:!bg-white dark:!bg-[#171821] !rounded-xl !transition-colors">
+        <Link href="/admin/properties" className="!p-2 !text-gray-500 dark:!text-gray-400 hover:!bg-white dark:hover:!bg-[#171821] hover:!border-gray-100 dark:hover:!border-[#262730] !border !border-transparent !rounded-xl !transition-all">
           <ArrowLeft size={20} />
         </Link>
-        <h2 className="!text-[22px] !font-semibold !text-gray-800 dark:!text-white !tracking-tight">Edit Property</h2>
+        <div>
+          <h2 className="!text-[22px] !font-semibold !text-gray-800 dark:!text-white !tracking-tight">Edit Property</h2>
+          <p className="!text-[13px] !text-gray-400 !mt-0.5">{formData.title || "Loading..."}</p>
+        </div>
       </div>
 
-      {error && (
-        <div className="!p-4 !bg-rose-50 !text-rose-600 !border !border-rose-100 !rounded-xl !text-[14px] !font-medium">
-          {error}
-        </div>
-      )}
+      <form onSubmit={handleSubmit} className="!space-y-5">
 
-      <form onSubmit={handleSubmit} className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] shadow-[0_4px_20px_rgba(0,0,0,0.03)!] !overflow-hidden">
-        <div className="!p-8 !space-y-8">
-          
-          <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Property Title</label>
-              <input required name="title" value={formData.title} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. Luxury 3BHK Villa" />
+        {/* ── Basic Information ───────────── */}
+        <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] !shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:!shadow-none !p-6 !space-y-5">
+          <SectionHeader title="Basic Information" />
+          <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-5">
+            <div className="md:!col-span-2">
+              <Field label="Property Title *">
+                <input required name="title" value={formData.title} onChange={handleChange} className={inputCls} placeholder="E.g. Luxury 3BHK Apartment in Coimbatore" />
+              </Field>
             </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Price (₹)</label>
-              <input required name="price" value={formData.price} onChange={handleChange} type="number" className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 15000000" />
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Property Type</label>
-              <div className="!relative">
-                <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block">
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="plot">Plot</option>
-                  <option value="commercial">Commercial Space</option>
-                  <option value="coworking">Coworking</option>
-                  <option value="farmland">Farmland</option>
-                  <option value="industrial">Industrial Space</option>
-                  <option value="individual_portion">Independent House</option>
+            <Field label="Property Type">
+              <SelectWrapper>
+                <select name="propertyType" value={formData.propertyType} onChange={handleChange} className={selectCls}>
+                  {PROPERTY_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
-                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
-                  <ChevronDown size={18} />
-                </div>
-              </div>
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Property ID</label>
-              <input 
-                type="text" 
-                readOnly 
-                value={`Auto-generated (${
-                  formData.propertyType === 'apartment' ? 'AP' : 
-                  formData.propertyType === 'villa' ? 'V' : 
-                  formData.propertyType === 'plot' ? 'P' : 
-                  formData.propertyType === 'commercial' ? 'CS' :
-                  formData.propertyType === 'coworking' ? 'CW' : 
-                  formData.propertyType === 'farmland' ? 'FL' : 
-                  formData.propertyType === 'industrial' ? 'IS' :
-                  formData.propertyType === 'individual_portion' ? 'IP' : ''
-                }-XXXX)`}
-                className="!w-full !bg-gray-50 dark:!bg-[#1c1d27]/50 !border !border-gray-100 dark:!border-[#262730] !shadow-sm !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-500 dark:!text-gray-400 !font-medium !cursor-not-allowed !outline-none" 
-              />
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Status</label>
-              <div className="!relative">
-                <select name="status" value={formData.status} onChange={handleChange} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block">
+              </SelectWrapper>
+            </Field>
+            <Field label="Listing Type">
+              <SelectWrapper>
+                <select name="listingType" value={formData.listingType} onChange={handleChange} className={selectCls}>
+                  <option value="Sell">For Sale</option>
+                  <option value="Rent">For Rent</option>
+                </select>
+              </SelectWrapper>
+            </Field>
+            <Field label="Status">
+              <SelectWrapper>
+                <select name="status" value={formData.status} onChange={handleChange} className={selectCls}>
                   <option value="available">Available</option>
-                  <option value="unavailable">Unavailable (Hidden)</option>
+                  <option value="unavailable">Hidden (Unavailable)</option>
                   <option value="sold">Sold</option>
                   <option value="rented">Rented</option>
                 </select>
-                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
-                  <ChevronDown size={18} />
-                </div>
-              </div>
-            </div>
-            
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">City</label>
-              <div className="!relative">
-                <select required name="cityId" value={resolvedCityId} onChange={handleChange} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block">
-                  <option value="" disabled>Select City</option>
-                  {availableCities.map(city => (
-                    <option key={city.id} value={city.id}>{city.city_name}</option>
-                  ))}
-                </select>
-                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
-                  <ChevronDown size={18} />
-                </div>
-              </div>
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Sublocation (Area)</label>
-              <div className="!relative">
-                <select required name="sublocationId" value={resolvedSublocationId} onChange={handleChange} disabled={!resolvedCityId} className="!w-full !appearance-none !bg-gray-50 dark:!bg-[#1c1d27] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-white !rounded-xl !pl-4 !pr-10 !py-3 !text-[14px] focus:!ring-1 focus:!ring-gray-900/50 !outline-none !transition-all !cursor-pointer !block disabled:!opacity-50 disabled:!cursor-not-allowed">
-                  <option value="" disabled>{resolvedCityId ? "Select Area" : "Select City First"}</option>
-                  {availableSublocations.map(sub => (
-                    <option key={sub.id} value={sub.id}>{sub.locality_name}</option>
-                  ))}
-                </select>
-                <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500 dark:!text-gray-400">
-                  <ChevronDown size={18} />
-                </div>
-              </div>
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">State</label>
-              <input required readOnly name="state" value={formData.state} className="!w-full !bg-gray-50 dark:!bg-[#1c1d27]/50 !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-500 dark:!text-gray-400 !shadow-sm" />
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">BHKs / Bedrooms</label>
-              <input name="bedrooms" type="number" value={formData.bedrooms} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 3" />
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Bathrooms</label>
-              <input name="bathrooms" type="number" value={formData.bathrooms} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 2" />
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Area (Sqft)</label>
-              <input name="areaSqft" type="number" value={formData.areaSqft} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. 1500" />
-            </div>
-
-            <div className="!space-y-2">
-              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Builder Name</label>
-              <input name="builderName" value={formData.builderName} onChange={handleChange} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="E.g. Sobha Developers" />
-            </div>
+              </SelectWrapper>
+            </Field>
+            <Field label="Builder / Owner Name">
+              <input name="builderName" value={formData.builderName} onChange={handleChange} className={inputCls} placeholder="E.g. Sobha Developers" />
+            </Field>
+            <Field label="Price (₹) *">
+              <input required name="price" type="number" value={formData.price} onChange={handleChange} className={inputCls} placeholder="E.g. 15000000" />
+            </Field>
+            <Field label="SEO Slug">
+              <input name="slug" value={formData.slug} onChange={handleChange} className={inputCls} placeholder="auto-generated if left blank" />
+            </Field>
           </div>
+          <Field label="Description *">
+            <textarea required name="description" value={formData.description} onChange={handleChange} rows={4} className={inputCls} placeholder="Detailed description of the property..." />
+          </Field>
+        </div>
 
-          <div className="!space-y-2">
-            <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Description</label>
-            <textarea required name="description" value={formData.description} onChange={handleChange} rows={4} className="!w-full !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !text-gray-800 dark:!text-white focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" placeholder="Detailed description of the property..."></textarea>
+        {/* ── Location ───────────────────── */}
+        <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] !shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:!shadow-none !p-6 !space-y-5">
+          <SectionHeader title="Location" />
+          <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-5">
+            <Field label="City">
+              <SelectWrapper>
+                <select name="cityId" value={formData.cityId} onChange={handleChange} className={selectCls}>
+                  <option value="">Select City</option>
+                  {availableCities.map(c => <option key={c.id} value={c.id}>{c.city_name}</option>)}
+                </select>
+              </SelectWrapper>
+            </Field>
+            <Field label="Sublocation / Area">
+              <SelectWrapper>
+                <select name="sublocationId" value={formData.sublocationId} onChange={handleChange} disabled={!formData.cityId} className={selectCls + " disabled:!opacity-50 disabled:!cursor-not-allowed"}>
+                  <option value="">{formData.cityId ? "Select Area" : "Select City First"}</option>
+                  {availableSublocations.map(s => <option key={s.id} value={s.id}>{s.locality_name}</option>)}
+                </select>
+              </SelectWrapper>
+            </Field>
+            <Field label="State">
+              <input readOnly name="state" value={formData.state} className={inputCls + " !opacity-60 !cursor-not-allowed"} />
+            </Field>
+            <Field label="Country">
+              <input readOnly name="country" value={formData.country} className={inputCls + " !opacity-60 !cursor-not-allowed"} />
+            </Field>
+            <div className="md:!col-span-2">
+              <Field label="Address">
+                <input name="address" value={formData.address} onChange={handleChange} className={inputCls} placeholder="Street address" />
+              </Field>
+            </div>
+            <Field label="Landmark">
+              <input name="landmark" value={formData.landmark} onChange={handleChange} className={inputCls} placeholder="E.g. Near City Mall" />
+            </Field>
+            <Field label="Pincode">
+              <input name="pincode" value={formData.pincode} onChange={handleChange} className={inputCls} placeholder="E.g. 641001" />
+            </Field>
+            <Field label="Latitude">
+              <input name="latitude" type="number" step="any" value={formData.latitude} onChange={handleChange} className={inputCls} placeholder="E.g. 11.0168" />
+            </Field>
+            <Field label="Longitude">
+              <input name="longitude" type="number" step="any" value={formData.longitude} onChange={handleChange} className={inputCls} placeholder="E.g. 76.9558" />
+            </Field>
           </div>
+        </div>
 
-          {/* Amenities Section */}
-          <div className="!pt-6 !border-t !border-gray-100 dark:!border-[#262730]">
-            <h3 className="!text-lg !font-semibold !text-gray-800 dark:!text-white !mb-4">Amenities</h3>
-            <div className="!grid !grid-cols-2 md:!grid-cols-3 lg:!grid-cols-4 !gap-3">
-              {amenities.map(amenity => (
+        {/* ── Specifications ─────────────── */}
+        <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] !shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:!shadow-none !p-6 !space-y-5">
+          <SectionHeader title="Specifications" />
+          <div className="!grid !grid-cols-2 md:!grid-cols-3 lg:!grid-cols-4 !gap-5">
+            <Field label="Bedrooms">
+              <input name="bedrooms" type="number" min="0" value={formData.bedrooms} onChange={handleChange} className={inputCls} placeholder="3" />
+            </Field>
+            <Field label="Bathrooms">
+              <input name="bathrooms" type="number" min="0" value={formData.bathrooms} onChange={handleChange} className={inputCls} placeholder="2" />
+            </Field>
+            <Field label="Parking">
+              <input name="parking" type="number" min="0" value={formData.parking} onChange={handleChange} className={inputCls} placeholder="1" />
+            </Field>
+            <Field label="Area (sqft)">
+              <input name="areaSqft" type="number" min="0" value={formData.areaSqft} onChange={handleChange} className={inputCls} placeholder="1500" />
+            </Field>
+            <Field label="Build-up Area (sqft)">
+              <input name="buildUpArea" type="number" min="0" value={formData.buildUpArea} onChange={handleChange} className={inputCls} placeholder="1600" />
+            </Field>
+            <Field label="Carpet Area (sqft)">
+              <input name="carpetArea" type="number" min="0" value={formData.carpetArea} onChange={handleChange} className={inputCls} placeholder="1300" />
+            </Field>
+            <Field label="Total Floors">
+              <input name="totalFloors" type="number" min="0" value={formData.totalFloors} onChange={handleChange} className={inputCls} placeholder="10" />
+            </Field>
+            <Field label="Facing Direction">
+              <SelectWrapper>
+                <select name="facing" value={formData.facing} onChange={handleChange} className={selectCls}>
+                  <option value="">Select</option>
+                  {["North", "South", "East", "West", "North-East", "North-West", "South-East", "South-West"].map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </SelectWrapper>
+            </Field>
+            <Field label="Furnished Status">
+              <SelectWrapper>
+                <select name="furnished" value={formData.furnished} onChange={handleChange} className={selectCls}>
+                  <option value="">Select</option>
+                  <option value="true">Furnished</option>
+                  <option value="false">Unfurnished</option>
+                </select>
+              </SelectWrapper>
+            </Field>
+          </div>
+        </div>
+
+        {/* ── Amenities ──────────────────── */}
+        <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] !shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:!shadow-none !p-6 !space-y-4">
+          <SectionHeader title="Amenities" subtitle={`${selectedAmenities.length} selected`} />
+          <input
+            type="text"
+            placeholder="Search amenities..."
+            value={amenitySearch}
+            onChange={e => setAmenitySearch(e.target.value)}
+            className={inputCls + " !py-2"}
+          />
+          <div className="!grid !grid-cols-2 sm:!grid-cols-3 md:!grid-cols-4 !gap-2.5 !max-h-64 !overflow-y-auto !pr-1">
+            {filteredAmenities.map(amenity => {
+              const active = selectedAmenities.includes(amenity.id);
+              return (
                 <button
                   key={amenity.id}
                   type="button"
                   onClick={() => toggleAmenity(amenity.id)}
-                  className={`!flex !items-center !gap-3 !p-3 !rounded-xl !border !text-[14px] !font-medium !transition-all ${
-                    selectedAmenities.includes(amenity.id) 
-                      ? '!bg-gray-900 !border-gray-900 !text-white' 
-                      : '!bg-white dark:!bg-[#171821] !border-gray-200 dark:!border-[#262730] !text-gray-700 dark:!text-gray-300 hover:!border-gray-300 dark:hover:!border-[#3a3b45] hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] dark:!bg-[#1c1d27]'
+                  className={`!flex !items-center !gap-2 !p-2.5 !rounded-xl !border !text-[13px] !font-medium !transition-all !text-left ${active
+                    ? "!bg-blue-600 !border-blue-600 !text-white"
+                    : "!bg-white dark:!bg-[#171821] !border-gray-200 dark:!border-[#262730] !text-gray-700 dark:!text-gray-300 hover:!border-blue-300 dark:hover:!border-blue-700"
                   }`}
                 >
-                  <div className={`!w-5 !h-5 !rounded-md !border !flex !items-center !justify-center ${
-                    selectedAmenities.includes(amenity.id)
-                      ? '!bg-white dark:!bg-[#171821] !border-white'
-                      : '!bg-white dark:!bg-[#171821] !border-gray-300'
-                  }`}>
-                    {selectedAmenities.includes(amenity.id) && <Check size={14} className="!text-gray-800 dark:!text-white" />}
+                  <div className={`!w-4 !h-4 !rounded !flex !items-center !justify-center !flex-shrink-0 ${active ? "!bg-white/20" : "!border !border-gray-300 dark:!border-gray-600"}`}>
+                    {active && <Check size={11} strokeWidth={3} />}
                   </div>
-                  {amenity.name}
+                  <span className="!truncate">{amenity.name}</span>
                 </button>
-              ))}
-              {amenities.length === 0 && (
-                <div className="!col-span-full !text-[14px] !text-gray-500 dark:!text-gray-400 !italic">No amenities available.</div>
-              )}
-            </div>
+              );
+            })}
+            {filteredAmenities.length === 0 && (
+              <p className="!col-span-full !text-[13px] !text-gray-400 !italic">No amenities match your search.</p>
+            )}
           </div>
-
-          {/* Image Upload Section */}
-          <div className="!pt-6 !border-t !border-gray-100 dark:!border-[#262730]">
-            <h3 className="!text-lg !font-semibold !text-gray-800 dark:!text-white !mb-4">Property Images</h3>
-            
-            <div className="!grid !grid-cols-2 sm:!grid-cols-3 md:!grid-cols-4 lg:!grid-cols-5 !gap-4">
-              {existingImages.map((img, i) => (
-                <div key={`exist-${i}`} className="!relative !aspect-square !rounded-2xl !overflow-hidden !border !border-gray-200 dark:!border-[#262730] !group">
-                  <img src={img} alt="Existing Preview" className="!w-full !h-full !object-cover" />
-                  <button type="button" onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))} className="!absolute !top-2 !right-2 !p-1.5 !bg-white dark:!bg-[#171821]/90 hover:!bg-rose-50 !text-gray-600 dark:!text-gray-300 hover:!text-rose-600 !rounded-lg !backdrop-blur-sm !transition-colors !opacity-0 group-hover:!opacity-100">
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-              {images.map((img, i) => (
-                <div key={i} className="!relative !aspect-square !rounded-2xl !overflow-hidden !border !border-gray-200 dark:!border-[#262730] !group">
-                  <img src={URL.createObjectURL(img)} alt="Preview" className="!w-full !h-full !object-cover" />
-                  <button type="button" onClick={() => removeImage(i)} className="!absolute !top-2 !right-2 !p-1.5 !bg-white dark:!bg-[#171821]/90 hover:!bg-rose-50 !text-gray-600 dark:!text-gray-300 hover:!text-rose-600 !rounded-lg !backdrop-blur-sm !transition-colors !opacity-0 group-hover:!opacity-100">
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-              
-              <label className="!relative !aspect-square !rounded-2xl !border-2 !border-dashed !border-gray-300 hover:!border-gray-400 hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] dark:!bg-[#1c1d27] !flex !flex-col !items-center !justify-center !gap-2 !cursor-pointer !transition-all">
-                <ImagePlus className="!text-gray-400" size={28} />
-                <span className="!text-[12px] !font-semibold !text-gray-500 dark:!text-gray-400">Add Images</span>
-                <input type="file" multiple accept="image/*" className="!hidden" onChange={handleImageChange} />
-              </label>
-            </div>
-          </div>
-
         </div>
 
-        <div className="!p-6 !bg-gray-50 dark:!bg-[#1c1d27] !border-t !border-gray-100 dark:!border-[#262730] !flex !justify-end !gap-4">
-          <Link href="/admin/properties" className="!px-6 !py-3 !text-[14px] !font-semibold !text-gray-600 dark:!text-gray-300 hover:!text-gray-800 dark:!text-white !transition-colors">Cancel</Link>
-          <button disabled={loading} type="submit" className="!inline-flex !items-center !gap-2 !px-8 !py-3 !bg-blue-600 hover:!bg-blue-700 !text-white !shadow-sm hover:!shadow-blue-500/20 !rounded-xl !text-[14px] !font-semibold !transition-all disabled:!opacity-70">
-            {loading ? <Loader2 size={18} className="!animate-spin" /> : <Save size={18} />}
-            {uploadingImages ? "Uploading Images..." : loading ? "Saving..." : "Update Property"}
+        {/* ── Images ─────────────────────── */}
+        <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] !shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:!shadow-none !p-6 !space-y-4">
+          <SectionHeader title="Property Images" subtitle="Existing images are retained unless removed" />
+          <div className="!grid !grid-cols-2 sm:!grid-cols-3 md:!grid-cols-4 lg:!grid-cols-5 !gap-4">
+            {existingImages.map((img, i) => (
+              <div key={`ex-${i}`} className="!relative !aspect-square !rounded-xl !overflow-hidden !border !border-gray-200 dark:!border-[#262730] !group">
+                <img src={img} alt="" className="!w-full !h-full !object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <div className="!absolute !inset-0 !bg-black/0 group-hover:!bg-black/20 !transition-all" />
+                <button
+                  type="button"
+                  onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))}
+                  className="!absolute !top-2 !right-2 !p-1.5 !bg-white dark:!bg-[#171821] hover:!bg-rose-50 !text-gray-600 dark:!text-gray-300 hover:!text-rose-600 !rounded-lg !shadow-sm !opacity-0 group-hover:!opacity-100 !transition-all"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            {newImages.map((img, i) => (
+              <div key={`new-${i}`} className="!relative !aspect-square !rounded-xl !overflow-hidden !border-2 !border-blue-200 dark:!border-blue-800 !group">
+                <img src={URL.createObjectURL(img)} alt="" className="!w-full !h-full !object-cover" />
+                <div className="!absolute !top-1.5 !left-1.5 !px-1.5 !py-0.5 !bg-blue-600 !text-white !text-[10px] !font-medium !rounded">NEW</div>
+                <button
+                  type="button"
+                  onClick={() => setNewImages(prev => prev.filter((_, idx) => idx !== i))}
+                  className="!absolute !top-2 !right-2 !p-1.5 !bg-white dark:!bg-[#171821] hover:!bg-rose-50 !text-gray-600 hover:!text-rose-600 !rounded-lg !shadow-sm !opacity-0 group-hover:!opacity-100 !transition-all"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            <label className="!relative !aspect-square !rounded-xl !border-2 !border-dashed !border-gray-300 dark:!border-[#262730] hover:!border-blue-400 dark:hover:!border-blue-600 !flex !flex-col !items-center !justify-center !gap-2 !cursor-pointer !transition-all hover:!bg-blue-50/50 dark:hover:!bg-blue-950/20">
+              <ImagePlus className="!text-gray-400" size={24} />
+              <span className="!text-[12px] !font-medium !text-gray-400">Add Images</span>
+              <input type="file" multiple accept="image/*" className="!hidden" onChange={handleImageAdd} />
+            </label>
+          </div>
+        </div>
+
+        {/* ── Footer ─────────────────────── */}
+        <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] !p-5 !flex !items-center !justify-between">
+          <Link href="/admin/properties" className="!px-5 !py-2.5 !text-[14px] !font-medium !text-gray-600 dark:!text-gray-300 hover:!text-gray-800 dark:hover:!text-white !transition-colors">
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            disabled={loading}
+            className="!inline-flex !items-center !gap-2 !px-8 !py-2.5 !bg-blue-600 hover:!bg-blue-700 !text-white !shadow-sm hover:!shadow-blue-500/20 !rounded-xl !text-[14px] !font-semibold !transition-all disabled:!opacity-70 disabled:!cursor-not-allowed"
+          >
+            {loading ? <Loader2 size={16} className="!animate-spin" /> : <Save size={16} />}
+            {loading ? "Saving..." : "Update Property"}
           </button>
         </div>
+
       </form>
     </div>
   );

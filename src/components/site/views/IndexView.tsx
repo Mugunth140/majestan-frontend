@@ -537,8 +537,6 @@ function FeaturedProjectCard({ card }: { card: FeaturedCard }): React.JSX.Elemen
     </div>
   );
 }
-
-export default function IndexView({ properties = [], loading = false }: IndexViewProps) {
   
   const [activeWordIndex, setActiveWordIndex] = useState<number>(0);
   const [listingType, setListingType] = useState<string>("");

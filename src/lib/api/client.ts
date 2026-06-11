@@ -5,8 +5,10 @@ const SERVER_API_BASE_URL =
   process.env.API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   DEFAULT_API_BASE_URL;
-const BROWSER_API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+
+const BROWSER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL 
+  ? process.env.NEXT_PUBLIC_API_BASE_URL 
+  : (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:5000/api/v1` : DEFAULT_API_BASE_URL);
 
 const API_BASE_URL =
   typeof window === "undefined" ? SERVER_API_BASE_URL : BROWSER_API_BASE_URL;

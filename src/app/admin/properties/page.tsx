@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { toast } from "@/components/ui/toast-store";
+import { formatToShortIndianCurrency } from "@/lib/utils/currency.util";
 
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<any[]>([]);
@@ -190,11 +191,13 @@ export default function AdminPropertiesPage() {
                       </div>
                     </td>
                     <td className="!px-6 !py-4">
-                      <div className="!text-gray-800 dark:!text-white !capitalize">{property.propertyType}</div>
+                      <div className="!text-gray-800 dark:!text-white !capitalize font-medium!">{property.propertyType}</div>
                       <div className="!text-[12px] !text-gray-400 !mt-0.5">{property.city}, {property.state}</div>
                     </td>
                     <td className="!px-6 !py-4">
-                      <div className="!text-gray-800 dark:!text-white !font-medium">₹{property.price || 'N/A'}</div>
+                      <div className="!text-gray-800 dark:!text-white !font-semibold">
+                        {property.price ? `${formatToShortIndianCurrency(property.price)}` : 'N/A'}
+                      </div>
                       <div className="!text-[12px] !text-gray-400 !mt-0.5 !capitalize">For {property.listingType}</div>
                     </td>
                     <td className="!px-6 !py-4">

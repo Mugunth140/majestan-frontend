@@ -23,6 +23,8 @@ export default function AdminPropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [listingTypeFilter, setListingTypeFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   const fetchProperties = async (searchQuery = search) => {
     setLoading(true);
@@ -30,6 +32,7 @@ export default function AdminPropertiesPage() {
       const token = window.localStorage.getItem("majestan_access_token");
       const url = new URL(`${API_BASE_URL}/admin/properties/${filterType}`);
       if (searchQuery) url.searchParams.append("search", searchQuery);
+      if (listingTypeFilter !== "all") url.searchParams.append("listingType", listingTypeFilter);
       
       const res = await fetch(url.toString(), {
         headers: { "Authorization": `Bearer ${token}` }
@@ -48,7 +51,7 @@ export default function AdminPropertiesPage() {
 
   useEffect(() => {
     fetchProperties();
-  }, [filterType]);
+  }, [filterType, listingTypeFilter]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +120,7 @@ export default function AdminPropertiesPage() {
             <select 
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="!bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !text-gray-800 dark:!text-white !text-[14px] !rounded-xl focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !block !p-2.5 !outline-none !transition-all"
+              className="!bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !text-gray-800 dark:!text-white !text-[14px] !rounded-xl focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !block !p-2.5 !transition-all"
             >
               <option value="all">All Types</option>
               <option value="apartment">Apartment</option>
@@ -129,7 +132,21 @@ export default function AdminPropertiesPage() {
               <option value="industrial">Industrial Space</option>
               <option value="individual_portion">Independent House</option>
             </select>
-            <button className="!p-2.5 !text-gray-500 dark:!text-gray-400 hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] dark:!bg-[#1c1d27] !rounded-xl !border !border-gray-100 dark:!border-[#262730] !shadow-sm !transition-colors">
+            {showFilters && (
+              <select 
+                value={listingTypeFilter}
+                onChange={(e) => setListingTypeFilter(e.target.value)}
+                className="!bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !text-gray-800 dark:!text-white !text-[14px] !rounded-xl focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !outline-none !block !p-2.5 !transition-all"
+              >
+                <option value="all">All Listings</option>
+                <option value="Sell">For Sell</option>
+                <option value="Rent">For Rent</option>
+              </select>
+            )}
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`!p-2.5 !text-gray-500 dark:!text-gray-400 hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] !rounded-xl !border !border-gray-100 dark:!border-[#262730] !shadow-sm !transition-colors ${showFilters ? '!bg-gray-100 dark:!bg-[#1c1d27]' : ''}`}
+            >
               <Filter size={18} />
             </button>
           </div>
@@ -153,17 +170,17 @@ export default function AdminPropertiesPage() {
           <table className="!w-full !text-[14px] !text-left !text-gray-500 dark:!text-gray-400">
             <thead className="!text-[12px] !text-gray-400 !uppercase !bg-gray-50 dark:!bg-[#1c1d27]/50">
               <tr>
-                <th scope="col" className="!px-6 !py-4 !font-medium">Property</th>
-                <th scope="col" className="!px-6 !py-4 !font-medium">Type / Location</th>
-                <th scope="col" className="!px-6 !py-4 !font-medium">Price</th>
-                <th scope="col" className="!px-6 !py-4 !font-medium">Status</th>
-                <th scope="col" className="!px-6 !py-4 !font-medium !text-right">Actions</th>
+                <th scope="col" className="!px-6 !py-4 !font-medium !text-center">Property</th>
+                <th scope="col" className="!px-6 !py-4 !font-medium !text-center">Type / Location</th>
+                <th scope="col" className="!px-6 !py-4 !font-medium !text-center">Price</th>
+                <th scope="col" className="!px-6 !py-4 !font-medium !text-center">Status</th>
+                <th scope="col" className="!px-6 !py-4 !font-medium !text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="!divide-y !divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="!px-6 !py-12 !text-center !text-gray-500 dark:!text-gray-400">
+                  <td colSpan={5} className="!px-6 !py-12 !text-center !text-gray-500 dark:!text-gray-400 !align-middle">
                     <div className="!flex !justify-center !items-center !gap-2">
                       <div className="!w-4 !h-4 !rounded-full !border-2 !border-gray-300 !border-t-gray-900 !animate-spin" />
                       Loading properties...
@@ -172,39 +189,39 @@ export default function AdminPropertiesPage() {
                 </tr>
               ) : properties.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="!px-6 !py-12 !text-center !text-gray-500 dark:!text-gray-400">
+                  <td colSpan={5} className="!px-6 !py-12 !text-center !text-gray-500 dark:!text-gray-400 !align-middle">
                     No properties found. Try adjusting your filters.
                   </td>
                 </tr>
               ) : (
                 properties.map((property) => (
-                  <tr key={property.id} className="!bg-white dark:!bg-[#171821] hover:!bg-[#fbfbfc] dark:!bg-[#0f1015] !transition-colors !group">
-                    <td className="!px-6 !py-4">
-                      <div className="!flex !items-center !gap-3">
+                  <tr key={property.id} className="!bg-white dark:!bg-[#171821] hover:!bg-[#fbfbfc] dark:!bg-[#0f1015] !transition-colors !group !text-center">
+                    <td className="!px-6 !py-4 !align-start">
+                      <div className="!flex !items-center !justify-start-safe !gap-3">
                         <div className="!w-10 !h-10 !rounded-lg !bg-gray-100 dark:!bg-[#262730] !flex !items-center !justify-center !text-gray-400 !flex-shrink-0">
                           <Building2 size={20} />
                         </div>
-                        <div>
+                        <div className="!text-left">
                           <div className="!font-medium !text-gray-800 dark:!text-white group-hover:!text-blue-600 !transition-colors">{property.title}</div>
                           <div className="!text-[12px] !text-gray-400 !mt-0.5">{property.propertyCode || `ID: ${property.id}`}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="!px-6 !py-4">
+                    <td className="!px-6 !py-4 !align-middle">
                       <div className="!text-gray-800 dark:!text-white !capitalize font-medium!">{property.propertyType}</div>
                       <div className="!text-[12px] !text-gray-400 !mt-0.5">{property.city}, {property.state}</div>
                     </td>
-                    <td className="!px-6 !py-4">
+                    <td className="!px-6 !py-4 !align-middle">
                       <div className="!text-gray-800 dark:!text-white !font-semibold">
-                        {property.price ? `${formatToShortIndianCurrency(property.price)}` : 'N/A'}
+                        {property.price ? `₹ ${formatToShortIndianCurrency(property.price)}` : 'N/A'}
                       </div>
                       <div className="!text-[12px] !text-gray-400 !mt-0.5 !capitalize">For {property.listingType}</div>
                     </td>
-                    <td className="!px-6 !py-4">
+                    <td className="!px-6 !py-4 !align-middle">
                       {getStatusBadge(property.status)}
                     </td>
-                    <td className="!px-6 !py-4 !text-right">
-                      <div className="!flex !items-center !justify-end !gap-2">
+                    <td className="!px-6 !py-4 !align-middle">
+                      <div className="!flex !items-center !justify-center !gap-2">
                         <Link href={`/admin/properties/view/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-blue-600 hover:!bg-blue-50 dark:hover:!bg-blue-950/30 !rounded-lg !transition-colors" title="View Details">
                           <Eye size={16} />
                         </Link>

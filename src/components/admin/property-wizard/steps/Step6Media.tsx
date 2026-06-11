@@ -42,37 +42,37 @@ export default function Step6Media() {
   };
 
   return (
-    <div className="space-y-8!">
+    <div className="!space-y-8">
       
       {/* Drag & Drop Zone */}
       <div 
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        className={`w-full! rounded-3xl! border-2! border-dashed! flex! flex-col! items-center! justify-center! p-10! text-center! transition-all! duration-200! ${
+        className={`!w-full !rounded-3xl !border-2 !border-dashed !flex !flex-col !items-center !justify-center !p-10 !text-center !transition-all !duration-200 ${
           isDragging 
-            ? 'border-blue-500! bg-blue-50/50! backdrop-blur-md!' 
-            : 'border-white/60! bg-white/30! backdrop-blur-md! hover:bg-white/40!'
+            ? '!border-blue-500 !bg-blue-50/50 !backdrop-blur-md' 
+            : '!border-white/60 !bg-white/30 !backdrop-blur-md hover:!bg-white/40'
         }`}
       >
-        <div className="w-16! h-16! rounded-full! bg-white! shadow-sm! flex! items-center! justify-center! mb-4!">
-          <UploadCloud className={`w-8! h-8! ${isDragging ? 'text-blue-500!' : 'text-gray-400!'}`} />
+        <div className="!w-16 !h-16 !rounded-full !bg-white !shadow-sm !flex !items-center !justify-center !mb-4">
+          <UploadCloud className={`!w-8 !h-8 ${isDragging ? '!text-blue-500' : '!text-gray-400'}`} />
         </div>
-        <h3 className="text-[16px]! font-bold! text-gray-900! mb-2!">
+        <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-2">
           Drag and drop your images here
         </h3>
-        <p className="text-[13px]! font-medium! text-gray-500! mb-6!">
+        <p className="!text-[13px] !font-medium !text-gray-500 !mb-6">
           Support for JPG, PNG, WEBP. Max 5MB per file.
         </p>
         
-        <label className="inline-flex! items-center! gap-2! px-6! py-2.5! bg-white! border! border-gray-200! hover:border-gray-300! hover:bg-gray-50! rounded-xl! text-[14px]! font-semibold! text-gray-700! shadow-sm! cursor-pointer! transition-all!">
+        <label className="!inline-flex !items-center !gap-2 !px-6 !py-2.5 !bg-white !border !border-gray-200 hover:!border-gray-300 hover:!bg-gray-50 !rounded-xl !text-[14px] !font-semibold !text-gray-700 !shadow-sm !cursor-pointer !transition-all">
           <ImagePlus size={18} />
           Browse Files
           <input 
             type="file" 
             multiple 
             accept="image/*" 
-            className="hidden!" 
+            className="!hidden" 
             onChange={handleFileInput} 
           />
         </label>
@@ -81,26 +81,26 @@ export default function Step6Media() {
       {/* Preview Grid */}
       {images.length > 0 && (
         <div>
-          <h4 className="text-[14px]! font-bold! text-gray-800! mb-4!">Selected Images ({images.length})</h4>
-          <div className="grid! grid-cols-2! sm:grid-cols-3! md:grid-cols-4! lg:grid-cols-5! gap-4!">
+          <h4 className="!text-[14px] !font-bold !text-gray-800 !mb-4">Selected Images ({images.length})</h4>
+          <div className="!grid !grid-cols-2 sm:!grid-cols-3 md:!grid-cols-4 lg:!grid-cols-5 !gap-4">
             {images.map((img, i) => (
-              <div key={`${img.name}-${i}`} className="relative! aspect-square! rounded-2xl! overflow-hidden! border! border-white/60! shadow-sm! group!">
+              <div key={`${img.name}-${i}`} className="!relative !aspect-square !rounded-2xl !overflow-hidden !border !border-white/60 !shadow-sm !group">
                 <img 
                   src={URL.createObjectURL(img)} 
                   alt="Preview" 
-                  className="w-full! h-full! object-cover! transition-transform! duration-300! group-hover:scale-110!" 
+                  className="!w-full !h-full !object-cover !transition-transform !duration-300 group-hover:!scale-110" 
                 />
-                <div className="absolute! inset-0! bg-black/40! opacity-0! group-hover:opacity-100! transition-opacity! duration-200!" />
+                <div className="!absolute !inset-0 !bg-black/40 !opacity-0 group-hover:!opacity-100 !transition-opacity !duration-200" />
                 <button 
                   type="button" 
                   onClick={() => removeImage(i)} 
-                  className="absolute! top-2! right-2! p-1.5! bg-white!/90 backdrop-blur-sm! text-gray-600! hover:text-rose-600! rounded-lg! opacity-0! group-hover:opacity-100! transition-all! hover:scale-110!"
+                  className="!absolute !top-2 !right-2 !p-1.5 !bg-white/90 !backdrop-blur-sm !text-gray-600 hover:!text-rose-600 !rounded-lg !opacity-0 group-hover:!opacity-100 !transition-all hover:!scale-110"
                   title="Remove image"
                 >
                   <X size={16} />
                 </button>
                 {i === 0 && (
-                  <div className="absolute! bottom-2! left-2! px-2! py-1! bg-emerald-500! text-white! text-[10px]! font-bold! rounded-md! uppercase! tracking-wide! shadow-sm!">
+                  <div className="!absolute !bottom-2 !left-2 !px-2 !py-1 !bg-emerald-500 !text-white !text-[10px] !font-bold !rounded-md !uppercase !tracking-wide !shadow-sm">
                     Cover
                   </div>
                 )}

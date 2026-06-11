@@ -53,5 +53,30 @@ export const amenitiesSchema = z.object({
 });
 
 export const mediaSchema = z.object({
-  images: z.array(z.any()).default([]), // Will hold File objects locally
+  images: z.array(z.any()).default([]),
+});
+
+export const ownerInfoSchema = z.object({
+  ownerName: z.string().min(2, 'Name must be at least 2 characters'),
+  ownerEmail: z.string().email('Invalid email address').optional().or(z.literal('')),
+  ownerPhone: z.string().min(10, 'Valid phone number required'),
+});
+
+export const seoSchema = z.object({
+  seoSlug: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
+});
+
+export const availabilitySchema = z.object({
+  availableFrom: z.string().optional(),
+  availableUntil: z.string().optional(),
+  availabilityStatus: z.enum(['Available', 'Reserved', 'Sold', 'Rented']).default('Available'),
+});
+
+export const verificationSchema = z.object({
+  verificationStatus: z.enum(['Pending', 'Verified', 'Rejected']).default('Pending'),
+  approvalStatus: z.enum(['Pending', 'Approved', 'Rejected']).default('Pending'),
+  publishImmediately: z.boolean().default(false),
 });

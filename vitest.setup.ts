@@ -25,3 +25,12 @@ const localStorageMock = (function () {
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => '',
+}));

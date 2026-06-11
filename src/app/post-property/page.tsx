@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/lib/api";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { ModernLoader } from "@/components/admin/ui/ModernLoader";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
@@ -60,12 +61,10 @@ export default function PostPropertyPage() {
             <h2 className="!text-2xl !font-bold !text-gray-900 !tracking-tight">Post Your Property</h2>
           </div>
 
-          {loading ? (
-            <div className="!flex !items-center !justify-center !p-20">
-              <Loader2 size={32} className="!animate-spin !text-blue-600" />
-            </div>
-          ) : (
-            <PropertyWizard 
+      {loading ? (
+        <ModernLoader text="Initializing Setup..." />
+      ) : (
+        <PropertyWizard 
               isAdmin={false} 
               availableCities={availableCities} 
               availableSublocations={availableSublocations}

@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/lib/api";
 import PropertyWizard from "@/components/admin/property-wizard/PropertyWizard";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { AdminCity, AdminSublocation } from "@/lib/location-options";
 import { usePropertyWizardStore } from "@/store/usePropertyWizardStore";
+import { ModernLoader } from "@/components/admin/ui/ModernLoader";
 
 export default function NewPropertyPage() {
   const [loading, setLoading] = useState(true);
@@ -61,9 +62,7 @@ export default function NewPropertyPage() {
       </div>
 
       {loading ? (
-        <div className="!flex !items-center !justify-center !p-20">
-          <Loader2 size={32} className="!animate-spin !text-blue-600" />
-        </div>
+        <ModernLoader text="Initializing Wizard..." />
       ) : (
         <PropertyWizard 
           isAdmin={true} 

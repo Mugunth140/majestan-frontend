@@ -7,7 +7,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Edit,
-  Loader2,
   Building2,
   MapPin,
   Tag,
@@ -23,6 +22,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { ModernLoader } from "@/components/admin/ui/ModernLoader";
 
 function InfoRow({ label, value }: { label: string; value?: string | number | boolean | null }) {
   if (value === undefined || value === null || value === "") return null;
@@ -78,11 +78,7 @@ export default function ViewPropertyPage() {
   }, [id, propertyType]);
 
   if (loading) {
-    return (
-      <div className="!flex !items-center !justify-center !h-64">
-        <Loader2 className="!animate-spin !text-blue-600" size={28} />
-      </div>
-    );
+    return <ModernLoader text="Loading Property Data..." />;
   }
 
   if (!property) {

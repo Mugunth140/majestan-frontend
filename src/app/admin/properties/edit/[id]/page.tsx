@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
 import { usePropertyWizardStore } from "@/store/usePropertyWizardStore";
 import PropertyWizard from "@/components/admin/property-wizard/PropertyWizard";
-import { Loader2 } from "lucide-react";
+import { ModernLoader } from "@/components/admin/ui/ModernLoader";
 import type { AdminCity, AdminSublocation } from "@/lib/location-options";
 import { formatToShortIndianCurrency } from "@/lib/utils/currency.util";
 
@@ -163,11 +163,7 @@ export default function EditPropertyPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="!flex !items-center !justify-center !min-h-[60vh]">
-        <Loader2 className="!w-12 !h-12 !text-blue-500 !animate-spin" />
-      </div>
-    );
+    return <ModernLoader text="Loading Property Details..." />;
   }
 
   return (

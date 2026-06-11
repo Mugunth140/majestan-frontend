@@ -327,7 +327,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
             />
           </div>
 
-          <div className="!flex !items-center !justify-between !gap-4 !overflow-x-auto !scrollbar-hide !pb-2">
+          <div className="!flex !items-center !justify-between !gap-4 !overflow-x-auto [&::-webkit-scrollbar]:!hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] !pt-2 !pb-4">
             {steps.map((step) => {
               const isCompleted = currentStep > step.id;
               const isActive = currentStep === step.id;

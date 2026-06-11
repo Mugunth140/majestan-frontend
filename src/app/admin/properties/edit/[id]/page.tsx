@@ -78,9 +78,16 @@ export default function EditPropertyPage() {
             listingType: p.listingType ? (p.listingType.charAt(0).toUpperCase() + p.listingType.slice(1).toLowerCase()) : "Sell",
             status: p.status ? p.status.toUpperCase() : "AVAILABLE",
             builderName: p.builderName || "",
+            propertyCondition: p.propertyCondition || undefined,
+            ownershipType: p.ownershipType || undefined,
+            reraNumber: p.reraNumber || "",
+            projectName: p.projectName || "",
 
             price: p.price ? String(p.price) : "",
-            negotiable: false,
+            negotiable: p.negotiable || false,
+            maintenanceCharges: p.maintenanceCharges || "",
+            securityDeposit: p.securityDeposit || "",
+            bookingAmount: p.bookingAmount || "",
 
             cityId: subloc.cityId ? String(subloc.cityId) : "",
             sublocationId: loc.locationId ? String(loc.locationId) : "",
@@ -92,12 +99,23 @@ export default function EditPropertyPage() {
 
             bedrooms: det.bedrooms != null ? String(det.bedrooms) : "",
             bathrooms: det.bathrooms != null ? String(det.bathrooms) : "",
-            builtUpArea: det.buildUpArea != null ? String(det.buildUpArea) : det.areaSqft != null ? String(det.areaSqft) : "",
+            builtUpArea: det.builtUpArea != null ? String(det.builtUpArea) : det.areaSqft != null ? String(det.areaSqft) : "",
             carpetArea: det.carpetArea != null ? String(det.carpetArea) : "",
             totalFloors: det.totalFloors != null ? String(det.totalFloors) : "",
-            propertyFacing: det.facing || "",
+            propertyFacing: det.propertyFacing || undefined,
             furnishing: det.furnished ? "Furnished" : "Unfurnished",
             parkingSpaces: det.parking != null ? String(det.parking) : "",
+            balconies: det.balconies != null ? String(det.balconies) : "",
+            floorNumber: det.floorNumber || "",
+            superBuiltUpArea: det.superBuiltUpArea != null ? String(det.superBuiltUpArea) : "",
+            plotArea: det.plotArea != null ? String(det.plotArea) : "",
+            areaUnit: det.areaUnit || "Sq Ft",
+            propertyAge: det.propertyAge || undefined,
+            possessionStatus: det.possessionStatus || undefined,
+            waterSupply: det.waterSupply || "",
+            powerBackup: det.powerBackup || "",
+            roadWidth: det.roadWidth || "",
+            openSides: det.openSides != null ? String(det.openSides) : "",
 
             amenityIds: (p.propertyAmenities || []).map((a: any) => a.amenityId),
 
@@ -107,12 +125,20 @@ export default function EditPropertyPage() {
             })),
             images: [], // New images start empty
 
-            ownerName: p.owner?.firstName ? `${p.owner.firstName} ${p.owner.lastName || ''}` : "Admin",
-            ownerEmail: p.owner?.email || "",
-            ownerPhone: p.owner?.mobileNumber || "0000000000",
+            ownerName: p.ownerName || (p.owner?.firstName ? `${p.owner.firstName} ${p.owner.lastName || ''}` : ""),
+            ownerEmail: p.ownerEmail || p.owner?.email || "",
+            ownerPhone: p.ownerPhone || p.owner?.mobileNumber || "",
 
+            availableFrom: p.availableFrom ? new Date(p.availableFrom).toISOString().split('T')[0] : "",
+            availableUntil: p.availableUntil ? new Date(p.availableUntil).toISOString().split('T')[0] : "",
+            availabilityStatus: "Available",
+            verificationStatus: p.verificationStatus || "Pending",
+            approvalStatus: p.approvalStatus || "Pending",
             publishImmediately: p.status === 'AVAILABLE' || p.status === 'available',
             seoSlug: p.slug || "",
+            metaTitle: p.metaTitle || "",
+            metaDescription: p.metaDescription || "",
+            metaKeywords: p.metaKeywords || "",
           });
 
           setStep(1);

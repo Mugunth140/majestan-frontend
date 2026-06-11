@@ -230,61 +230,74 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     }
   };
 
-  const handleNext = async () => {
+  const processCurrentStep = async (): Promise<boolean> => {
     const isValid = await methods.trigger();
     if (!isValid) {
       console.log("Validation Errors:", methods.formState.errors);
-      
-      // Get the first error message to show to the user
       const errors = methods.formState.errors;
       const firstErrorKey = Object.keys(errors)[0];
       if (firstErrorKey) {
         const errorMsg = (errors as any)[firstErrorKey]?.message;
         toast.error(`Please fix the errors before continuing. ${firstErrorKey}: ${errorMsg}`);
       }
-      return;
+      return false;
     }
     
-    if (isValid) {
-      let currentValues = methods.getValues();
-      console.log("Validation passed", currentValues);
+    let currentValues = methods.getValues();
+    console.log("Validation passed", currentValues);
 
-      // Immediately upload images after Step 6 to avoid losing File objects in localStorage
-      if (currentStep === 6) {
-        const filesToUpload = currentValues.images?.filter((f: any) => f instanceof File || f instanceof Blob) || [];
-        if (filesToUpload.length > 0) {
-          setIsSubmitting(true);
-          try {
-            const uploadedImages = await uploadImagesToR2(filesToUpload);
-            
-            const existing = currentValues.existingImageUrls || [];
-            const newExisting = [...existing, ...uploadedImages];
-            
-            // Move from transient files to persisted existingImageUrls
-            methods.setValue('existingImageUrls', newExisting);
-            methods.setValue('images', []);
-            
-            // Refresh currentValues so updateFormData stores the strings, not the Files
-            currentValues = methods.getValues();
-          } catch (err) {
-            console.error(err);
-            toast.error(err instanceof Error ? err.message : "Failed to upload images.");
-            setIsSubmitting(false);
-            return; // Stop here, do not advance step!
-          } finally {
-            setIsSubmitting(false);
-          }
+    // Immediately upload images after Step 6 to avoid losing File objects in localStorage
+    if (currentStep === 6) {
+      const filesToUpload = currentValues.images?.filter((f: any) => f instanceof File || f instanceof Blob) || [];
+      if (filesToUpload.length > 0) {
+        setIsSubmitting(true);
+        try {
+          const uploadedImages = await uploadImagesToR2(filesToUpload);
+          const existing = currentValues.existingImageUrls || [];
+          const newExisting = [...existing, ...uploadedImages];
+          methods.setValue('existingImageUrls', newExisting);
+          methods.setValue('images', []);
+          currentValues = methods.getValues();
+        } catch (err) {
+          console.error(err);
+          toast.error(err instanceof Error ? err.message : "Failed to upload images.");
+          setIsSubmitting(false);
+          return false;
+        } finally {
+          setIsSubmitting(false);
         }
       }
+    }
 
-      updateFormData(currentValues);
-      
+    updateFormData(currentValues);
+    return true;
+  };
+
+  const handleNext = async () => {
+    const success = await processCurrentStep();
+    if (success) {
       if (currentStep < steps.length) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setStep(currentStep + 1);
       } else {
-        await handleFinalSubmit({ ...formData, ...currentValues });
+        await handleFinalSubmit({ ...formData, ...methods.getValues() });
       }
+    }
+  };
+
+  const handleStepJump = async (targetStepId: number) => {
+    if (!editPropertyId || targetStepId === currentStep) return;
+    const success = await processCurrentStep();
+    if (success) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setStep(targetStepId);
+    }
+  };
+
+  const handleQuickSave = async () => {
+    const success = await processCurrentStep();
+    if (success) {
+      await handleFinalSubmit({ ...formData, ...methods.getValues() });
     }
   };
 
@@ -320,7 +333,13 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
               const isActive = currentStep === step.id;
 
               return (
-                <div key={step.id} className={`!flex !flex-col !items-center !min-w-[70px] !gap-2 !transition-all !duration-300 ${isActive ? '!opacity-100 !scale-105' : isCompleted ? '!opacity-100' : '!opacity-40 grayscale'}`}>
+                <div 
+                  key={step.id} 
+                  onClick={() => {
+                    if (editPropertyId) handleStepJump(step.id);
+                  }}
+                  className={`!flex !flex-col !items-center !min-w-[70px] !gap-2 !transition-all !duration-300 ${isActive ? '!opacity-100 !scale-105' : isCompleted ? '!opacity-100' : '!opacity-40 grayscale'} ${editPropertyId && !isActive ? '!cursor-pointer hover:!scale-105 hover:!opacity-100' : ''}`}
+                >
                   <div className={`!w-9 !h-9 !rounded-full !flex !items-center !justify-center !text-sm !font-semibold !transition-all !duration-500 ${
                     isActive ? '!bg-gray-900 dark:!bg-blue-600 !text-white !shadow-md !ring-4 !ring-gray-900/10 dark:!ring-blue-500/20' :
                     isCompleted ? '!bg-gray-900 dark:!bg-blue-600 !text-white' : '!bg-gray-50 dark:!bg-[#0f1015] !text-gray-400 dark:!text-gray-500 !border !border-gray-200 dark:!border-[#262730]'
@@ -380,16 +399,30 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
             <ArrowLeft size={16} /> Back
           </button>
           
-          <button 
-            type="button"
-            onClick={handleNext}
-            disabled={isSubmitting}
-            className="!inline-flex !items-center !gap-2 !px-8 !py-2.5 !rounded-xl !text-sm !font-medium !text-white !bg-gray-900 hover:!bg-black dark:!bg-blue-600 dark:hover:!bg-blue-700 !shadow-md hover:!shadow-lg !transition-all active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
-          >
-            {isSubmitting ? <Loader2 size={16} className="!animate-spin" /> : currentStep === steps.length ? <Save size={16} /> : null}
-            {isSubmitting ? 'Processing...' : currentStep === steps.length ? (editPropertyId ? 'Update Property' : 'Submit Property') : 'Continue'}
-            {!isSubmitting && currentStep !== steps.length && <ArrowRight size={16} />}
-          </button>
+          <div className="!flex !items-center !gap-3">
+            {editPropertyId && currentStep !== steps.length && (
+              <button 
+                type="button"
+                onClick={handleQuickSave}
+                disabled={isSubmitting}
+                className="!inline-flex !items-center !gap-2 !px-6 !py-2.5 !rounded-xl !text-sm !font-medium !text-blue-700 dark:!text-blue-400 !bg-blue-50 dark:!bg-blue-500/10 hover:!bg-blue-100 dark:hover:!bg-blue-500/20 !border !border-blue-200 dark:!border-blue-500/30 !transition-all active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
+              >
+                {isSubmitting ? <Loader2 size={16} className="!animate-spin" /> : <Save size={16} />}
+                Save Changes
+              </button>
+            )}
+
+            <button 
+              type="button"
+              onClick={handleNext}
+              disabled={isSubmitting}
+              className="!inline-flex !items-center !gap-2 !px-8 !py-2.5 !rounded-xl !text-sm !font-medium !text-white !bg-gray-900 hover:!bg-black dark:!bg-blue-600 dark:hover:!bg-blue-700 !shadow-md hover:!shadow-lg !transition-all active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
+            >
+              {isSubmitting ? <Loader2 size={16} className="!animate-spin" /> : currentStep === steps.length ? <Save size={16} /> : null}
+              {isSubmitting ? 'Processing...' : currentStep === steps.length ? (editPropertyId ? 'Update Property' : 'Submit Property') : 'Continue'}
+              {!isSubmitting && currentStep !== steps.length && <ArrowRight size={16} />}
+            </button>
+          </div>
         </div>
       </div>
 

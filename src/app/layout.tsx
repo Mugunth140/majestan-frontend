@@ -70,6 +70,8 @@ export const viewport: Viewport = {
 
 import { QueryProvider } from "@/providers/query-provider";
 import { LocationProvider } from "@/contexts/LocationContext";
+import { ThemeProvider } from "@/providers/theme-provider";
+
 
 export default function RootLayout({
   children,
@@ -77,7 +79,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="/assets/css/animate.min.css" />
@@ -103,7 +105,9 @@ export default function RootLayout({
       <body className="theme-color-3 majestan-app-root" suppressHydrationWarning>
         <QueryProvider>
           <LocationProvider>
-            {children}
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              {children}
+            </ThemeProvider>
           </LocationProvider>
         </QueryProvider>
       </body>

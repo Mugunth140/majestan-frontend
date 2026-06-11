@@ -1,6 +1,7 @@
 "use client";
 import { LogoutButton } from "./logout-button";
 import { User, Bell } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AdminHeader() {
   return (
@@ -10,6 +11,7 @@ export function AdminHeader() {
       </div>
 
       <div className="flex! items-center! gap-4!">
+        <ThemeToggle />
         <button className="relative! p-2! text-gray-400! hover:text-gray-600! transition-colors! rounded-full! hover:bg-gray-50!">
           <Bell size={20} />
           <span className="absolute! top-1.5! right-2! w-2! h-2! rounded-full! bg-rose-500! border! border-rose-400!"></span>

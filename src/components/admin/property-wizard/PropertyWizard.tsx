@@ -9,6 +9,7 @@ import {
 } from '@/lib/validations/property-wizard.schema';
 import { z } from 'zod';
 import { toast } from '@/components/ui/toast-store';
+import { parseIndianCurrency } from '@/lib/utils/currency.util';
 import { ArrowLeft, ArrowRight, Save, Loader2, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/api';
@@ -131,7 +132,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         propertyType: finalData.propertyType,
         slug: finalData.seoSlug || undefined,
         status: rawStatus,
-        price: String(finalData.price),
+        price: finalData.price ? String(parseIndianCurrency(finalData.price)) : "",
         city: selectedCity?.city_name || finalData.city || '',
         state: selectedCity?.state_name || finalData.state || '',
         country: selectedCity?.country_name || finalData.country || 'India',
@@ -143,9 +144,9 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         reraNumber: finalData.reraNumber || undefined,
         projectName: finalData.projectName || undefined,
         negotiable: finalData.negotiable || false,
-        maintenanceCharges: finalData.maintenanceCharges || undefined,
-        securityDeposit: finalData.securityDeposit || undefined,
-        bookingAmount: finalData.bookingAmount || undefined,
+        maintenanceCharges: finalData.maintenanceCharges ? String(parseIndianCurrency(finalData.maintenanceCharges)) : undefined,
+        securityDeposit: finalData.securityDeposit ? String(parseIndianCurrency(finalData.securityDeposit)) : undefined,
+        bookingAmount: finalData.bookingAmount ? String(parseIndianCurrency(finalData.bookingAmount)) : undefined,
         availableFrom: finalData.availableFrom || undefined,
         availableUntil: finalData.availableUntil || undefined,
         verificationStatus: finalData.verificationStatus || undefined,

@@ -7,6 +7,7 @@ import { usePropertyWizardStore } from "@/store/usePropertyWizardStore";
 import PropertyWizard from "@/components/admin/property-wizard/PropertyWizard";
 import { Loader2 } from "lucide-react";
 import type { AdminCity, AdminSublocation } from "@/lib/location-options";
+import { formatToShortIndianCurrency } from "@/lib/utils/currency.util";
 
 export default function EditPropertyPage() {
   const params = useParams();
@@ -83,11 +84,11 @@ export default function EditPropertyPage() {
             reraNumber: p.reraNumber || "",
             projectName: p.projectName || "",
 
-            price: p.price ? String(p.price) : "",
+            price: p.price ? formatToShortIndianCurrency(p.price) : "",
             negotiable: p.negotiable || false,
-            maintenanceCharges: p.maintenanceCharges || "",
-            securityDeposit: p.securityDeposit || "",
-            bookingAmount: p.bookingAmount || "",
+            maintenanceCharges: p.maintenanceCharges ? formatToShortIndianCurrency(p.maintenanceCharges) : "",
+            securityDeposit: p.securityDeposit ? formatToShortIndianCurrency(p.securityDeposit) : "",
+            bookingAmount: p.bookingAmount ? formatToShortIndianCurrency(p.bookingAmount) : "",
 
             cityId: subloc.cityId ? String(subloc.cityId) : "",
             sublocationId: loc.locationId ? String(loc.locationId) : "",

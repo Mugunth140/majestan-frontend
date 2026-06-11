@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { parseIndianCurrency } from '../utils/currency.util';
 
 export const basicInfoSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters').max(255),
@@ -17,13 +18,16 @@ export const basicInfoSchema = z.object({
 });
 
 export const pricingSchema = z.object({
-  price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: 'Price must be a valid positive number',
+  price: z.string().refine((val) => {
+    const parsed = parseIndianCurrency(val);
+    return !isNaN(parsed) && parsed > 0;
+  }, {
+    message: 'Price must be a valid number or format (e.g. 1.5 Cr, 45 Lk)',
   }),
   negotiable: z.boolean().default(false),
-  maintenanceCharges: z.string().optional(),
-  securityDeposit: z.string().optional(),
-  bookingAmount: z.string().optional(),
+  maintenanceCharges: z.string().optional().refine((val) => !val || (!isNaN(parseIndianCurrency(val)) && parseIndianCurrency(val) >= 0), 'Invalid format'),
+  securityDeposit: z.string().optional().refine((val) => !val || (!isNaN(parseIndianCurrency(val)) && parseIndianCurrency(val) >= 0), 'Invalid format'),
+  bookingAmount: z.string().optional().refine((val) => !val || (!isNaN(parseIndianCurrency(val)) && parseIndianCurrency(val) >= 0), 'Invalid format'),
 });
 
 export const specificationsSchema = z.object({

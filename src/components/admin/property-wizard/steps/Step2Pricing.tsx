@@ -1,6 +1,18 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FloatingInput } from '../ui/FloatingInput';
+import { parseIndianCurrency, numberToIndianWords } from '@/lib/utils/currency.util';
+
+const PriceIndicator = ({ value }: { value: string }) => {
+  if (!value) return null;
+  const parsed = parseIndianCurrency(value);
+  if (isNaN(parsed) || parsed === 0) return null;
+  return (
+    <div className="!text-[12px] !text-emerald-600 dark:!text-emerald-400 !mt-[-4px] !mb-2 !font-medium !pl-2 !tracking-tight">
+      ₹ {parsed.toLocaleString('en-IN')} <span className="!text-gray-500 dark:!text-gray-400 !font-normal">({numberToIndianWords(parsed)})</span>
+    </div>
+  );
+};
 
 export default function Step2Pricing() {
   const { register, formState: { errors }, watch } = useFormContext();
@@ -10,13 +22,16 @@ export default function Step2Pricing() {
     <div className="!space-y-8">
       <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-x-6 !gap-y-8">
         
-        <FloatingInput 
-          id="price"
-          type="number"
-          label={listingType === 'Rent' ? 'Monthly Rent (₹)' : 'Total Price (₹)'}
-          registerProps={register('price')}
-          error={errors.price?.message as string}
-        />
+        <div>
+          <FloatingInput 
+            id="price"
+            type="text"
+            label={listingType === 'Rent' ? 'Monthly Rent (₹)' : 'Total Price (e.g. 1.5 Cr, 45 Lk)'}
+            registerProps={register('price')}
+            error={errors.price?.message as string}
+          />
+          <PriceIndicator value={watch('price')} />
+        </div>
 
         <div className="!flex !items-center !h-full !pt-2">
           <label className="!flex !items-center !cursor-pointer !group">
@@ -35,21 +50,27 @@ export default function Step2Pricing() {
           </label>
         </div>
 
-        <FloatingInput 
-          id="maintenanceCharges"
-          type="number"
-          label="Maintenance Charges (₹)"
-          registerProps={register('maintenanceCharges')}
-          error={errors.maintenanceCharges?.message as string}
-        />
+        <div>
+          <FloatingInput 
+            id="maintenanceCharges"
+            type="text"
+            label="Maintenance Charges (e.g. 5 K)"
+            registerProps={register('maintenanceCharges')}
+            error={errors.maintenanceCharges?.message as string}
+          />
+          <PriceIndicator value={watch('maintenanceCharges')} />
+        </div>
 
-        <FloatingInput 
-          id="securityDeposit"
-          type="number"
-          label={listingType === 'Rent' ? 'Security Deposit (₹)' : 'Booking Amount (₹)'}
-          registerProps={register(listingType === 'Rent' ? 'securityDeposit' : 'bookingAmount')}
-          error={(listingType === 'Rent' ? errors.securityDeposit?.message : errors.bookingAmount?.message) as string}
-        />
+        <div>
+          <FloatingInput 
+            id="securityDeposit"
+            type="text"
+            label={listingType === 'Rent' ? 'Security Deposit (e.g. 1 Lk)' : 'Booking Amount (e.g. 5 Lk)'}
+            registerProps={register(listingType === 'Rent' ? 'securityDeposit' : 'bookingAmount')}
+            error={errors.securityDeposit?.message as string || errors.bookingAmount?.message as string}
+          />
+          <PriceIndicator value={watch(listingType === 'Rent' ? 'securityDeposit' : 'bookingAmount')} />
+        </div>
 
       </div>
     </div>

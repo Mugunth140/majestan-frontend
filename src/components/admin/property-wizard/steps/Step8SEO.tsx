@@ -1,61 +1,44 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { FloatingInput, FloatingTextarea } from '../ui/FloatingInput';
 
 export default function Step8SEO() {
- const { register, formState: { errors } } = useFormContext();
+  const { register, formState: { errors } } = useFormContext();
 
- return (
- <div className="!space-y-6">
- <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">
- Search Engine Optimization (Admin Only)
- </h3>
- 
- <div className="!grid !grid-cols-1 !gap-6">
- <div className="!space-y-1.5">
- <label htmlFor="seoSlug" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">SEO URL Slug</label>
- <input 
- id="seoSlug"
- {...register('seoSlug')} 
- className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
- placeholder="luxury-3bhk-villa-mumbai" 
- />
- {errors.seoSlug && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.seoSlug.message as string}</p>}
- </div>
+  return (
+    <div className="!space-y-8">
+      <div className="!grid !grid-cols-1 !gap-x-6 !gap-y-8">
+        
+        <FloatingInput 
+          id="seoSlug"
+          label="SEO URL Slug"
+          registerProps={register('seoSlug')}
+          error={errors.seoSlug?.message as string}
+        />
 
- <div className="!space-y-1.5">
- <label htmlFor="metaTitle" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Meta Title</label>
- <input 
- id="metaTitle"
- {...register('metaTitle')} 
- className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
- placeholder="Buy Luxury 3BHK Villa in Mumbai | Real Estate" 
- />
- {errors.metaTitle && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.metaTitle.message as string}</p>}
- </div>
+        <FloatingInput 
+          id="metaTitle"
+          label="Meta Title"
+          registerProps={register('metaTitle')}
+          error={errors.metaTitle?.message as string}
+        />
 
- <div className="!space-y-1.5">
- <label htmlFor="metaDescription" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Meta Description</label>
- <textarea 
- id="metaDescription"
- {...register('metaDescription')} 
- rows={3}
- className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
- placeholder="Find the best luxury villas in Mumbai. Excellent amenities, sea view, and premium location." 
- />
- {errors.metaDescription && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.metaDescription.message as string}</p>}
- </div>
+        <FloatingTextarea 
+          id="metaDescription"
+          label="Meta Description"
+          rows={3}
+          registerProps={register('metaDescription')}
+          error={errors.metaDescription?.message as string}
+        />
 
- <div className="!space-y-1.5">
- <label htmlFor="metaKeywords" className="!text-[14px] !font-semibold !text-gray-800 dark:!text-gray-100">Meta Keywords</label>
- <input 
- id="metaKeywords"
- {...register('metaKeywords')} 
- className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-3 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
- placeholder="villa, mumbai, luxury real estate, 3bhk" 
- />
- {errors.metaKeywords && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.metaKeywords.message as string}</p>}
- </div>
- </div>
- </div>
- );
+        <FloatingInput 
+          id="metaKeywords"
+          label="Meta Keywords"
+          registerProps={register('metaKeywords')}
+          error={errors.metaKeywords?.message as string}
+        />
+
+      </div>
+    </div>
+  );
 }

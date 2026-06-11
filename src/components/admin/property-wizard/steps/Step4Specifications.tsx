@@ -1,84 +1,52 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { ChevronDown } from 'lucide-react';
+import { FloatingInput, FloatingSelect } from '../ui/FloatingInput';
 
 export default function Step4Specifications() {
- const { register, formState: { errors } } = useFormContext();
+  const { register, formState: { errors } } = useFormContext();
 
- const InputField = ({ id, label, placeholder, type = "number" }: any) => (
- <div className="!space-y-1.5">
- <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800 dark:!text-gray-100">{label}</label>
- <input 
- id={id}
- type={type}
- {...register(id)} 
- className="!w-full !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-xl !px-4 !py-2.5 !text-[14px] !font-medium !text-gray-800 dark:!text-gray-100 focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !shadow-sm !outline-none !transition-all" 
- placeholder={placeholder}
- />
- {errors[id] && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors[id]?.message as string}</p>}
- </div>
- );
+  const toOptions = (arr: string[]) => arr.map(item => ({ value: item, label: item }));
 
- const SelectField = ({ id, label, options }: any) => (
- <div className="!space-y-1.5">
- <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800 dark:!text-gray-100">{label}</label>
- <div className="!relative">
- <select 
- id={id}
- {...register(id)} 
- className="!w-full !appearance-none !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !text-gray-800 dark:!text-gray-100 !font-medium !rounded-xl !pl-4 !pr-10 !py-2.5 !text-[14px] focus:!ring-2 focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!ring-blue-500/20 dark:focus:!border-blue-500 !outline-none !transition-all !cursor-pointer !block !shadow-sm"
- >
- <option value="">Select</option>
- {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
- </select>
- <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
- <ChevronDown size={16} />
- </div>
- </div>
- {errors[id] && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors[id]?.message as string}</p>}
- </div>
- );
+  return (
+    <div className="!space-y-10">
+      
+      <div>
+        <h3 className="!text-sm !font-bold !text-gray-900 dark:!text-white !mb-6 !uppercase !tracking-wider">Basic Specs</h3>
+        <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-x-5 !gap-y-6">
+          <FloatingInput id="bedrooms" label="Bedrooms" type="number" registerProps={register('bedrooms')} error={errors.bedrooms?.message as string} />
+          <FloatingInput id="bathrooms" label="Bathrooms" type="number" registerProps={register('bathrooms')} error={errors.bathrooms?.message as string} />
+          <FloatingInput id="balconies" label="Balconies" type="number" registerProps={register('balconies')} error={errors.balconies?.message as string} />
+          <FloatingInput id="parkingSpaces" label="Parking" type="number" registerProps={register('parkingSpaces')} error={errors.parkingSpaces?.message as string} />
+          <FloatingInput id="floorNumber" label="Floor No." type="number" registerProps={register('floorNumber')} error={errors.floorNumber?.message as string} />
+          <FloatingInput id="totalFloors" label="Total Floors" type="number" registerProps={register('totalFloors')} error={errors.totalFloors?.message as string} />
+        </div>
+      </div>
 
- return (
- <div className="!space-y-8">
- 
- <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">Basic Specs</h3>
- <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
- <InputField id="bedrooms" label="Bedrooms" placeholder="E.g. 3" />
- <InputField id="bathrooms" label="Bathrooms" placeholder="E.g. 2" />
- <InputField id="balconies" label="Balconies" placeholder="E.g. 1" />
- <InputField id="parkingSpaces" label="Parking Spaces" placeholder="E.g. 2" />
- <InputField id="floorNumber" label="Floor Number" placeholder="E.g. 4" />
- <InputField id="totalFloors" label="Total Floors" placeholder="E.g. 12" />
- </div>
- </div>
+      <div>
+        <h3 className="!text-sm !font-bold !text-gray-900 dark:!text-white !mb-6 !uppercase !tracking-wider">Area Details</h3>
+        <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-x-5 !gap-y-6">
+          <FloatingSelect id="areaUnit" label="Unit" options={toOptions(['Sq Ft', 'Sq M', 'Acres', 'Cents'])} registerProps={register('areaUnit')} error={errors.areaUnit?.message as string} />
+          <FloatingInput id="carpetArea" label="Carpet Area" type="number" registerProps={register('carpetArea')} error={errors.carpetArea?.message as string} />
+          <FloatingInput id="builtUpArea" label="Built Up Area" type="number" registerProps={register('builtUpArea')} error={errors.builtUpArea?.message as string} />
+          <FloatingInput id="superBuiltUpArea" label="Super Built Up" type="number" registerProps={register('superBuiltUpArea')} error={errors.superBuiltUpArea?.message as string} />
+          <FloatingInput id="plotArea" label="Plot Area" type="number" registerProps={register('plotArea')} error={errors.plotArea?.message as string} />
+        </div>
+      </div>
 
- <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">Area Details</h3>
- <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
- <SelectField id="areaUnit" label="Area Unit" options={['Sq Ft', 'Sq M', 'Acres', 'Cents']} />
- <InputField id="carpetArea" label="Carpet Area" placeholder="E.g. 1200" />
- <InputField id="builtUpArea" label="Built Up Area" placeholder="E.g. 1400" />
- <InputField id="superBuiltUpArea" label="Super Built Up Area" placeholder="E.g. 1500" />
- <InputField id="plotArea" label="Plot Area" placeholder="E.g. 2000" />
- </div>
- </div>
+      <div>
+        <h3 className="!text-sm !font-bold !text-gray-900 dark:!text-white !mb-6 !uppercase !tracking-wider">Features</h3>
+        <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-x-5 !gap-y-6">
+          <FloatingSelect id="propertyFacing" label="Facing" options={toOptions(['East', 'West', 'North', 'South', 'North East', 'North West', 'South East', 'South West'])} registerProps={register('propertyFacing')} error={errors.propertyFacing?.message as string} />
+          <FloatingSelect id="propertyAge" label="Age" options={toOptions(['New', '1-3 Years', '3-5 Years', '5-10 Years', '10+ Years'])} registerProps={register('propertyAge')} error={errors.propertyAge?.message as string} />
+          <FloatingSelect id="furnishing" label="Furnishing" options={toOptions(['Furnished', 'Semi Furnished', 'Unfurnished'])} registerProps={register('furnishing')} error={errors.furnishing?.message as string} />
+          <FloatingSelect id="possessionStatus" label="Possession" options={toOptions(['Ready To Move', 'Under Construction', 'Immediate', 'Future Date'])} registerProps={register('possessionStatus')} error={errors.possessionStatus?.message as string} />
+          <FloatingInput id="waterSupply" label="Water Supply" type="text" registerProps={register('waterSupply')} error={errors.waterSupply?.message as string} />
+          <FloatingInput id="powerBackup" label="Power Backup" type="text" registerProps={register('powerBackup')} error={errors.powerBackup?.message as string} />
+          <FloatingInput id="roadWidth" label="Road Width (ft)" type="number" registerProps={register('roadWidth')} error={errors.roadWidth?.message as string} />
+          <FloatingInput id="openSides" label="Open Sides" type="number" registerProps={register('openSides')} error={errors.openSides?.message as string} />
+        </div>
+      </div>
 
- <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 dark:!text-white !mb-5/50">Property Features</h3>
- <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
- <SelectField id="propertyFacing" label="Property Facing" options={['East', 'West', 'North', 'South', 'North East', 'North West', 'South East', 'South West']} />
- <SelectField id="propertyAge" label="Property Age" options={['New', '1-3 Years', '3-5 Years', '5-10 Years', '10+ Years']} />
- <SelectField id="furnishing" label="Furnishing" options={['Furnished', 'Semi Furnished', 'Unfurnished']} />
- <SelectField id="possessionStatus" label="Possession Status" options={['Ready To Move', 'Under Construction', 'Immediate', 'Future Date']} />
- <InputField id="waterSupply" label="Water Supply" type="text" placeholder="E.g. 24 Hours, BMC" />
- <InputField id="powerBackup" label="Power Backup" type="text" placeholder="E.g. Full, Partial" />
- <InputField id="roadWidth" label="Road Width (ft)" placeholder="E.g. 40" />
- <InputField id="openSides" label="Open Sides" placeholder="E.g. 2" />
- </div>
- </div>
-
- </div>
- );
+    </div>
+  );
 }

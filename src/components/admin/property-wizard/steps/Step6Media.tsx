@@ -4,7 +4,11 @@ import { ImagePlus, X, UploadCloud } from 'lucide-react';
 
 export default function Step6Media() {
   const { watch, setValue } = useFormContext();
-  const images: File[] = watch('images') || [];
+  
+  const rawImages: any[] = watch('images') || [];
+  // Ensure we only render valid File objects (safeguard against corrupted localStorage)
+  const images: File[] = rawImages.filter(img => img instanceof File || img instanceof Blob);
+
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFiles = (files: FileList | File[]) => {

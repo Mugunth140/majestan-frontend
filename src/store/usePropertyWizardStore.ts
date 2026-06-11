@@ -25,6 +25,15 @@ export const usePropertyWizardStore = create<PropertyWizardState>()(
     }),
     {
       name: 'property-wizard-storage',
+      partialize: (state) => {
+        // Exclude File objects (images) from being serialized to localStorage
+        // because JSON.stringify(File) destroys the File object, causing upload errors.
+        const { images, ...restFormData } = state.formData;
+        return {
+          ...state,
+          formData: restFormData
+        };
+      }
     }
   )
 );

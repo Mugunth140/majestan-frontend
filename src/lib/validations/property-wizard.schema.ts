@@ -8,7 +8,7 @@ export const basicInfoSchema = z.object({
     'farmland', 'industrial', 'independent_portion', 'other'
   ]),
   listingType: z.enum(['Sell', 'Rent']),
-  status: z.enum(['AVAILABLE', 'UNAVAILABLE', 'SOLD', 'RENTED']),
+  status: z.enum(['AVAILABLE', 'UNAVAILABLE', 'SOLD', 'RENTED']).optional().default('AVAILABLE'),
   propertyCondition: z.enum(['New', 'Under Construction', 'Resale']).optional(),
   ownershipType: z.enum(['Freehold', 'Leasehold']).optional(),
   reraNumber: z.string().optional(),

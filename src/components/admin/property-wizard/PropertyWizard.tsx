@@ -48,7 +48,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const steps = [
+  const steps: any[] = [
     { id: 1, title: 'Basic Info', component: Step1BasicInfo, schema: basicInfoSchema },
     { id: 2, title: 'Pricing', component: Step2Pricing, schema: pricingSchema },
     { id: 3, title: 'Location', component: Step3Location, schema: locationSchema },
@@ -89,13 +89,18 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
       const { data } = await presignedRes.json();
       const { url, key } = data;
 
-      const uploadRes = await fetch(url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      if (!uploadRes.ok) throw new Error("Failed to upload " + file.name + " to R2");
-      uploadedUrls.push(key);
+      try {
+        const uploadRes = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        if (!uploadRes.ok) throw new Error("Failed to upload " + file.name + " to R2");
+        uploadedUrls.push(key);
+      } catch (err) {
+        console.error("Upload error:", err);
+        throw new Error("R2 Upload Error: Check your Cloudflare R2 CORS settings. Make sure your bucket allows PUT requests from this origin.");
+      }
     }
     return uploadedUrls;
   };
@@ -105,39 +110,39 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     try {
       const uploadedImageKeys = finalData.images?.length > 0 ? await uploadImagesToR2(finalData.images) : [];
       
+      // Derive status: backend expects lowercase enum values
+      const rawStatus = finalData.publishImmediately ? 'available' : (finalData.status?.toLowerCase() || 'unavailable');
+
+      // Resolve city name/state/country from selected cityId
+      const selectedCity = availableCities.find(c => c.id === Number(finalData.cityId));
+
       const payload = {
         title: finalData.title,
         description: finalData.description,
         propertyType: finalData.propertyType,
-        listingType: finalData.listingType,
-        status: isAdmin && finalData.publishImmediately ? 'AVAILABLE' : (finalData.status || 'UNAVAILABLE'),
-        price: finalData.price,
-        city: finalData.city,
-        state: finalData.state,
-        country: finalData.country,
-        cityId: Number(finalData.cityId),
-        sublocationId: Number(finalData.sublocationId),
+        status: rawStatus,
+        price: String(finalData.price),
+        city: selectedCity?.city_name || finalData.city || '',
+        state: selectedCity?.state_name || finalData.state || '',
+        country: selectedCity?.country_name || finalData.country || 'India',
+        cityId: Number(finalData.cityId) || undefined,
+        sublocationId: Number(finalData.sublocationId) || undefined,
         location: {
-          addressLine1: finalData.addressLine1,
-          addressLine2: finalData.addressLine2,
-          pincode: finalData.pincode
+          address: [finalData.addressLine1, finalData.addressLine2].filter(Boolean).join(', '),
+          pincode: finalData.pincode,
         },
         details: {
-          bedrooms: Number(finalData.bedrooms) || 0,
-          bathrooms: Number(finalData.bathrooms) || 0,
-          areaSqft: Number(finalData.builtUpArea) || 0,
-          furnishing: finalData.furnishing,
-          propertyAge: finalData.propertyAge,
-          propertyFacing: finalData.propertyFacing
+          bedrooms: Number(finalData.bedrooms) || undefined,
+          bathrooms: Number(finalData.bathrooms) || undefined,
+          areaSqft: Number(finalData.builtUpArea) || undefined,
+          furnished: finalData.furnishing === 'Furnished' || finalData.furnishing === 'Semi Furnished',
+          facing: finalData.propertyFacing,
+          buildUpArea: Number(finalData.builtUpArea) || undefined,
+          carpetArea: Number(finalData.carpetArea) || undefined,
+          totalFloors: Number(finalData.totalFloors) || undefined,
         },
         amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
         files: uploadedImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),
-        seo: isAdmin ? {
-          slug: finalData.seoSlug,
-          metaTitle: finalData.metaTitle,
-          metaDescription: finalData.metaDescription,
-          metaKeywords: finalData.metaKeywords
-        } : undefined
       };
 
       const token = window.localStorage.getItem(isAdmin ? "majestan_access_token" : "majestan_user_auth");
@@ -152,14 +157,18 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error("Failed to create property");
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Backend validation error:", errorData);
+        throw new Error(`Failed to create property: ${JSON.stringify(errorData.message || errorData)}`);
+      }
       
       clearWizard();
       router.push(isAdmin ? "/admin/properties" : "/");
       
     } catch (error) {
       console.error(error);
-      alert("Submission failed. Please check the console for details.");
+      alert(error instanceof Error ? error.message : "Submission failed due to an upload error. Check R2 CORS settings.");
     } finally {
       setIsSubmitting(false);
     }
@@ -167,8 +176,11 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
 
   const handleNext = async () => {
     const isValid = await methods.trigger();
+    if (!isValid) console.log("Validation Errors:", methods.formState.errors);
     if (isValid) {
       const currentValues = methods.getValues();
+      console.log("Validation passed", currentValues);
+
       updateFormData(currentValues);
       
       if (currentStep < steps.length) {

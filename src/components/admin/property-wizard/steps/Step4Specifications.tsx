@@ -6,7 +6,7 @@ export default function Step4Specifications() {
  const { register, formState: { errors } } = useFormContext();
 
  const InputField = ({ id, label, placeholder, type = "number" }: any) => (
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800">{label}</label>
  <input 
  id={id}
@@ -20,7 +20,7 @@ export default function Step4Specifications() {
  );
 
  const SelectField = ({ id, label, options }: any) => (
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor={id} className="!text-[13px] !font-semibold !text-gray-800">{label}</label>
  <div className="!relative">
  <select 
@@ -31,7 +31,7 @@ export default function Step4Specifications() {
  <option value="">Select</option>
  {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={16} />
  </div>
  </div>
@@ -43,7 +43,7 @@ export default function Step4Specifications() {
  <div className="!space-y-8">
  
  <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-4 !pb-2 !border-b !border-gray-200/50">Basic Specs</h3>
+ <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">Basic Specs</h3>
  <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
  <InputField id="bedrooms" label="Bedrooms" placeholder="E.g. 3" />
  <InputField id="bathrooms" label="Bathrooms" placeholder="E.g. 2" />
@@ -55,7 +55,7 @@ export default function Step4Specifications() {
  </div>
 
  <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-4 !pb-2 !border-b !border-gray-200/50">Area Details</h3>
+ <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">Area Details</h3>
  <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
  <SelectField id="areaUnit" label="Area Unit" options={['Sq Ft', 'Sq M', 'Acres', 'Cents']} />
  <InputField id="carpetArea" label="Carpet Area" placeholder="E.g. 1200" />
@@ -66,7 +66,7 @@ export default function Step4Specifications() {
  </div>
 
  <div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-4 !pb-2 !border-b !border-gray-200/50">Property Features</h3>
+ <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">Property Features</h3>
  <div className="!grid !grid-cols-2 md:!grid-cols-4 !gap-5">
  <SelectField id="propertyFacing" label="Property Facing" options={['East', 'West', 'North', 'South', 'North East', 'North West', 'South East', 'South West']} />
  <SelectField id="propertyAge" label="Property Age" options={['New', '1-3 Years', '3-5 Years', '5-10 Years', '10+ Years']} />

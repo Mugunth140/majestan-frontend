@@ -8,7 +8,7 @@ export default function Step2Pricing() {
  return (
  <div className="!space-y-6">
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="price" className="!text-[14px] !font-semibold !text-gray-800">
  {listingType === 'Rent' ? 'Monthly Rent (₹)' : 'Total Price (₹)'}
  </label>
@@ -22,7 +22,7 @@ export default function Step2Pricing() {
  {errors.price && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.price.message as string}</p>}
  </div>
 
- <div className="!space-y-2 !flex !items-center !h-full !pt-8">
+ <div className="!space-y-1.5 !flex !items-center !h-full !pt-8">
  <label className="!flex !items-center !cursor-pointer !group">
  <div className="!relative !flex !items-center !justify-center !w-5 !h-5 !mr-3">
  <input
@@ -35,11 +35,11 @@ export default function Step2Pricing() {
  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
  </svg>
  </div>
- <span className="!text-[14px] !font-semibold !text-gray-800 group-hover:!text-gray-900">Price is Negotiable</span>
+ <span className="!text-sm !font-medium !text-gray-700 group-hover:!text-gray-900">Price is Negotiable</span>
  </label>
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="maintenanceCharges" className="!text-[14px] !font-semibold !text-gray-800">Maintenance Charges (₹)</label>
  <input 
  id="maintenanceCharges"
@@ -50,7 +50,7 @@ export default function Step2Pricing() {
  />
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="securityDeposit" className="!text-[14px] !font-semibold !text-gray-800">
  {listingType === 'Rent' ? 'Security Deposit (₹)' : 'Booking Amount (₹)'}
  </label>

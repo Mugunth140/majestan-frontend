@@ -52,7 +52,7 @@ export default function PostPropertyPage() {
     <>
       <SiteHeader />
       <div className="!pt-[120px] !pb-20 !bg-[#f8f9fa] !min-h-screen">
-        <div className="!w-full !max-w-6xl !mx-auto !space-y-6 !px-4 md:!px-0">
+        <div className="!w-full !max-w-full !mx-auto !space-y-6 !px-4 md:!px-0">
           <div className="!flex !items-center !gap-4">
             <Link href="/" className="!p-2 !text-gray-500 hover:!bg-white !rounded-xl !transition-colors">
               <ArrowLeft size={20} />

@@ -3,14 +3,15 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePropertyWizardStore } from '@/store/usePropertyWizardStore';
 import { 
- basicInfoSchema, pricingSchema, specificationsSchema, 
- amenitiesSchema, mediaSchema, ownerInfoSchema, 
- seoSchema, availabilitySchema, verificationSchema 
+  basicInfoSchema, pricingSchema, specificationsSchema, 
+  amenitiesSchema, mediaSchema, ownerInfoSchema, 
+  seoSchema, availabilitySchema, verificationSchema 
 } from '@/lib/validations/property-wizard.schema';
 import { z } from 'zod';
 import { ArrowLeft, ArrowRight, Save, Loader2, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import Step1BasicInfo from './steps/Step1BasicInfo';
 import Step2Pricing from './steps/Step2Pricing';
@@ -26,237 +27,265 @@ import Step10Verification from './steps/Step10Verification';
 import type { AdminCity, AdminSublocation } from '@/lib/location-options';
 
 interface PropertyWizardProps {
- isAdmin: boolean;
- availableCities: AdminCity[];
- availableSublocations: AdminSublocation[];
- amenities: any[];
+  isAdmin: boolean;
+  availableCities: AdminCity[];
+  availableSublocations: AdminSublocation[];
+  amenities: any[];
 }
 
 const locationSchema = z.object({
- cityId: z.string().min(1, 'City is required'),
- sublocationId: z.string().min(1, 'Sublocation is required'),
- state: z.string().min(1, 'State is required'),
- country: z.string().default('India'),
- addressLine1: z.string().min(5, 'Address is required'),
- addressLine2: z.string().optional(),
- pincode: z.string().min(6, 'Valid pincode required'),
+  cityId: z.string().min(1, 'City is required'),
+  sublocationId: z.string().min(1, 'Sublocation is required'),
+  state: z.string().min(1, 'State is required'),
+  country: z.string().default('India'),
+  addressLine1: z.string().min(5, 'Address is required'),
+  addressLine2: z.string().optional(),
+  pincode: z.string().min(6, 'Valid pincode required'),
 });
 
 export default function PropertyWizard({ isAdmin, availableCities, availableSublocations, amenities }: PropertyWizardProps) {
- const { currentStep, setStep, formData, updateFormData, clearWizard } = usePropertyWizardStore();
- const [isSubmitting, setIsSubmitting] = useState(false);
- const router = useRouter();
+  const { currentStep, setStep, formData, updateFormData, clearWizard } = usePropertyWizardStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
- // Conditionally build steps
- const steps = [
- { id: 1, title: 'Basic Info', component: Step1BasicInfo, schema: basicInfoSchema },
- { id: 2, title: 'Pricing', component: Step2Pricing, schema: pricingSchema },
- { id: 3, title: 'Location', component: Step3Location, schema: locationSchema },
- { id: 4, title: 'Specs', component: Step4Specifications, schema: specificationsSchema },
- { id: 5, title: 'Amenities', component: Step5Amenities, schema: amenitiesSchema },
- { id: 6, title: 'Media', component: Step6Media, schema: mediaSchema },
- { id: 7, title: 'Owner', component: Step7OwnerInfo, schema: ownerInfoSchema },
- ];
+  const steps = [
+    { id: 1, title: 'Basic Info', component: Step1BasicInfo, schema: basicInfoSchema },
+    { id: 2, title: 'Pricing', component: Step2Pricing, schema: pricingSchema },
+    { id: 3, title: 'Location', component: Step3Location, schema: locationSchema },
+    { id: 4, title: 'Specs', component: Step4Specifications, schema: specificationsSchema },
+    { id: 5, title: 'Amenities', component: Step5Amenities, schema: amenitiesSchema },
+    { id: 6, title: 'Media', component: Step6Media, schema: mediaSchema },
+    { id: 7, title: 'Owner', component: Step7OwnerInfo, schema: ownerInfoSchema },
+  ];
 
- if (isAdmin) {
- steps.push({ id: 8, title: 'SEO', component: Step8SEO, schema: seoSchema });
- }
+  if (isAdmin) steps.push({ id: 8, title: 'SEO', component: Step8SEO, schema: seoSchema });
+  steps.push({ id: isAdmin ? 9 : 8, title: 'Availability', component: Step9Availability, schema: availabilitySchema });
+  if (isAdmin) steps.push({ id: 10, title: 'Publish', component: Step10Verification, schema: verificationSchema });
 
- steps.push({ id: isAdmin ? 9 : 8, title: 'Availability', component: Step9Availability, schema: availabilitySchema });
+  const currentStepConfig = steps.find(s => s.id === currentStep) || steps[0];
+  const CurrentStepComponent = currentStepConfig.component;
 
- if (isAdmin) {
- steps.push({ id: 10, title: 'Publish', component: Step10Verification, schema: verificationSchema });
- }
+  const methods = useForm({
+    resolver: zodResolver(currentStepConfig.schema),
+    defaultValues: formData,
+    mode: 'onTouched',
+  });
 
- const currentStepConfig = steps.find(s => s.id === currentStep) || steps[0];
- const CurrentStepComponent = currentStepConfig.component;
+  useEffect(() => {
+    methods.reset({ ...formData, ...methods.getValues() });
+  }, [currentStep, formData, methods]);
 
- const methods = useForm({
- resolver: zodResolver(currentStepConfig.schema),
- defaultValues: formData,
- mode: 'onTouched',
- });
+  const uploadImagesToR2 = async (images: File[]): Promise<string[]> => {
+    const uploadedUrls: string[] = [];
+    const token = window.localStorage.getItem("majestan_access_token") || window.localStorage.getItem("majestan_user_auth");
 
- useEffect(() => {
- methods.reset({ ...formData, ...methods.getValues() });
- }, [currentStep, formData, methods]);
+    for (const file of images) {
+      const presignedRes = await fetch(
+        `${API_BASE_URL}/properties/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      );
+      if (!presignedRes.ok) throw new Error("Failed to get presigned URL for " + file.name);
 
- const uploadImagesToR2 = async (images: File[]): Promise<string[]> => {
- const uploadedUrls: string[] = [];
- const token = window.localStorage.getItem("majestan_access_token") || window.localStorage.getItem("majestan_user_auth");
+      const { data } = await presignedRes.json();
+      const { url, key } = data;
 
- for (const file of images) {
- const presignedRes = await fetch(
- `${API_BASE_URL}/properties/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
- { headers: token ? { Authorization: `Bearer ${token}` } : {} }
- );
- if (!presignedRes.ok) throw new Error("Failed to get presigned URL for " + file.name);
+      const uploadRes = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!uploadRes.ok) throw new Error("Failed to upload " + file.name + " to R2");
+      uploadedUrls.push(key);
+    }
+    return uploadedUrls;
+  };
 
- const { data } = await presignedRes.json();
- const { url, key } = data;
+  const handleFinalSubmit = async (finalData: any) => {
+    setIsSubmitting(true);
+    try {
+      const uploadedImageKeys = finalData.images?.length > 0 ? await uploadImagesToR2(finalData.images) : [];
+      
+      const payload = {
+        title: finalData.title,
+        description: finalData.description,
+        propertyType: finalData.propertyType,
+        listingType: finalData.listingType,
+        status: isAdmin && finalData.publishImmediately ? 'AVAILABLE' : (finalData.status || 'UNAVAILABLE'),
+        price: finalData.price,
+        city: finalData.city,
+        state: finalData.state,
+        country: finalData.country,
+        cityId: Number(finalData.cityId),
+        sublocationId: Number(finalData.sublocationId),
+        location: {
+          addressLine1: finalData.addressLine1,
+          addressLine2: finalData.addressLine2,
+          pincode: finalData.pincode
+        },
+        details: {
+          bedrooms: Number(finalData.bedrooms) || 0,
+          bathrooms: Number(finalData.bathrooms) || 0,
+          areaSqft: Number(finalData.builtUpArea) || 0,
+          furnishing: finalData.furnishing,
+          propertyAge: finalData.propertyAge,
+          propertyFacing: finalData.propertyFacing
+        },
+        amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
+        files: uploadedImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),
+        seo: isAdmin ? {
+          slug: finalData.seoSlug,
+          metaTitle: finalData.metaTitle,
+          metaDescription: finalData.metaDescription,
+          metaKeywords: finalData.metaKeywords
+        } : undefined
+      };
 
- const uploadRes = await fetch(url, {
- method: "PUT",
- headers: { "Content-Type": file.type },
- body: file,
- });
- if (!uploadRes.ok) throw new Error("Failed to upload " + file.name + " to R2");
- uploadedUrls.push(key);
- }
- return uploadedUrls;
- };
+      const token = window.localStorage.getItem(isAdmin ? "majestan_access_token" : "majestan_user_auth");
+      const endpoint = isAdmin ? `${API_BASE_URL}/admin/properties/${finalData.propertyType}` : `${API_BASE_URL}/properties/submit/${finalData.propertyType}`;
 
- const handleFinalSubmit = async (finalData: any) => {
- setIsSubmitting(true);
- try {
- const uploadedImageKeys = finalData.images?.length > 0 ? await uploadImagesToR2(finalData.images) : [];
- 
- const payload = {
- title: finalData.title,
- description: finalData.description,
- propertyType: finalData.propertyType,
- listingType: finalData.listingType,
- status: isAdmin && finalData.publishImmediately ? 'AVAILABLE' : (finalData.status || 'UNAVAILABLE'),
- price: finalData.price,
- city: finalData.city,
- state: finalData.state,
- country: finalData.country,
- cityId: Number(finalData.cityId),
- sublocationId: Number(finalData.sublocationId),
- location: {
- addressLine1: finalData.addressLine1,
- addressLine2: finalData.addressLine2,
- pincode: finalData.pincode
- },
- details: {
- bedrooms: Number(finalData.bedrooms) || 0,
- bathrooms: Number(finalData.bathrooms) || 0,
- areaSqft: Number(finalData.builtUpArea) || 0,
- furnishing: finalData.furnishing,
- propertyAge: finalData.propertyAge,
- propertyFacing: finalData.propertyFacing
- },
- amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
- files: uploadedImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),
- seo: isAdmin ? {
- slug: finalData.seoSlug,
- metaTitle: finalData.metaTitle,
- metaDescription: finalData.metaDescription,
- metaKeywords: finalData.metaKeywords
- } : undefined
- };
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
+        body: JSON.stringify(payload)
+      });
 
- const token = window.localStorage.getItem(isAdmin ? "majestan_access_token" : "majestan_user_auth");
- const endpoint = isAdmin ? `${API_BASE_URL}/admin/properties/${finalData.propertyType}` : `${API_BASE_URL}/properties/submit/${finalData.propertyType}`;
+      if (!res.ok) throw new Error("Failed to create property");
+      
+      clearWizard();
+      router.push(isAdmin ? "/admin/properties" : "/");
+      
+    } catch (error) {
+      console.error(error);
+      alert("Submission failed. Please check the console for details.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
- const res = await fetch(endpoint, {
- method: "POST",
- headers: {
- "Content-Type": "application/json",
- ...(token && { "Authorization": `Bearer ${token}` })
- },
- body: JSON.stringify(payload)
- });
+  const handleNext = async () => {
+    const isValid = await methods.trigger();
+    if (isValid) {
+      const currentValues = methods.getValues();
+      updateFormData(currentValues);
+      
+      if (currentStep < steps.length) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setStep(currentStep + 1);
+      } else {
+        await handleFinalSubmit({ ...formData, ...currentValues });
+      }
+    }
+  };
 
- if (!res.ok) throw new Error("Failed to create property");
- 
- clearWizard();
- router.push(isAdmin ? "/admin/properties" : "/");
- 
- } catch (error) {
- console.error(error);
- alert("Submission failed. Please check the console for details.");
- } finally {
- setIsSubmitting(false);
- }
- };
+  const handleBack = () => {
+    if (currentStep > 1) {
+      updateFormData(methods.getValues());
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setStep(currentStep - 1);
+    }
+  };
 
- const handleNext = async () => {
- const isValid = await methods.trigger();
- if (isValid) {
- const currentValues = methods.getValues();
- updateFormData(currentValues);
- 
- if (currentStep < steps.length) {
- setStep(currentStep + 1);
- } else {
- await handleFinalSubmit({ ...formData, ...currentValues });
- }
- }
- };
+  const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
 
- const handleBack = () => {
- if (currentStep > 1) {
- updateFormData(methods.getValues());
- setStep(currentStep - 1);
- }
- };
+  return (
+    <div className="!w-full !max-w-full !mx-auto !font-sans !tracking-tight">
+      
+      {/* Modern Stepper Header */}
+      <div className="!mb-10">
+        <div className="!bg-white !rounded-3xl !p-5 !border !border-gray-100 !shadow-[0_4px_20px_rgba(0,0,0,0.03)] !relative !overflow-hidden">
+          {/* Progress Bar Background */}
+          <div className="!absolute !bottom-0 !left-0 !w-full !h-1 !bg-gray-50">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercentage}%` }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="!h-full !bg-gray-900 !rounded-r-full"
+            />
+          </div>
 
- return (
- <div className="!w-full !max-w-6xl !mx-auto !space-y-8">
- {/* Stepper Header */}
- <div className="!bg-white !border !border-gray-100 !rounded-3xl !p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)!]">
- <div className="!flex !items-center !justify-between !gap-4 !overflow-x-auto !pb-2 !scrollbar-hide">
- {steps.map((step, idx) => (
- <div key={step.id} className="!flex !items-center !gap-3 !min-w-max">
- <div className={`!w-10 !h-10 !rounded-2xl !flex !items-center !justify-center !text-[14px] !font-bold !transition-all !duration-300 ${
- currentStep === step.id 
- ? '!bg-blue-600 !text-white !shadow-lg !shadow-blue-500/30' 
- : currentStep > step.id 
- ? '!bg-emerald-500 !text-white' 
- : '!bg-white !text-gray-400 !border !border-gray-200'
- }`}>
- {currentStep > step.id ? <Check size={18} /> : step.id}
- </div>
- <span className={`!text-[13px] !font-semibold ${currentStep === step.id ? '!text-gray-900' : '!text-gray-500'}`}>
- {step.title}
- </span>
- {idx < steps.length - 1 && (
- <div className={`!w-4 md:!w-8 !h-px !mx-1 md:!mx-2 ${currentStep > step.id ? '!bg-emerald-500' : '!bg-gray-200'}`} />
- )}
- </div>
- ))}
- </div>
- </div>
+          <div className="!flex !items-center !justify-between !gap-4 !overflow-x-auto !scrollbar-hide">
+            {steps.map((step) => {
+              const isCompleted = currentStep > step.id;
+              const isActive = currentStep === step.id;
+              const isUpcoming = currentStep < step.id;
 
- {/* Main Form Area */}
- <div className="!bg-white !border !border-gray-100 !rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)!] !overflow-hidden">
- <div className="!p-8 md:!p-10">
- <FormProvider {...methods}>
- <form onSubmit={(e) => e.preventDefault()}>
- <CurrentStepComponent 
- isAdmin={isAdmin}
- availableCities={availableCities} 
- availableSublocations={availableSublocations}
- amenities={amenities}
- />
- </form>
- </FormProvider>
- </div>
+              return (
+                <div key={step.id} className={`!flex !flex-col !items-center !min-w-[70px] !gap-2 !transition-all !duration-300 ${isActive ? '!opacity-100 !scale-105' : isCompleted ? '!opacity-70' : '!opacity-40 grayscale'}`}>
+                  <div className={`!w-9 !h-9 !rounded-full !flex !items-center !justify-center !text-sm !font-semibold !transition-all !duration-500 ${
+                    isActive ? '!bg-gray-900 !text-white !shadow-md !ring-4 !ring-gray-900/10' :
+                    isCompleted ? '!bg-gray-900 !text-white' : '!bg-gray-100 !text-gray-400 !border !border-gray-200'
+                  }`}>
+                    {isCompleted ? <Check size={16} strokeWidth={3} /> : step.id}
+                  </div>
+                  <span className={`!text-[12px] !font-medium ${isActive ? '!text-gray-900' : '!text-gray-500'}`}>
+                    {step.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
- {/* Navigation Footer */}
- <div className="!px-8 !py-6 !bg-white/50 !border-t !border-gray-200 !flex !items-center !justify-between">
- <button 
- type="button" 
- onClick={handleBack}
- disabled={currentStep === 1 || isSubmitting}
- className="!inline-flex !items-center !gap-2 !px-6 !py-3 !rounded-xl !text-[14px] !font-semibold !text-gray-700 !bg-white !border !border-gray-200 hover:!bg-gray-50 !transition-all disabled:!opacity-40 disabled:!cursor-not-allowed"
- >
- <ArrowLeft size={18} /> Back
- </button>
- 
- <button 
- type="button"
- onClick={handleNext}
- disabled={isSubmitting}
- className="!inline-flex !items-center !gap-2 !px-8 !py-3 !rounded-xl !text-[14px] !font-semibold !text-white !bg-blue-600 hover:!bg-blue-700 !shadow-lg !shadow-blue-500/25 hover:!shadow-blue-500/40 !transition-all disabled:!opacity-70"
- >
- {isSubmitting ? <Loader2 size={18} className="!animate-spin" /> : currentStep === steps.length ? <Save size={18} /> : null}
- {isSubmitting ? 'Processing...' : currentStep === steps.length ? 'Submit Property' : 'Next Step'}
- {!isSubmitting && currentStep !== steps.length && <ArrowRight size={18} />}
- </button>
- </div>
- </div>
- </div>
- );
+      {/* Main Form Container */}
+      <div className="!bg-white !rounded-[2rem] !border !border-gray-100 !shadow-[0_8px_30px_rgba(0,0,0,0.04)] !overflow-hidden">
+        
+        {/* Header Strip */}
+        <div className="!px-10 !py-8 !border-b !border-gray-50 !bg-gray-50/30">
+          <h2 className="!text-2xl !font-bold !text-gray-900">{currentStepConfig.title}</h2>
+          <p className="!text-sm !text-gray-500 !mt-1">Please provide the details below to continue.</p>
+        </div>
+
+        <div className="!p-10">
+          <FormProvider {...methods}>
+            <form onSubmit={(e) => e.preventDefault()}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CurrentStepComponent 
+                    isAdmin={isAdmin}
+                    availableCities={availableCities} 
+                    availableSublocations={availableSublocations}
+                    amenities={amenities}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </form>
+          </FormProvider>
+        </div>
+
+        {/* Action Bar */}
+        <div className="!px-10 !py-6 !bg-gray-50/50 !border-t !border-gray-100 !flex !items-center !justify-between">
+          <button 
+            type="button" 
+            onClick={handleBack}
+            disabled={currentStep === 1 || isSubmitting}
+            className="!inline-flex !items-center !gap-2 !px-6 !py-2.5 !rounded-xl !text-sm !font-medium !text-gray-700 !bg-white !border !border-gray-200 hover:!border-gray-300 hover:!bg-gray-50 !shadow-sm !transition-all active:!scale-[0.98] disabled:!opacity-40 disabled:!cursor-not-allowed"
+          >
+            <ArrowLeft size={16} /> Back
+          </button>
+          
+          <button 
+            type="button"
+            onClick={handleNext}
+            disabled={isSubmitting}
+            className="!inline-flex !items-center !gap-2 !px-8 !py-2.5 !rounded-xl !text-sm !font-medium !text-white !bg-gray-900 hover:!bg-black !shadow-md hover:!shadow-lg !transition-all active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
+          >
+            {isSubmitting ? <Loader2 size={16} className="!animate-spin" /> : currentStep === steps.length ? <Save size={16} /> : null}
+            {isSubmitting ? 'Processing...' : currentStep === steps.length ? 'Submit Property' : 'Continue'}
+            {!isSubmitting && currentStep !== steps.length && <ArrowRight size={16} />}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  );
 }

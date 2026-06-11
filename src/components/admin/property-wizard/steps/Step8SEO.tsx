@@ -6,12 +6,12 @@ export default function Step8SEO() {
 
  return (
  <div className="!space-y-6">
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-4 !pb-2 !border-b !border-gray-200/50">
+ <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">
  Search Engine Optimization (Admin Only)
  </h3>
  
  <div className="!grid !grid-cols-1 !gap-6">
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="seoSlug" className="!text-[14px] !font-semibold !text-gray-800">SEO URL Slug</label>
  <input 
  id="seoSlug"
@@ -22,7 +22,7 @@ export default function Step8SEO() {
  {errors.seoSlug && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.seoSlug.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="metaTitle" className="!text-[14px] !font-semibold !text-gray-800">Meta Title</label>
  <input 
  id="metaTitle"
@@ -33,7 +33,7 @@ export default function Step8SEO() {
  {errors.metaTitle && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.metaTitle.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="metaDescription" className="!text-[14px] !font-semibold !text-gray-800">Meta Description</label>
  <textarea 
  id="metaDescription"
@@ -45,7 +45,7 @@ export default function Step8SEO() {
  {errors.metaDescription && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.metaDescription.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="metaKeywords" className="!text-[14px] !font-semibold !text-gray-800">Meta Keywords</label>
  <input 
  id="metaKeywords"

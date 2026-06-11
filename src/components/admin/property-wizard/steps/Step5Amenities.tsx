@@ -45,13 +45,13 @@ export default function Step5Amenities({ amenities = [] }: { amenities: any[] })
  key={amenity.id}
  type="button"
  onClick={() => toggleAmenity(amenity.id)}
- className={`!flex !items-center !gap-3 !p-3 !rounded-2xl !border !text-[14px] !font-semibold !transition-all ${
+ className={`!flex !items-center !gap-3 !p-3.5 !rounded-xl !border !text-sm !font-medium !transition-all ${
  isSelected 
- ? '!bg-blue-600 !border-blue-600 !text-white !shadow-lg !shadow-blue-500/20' 
- : '!bg-white !border-gray-200 !text-gray-700 hover:!bg-gray-50 !shadow-sm'
+ ? '!bg-gray-900 !border-gray-900 !text-white !shadow-sm !ring-2 !ring-gray-900/10' 
+ : '!bg-white !border-gray-200 !text-gray-700 hover:!bg-gray-50 hover:!border-gray-300 !shadow-sm'
  }`}
  >
- <div className={`!w-5 !h-5 !rounded-md !border !flex !items-center !justify-center !transition-colors ${
+ <div className={`!w-5 !h-5 !rounded !flex !items-center !justify-center !transition-colors ${
  isSelected ? '!bg-blue-600 !border-blue-600' : '!bg-white !border-gray-300'
  }`}>
  {isSelected && <Check size={14} className="!text-white" />}

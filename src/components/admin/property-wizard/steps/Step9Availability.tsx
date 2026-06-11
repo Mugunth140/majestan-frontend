@@ -7,12 +7,12 @@ export default function Step9Availability() {
 
  return (
  <div className="!space-y-6">
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-4 !pb-2 !border-b !border-gray-200/50">
+ <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">
  Availability Details
  </h3>
  
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="availableFrom" className="!text-[14px] !font-semibold !text-gray-800">Available From</label>
  <input 
  id="availableFrom"
@@ -23,7 +23,7 @@ export default function Step9Availability() {
  {errors.availableFrom && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.availableFrom.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="availableUntil" className="!text-[14px] !font-semibold !text-gray-800">Available Until (Optional)</label>
  <input 
  id="availableUntil"
@@ -34,7 +34,7 @@ export default function Step9Availability() {
  {errors.availableUntil && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.availableUntil.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="availabilityStatus" className="!text-[14px] !font-semibold !text-gray-800">Availability Status</label>
  <div className="!relative">
  <select 
@@ -47,7 +47,7 @@ export default function Step9Availability() {
  <option value="Sold">Sold</option>
  <option value="Rented">Rented</option>
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={18} />
  </div>
  </div>

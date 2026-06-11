@@ -49,23 +49,23 @@ export default function Step6Media() {
  onDragOver={onDragOver}
  onDragLeave={onDragLeave}
  onDrop={onDrop}
- className={`!w-full !rounded-3xl !border-2 !border-dashed !flex !flex-col !items-center !justify-center !p-10 !text-center !transition-all !duration-200 ${
+ className={`!w-full !rounded-[2rem] !border-2 !border-dashed !flex !flex-col !items-center !justify-center !p-12 !text-center !transition-all !duration-200 !bg-gray-50/50 ${
  isDragging 
- ? '!border-blue-500 !bg-blue-50 ' 
- : '!border-gray-200 !bg-white hover:!bg-gray-50'
+ ? '!border-gray-900 !bg-gray-50 ' 
+ : '!border-gray-200 !bg-white hover:!bg-gray-50 hover:!border-gray-300'
  }`}
  >
- <div className="!w-16 !h-16 !rounded-full !bg-white !shadow-sm !flex !items-center !justify-center !mb-4">
+ <div className="!w-16 !h-16 !rounded-full !bg-white !shadow-sm !border !border-gray-100 !flex !items-center !justify-center !mb-5">
  <UploadCloud className={`!w-8 !h-8 ${isDragging ? '!text-blue-500' : '!text-gray-400'}`} />
  </div>
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-2">
+ <h3 className="!text-base !font-semibold !text-gray-900 !mb-2">
  Drag and drop your images here
  </h3>
- <p className="!text-[13px] !font-medium !text-gray-500 !mb-6">
+ <p className="!text-sm !text-gray-500 !mb-6">
  Support for JPG, PNG, WEBP. Max 5MB per file.
  </p>
  
- <label className="!inline-flex !items-center !gap-2 !px-6 !py-2.5 !bg-white !border !border-gray-200 hover:!border-gray-300 hover:!bg-gray-50 !rounded-xl !text-[14px] !font-semibold !text-gray-700 !shadow-sm !cursor-pointer !transition-all">
+ <label className="!inline-flex !items-center !justify-center !gap-2 !px-6 !py-2.5 !bg-white !border !border-gray-200 hover:!border-gray-300 hover:!bg-gray-50 !text-gray-700 !text-sm !font-medium !rounded-xl !shadow-sm !transition-all active:!scale-[0.98] !cursor-pointer">
  <ImagePlus size={18} />
  Browse Files
  <input 

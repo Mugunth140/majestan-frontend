@@ -7,12 +7,12 @@ export default function Step10Verification() {
 
  return (
  <div className="!space-y-6">
- <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-4 !pb-2 !border-b !border-gray-200/50">
+ <h3 className="!text-[16px] !font-bold !text-gray-900 !mb-5/50">
  Verification & Publishing (Admin Only)
  </h3>
  
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="verificationStatus" className="!text-[14px] !font-semibold !text-gray-800">Verification Status</label>
  <div className="!relative">
  <select 
@@ -24,14 +24,14 @@ export default function Step10Verification() {
  <option value="Verified">Verified</option>
  <option value="Rejected">Rejected</option>
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={18} />
  </div>
  </div>
  {errors.verificationStatus && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.verificationStatus.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="approvalStatus" className="!text-[14px] !font-semibold !text-gray-800">Approval Status</label>
  <div className="!relative">
  <select 
@@ -43,14 +43,14 @@ export default function Step10Verification() {
  <option value="Approved">Approved</option>
  <option value="Rejected">Rejected</option>
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={18} />
  </div>
  </div>
  {errors.approvalStatus && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.approvalStatus.message as string}</p>}
  </div>
 
- <div className="!space-y-2 md:!col-span-2 !flex !items-center !h-full !pt-4">
+ <div className="!space-y-1.5 md:!col-span-2 !flex !items-center !h-full !pt-4">
  <label className="!flex !items-center !cursor-pointer !group">
  <div className="!relative !flex !items-center !justify-center !w-5 !h-5 !mr-3">
  <input
@@ -63,7 +63,7 @@ export default function Step10Verification() {
  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
  </svg>
  </div>
- <span className="!text-[14px] !font-semibold !text-gray-800 group-hover:!text-gray-900">Publish immediately on website</span>
+ <span className="!text-sm !font-medium !text-gray-700 group-hover:!text-gray-900">Publish immediately on website</span>
  </label>
  </div>
  </div>

@@ -34,7 +34,7 @@ export default function Step3Location({ availableCities, availableSublocations }
  <div className="!space-y-6">
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
  
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="cityId" className="!text-[14px] !font-semibold !text-gray-800">City</label>
  <div className="!relative">
  <select 
@@ -47,14 +47,14 @@ export default function Step3Location({ availableCities, availableSublocations }
  <option key={city.id} value={city.id}>{city.city_name}</option>
  ))}
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={18} />
  </div>
  </div>
  {errors.cityId && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.cityId.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="sublocationId" className="!text-[14px] !font-semibold !text-gray-800">Sublocation (Area)</label>
  <div className="!relative">
  <select 
@@ -68,14 +68,14 @@ export default function Step3Location({ availableCities, availableSublocations }
  <option key={sub.id} value={sub.id}>{sub.locality_name}</option>
  ))}
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={18} />
  </div>
  </div>
  {errors.sublocationId && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.sublocationId.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="state" className="!text-[14px] !font-semibold !text-gray-800">State</label>
  <input 
  id="state"
@@ -85,7 +85,7 @@ export default function Step3Location({ availableCities, availableSublocations }
  />
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="country" className="!text-[14px] !font-semibold !text-gray-800">Country</label>
  <input 
  id="country"
@@ -95,7 +95,7 @@ export default function Step3Location({ availableCities, availableSublocations }
  />
  </div>
 
- <div className="!space-y-2 md:!col-span-2">
+ <div className="!space-y-1.5 md:!col-span-2">
  <label htmlFor="addressLine1" className="!text-[14px] !font-semibold !text-gray-800">Address Line 1</label>
  <input 
  id="addressLine1"
@@ -105,7 +105,7 @@ export default function Step3Location({ availableCities, availableSublocations }
  />
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="addressLine2" className="!text-[14px] !font-semibold !text-gray-800">Address Line 2 (Optional)</label>
  <input 
  id="addressLine2"
@@ -115,7 +115,7 @@ export default function Step3Location({ availableCities, availableSublocations }
  />
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="pincode" className="!text-[14px] !font-semibold !text-gray-800">Pincode</label>
  <input 
  id="pincode"

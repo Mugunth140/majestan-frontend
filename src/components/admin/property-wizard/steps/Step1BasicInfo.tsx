@@ -8,7 +8,7 @@ export default function Step1BasicInfo() {
  return (
  <div className="!space-y-6">
  <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
- <div className="!space-y-2 md:!col-span-2">
+ <div className="!space-y-1.5 md:!col-span-2">
  <label htmlFor="title" className="!text-[14px] !font-semibold !text-gray-800">Property Title</label>
  <input 
  id="title"
@@ -19,7 +19,7 @@ export default function Step1BasicInfo() {
  {errors.title && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.title.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="propertyType" className="!text-[14px] !font-semibold !text-gray-800">Property Type</label>
  <div className="!relative">
  <select 
@@ -36,14 +36,14 @@ export default function Step1BasicInfo() {
  <option value="industrial">Industrial Space</option>
  <option value="independent_portion">Independent House</option>
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={18} />
  </div>
  </div>
  {errors.propertyType && <p className="!text-rose-500 !text-xs !font-medium !mt-1">{errors.propertyType.message as string}</p>}
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="listingType" className="!text-[14px] !font-semibold !text-gray-800">Listing Type</label>
  <div className="!relative">
  <select 
@@ -54,7 +54,7 @@ export default function Step1BasicInfo() {
  <option value="Sell">Sell</option>
  <option value="Rent">Rent</option>
  </select>
- <div className="!absolute !right-3 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-500">
+ <div className="!absolute !right-4 !top-1/2 !-translate-y-1/2 !pointer-events-none !text-gray-400">
  <ChevronDown size={18} />
  </div>
  </div>
@@ -62,7 +62,7 @@ export default function Step1BasicInfo() {
  </div>
  </div>
 
- <div className="!space-y-2">
+ <div className="!space-y-1.5">
  <label htmlFor="description" className="!text-[14px] !font-semibold !text-gray-800">Description</label>
  <textarea 
  id="description"

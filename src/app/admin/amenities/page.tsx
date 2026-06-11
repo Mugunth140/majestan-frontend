@@ -13,6 +13,8 @@ import {
   Plus
 } from "lucide-react";
 import Link from "next/link";
+import Swal from "sweetalert2";
+import { toast } from "@/components/ui/toast-store";
 
 export default function AdminAmenitiesPage() {
   const [amenities, setAmenities] = useState<any[]>([]);
@@ -50,8 +52,42 @@ export default function AdminAmenitiesPage() {
     fetchAmenities();
   };
 
-  const getStatusBadge = (status: number) => {
-    if (status === 1) {
+  const handleDelete = async (item: any) => {
+    const result = await Swal.fire({
+      title: "Delete amenity?",
+      text: `"${item.name}" will be permanently deleted.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#9ca3af",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const token = window.localStorage.getItem("majestan_access_token");
+      const res = await fetch(`${API_BASE_URL}/admin/amenities/${item.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        toast.success("Amenity deleted successfully");
+        fetchAmenities();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.message || "Failed to delete amenity");
+      }
+    } catch {
+      toast.error("Network error — could not delete amenity");
+    }
+  };
+
+  const getStatusBadge = (isActive: number | boolean) => {
+    // Handle both boolean (true/false) and integer (1/0) representations
+    const active = isActive === true || isActive === 1;
+    if (active) {
       return <span className="!inline-flex !items-center !gap-1 !px-2.5 !py-1 !rounded-full !text-[12px] !font-medium !bg-emerald-50 !text-emerald-600"><CheckCircle size={12} /> Active</span>;
     }
     return <span className="!inline-flex !items-center !gap-1 !px-2.5 !py-1 !rounded-full !text-[12px] !font-medium !bg-gray-50 dark:!bg-[#1c1d27] !text-gray-600 dark:!text-gray-300"><XCircle size={12} /> Inactive</span>;
@@ -135,14 +171,14 @@ export default function AdminAmenitiesPage() {
                       <div className="!text-gray-800 dark:!text-white !capitalize">{amenity.category || 'General'}</div>
                     </td>
                     <td className="!px-6 !py-4">
-                      {getStatusBadge(amenity.status)}
+                      {getStatusBadge(amenity.isActive !== undefined ? amenity.isActive : amenity.is_active)}
                     </td>
                     <td className="!px-6 !py-4 !text-right">
                       <div className="!flex !items-center !justify-end !gap-2">
-                        <button className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 !rounded-lg !transition-colors" title="Edit Amenity">
+                        <Link href={`/admin/amenities/edit/${amenity.id}`} className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 dark:hover:!bg-emerald-950/30 !rounded-lg !transition-colors" title="Edit Amenity">
                           <Edit size={16} />
-                        </button>
-                        <button className="!p-2 !text-gray-400 hover:!text-rose-600 hover:!bg-rose-50 !rounded-lg !transition-colors" title="Delete Amenity">
+                        </Link>
+                        <button onClick={() => handleDelete(amenity)} className="!p-2 !text-gray-400 hover:!text-rose-600 hover:!bg-rose-50 dark:hover:!bg-rose-950/30 !rounded-lg !transition-colors" title="Delete Amenity">
                           <Trash2 size={16} />
                         </button>
                       </div>

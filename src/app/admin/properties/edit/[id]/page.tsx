@@ -159,7 +159,9 @@ export default function EditPropertyPage() {
         if (p.propertyAmenities) {
           setSelectedAmenities(p.propertyAmenities.map((a: any) => a.amenityId));
         }
-        if (p.propertyFiles) {
+        if (p.propertyImages && p.propertyImages.length > 0) {
+          setExistingImages(p.propertyImages.map((f: any) => f.imageUrl || f.image_url || "").filter(Boolean));
+        } else if (p.propertyFiles) {
           setExistingImages(p.propertyFiles.map((f: any) => f.fileUrl || f.file_url || "").filter(Boolean));
         }
       }

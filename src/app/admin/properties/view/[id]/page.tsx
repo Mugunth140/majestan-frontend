@@ -98,10 +98,13 @@ export default function ViewPropertyPage() {
   const locations = property.propertyLocations || [];
   const amenities = property.propertyAmenities || [];
   const files = property.propertyFiles || [];
+  const images = [
+    // prefer dedicated propertyImages (imageUrl field)
+    ...(property.propertyImages || []).map((i: any) => i.imageUrl || i.image_url || ""),
+    // fallback: propertyFiles that have a fileUrl (legacy)
+    ...files.filter((f: any) => f.fileUrl || f.file_url).map((f: any) => f.fileUrl || f.file_url || ""),
+  ].filter(Boolean);
   const faqs = property.faqs || [];
-
-  // Build image URLs — fileUrl may be a full URL or R2 key
-  const images = files.filter((f: any) => f.fileType === "IMAGE" || !f.fileType).map((f: any) => f.fileUrl || f.file_url || "");
 
   const statusBadgeMap: Record<string, React.ReactElement> = {
     available: <span className="!inline-flex !items-center !gap-1.5 !px-3 !py-1 !rounded-full !text-[13px] !font-medium !bg-emerald-50 !text-emerald-600 !border !border-emerald-100"><CheckCircle size={13} /> Available</span>,

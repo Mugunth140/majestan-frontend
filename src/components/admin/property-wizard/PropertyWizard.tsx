@@ -199,7 +199,19 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
 
   const handleNext = async () => {
     const isValid = await methods.trigger();
-    if (!isValid) console.log("Validation Errors:", methods.formState.errors);
+    if (!isValid) {
+      console.log("Validation Errors:", methods.formState.errors);
+      
+      // Get the first error message to show to the user
+      const errors = methods.formState.errors;
+      const firstErrorKey = Object.keys(errors)[0];
+      if (firstErrorKey) {
+        const errorMsg = (errors as any)[firstErrorKey]?.message;
+        toast.error(`Please fix the errors before continuing. ${firstErrorKey}: ${errorMsg}`);
+      }
+      return;
+    }
+    
     if (isValid) {
       let currentValues = methods.getValues();
       console.log("Validation passed", currentValues);

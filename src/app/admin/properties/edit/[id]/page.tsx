@@ -75,8 +75,8 @@ export default function EditPropertyPage() {
             title: p.title || "",
             description: p.description || "",
             propertyType: p.propertyType || propertyType,
-            listingType: p.listingType || "Sell",
-            status: p.status || "available",
+            listingType: p.listingType ? (p.listingType.charAt(0).toUpperCase() + p.listingType.slice(1).toLowerCase()) : "Sell",
+            status: p.status ? p.status.toUpperCase() : "AVAILABLE",
             builderName: p.builderName || "",
 
             price: p.price ? String(p.price) : "",

@@ -443,6 +443,7 @@ const blogCards: BlogCard[] = [
   },
 ];
 
+// Extracted to top level to avoid React Compiler errors
 function SwiperNav({
   prevClass,
   nextClass,
@@ -464,7 +465,7 @@ function SwiperNav({
             strokeLinejoin="round"
           />
           <path
-            d="M12 5L5 12L12 19"
+            d="M12 19L5 12L12 5"
             stroke="#5C5E61"
             strokeWidth="2"
             strokeLinecap="round"
@@ -472,7 +473,7 @@ function SwiperNav({
           />
         </svg>
       </div>
-      <div className={`sw-pagination ${paginationClass} text-center`} />
+      <div className={`swiper-pagination sw-pagination ${paginationClass}`} />
       <div className={`swiper-button-next sw-button ${nextClass}`}>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path
@@ -537,8 +538,7 @@ function FeaturedProjectCard({ card }: { card: FeaturedCard }): React.JSX.Elemen
   );
 }
 
-
-  
+export default function IndexView({ properties = [], loading = false }: IndexViewProps) {
   
   const [activeWordIndex, setActiveWordIndex] = useState<number>(0);
   const [listingType, setListingType] = useState<string>("");

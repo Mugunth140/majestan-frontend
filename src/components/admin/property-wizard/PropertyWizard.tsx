@@ -8,6 +8,7 @@ import {
   seoSchema, availabilitySchema, verificationSchema 
 } from '@/lib/validations/property-wizard.schema';
 import { z } from 'zod';
+import { toast } from '@/components/ui/toast-store';
 import { ArrowLeft, ArrowRight, Save, Loader2, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/api';
@@ -31,6 +32,7 @@ interface PropertyWizardProps {
   availableCities: AdminCity[];
   availableSublocations: AdminSublocation[];
   amenities: any[];
+  editPropertyId?: number;
 }
 
 const locationSchema = z.object({
@@ -43,7 +45,7 @@ const locationSchema = z.object({
   pincode: z.string().min(6, 'Valid pincode required'),
 });
 
-export default function PropertyWizard({ isAdmin, availableCities, availableSublocations, amenities }: PropertyWizardProps) {
+export default function PropertyWizard({ isAdmin, availableCities, availableSublocations, amenities, editPropertyId }: PropertyWizardProps) {
   const { currentStep, setStep, formData, updateFormData, clearWizard } = usePropertyWizardStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -75,8 +77,8 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     methods.reset({ ...formData, ...methods.getValues() });
   }, [currentStep, formData, methods]);
 
-  const uploadImagesToR2 = async (images: File[]): Promise<string[]> => {
-    const uploadedUrls: string[] = [];
+  const uploadImagesToR2 = async (images: File[]): Promise<{url: string, key: string}[]> => {
+    const uploadedUrls: {url: string, key: string}[] = [];
     const token = window.localStorage.getItem("majestan_access_token") || window.localStorage.getItem("majestan_user_auth");
 
     for (const file of images) {
@@ -96,7 +98,9 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           body: file,
         });
         if (!uploadRes.ok) throw new Error("Failed to upload " + file.name + " to R2");
-        uploadedUrls.push(key);
+        
+        // We use createObjectURL for local immediate preview, while storing the real key for backend.
+        uploadedUrls.push({ url: URL.createObjectURL(file), key });
       } catch (err) {
         console.error("Upload error:", err);
         throw new Error("R2 Upload Error: Check your Cloudflare R2 CORS settings. Make sure your bucket allows PUT requests from this origin.");
@@ -108,8 +112,13 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
   const handleFinalSubmit = async (finalData: any) => {
     setIsSubmitting(true);
     try {
+      // Just in case any straggler files made it through (should normally be handled by Step 6 handleNext)
       const uploadedImageKeys = finalData.images?.length > 0 ? await uploadImagesToR2(finalData.images) : [];
+      const stragglerKeys = uploadedImageKeys.map(img => img.key);
       
+      const existingKeys = (finalData.existingImageUrls || []).map((img: { url: string, key: string }) => img.key);
+      const allImageKeys = [...existingKeys, ...stragglerKeys];
+
       // Derive status: backend expects lowercase enum values
       const rawStatus = finalData.publishImmediately ? 'available' : (finalData.status?.toLowerCase() || 'unavailable');
 
@@ -120,6 +129,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         title: finalData.title,
         description: finalData.description,
         propertyType: finalData.propertyType,
+        slug: finalData.seoSlug || undefined,
         status: rawStatus,
         price: String(finalData.price),
         city: selectedCity?.city_name || finalData.city || '',
@@ -142,33 +152,46 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           totalFloors: Number(finalData.totalFloors) || undefined,
         },
         amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
-        files: uploadedImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),
+        files: allImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),
       };
+      
+      console.log('Sending Property Payload:', payload);
 
       const token = window.localStorage.getItem(isAdmin ? "majestan_access_token" : "majestan_user_auth");
-      const endpoint = isAdmin ? `${API_BASE_URL}/admin/properties/${finalData.propertyType}` : `${API_BASE_URL}/properties/submit/${finalData.propertyType}`;
+      
+      let endpoint = '';
+      let method = '';
+      
+      if (editPropertyId) {
+        endpoint = `${API_BASE_URL}/admin/properties/${finalData.propertyType}/${editPropertyId}`;
+        method = 'PATCH';
+      } else {
+        endpoint = isAdmin ? `${API_BASE_URL}/admin/properties/${finalData.propertyType}` : `${API_BASE_URL}/properties/submit/${finalData.propertyType}`;
+        method = 'POST';
+      }
 
-      const res = await fetch(endpoint, {
-        method: "POST",
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           "Content-Type": "application/json",
-          ...(token && { "Authorization": `Bearer ${token}` })
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
+      if (!response.ok) {
+        const errorData = await response.json();
         console.error("Backend validation error:", errorData);
-        throw new Error(`Failed to create property: ${JSON.stringify(errorData.message || errorData)}`);
+        throw new Error(`Failed to save property: ${JSON.stringify(errorData.message || errorData)}`);
       }
       
       clearWizard();
+      toast.success(`Property ${editPropertyId ? 'updated' : 'created'} successfully!`);
       router.push(isAdmin ? "/admin/properties" : "/");
       
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Submission failed due to an upload error. Check R2 CORS settings.");
+      toast.error(error instanceof Error ? error.message : "Submission failed.");
     } finally {
       setIsSubmitting(false);
     }
@@ -178,8 +201,36 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     const isValid = await methods.trigger();
     if (!isValid) console.log("Validation Errors:", methods.formState.errors);
     if (isValid) {
-      const currentValues = methods.getValues();
+      let currentValues = methods.getValues();
       console.log("Validation passed", currentValues);
+
+      // Immediately upload images after Step 6 to avoid losing File objects in localStorage
+      if (currentStep === 6) {
+        const filesToUpload = currentValues.images?.filter((f: any) => f instanceof File || f instanceof Blob) || [];
+        if (filesToUpload.length > 0) {
+          setIsSubmitting(true);
+          try {
+            const uploadedImages = await uploadImagesToR2(filesToUpload);
+            
+            const existing = currentValues.existingImageUrls || [];
+            const newExisting = [...existing, ...uploadedImages];
+            
+            // Move from transient files to persisted existingImageUrls
+            methods.setValue('existingImageUrls', newExisting);
+            methods.setValue('images', []);
+            
+            // Refresh currentValues so updateFormData stores the strings, not the Files
+            currentValues = methods.getValues();
+          } catch (err) {
+            console.error(err);
+            toast.error(err instanceof Error ? err.message : "Failed to upload images.");
+            setIsSubmitting(false);
+            return; // Stop here, do not advance step!
+          } finally {
+            setIsSubmitting(false);
+          }
+        }
+      }
 
       updateFormData(currentValues);
       
@@ -291,7 +342,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
             className="!inline-flex !items-center !gap-2 !px-8 !py-2.5 !rounded-xl !text-sm !font-medium !text-white !bg-gray-900 hover:!bg-black dark:!bg-blue-600 dark:hover:!bg-blue-700 !shadow-md hover:!shadow-lg !transition-all active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
           >
             {isSubmitting ? <Loader2 size={16} className="!animate-spin" /> : currentStep === steps.length ? <Save size={16} /> : null}
-            {isSubmitting ? 'Processing...' : currentStep === steps.length ? 'Submit Property' : 'Continue'}
+            {isSubmitting ? 'Processing...' : currentStep === steps.length ? (editPropertyId ? 'Update Property' : 'Submit Property') : 'Continue'}
             {!isSubmitting && currentStep !== steps.length && <ArrowRight size={16} />}
           </button>
         </div>

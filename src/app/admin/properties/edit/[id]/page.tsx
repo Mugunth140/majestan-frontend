@@ -89,6 +89,8 @@ export default function EditPropertyPage() {
             maintenanceCharges: p.maintenanceCharges ? formatToShortIndianCurrency(p.maintenanceCharges) : "",
             securityDeposit: p.securityDeposit ? formatToShortIndianCurrency(p.securityDeposit) : "",
             bookingAmount: p.bookingAmount ? formatToShortIndianCurrency(p.bookingAmount) : "",
+            brokerageType: p.brokerageType || "no_brokerage",
+            brokerageValue: p.brokerageValue || "",
 
             cityId: subloc.cityId ? String(subloc.cityId) : "",
             sublocationId: loc.locationId ? String(loc.locationId) : "",

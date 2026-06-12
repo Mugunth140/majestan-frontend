@@ -75,8 +75,8 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
   });
 
   useEffect(() => {
-    methods.reset({ ...formData, ...methods.getValues() });
-  }, [currentStep, formData, methods]);
+    methods.reset({ ...formData });
+  }, [currentStep]);
 
   const uploadImagesToR2 = async (images: File[]): Promise<{url: string, key: string}[]> => {
     const uploadedUrls: {url: string, key: string}[] = [];
@@ -160,6 +160,8 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         maintenanceCharges: safeCurrency(finalData.maintenanceCharges),
         securityDeposit: safeCurrency(finalData.securityDeposit),
         bookingAmount: safeCurrency(finalData.bookingAmount),
+        brokerageType: finalData.brokerageType || 'no_brokerage',
+        brokerageValue: finalData.brokerageValue || undefined,
         availableFrom: finalData.availableFrom || undefined,
         availableUntil: finalData.availableUntil || undefined,
         verificationStatus: finalData.verificationStatus || undefined,

@@ -282,7 +282,11 @@ function PropertySidebar({ property }: { property: SeoProperty }) {
         
         <div className="mt-6! pt-6! border-t! border-gray-100! flex! items-center! justify-center! gap-2! text-sm! font-normal! text-gray-500!">
           <ShieldCheck className="w-4! h-4! text-emerald-500!" />
-          No brokerage for this property
+          {(!property.brokerageType || property.brokerageType === 'no_brokerage')
+            ? 'No brokerage for this property'
+            : property.brokerageType === 'percentage'
+            ? `Brokerage: ${property.brokerageValue}%`
+            : `Brokerage: ${property.brokerageValue} Days Rent`}
         </div>
       </div>
 

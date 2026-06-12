@@ -42,14 +42,24 @@ function getAmenityCategories(property: SeoProperty): AmenityCategory[] {
   const hasParking = !!(property.details?.parking && property.details.parking > 0);
   const isFurnished = property.details?.furnished === true;
 
+  // Extract all amenity names passed from the DB relation
+  const backendAmenities = ((property as any).propertyAmenities || []).map(
+    (pa: any) => pa.amenity?.name || ""
+  ).filter(Boolean);
+
+  const checkAvailable = (name: string, fallback: boolean = false) => {
+    if (backendAmenities.length === 0) return fallback; // Safety fallback for older listings
+    return backendAmenities.includes(name);
+  };
+
   return [
     {
       title: "Essentials",
       description: "Core infrastructure & safety features",
       amenities: [
-        { name: "24/7 Security", icon: Shield, available: true },
-        { name: "Power Backup", icon: Zap, available: true },
-        { name: "Water Supply", icon: Droplets, available: true },
+        { name: "24/7 Security", icon: Shield, available: checkAvailable("24/7 Security", true) },
+        { name: "Power Backup", icon: Zap, available: checkAvailable("Power Backup", true) },
+        { name: "Water Supply", icon: Droplets, available: checkAvailable("Water Supply", true) },
         { name: "Reserved Parking", icon: Car, available: hasParking },
         { name: "Furnished", icon: Armchair, available: isFurnished },
       ],
@@ -58,33 +68,33 @@ function getAmenityCategories(property: SeoProperty): AmenityCategory[] {
       title: "Lifestyle",
       description: "Leisure & recreation amenities",
       amenities: [
-        { name: "Swimming Pool", icon: Waves, available: false },
-        { name: "Gymnasium", icon: Dumbbell, available: false },
-        { name: "Clubhouse", icon: Home, available: false },
-        { name: "Garden / Park", icon: TreePine, available: false },
-        { name: "Children's Play Area", icon: Baby, available: false },
-        { name: "Party Hall", icon: PartyPopper, available: false },
+        { name: "Swimming Pool", icon: Waves, available: checkAvailable("Swimming Pool") },
+        { name: "Gymnasium", icon: Dumbbell, available: checkAvailable("Gymnasium") },
+        { name: "Clubhouse", icon: Home, available: checkAvailable("Clubhouse") },
+        { name: "Garden / Park", icon: TreePine, available: checkAvailable("Garden / Park") },
+        { name: "Children's Play Area", icon: Baby, available: checkAvailable("Children's Play Area") },
+        { name: "Party Hall", icon: PartyPopper, available: checkAvailable("Party Hall") },
       ],
     },
     {
       title: "Convenience",
       description: "Everyday comfort & access",
       amenities: [
-        { name: "Lift", icon: ArrowUpFromLine, available: false },
-        { name: "Intercom", icon: Intercom, available: false },
-        { name: "Piped Gas", icon: Flame, available: false },
-        { name: "Shopping Center", icon: ShoppingCart, available: false },
-        { name: "ATM", icon: Landmark, available: false },
+        { name: "Lift", icon: ArrowUpFromLine, available: checkAvailable("Lift") },
+        { name: "Intercom", icon: Intercom, available: checkAvailable("Intercom") },
+        { name: "Piped Gas", icon: Flame, available: checkAvailable("Piped Gas") },
+        { name: "Shopping Center", icon: ShoppingCart, available: checkAvailable("Shopping Center") },
+        { name: "ATM", icon: Landmark, available: checkAvailable("ATM") },
       ],
     },
     {
       title: "Sports",
       description: "Fitness & outdoor activities",
       amenities: [
-        { name: "Badminton", icon: Volleyball, available: false },
-        { name: "Tennis", icon: Trophy, available: false },
-        { name: "Basketball Court", icon: CircleDot, available: false },
-        { name: "Jogging Track", icon: Footprints, available: false },
+        { name: "Badminton", icon: Volleyball, available: checkAvailable("Badminton") },
+        { name: "Tennis", icon: Trophy, available: checkAvailable("Tennis") },
+        { name: "Basketball Court", icon: CircleDot, available: checkAvailable("Basketball Court") },
+        { name: "Jogging Track", icon: Footprints, available: checkAvailable("Jogging Track") },
       ],
     },
   ];

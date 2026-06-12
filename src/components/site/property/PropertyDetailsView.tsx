@@ -458,8 +458,8 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                   {!property.brokerageType || property.brokerageType === 'no_brokerage' 
                     ? 'No brokerage for this property' 
                     : property.brokerageType === 'percentage' 
-                      ? `Brokerage: ${property.brokerageValue}%` 
-                      : `Brokerage: ${property.brokerageValue} Days Rent`}
+                      ? `Brokerage: Only ${property.brokerageValue}% on Sale Value` 
+                      : `Brokerage: Just ${property.brokerageValue} Days Rent`}
                 </div>
               </div>
 

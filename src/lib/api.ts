@@ -245,10 +245,10 @@ export async function searchProperties(
       // Skip if already mapped
       if (item.propertyname !== undefined && item.propertyname === item.title) return item;
       
-      const images = item.__propertyImages__ || item.propertyImages || item.images || [];
+      const images = item.propertyImages || item.images || item.__propertyImages__ || [];
       const primaryImage = images.find((i: any) => i.isPrimary) || images[0];
-      const details = item.__propertyDetails__ || item.propertyDetails || item.details || {};
-      const locations = item.__propertyLocations__ || item.propertyLocations || item.locations || [];
+      const details = item.propertyDetails || item.details || item.__propertyDetails__ || {};
+      const locations = item.propertyLocations || item.locations || item.__propertyLocations__ || [];
       
       return {
         ...item,

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 export function ModernLoader({ text = "Loading Data..." }: { text?: string }) {
   return (
     <div className="!flex !flex-col !items-center !justify-center !min-h-[60vh] !w-full !gap-6">
-      <div className="!relative !flex !items-center !justify-center !w-20 !h-20">
+      <div className="!relative !flex !items-center !justify-center !w-10 !h-10">
         {/* Outer pulsing ring */}
         <motion.div
           className="!absolute !inset-0 !rounded-full !border-2 !border-blue-500/30"
@@ -20,7 +20,7 @@ export function ModernLoader({ text = "Loading Data..." }: { text?: string }) {
         />
         
         {/* Center dot */}
-        <div className="!w-3 !h-3 !bg-blue-600 !rounded-full !shadow-[0_0_10px_rgba(37,99,235,0.5)]" />
+        {/* <div className="!w-3 !h-3 !bg-blue-600 !rounded-full !shadow-[0_0_10px_rgba(37,99,235,0.5)]" /> */}
       </div>
       
       <motion.div 

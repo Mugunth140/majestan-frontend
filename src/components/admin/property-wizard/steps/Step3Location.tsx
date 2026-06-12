@@ -35,7 +35,10 @@ export default function Step3Location({ availableCities, availableSublocations }
         <FloatingSelect 
           id="cityId"
           label="City"
-          options={availableCities.map(c => ({ value: c.id, label: c.city_name }))}
+          options={[
+            { value: "", label: "Select City" },
+            ...availableCities.map(c => ({ value: c.id, label: c.city_name }))
+          ]}
           registerProps={register('cityId')}
           error={errors.cityId?.message as string}
         />
@@ -43,7 +46,10 @@ export default function Step3Location({ availableCities, availableSublocations }
         <FloatingSelect 
           id="sublocationId"
           label={cityId ? "Sublocation (Area)" : "Select City First"}
-          options={filteredSublocations.map(s => ({ value: s.id, label: s.locality_name }))}
+          options={[
+            { value: "", label: cityId ? "Select Sublocation" : "Select City First" },
+            ...filteredSublocations.map(s => ({ value: s.id, label: s.locality_name }))
+          ]}
           registerProps={register('sublocationId')}
           disabled={!cityId}
           error={errors.sublocationId?.message as string}

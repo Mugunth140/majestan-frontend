@@ -41,7 +41,21 @@ function getDetailPath(item: PropertySearchItem & { canonicalSlug?: string }): s
   return `/${item.propertyType}-${item.id}-${suffix}${item.id}`;
 }
 
-function getPhotoUrl(item: PropertySearchItem): string {
+function getPhotoUrl(item: any): string {
+  // Support new unified schema
+  if (item.images && item.images.length > 0) {
+    // Sort by isPrimary first, then return the first one
+    const primary = item.images.find((img: any) => img.isPrimary);
+    if (primary && primary.imageUrl) return primary.imageUrl;
+    if (item.images[0].imageUrl) return item.images[0].imageUrl;
+  }
+  if (item.propertyImages && item.propertyImages.length > 0) {
+    const primary = item.propertyImages.find((img: any) => img.isPrimary);
+    if (primary && primary.imageUrl) return primary.imageUrl;
+    if (item.propertyImages[0].imageUrl) return item.propertyImages[0].imageUrl;
+  }
+
+  // Support legacy
   const photo = item.photo1;
   if (!photo) return "/assets/images/home/apartment-buy.png";
   if (photo.startsWith("http")) return photo;

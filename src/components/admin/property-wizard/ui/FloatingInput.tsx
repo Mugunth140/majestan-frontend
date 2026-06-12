@@ -25,7 +25,7 @@ export function FloatingInput({ label, error, registerProps, className = "", ...
   );
 }
 
-export function FloatingSelect({ label, error, registerProps, options, disabled, className = "", ...props }: any) {
+export function FloatingSelect({ label, error, registerProps, options, disabled, className = "", placeholder, ...props }: any) {
   return (
     <div className="!relative !w-full !mb-2">
       <select
@@ -34,7 +34,7 @@ export function FloatingSelect({ label, error, registerProps, options, disabled,
         disabled={disabled}
         className={`!block !px-4 !pb-2.5 !pt-5 !w-full !text-[14px] !text-gray-900 !bg-white dark:!bg-[#171821] !rounded-xl !border ${error ? '!border-rose-500 focus:!border-rose-500' : '!border-gray-200 dark:!border-[#262730] focus:!border-blue-600 dark:focus:!border-blue-500'} !appearance-none dark:!text-white focus:!outline-none focus:!ring-0 peer !transition-all ${disabled ? '!opacity-50 !cursor-not-allowed' : '!cursor-pointer'} ${className}`}
       >
-        <option value="" disabled hidden></option>
+        <option value="" disabled hidden>{placeholder || "Select an option"}</option>
         {options.map((opt: any) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}

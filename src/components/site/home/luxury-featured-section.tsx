@@ -157,87 +157,89 @@ function LuxuryCard({ property, isActive, imgSrc, onContact }: { property: Featu
   return (
     <div 
       className={`
-        relative! w-full! max-w-[340px]! h-[480px]! rounded-[20px]! overflow-hidden! cursor-pointer!
+        relative! w-full! max-w-100! h-140! rounded-4xl! overflow-hidden! cursor-pointer!
         bg-white! border! border-gray-100! 
-        shadow-[0_15px_40px_-10px_rgba(0,0,0,0.1)]!
-        transition-all! duration-300! ease-out! group! mx-auto! hover:scale-[1.02]! hover:-translate-y-2! hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)]!
+        shadow-[0_8px_30px_rgba(0,0,0,0.06)]!
+        transition-all! duration-300! ease-out! group! mx-auto! hover:-translate-y-2! hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)]!
       `}
     >
-      {/* Image Area (top 55%) */}
-      <div className="relative! h-[55%]! w-full! overflow-hidden!">
+      <div className="relative! h-[50%]! w-full! overflow-hidden! shrink-0!">
+        <span className=" absolute! left-4! top-4! inline-flex! items-center! rounded-full! bg-gray-100! px-3! py-1! text-[11px]! font-semibold! tracking-wide! text-gray-800!">
+         For Sale
+        </span>
         <img 
           src={imgSrc} 
           alt={property.propertyName || "Property"} 
           className="w-full! h-full! object-cover! transition-transform! duration-700! group-hover:scale-105!"
         />
-        
-        {/* Liquid Glass Pill for Status */}
-        <div className="absolute! top-4! left-4! z-10!">
-          <span className="inline-flex! items-center! gap-1.5! rounded-full! bg-white/60! backdrop-blur-md! border! border-white/20! px-3! py-1! text-[10px]! font-bold! uppercase! tracking-wide! text-gray-900! shadow-sm!">
-            {/* <span className={`w-[6px]! h-[6px]! rounded-full! ${isSale ? 'bg-[#27427f]!' : 'bg-blue-500!'}`}></span> */}
-            {badgeLabel}
-          </span>
-        </div>
-
-        {/* Liquid Glass Price Pill */}
-        <div className="absolute! top-4! right-4! z-10!">
-          <span className="inline-flex! rounded-full! bg-white/60! backdrop-blur-md! border! border-white/20! px-3! py-1.5! text-[13px]! font-semibold! text-gray-900! shadow-sm!">
-            {formatPrice(property)}
-          </span>
-        </div>
       </div>
 
-      {/* Card Body (bottom 45%) */}
-      <div className="absolute! bottom-0! w-full! h-[45%]! p-5! flex! flex-col! justify-between! bg-white!">
+      {/* Card Body (bottom 55%) */}
+      <div className="absolute! bottom-0! w-full! h-[50%]! p-5! md:p-6! flex! flex-col! justify-between! bg-white!">
+        <span className="bg-gray-500/10! absolute! right-2! top-0! px-1! rounded-b-md inline-flex! text-[#27427f]! text-lg! font-semibold! tracking-relaxed!">
+              {formatPrice(property)}
+            </span>
         <div>
-          <p className="flex! items-center! gap-1! text-[12px]! font-normal! capitalize! tracking-[0.05em]! text-gray-400!">
-            <MapPin size={12} className="text-[#27427f]!" strokeWidth={2.5} />
-            {property.sublocation ? `${property.sublocation}, Coimbatore` : "Coimbatore"}
+          {/* Location */}
+          <p className="flex! items-center! gap-1.5! text-[13px]! font-medium! tracking-wide! text-gray-400! mb-1.5!">
+            <MapPin size={14} className="text-[#27427f]!" strokeWidth={2.5} />
+            <span className="truncate!">{property.sublocation ? `${property.sublocation}, Coimbatore` : "Coimbatore"}</span>
           </p>
-          <h3 className="text-[#27427f]! font-['Lexend',sans-serif]! text-[20px]! font-medium! leading-[1.2]! mt-1.5! truncate! tracking-tight!">
+          
+          {/* Title */}
+          <h3 className="text-[#27427f]! font-['Lexend',sans-serif]! text-[22px]! font-semibold! leading-[1.2]! truncate! tracking-tight!">
             {property.propertyName || "Luxury Property"}
           </h3>
+          
+          {/* <div className="flex! items-center! gap-2.5! mt-2!">
+            <span className="inline-flex! text-lg! font-semibold! tracking-relaxed!">
+              {formatPrice(property)}
+            </span>
+          </div>  */}
+
         </div>
 
-        <div className="h-px! w-full! bg-gray-100! my-3!" />
+        <div className="h-px! w-full! bg-gray-100/80! my-2.5!" />
 
         {/* Stats Row */}
-        <div className="grid! grid-cols-3! divide-x! divide-gray-100!">
+        <div className="grid! grid-cols-3! divide-x! divide-gray-100/80! mb-1!">
           <div className="flex! flex-col! items-center! justify-center! px-1!">
             <div className="flex! items-center! gap-1.5! mb-1!">
-              <BedDouble size={14} className="text-[#27427f]!" />
-              <span className="text-gray-800! text-[13px]! font-bold!">{bhk} BHK</span>
+              <BedDouble size={16} className="text-[#27427f]!" strokeWidth={2} />
+              <span className="text-gray-900! text-[14px]! font-bold!">{bhk} BHK</span>
             </div>
-            <span className="text-gray-500! text-[10px]!">Unit Type</span>
+            <span className="text-gray-400! text-[11px]! font-medium!">Unit Type</span>
           </div>
+          
           <div className="flex! flex-col! items-center! justify-center! px-1!">
             <div className="flex! items-center! gap-1.5! mb-1!">
-              <Ruler size={14} className="text-[#27427f]!" />
-              <span className="text-gray-800! text-[13px]! font-bold!">{area} sq.ft</span>
+              <Ruler size={16} className="text-[#27427f]!" strokeWidth={2} />
+              <span className="text-gray-900! text-[14px]! font-bold!">{area} sq.ft</span>
             </div>
-            <span className="text-gray-500! text-[10px]!">Area</span>
+            <span className="text-gray-400! text-[11px]! font-medium!">Area</span>
           </div>
+          
           <div className="flex! flex-col! items-center! justify-center! px-1!">
             <div className="flex! items-center! gap-1.5! mb-1!">
-              <Calendar size={14} className="text-[#27427f]!" />
-              <span className="text-gray-800! text-[13px]! font-bold!">{possession}</span>
+              <Calendar size={16} className="text-[#27427f]!" strokeWidth={2} />
+              <span className="text-gray-900! text-[14px]! font-bold!">{possession}</span>
             </div>
-            <span className="text-gray-500! text-[10px]!">Possession</span>
+            <span className="text-gray-400! text-[11px]! font-medium!">Possession</span>
           </div>
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="flex! items-center! justify-between! mt-3.5!">
+        <div className="flex! items-center! justify-between! gap-3! mt-5!">
           <button 
             onClick={(e) => { e.stopPropagation(); onContact(); }}
-            className="inline-flex! items-center! gap-1.5! border! border-[#27427f]! rounded-3xl! text-[#27427f]! bg-transparent! text-[13px]! font-semibold! tracking-normal! px-5! py-3! transition-colors! duration-300! hover:bg-[#27427f]! hover:text-white!"
+            className="flex-1! flex! items-center! justify-center! gap-2! border-2! border-[#27427f]! rounded-full! text-[#27427f]! bg-transparent! text-[14px]! font-semibold! px-4! py-3! transition-all! duration-300! hover:bg-[#27427f]! hover:text-white! group/btn!"
           >
-            <Phone size={14} fill="#27427f" /> Contact
+            <Phone size={16} className="fill-[#27427f]! group-hover/btn:fill-white! transition-colors!" /> Contact
           </button>
           
           <Link 
             href={property.detailPath}
-            className="px-5! py-2.5! rounded-3xl! bg-[#27427f]! text-white! flex! items-center! justify-center! gap-1! transition-transform! duration-300! hover:scale-100! text-[13px]! font-normal!"
+            className="flex-[1.2]! flex! items-center! justify-center! gap-2! rounded-full! bg-[#27427f]! text-white! px-4! py-[11px]! text-[14px]! font-semibold! shadow-md! transition-all! duration-300! hover:shadow-lg! hover:bg-[#1e3465]!"
           >
             <ArrowUpRight size={18} strokeWidth={2.5} /> View More
           </Link>

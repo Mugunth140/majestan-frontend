@@ -16,7 +16,8 @@ import {
   PlusCircle, 
   Globe,
   ChevronDown,
-  Users
+  Users,
+  Search
 } from "lucide-react";
 
 type NavItem = {
@@ -42,6 +43,7 @@ const navItems: (NavItem | NavGroup)[] = [
     defaultOpen: true,
     items: [
       { title: "All Properties", href: "/admin/properties", icon: Home },
+      { title: "SEO & Publish", href: "/admin/properties/seo", icon: Search },
       { title: "Add Property", href: "/admin/properties/new", icon: PlusCircle },
       { title: "Amenities", href: "/admin/amenities", icon: List },
     ]
@@ -68,9 +70,9 @@ const navItems: (NavItem | NavGroup)[] = [
 
 function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }) {
   const isActive = group.items.some(item => {
-    if (item.href === '/admin/properties') {
-      return pathname === item.href || (pathname.startsWith('/admin/properties/') && !pathname.startsWith('/admin/properties/new'));
-    }
+      if (item.href === '/admin/properties') {
+        return pathname === item.href || (pathname.startsWith('/admin/properties/') && !pathname.startsWith('/admin/properties/new') && !pathname.startsWith('/admin/properties/seo'));
+      }
     return pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
   });
   
@@ -99,7 +101,7 @@ function NavGroupItem({ group, pathname }: { group: NavGroup, pathname: string }
             {group.items.map((item) => {
               let isItemActive = false;
               if (item.href === '/admin/properties') {
-                isItemActive = pathname === item.href || (pathname.startsWith('/admin/properties/') && !pathname.startsWith('/admin/properties/new'));
+                isItemActive = pathname === item.href || (pathname.startsWith('/admin/properties/') && !pathname.startsWith('/admin/properties/new') && !pathname.startsWith('/admin/properties/seo'));
               } else {
                 isItemActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
               }

@@ -44,6 +44,15 @@ type SlugPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
+  if (!robotsStr) return { index: true, follow: true };
+  const [indexPart, followPart] = robotsStr.split(",");
+  return {
+    index: indexPart?.trim() === "index",
+    follow: followPart?.trim() === "follow",
+  };
+}
+
 const buildPropertyDescription = (
   description: string,
   city: string,
@@ -82,53 +91,76 @@ export async function generateMetadata({
 
   if (property) {
     const canonicalPath = `/${property.canonicalSlug}`;
-    const description = buildPropertyDescription(
-      property.description,
-      property.city,
-      property.propertyType
-    );
+
+    const seoPage = property.seo?.seoData?.overview;
 
     const typeLabel =
       Object.values(PROPERTY_TYPES).find(
         (p) => p.apiValue === property.propertyType
       )?.label || property.propertyType;
 
+    const title =
+      seoPage?.title ||
+      `${property.title} - ${typeLabel} in ${property.city} | Majestan Realty`;
+    const description =
+      seoPage?.description ||
+      buildPropertyDescription(
+        property.description,
+        property.city,
+        property.propertyType
+      );
+    const ogTitle = seoPage?.og_title || `${property.title} | Majestan Realty`;
+    const ogDescription = seoPage?.og_description || description;
+    const robots = parseRobots(seoPage?.robots);
+
+    const ogImages = seoPage?.og_image
+      ? [
+          {
+            url: seoPage.og_image,
+            width: 1200,
+            height: 630,
+            alt: `${property.title} - Property Image`,
+          },
+        ]
+      : (property.images || [])
+          .filter((img) => img.imageUrl)
+          .map((img) => ({
+            url: img.imageUrl,
+            width: 1200,
+            height: 630,
+            alt: `${property.title} - Property Image`,
+          }))
+          .slice(0, 3);
+
     return {
-      title: `${property.title} - ${typeLabel} in ${property.city} | Majestan Realty`,
+      title,
       description,
       alternates: {
         canonical: canonicalPath,
       },
       openGraph: {
-        title: `${property.title} | Majestan Realty`,
-        description,
+        title: ogTitle,
+        description: ogDescription,
         url: canonicalPath,
         type: "article",
-        images: (property.images || [])
-          .filter((image) => image.imageUrl)
-          .map((image) => ({
-            url: image.imageUrl,
-            width: 1200,
-            height: 630,
-            alt: `${property.title} - Property Image`,
-          }))
-          .slice(0, 3),
+        images: ogImages,
       },
       twitter: {
         card: "summary_large_image",
-        title: `${property.title} | Majestan Realty`,
-        description,
-        images: (property.images || [])
-          .filter((image) => image.imageUrl)
-          .map((image) => image.imageUrl)
-          .slice(0, 1),
+        title: ogTitle,
+        description: ogDescription,
+        images: seoPage?.og_image
+          ? [seoPage.og_image]
+          : (property.images || [])
+              .filter((img) => img.imageUrl)
+              .map((img) => img.imageUrl)
+              .slice(0, 1),
       },
       robots: {
-        index: true,
-        follow: true,
+        ...robots,
         googleBot: {
-          index: true,
-          follow: true,
+          index: robots.index ?? true,
+          follow: robots.follow ?? true,
           "max-image-preview": "large",
           "max-snippet": -1,
         },

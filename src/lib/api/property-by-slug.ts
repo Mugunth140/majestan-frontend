@@ -21,6 +21,16 @@ export type SeoPropertyImage = {
   createdAt: string;
 };
 
+type SeoPageData = {
+  title?: string;
+  description?: string;
+  h1?: string;
+  og_title?: string;
+  og_description?: string;
+  og_image?: string;
+  robots?: string;
+};
+
 export type SeoProperty = {
   id: number;
   propertyCode: string | null;
@@ -44,6 +54,24 @@ export type SeoProperty = {
   requestedSlug: string;
   canonicalSlug: string;
   shouldRedirect: boolean;
+  seo?: {
+    id: number;
+    seoData: {
+      overview?: SeoPageData;
+      amenities?: SeoPageData;
+      floor_plan?: SeoPageData;
+      locality?: SeoPageData & {
+        content_overview?: string;
+        content_connectivity?: string;
+        content_education?: string;
+        content_healthcare?: string;
+        content_shopping?: string;
+      };
+      photos?: SeoPageData;
+    };
+    verificationStatus?: string;
+    approvalStatus?: string;
+  } | null;
 };
 
 const unwrapPayload = async <T>(response: Response): Promise<T> => {

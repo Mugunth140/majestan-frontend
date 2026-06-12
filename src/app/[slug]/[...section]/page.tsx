@@ -22,6 +22,15 @@ import {
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
+function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
+  if (!robotsStr) return { index: true, follow: true };
+  const [indexPart, followPart] = robotsStr.split(",");
+  return {
+    index: indexPart?.trim() === "index",
+    follow: followPart?.trim() === "follow",
+  };
+}
+
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
@@ -164,24 +173,42 @@ export async function generateMetadata({
     }
 
     const canonicalPath = `/${property.canonicalSlug}/${sectionKey}`;
-    const description = `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${sectionConfig.descriptionSuffix}`;
+
+    const SEO_KEY_MAP: Record<string, string> = {
+      "floor-plan": "floor_plan",
+    };
+    const seoKey = SEO_KEY_MAP[sectionKey] || sectionKey;
+    const seoPage =
+      property.seo?.seoData?.[
+        seoKey as keyof NonNullable<typeof property.seo>["seoData"]
+      ];
+
     const typeLabel =
       Object.values(PROPERTY_TYPES).find(
         (p) => p.apiValue === property.propertyType
       )?.label || property.propertyType;
 
-    return {
-      title: `${sectionConfig.titlePrefix} - ${property.title} | ${typeLabel} in ${property.city} | Majestan Realty`,
-      description,
-      alternates: {
-        canonical: canonicalPath,
-      },
-      openGraph: {
-        title: `${sectionConfig.titlePrefix} - ${property.title} | Majestan Realty`,
-        description,
-        url: canonicalPath,
-        type: "article",
-        images: (property.images || [])
+    const fallbackTitle = `${sectionConfig.titlePrefix} - ${property.title} | ${typeLabel} in ${property.city} | Majestan Realty`;
+    const fallbackDescription = `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${sectionConfig.descriptionSuffix}`;
+
+    const title = seoPage?.title || fallbackTitle;
+    const description = seoPage?.description || fallbackDescription;
+    const ogTitle =
+      seoPage?.og_title ||
+      `${sectionConfig.titlePrefix} - ${property.title} | Majestan Realty`;
+    const ogDescription = seoPage?.og_description || description;
+    const robots = parseRobots(seoPage?.robots);
+
+    const ogImages = seoPage?.og_image
+      ? [
+          {
+            url: seoPage.og_image,
+            width: 1200,
+            height: 630,
+            alt: `${property.title} - ${sectionConfig.titlePrefix}`,
+          },
+        ]
+      : (property.images || [])
           .filter((image) => image.imageUrl)
           .map((image) => ({
             url: image.imageUrl,
@@ -189,19 +216,31 @@ export async function generateMetadata({
             height: 630,
             alt: `${property.title} - ${sectionConfig.titlePrefix}`,
           }))
-          .slice(0, 2),
+          .slice(0, 2);
+
+    return {
+      title,
+      description,
+      alternates: {
+        canonical: canonicalPath,
+      },
+      openGraph: {
+        title: ogTitle,
+        description: ogDescription,
+        url: canonicalPath,
+        type: "article",
+        images: ogImages,
       },
       twitter: {
         card: "summary_large_image",
-        title: `${sectionConfig.titlePrefix} - ${property.title} | Majestan Realty`,
-        description,
+        title: ogTitle,
+        description: ogDescription,
       },
       robots: {
-        index: true,
-        follow: true,
+        ...robots,
         googleBot: {
-          index: true,
-          follow: true,
+          index: robots.index ?? true,
+          follow: robots.follow ?? true,
           "max-image-preview": "large",
           "max-snippet": -1,
         },

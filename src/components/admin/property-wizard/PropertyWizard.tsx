@@ -5,7 +5,7 @@ import { usePropertyWizardStore } from '@/store/usePropertyWizardStore';
 import { 
   basicInfoSchema, pricingSchema, specificationsSchema, 
   amenitiesSchema, mediaSchema, ownerInfoSchema, 
-  seoSchema, availabilitySchema, verificationSchema 
+  availabilitySchema 
 } from '@/lib/validations/property-wizard.schema';
 import { z } from 'zod';
 import { toast } from '@/components/ui/toast-store';
@@ -22,9 +22,7 @@ import Step4Specifications from './steps/Step4Specifications';
 import Step5Amenities from './steps/Step5Amenities';
 import Step6Media from './steps/Step6Media';
 import Step7OwnerInfo from './steps/Step7OwnerInfo';
-import Step8SEO from './steps/Step8SEO';
 import Step9Availability from './steps/Step9Availability';
-import Step10Verification from './steps/Step10Verification';
 
 import type { AdminCity, AdminSublocation } from '@/lib/location-options';
 
@@ -59,11 +57,8 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     { id: 5, title: 'Amenities', component: Step5Amenities, schema: amenitiesSchema },
     { id: 6, title: 'Media', component: Step6Media, schema: mediaSchema },
     { id: 7, title: 'Owner', component: Step7OwnerInfo, schema: ownerInfoSchema },
+    { id: 8, title: 'Availability', component: Step9Availability, schema: availabilitySchema },
   ];
-
-  if (isAdmin) steps.push({ id: 8, title: 'SEO', component: Step8SEO, schema: seoSchema });
-  steps.push({ id: isAdmin ? 9 : 8, title: 'Availability', component: Step9Availability, schema: availabilitySchema });
-  if (isAdmin) steps.push({ id: 10, title: 'Publish', component: Step10Verification, schema: verificationSchema });
 
   const currentStepConfig = steps.find(s => s.id === currentStep) || steps[0];
   const CurrentStepComponent = currentStepConfig.component;
@@ -164,12 +159,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         brokerageValue: finalData.brokerageValue || undefined,
         availableFrom: finalData.availableFrom || undefined,
         availableUntil: finalData.availableUntil || undefined,
-        verificationStatus: finalData.verificationStatus || undefined,
-        approvalStatus: finalData.approvalStatus || undefined,
         builderName: finalData.builderName || undefined,
-        metaTitle: finalData.metaTitle || undefined,
-        metaDescription: finalData.metaDescription || undefined,
-        metaKeywords: finalData.metaKeywords || undefined,
         ownerName: finalData.ownerName || undefined,
         ownerEmail: finalData.ownerEmail || undefined,
         ownerPhone: finalData.ownerPhone || undefined,

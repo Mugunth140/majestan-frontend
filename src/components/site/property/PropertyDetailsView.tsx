@@ -281,7 +281,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
               </div>
               <div className="flex! flex-col! md:flex-row! items-start! justify-between! gap-6!">
                 <h1 className="text-3xl! md:text-4xl! font-semibold! text-gray-900! leading-tight! tracking-tight!">
-                  {property.title}
+                  {property.seo?.seoData?.overview?.h1 || property.title}
                 </h1>
                 <div className="text-left! md:text-right! shrink-0!">
                   <p className="text-3xl! md:text-4xl! font-semibold! text-gray-900! tracking-tight!">

@@ -135,13 +135,8 @@ export default function EditPropertyPage() {
             availableFrom: p.availableFrom ? new Date(p.availableFrom).toISOString().split('T')[0] : "",
             availableUntil: p.availableUntil ? new Date(p.availableUntil).toISOString().split('T')[0] : "",
             availabilityStatus: "Available",
-            verificationStatus: p.verificationStatus || "Pending",
-            approvalStatus: p.approvalStatus || "Pending",
             publishImmediately: p.status === 'AVAILABLE' || p.status === 'available',
             seoSlug: p.slug || "",
-            metaTitle: p.metaTitle || "",
-            metaDescription: p.metaDescription || "",
-            metaKeywords: p.metaKeywords || "",
           });
 
           setStep(1);

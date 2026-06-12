@@ -248,7 +248,8 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
       return false;
     }
     
-    let currentValues = methods.getValues();
+    let rawValues = methods.getValues();
+    let currentValues = Object.fromEntries(Object.entries(rawValues).filter(([_, v]) => v !== undefined && v !== null));
     console.log("Validation passed", currentValues);
 
     // Immediately upload images after Step 6 to avoid losing File objects in localStorage
@@ -262,7 +263,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           const newExisting = [...existing, ...uploadedImages];
           methods.setValue('existingImageUrls', newExisting);
           methods.setValue('images', []);
-          currentValues = methods.getValues();
+          currentValues = Object.fromEntries(Object.entries(methods.getValues()).filter(([_, v]) => v !== undefined && v !== null));
         } catch (err) {
           console.error(err);
           toast.error(err instanceof Error ? err.message : "Failed to upload images.");
@@ -308,7 +309,11 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
 
   const handleBack = () => {
     if (currentStep > 1) {
-      updateFormData(methods.getValues());
+      const rawValues = methods.getValues();
+      const currentValues = Object.fromEntries(
+        Object.entries(rawValues).filter(([_, v]) => v !== undefined && v !== null)
+      );
+      updateFormData(currentValues);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setStep(currentStep - 1);
     }

@@ -155,31 +155,7 @@ export function HomePage({ data }: { data: HomePageData }) {
               text="Find the perfect rental property to match your lifestyle and business needs."
             />
             
-            {/* Custom Rent Bento Grid */}
-            <div className="mt-12! grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-4! sm:gap-6! md:gap-8! auto-rows-[220px]! md:auto-rows-[180px]! lg:auto-rows-[200px]! mb-0!">
-              {rentCards.map(([title, link, img, subtitle], i) => (
-                <Link href={link} key={title} className={`group! relative! overflow-hidden! rounded-[2rem]! md:rounded-[2.5rem]! shadow-lg! transition-all! duration-700! hover:-translate-y-2! hover:shadow-[0_25px_50px_-12px_rgba(39,66,127,0.2)]!
-                  ${i === 0 ? 'md:col-span-2! lg:col-span-2!' : ''}
-                  ${i === 1 ? 'md:col-span-1! lg:col-span-1!' : ''}
-                  ${i === 2 ? 'md:col-span-1! lg:col-span-1!' : ''}
-                  ${i === 3 ? 'md:col-span-2! lg:col-span-2!' : ''}
-                  ${i === 4 ? 'md:col-span-1! lg:col-span-1!' : ''}
-                  ${i === 5 ? 'md:col-span-1! lg:col-span-2!' : ''}
-                `}>
-                  <img src={img} alt={title} className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-105!" />
-                  <div className="absolute! inset-0! bg-linear-to-t! from-black/90! via-black/20! to-transparent! opacity-70! transition-opacity! duration-500! group-hover:opacity-90!" />
-                  <div className="absolute! inset-0! p-5! md:p-8! flex! flex-col! justify-end! items-start!">
-                    <span className="mb-2! md:mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3! py-1! text-[9px]! md:text-[10px]! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm! translate-y-4! opacity-0! transition-all! duration-500! group-hover:translate-y-0! group-hover:opacity-100!">
-                      {subtitle}
-                    </span>
-                    <h3 className="text-white! font-['Lexend',sans-serif]! text-lg! md:text-xl! lg:text-3xl! font-medium! tracking-tight!">
-                      {title}
-                    </h3>
-                  </div>
-                  <div className="absolute! inset-0! shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]! rounded-[2rem]! md:rounded-[2.5rem]! pointer-events-none!" />
-                </Link>
-              ))}
-            </div>
+            <CardRail cards={rentCards} gridClass="lg:grid-cols-3!" />
           </div>
         </section>
 
@@ -297,11 +273,13 @@ function SectionHeading({ title, text }: { title: string; text?: string }) {
 
 function CardRail({
   cards,
+  gridClass = "lg:grid-cols-5!"
 }: {
   cards: readonly (readonly [string, string, string, string])[];
+  gridClass?: string;
 }) {
   return (
-    <div className="grid! grid-cols-2! md:grid-cols-3! lg:grid-cols-5! gap-4! md:gap-5!">
+    <div className={`grid! grid-cols-2! md:grid-cols-3! ${gridClass} gap-4! md:gap-5!`}>
       {cards.map(([title, href, image, text], i) => (
         <Link
           key={title}

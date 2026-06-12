@@ -20,13 +20,10 @@ export function HomePage({ data }: { data: HomePageData }) {
   const { location } = useLocationContext();
   const citySlug = toLocationSlug(location);
   
-  const filteredApartments = data.featuredApartments.filter(p => 
-    location === "Coimbatore" ? true : p.sublocation?.toLowerCase().includes(location.toLowerCase())
-  );
-  
-  const filteredVillas = data.featuredVillas.filter(p => 
-    location === "Coimbatore" ? true : p.sublocation?.toLowerCase().includes(location.toLowerCase())
-  );
+  // Always show featured properties since backend only returns top global 6 
+  // and filtering them strictly by sublocation breaks the UI for other cities.
+  const filteredApartments = data.featuredApartments;
+  const filteredVillas = data.featuredVillas;
 
   const saleCards = [
     ["Apartment", `/for-sale/apartments/${citySlug}`, "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", "for sale"],
@@ -274,14 +271,26 @@ export function HomePage({ data }: { data: HomePageData }) {
 
 function SectionHeading({ title, text }: { title: string; text?: string }) {
   const noSubText = !text || text.trim() === "";
+  
+  // Split at " in " if it exists to force the city onto a new line
+  const parts = title.split(" in ");
+  const displayTitle = parts.length > 1 ? (
+    <>
+      {parts[0]} in
+      <span className="!block">{parts[1]}</span>
+    </>
+  ) : title;
+
   return (
-    <div className={`flex! flex-col! md:flex-row! md:items-end! ${noSubText ? "justify-center! mb-6!" : "justify-between!"} gap-6! mb-4!`}>
-      <div className="flex flex-col! md:flex-row! justify-between! items-center! gap-4! p-2! md:py-8! md:px-6!">
-        <h2 className="font-['Lexend',sans-serif]! text-[#0a0a0a]! leading-[1.1]! tracking-[-0.02em]! drop-shadow-sm! font-light! text-[clamp(30px,4vw,50px)]! ">
-          {title}
-        </h2>
-        {text ? <p className="mt-5! text-lg! font-light! text-gray-500! leading-relaxed! max-w-[65ch]!">{text}</p> : null}
-      </div>
+    <div className={`flex! flex-col! md:flex-row! md:items-end! md:justify-between! gap-6! mb-8! pb-4!  w-full!`}>
+      <h2 className="font-['Lexend',sans-serif]! text-[#0a0a0a]! leading-[1.1]! tracking-[-0.02em]! drop-shadow-sm! font-light! text-[clamp(30px,4vw,50px)]! !text-left!">
+        {displayTitle}
+      </h2>
+      {text ? (
+        <p className="text-sm! md:text-lg! font-light! text-gray-400! leading-relaxed! max-w-[45ch]! md:text-right! md:self-end! mb-1!">
+          {text}
+        </p>
+      ) : null}
     </div>
   );
 }

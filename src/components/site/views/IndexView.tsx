@@ -754,7 +754,10 @@ function FeaturedProjectCard({ card }: { card: FeaturedCard }): React.JSX.Elemen
             <div className="row">
               <div className="col-12">
                 <div className="heading-section text-center mb-48">
-                  <h2 className="title">Properties for Sale in {contextLocation}</h2>
+                  <h2 className="title">
+                    Properties for Sale in
+                    <span className="!block">{contextLocation}</span>
+                  </h2>
                   <p className="text-1 wow animate__fadeInUp animate__animated" data-wow-duration="1.5s" data-wow-delay="0s">
                     Find the best properties for sale in {contextLocation}, from residential homes to
                     commercial spaces.

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FloatingInput } from '../ui/FloatingInput';
+import { FloatingInput, FloatingSelect } from '../ui/FloatingInput';
 import { parseIndianCurrency, numberToIndianWords } from '@/lib/utils/currency.util';
 
 const PriceIndicator = ({ value }: { value: string }) => {
@@ -14,9 +14,10 @@ const PriceIndicator = ({ value }: { value: string }) => {
   );
 };
 
-export default function Step2Pricing() {
+export default function Step2Pricing({ isAdmin }: { isAdmin?: boolean }) {
   const { register, formState: { errors }, watch } = useFormContext();
   const listingType = watch('listingType');
+  const brokerageType = watch('brokerageType');
 
   return (
     <div className="!space-y-8">
@@ -34,19 +35,10 @@ export default function Step2Pricing() {
         </div>
 
         <div className="!flex !items-center !h-full !pt-2">
-          <label className="!flex !items-center !cursor-pointer !group">
-            <div className="!relative !flex !items-center !justify-center !w-5 !h-5 !mr-3">
-              <input
-                id="negotiable"
-                type="checkbox"
-                {...register('negotiable')}
-                className="!peer !appearance-none !w-5 !h-5 !border !border-gray-300 dark:!border-gray-600 !rounded-md checked:!bg-gray-900 checked:!border-gray-900 dark:checked:!bg-blue-600 dark:checked:!border-blue-600 !transition-all !cursor-pointer"
-              />
-              <svg className="!absolute !w-3 !h-3 !text-white !opacity-0 peer-checked:!opacity-100 !pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <span className="!text-sm !font-medium !text-gray-700 dark:!text-gray-300 group-hover:!text-gray-900 dark:group-hover:!text-white">Price is Negotiable</span>
+          <label className="!inline-flex !items-center !cursor-pointer">
+            <input type="checkbox" className="!sr-only !peer" {...register('negotiable')} />
+            <div className="!relative !w-11 !h-6 !bg-gray-200 peer-focus:!outline-none !rounded-full !peer dark:!bg-[#262730] peer-checked:after:!translate-x-full rtl:peer-checked:after:!-translate-x-full peer-checked:after:!border-white after:!content-[''] after:!absolute after:!top-[2px] after:!start-[2px] after:!bg-white after:!border-gray-300 after:!border after:!rounded-full after:!h-5 after:!w-5 after:!transition-all dark:!border-gray-600 peer-checked:!bg-[#27427f]"></div>
+            <span className="!ms-3 !text-sm !font-medium !text-gray-700 dark:!text-gray-300">Price is Negotiable</span>
           </label>
         </div>
 
@@ -73,6 +65,34 @@ export default function Step2Pricing() {
         </div>
 
       </div>
+
+      {isAdmin && (
+        <div className="!pt-6 !border-t !border-gray-100 dark:!border-[#262730]">
+          <h3 className="!text-sm !font-bold !text-gray-900 dark:!text-white !mb-6 !uppercase !tracking-wider">Brokerage Details (Admin)</h3>
+          <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-x-6 !gap-y-8">
+            <FloatingSelect 
+              id="brokerageType"
+              label="Brokerage Type"
+              options={[
+                { value: 'no_brokerage', label: 'No Brokerage' },
+                { value: listingType === 'Rent' ? 'days' : 'percentage', label: listingType === 'Rent' ? 'Days of Rent' : 'Percentage (%)' }
+              ]}
+              registerProps={register('brokerageType')}
+              error={errors.brokerageType?.message as string}
+            />
+
+            {brokerageType && brokerageType !== 'no_brokerage' && (
+              <FloatingInput 
+                id="brokerageValue"
+                type="text"
+                label={brokerageType === 'days' ? 'Number of Days (e.g. 15)' : 'Percentage (e.g. 1.5)'}
+                registerProps={register('brokerageValue')}
+                error={errors.brokerageValue?.message as string}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

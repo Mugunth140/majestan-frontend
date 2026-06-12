@@ -29,7 +29,10 @@ export type SeoProperty = {
   description: string;
   price: string;
   propertyType: string;
+  listingType: string;
   status: string;
+  brokerageType?: string;
+  brokerageValue?: string;
   ownerId: number;
   city: string;
   state: string;

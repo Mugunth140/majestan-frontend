@@ -38,19 +38,10 @@ export default function Step10Verification() {
         />
 
         <div className="md:!col-span-2 !flex !items-center !h-full !pt-2">
-          <label className="!flex !items-center !cursor-pointer !group">
-            <div className="!relative !flex !items-center !justify-center !w-5 !h-5 !mr-3">
-              <input
-                id="publishImmediately"
-                type="checkbox"
-                {...register('publishImmediately')}
-                className="!peer !appearance-none !w-5 !h-5 !border !border-gray-300 dark:!border-gray-600 !rounded-md checked:!bg-gray-900 checked:!border-gray-900 dark:checked:!bg-blue-600 dark:checked:!border-blue-600 !transition-all !cursor-pointer"
-              />
-              <svg className="!absolute !w-3 !h-3 !text-white !opacity-0 peer-checked:!opacity-100 !pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <span className="!text-sm !font-medium !text-gray-700 dark:!text-gray-300 group-hover:!text-gray-900 dark:group-hover:!text-white">Publish immediately on website</span>
+          <label className="!inline-flex !items-center !cursor-pointer">
+            <input type="checkbox" className="!sr-only !peer" {...register('publishImmediately')} />
+            <div className="!relative !w-11 !h-6 !bg-gray-200 peer-focus:!outline-none !rounded-full !peer dark:!bg-[#262730] peer-checked:after:!translate-x-full rtl:peer-checked:after:!-translate-x-full peer-checked:after:!border-white after:!content-[''] after:!absolute after:!top-[2px] after:!start-[2px] after:!bg-white after:!border-gray-300 after:!border after:!rounded-full after:!h-5 after:!w-5 after:!transition-all dark:!border-gray-600 peer-checked:!bg-[#27427f]"></div>
+            <span className="!ms-3 !text-sm !font-medium !text-gray-700 dark:!text-gray-300">Publish immediately on website</span>
           </label>
         </div>
 

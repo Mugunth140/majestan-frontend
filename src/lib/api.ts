@@ -112,7 +112,7 @@ export async function getHomePageData(): Promise<HomePageData> {
 }
 
 export async function getCities(): Promise<City[]> {
-  return fetchApi<City[]>("/metadata/cities", { cache: "no-store" });
+  return fetchApi<City[]>("/metadata/cities", { next: { revalidate: 3600 } });
 }
 
 export async function createEnquiry(payload: {
@@ -237,7 +237,7 @@ export async function searchProperties(
   if (params.limit) query.set("limit", String(params.limit));
 
   const res = await fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, {
-    cache: "no-store",
+    next: { revalidate: 3600 },
   });
 
   if (res && Array.isArray(res.items)) {
@@ -273,6 +273,6 @@ export async function searchProperties(
 
 export async function getPropertyBySlug(slug: string): Promise<any> {
   return fetchApi<any>(`/properties/by-slug/${slug}`, {
-    cache: "no-store",
+    next: { revalidate: 3600 },
   });
 }

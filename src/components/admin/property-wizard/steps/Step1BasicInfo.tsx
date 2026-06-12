@@ -13,7 +13,7 @@ export default function Step1BasicInfo() {
     { value: 'coworking', label: 'Coworking' },
     { value: 'farmland', label: 'Farmland' },
     { value: 'industrial', label: 'Industrial Space' },
-    { value: 'independent_portion', label: 'Independent House' },
+    { value: 'individual_portion', label: 'Independent House' },
   ];
 
   const listingTypeOptions = [

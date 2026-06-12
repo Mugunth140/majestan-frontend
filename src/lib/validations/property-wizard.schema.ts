@@ -6,7 +6,7 @@ export const basicInfoSchema = z.object({
   description: z.string().min(20, 'Description must be at least 20 characters'),
   propertyType: z.enum([
     'apartment', 'villa', 'plot', 'commercial', 'coworking', 
-    'farmland', 'industrial', 'independent_portion', 'other'
+    'farmland', 'industrial', 'individual_portion', 'other'
   ]),
   listingType: z.enum(['Sell', 'Rent']),
   status: z.enum(['AVAILABLE', 'UNAVAILABLE', 'SOLD', 'RENTED']).optional().default('AVAILABLE'),

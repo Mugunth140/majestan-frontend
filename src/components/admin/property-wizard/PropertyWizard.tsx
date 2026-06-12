@@ -126,27 +126,40 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
       // Resolve city name/state/country from selected cityId
       const selectedCity = availableCities.find(c => c.id === Number(finalData.cityId));
 
+      const safeNum = (val: any) => {
+        if (val === "" || val === null || val === undefined) return null;
+        const n = Number(val);
+        return isNaN(n) ? null : n;
+      };
+
+      const safeCurrency = (val: any) => {
+        if (val === "" || val === null || val === undefined) return "";
+        const parsed = parseIndianCurrency(val);
+        return isNaN(parsed) ? "" : String(parsed);
+      };
+
       const payload = {
         title: finalData.title,
         description: finalData.description,
         propertyType: finalData.propertyType,
+        listingType: finalData.listingType,
         slug: finalData.seoSlug || undefined,
         status: rawStatus,
-        price: finalData.price ? String(parseIndianCurrency(finalData.price)) : "",
+        price: safeCurrency(finalData.price),
         city: selectedCity?.city_name || finalData.city || '',
         state: selectedCity?.state_name || finalData.state || '',
         country: selectedCity?.country_name || finalData.country || 'India',
-        cityId: Number(finalData.cityId) || undefined,
-        sublocationId: Number(finalData.sublocationId) || undefined,
+        cityId: safeNum(finalData.cityId),
+        sublocationId: safeNum(finalData.sublocationId),
 
         propertyCondition: finalData.propertyCondition || undefined,
         ownershipType: finalData.ownershipType || undefined,
         reraNumber: finalData.reraNumber || undefined,
         projectName: finalData.projectName || undefined,
         negotiable: finalData.negotiable || false,
-        maintenanceCharges: finalData.maintenanceCharges ? String(parseIndianCurrency(finalData.maintenanceCharges)) : undefined,
-        securityDeposit: finalData.securityDeposit ? String(parseIndianCurrency(finalData.securityDeposit)) : undefined,
-        bookingAmount: finalData.bookingAmount ? String(parseIndianCurrency(finalData.bookingAmount)) : undefined,
+        maintenanceCharges: safeCurrency(finalData.maintenanceCharges),
+        securityDeposit: safeCurrency(finalData.securityDeposit),
+        bookingAmount: safeCurrency(finalData.bookingAmount),
         availableFrom: finalData.availableFrom || undefined,
         availableUntil: finalData.availableUntil || undefined,
         verificationStatus: finalData.verificationStatus || undefined,
@@ -164,25 +177,25 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           pincode: finalData.pincode,
         },
         details: {
-          bedrooms: Number(finalData.bedrooms) || undefined,
-          bathrooms: Number(finalData.bathrooms) || undefined,
-          areaSqft: Number(finalData.builtUpArea) || undefined,
+          bedrooms: safeNum(finalData.bedrooms),
+          bathrooms: safeNum(finalData.bathrooms),
+          areaSqft: safeNum(finalData.builtUpArea),
           furnished: finalData.furnishing === 'Furnished' || finalData.furnishing === 'Semi Furnished',
           facing: finalData.propertyFacing,
-          buildUpArea: Number(finalData.builtUpArea) || undefined,
-          carpetArea: Number(finalData.carpetArea) || undefined,
-          totalFloors: Number(finalData.totalFloors) || undefined,
-          balconies: Number(finalData.balconies) || undefined,
+          buildUpArea: safeNum(finalData.builtUpArea),
+          carpetArea: safeNum(finalData.carpetArea),
+          totalFloors: safeNum(finalData.totalFloors),
+          balconies: safeNum(finalData.balconies),
           floorNumber: finalData.floorNumber || undefined,
-          superBuiltUpArea: Number(finalData.superBuiltUpArea) || undefined,
-          plotArea: Number(finalData.plotArea) || undefined,
+          superBuiltUpArea: safeNum(finalData.superBuiltUpArea),
+          plotArea: safeNum(finalData.plotArea),
           areaUnit: finalData.areaUnit || undefined,
           propertyAge: finalData.propertyAge || undefined,
           possessionStatus: finalData.possessionStatus || undefined,
           waterSupply: finalData.waterSupply || undefined,
           powerBackup: finalData.powerBackup || undefined,
           roadWidth: finalData.roadWidth || undefined,
-          openSides: Number(finalData.openSides) || undefined,
+          openSides: safeNum(finalData.openSides),
         },
         amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
         files: allImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),

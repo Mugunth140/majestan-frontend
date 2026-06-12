@@ -31,6 +31,7 @@ export function FloatingSelect({ label, error, registerProps, options, disabled,
       <select
         {...registerProps}
         {...props}
+        defaultValue={props.defaultValue ?? ""}
         disabled={disabled}
         className={`!block !px-4 !pb-2.5 !pt-5 !w-full !text-[14px] !text-gray-900 !bg-white dark:!bg-[#171821] !rounded-xl !border ${error ? '!border-rose-500 focus:!border-rose-500' : '!border-gray-200 dark:!border-[#262730] focus:!border-blue-600 dark:focus:!border-blue-500'} !appearance-none dark:!text-white focus:!outline-none focus:!ring-0 peer !transition-all ${disabled ? '!opacity-50 !cursor-not-allowed' : '!cursor-pointer'} ${className}`}
       >

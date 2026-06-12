@@ -13,7 +13,23 @@ import { parsePseoSlug } from "@/lib/seo/pseo-parser";
 import { ListingPage } from "@/components/search/ListingPage";
 import { searchProperties } from "@/lib/api";
 
-export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  try {
+    const { API_BASE_URL } = await import("@/lib/api");
+    const res = await fetch(`${API_BASE_URL}/properties/all-slugs`);
+    if (!res.ok) return [];
+    
+    const data = await res.json();
+    const slugs: string[] = Array.isArray(data) ? data : (data.data || data.items || []);
+    
+    return slugs.map((slug) => ({ slug }));
+  } catch (error) {
+    console.error("Failed to fetch slugs for static generation:", error);
+    return [];
+  }
+}
 
 const RESERVED_SLUGS = new Set([
   "assets",

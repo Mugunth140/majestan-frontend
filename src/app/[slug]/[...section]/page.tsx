@@ -22,7 +22,32 @@ import {
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  try {
+    const { API_BASE_URL } = await import("@/lib/api");
+    const res = await fetch(`${API_BASE_URL}/properties/all-slugs`);
+    if (!res.ok) return [];
+    
+    const data = await res.json();
+    const slugs: string[] = Array.isArray(data) ? data : (data.data || data.items || []);
+    
+    const sections = ["amenities", "floor-plan", "locality", "photos"];
+    const params: { slug: string; section: string[] }[] = [];
+    
+    for (const slug of slugs) {
+      for (const section of sections) {
+        params.push({ slug, section: [section] });
+      }
+    }
+    
+    return params;
+  } catch (error) {
+    console.error("Failed to fetch slugs for static generation:", error);
+    return [];
+  }
+}
 
 const RESERVED_SECTION_SLUGS = new Set(["assets"]);
 

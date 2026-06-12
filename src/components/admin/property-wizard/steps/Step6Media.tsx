@@ -122,7 +122,7 @@ export default function Step6Media() {
             {existingImageUrls.map((imgObj, i) => (
               <div
                 key={`existing-${i}`}
-                className="!relative !aspect-square !rounded-2xl !overflow-hidden !border !border-gray-200 dark:!border-[#262730] !shadow-sm !group"
+                className="!relative !aspect-square !rounded-2xl !overflow-hidden !border !border-gray-200 dark:!border-[#262730] !shadow-sm group"
               >
                 <img
                   src={imgObj.url}
@@ -168,7 +168,7 @@ export default function Step6Media() {
                 onDragEnter={() => onCardDragEnter(i)}
                 onDragEnd={onCardDragEnd}
                 onDragOver={e => e.preventDefault()}
-                className={`!relative !aspect-square !rounded-2xl !overflow-hidden !border-2 !shadow-sm !group !cursor-grab active:!cursor-grabbing !transition-all !duration-150 ${
+                className={`!relative !aspect-square !rounded-2xl !overflow-hidden !border-2 !shadow-sm group !cursor-grab active:!cursor-grabbing !transition-all !duration-150 ${
                   draggingIndex === i
                     ? '!opacity-40 !scale-95 !border-blue-400'
                     : draggingOver === i

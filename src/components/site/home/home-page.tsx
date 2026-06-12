@@ -29,20 +29,20 @@ export function HomePage({ data }: { data: HomePageData }) {
   );
 
   const saleCards = [
-    ["Apartment", `/buy-apartments-${citySlug}`, "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", "for sale"],
-    ["Villa", `/buy-villas-${citySlug}`, "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80", "for sale"],
-    ["Independent Houses", `/buy-independent-houses-${citySlug}`, "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80", "for sale"],
-    ["Plot", `/buy-plots-${citySlug}`, "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80", "for sale"],
-    ["Commercial Space", `/buy-commercial-${citySlug}`, "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Apartment", `/for-sale/apartments/${citySlug}`, "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Villa", `/for-sale/villas/${citySlug}`, "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Independent Houses", `/for-sale/independent-houses/${citySlug}`, "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Plot", `/for-sale/plots/${citySlug}`, "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80", "for sale"],
+    ["Commercial Space", `/for-sale/commercial-space/${citySlug}`, "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", "for sale"],
   ] as const;
 
   const rentCards = [
-    ["Office Space", `/rent-commercial-space-${citySlug}`, "https://images.unsplash.com/photo-1631193816258-28b44b21e78b?auto=format&fit=crop&w=800&q=80", "for Rent"],
-    ["Ware House", `/rent-industrials-${citySlug}`, "https://images.unsplash.com/photo-1689942010216-dc412bb1e7a9?auto=format&fit=crop&w=800&q=80", "for Rent"],
-    ["Showroom", `/rent-commercial-space-${citySlug}`, "https://images.unsplash.com/photo-1555529902-5261145633bf?auto=format&fit=crop&w=800&q=80", "for Rent"],
-    ["Apartment", `/rent-apartments-${citySlug}`, "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80", "for Rent"],
-    ["Villa", `/rent-villas-${citySlug}`, "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", "for Rent"],
-    ["Independent Houses", `/rent-independent-houses-${citySlug}`, "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", "for Rent"],
+    ["Office Space", `/for-rent/commercial-space/${citySlug}`, "https://images.unsplash.com/photo-1631193816258-28b44b21e78b?auto=format&fit=crop&w=800&q=80", "for rent"],
+    ["Warehouse", `/for-rent/industrial-space/${citySlug}`, "https://images.unsplash.com/photo-1689942010216-dc412bb1e7a9?auto=format&fit=crop&w=800&q=80", "for rent"],
+    ["Showroom", `/for-rent/commercial-space/${citySlug}`, "https://images.unsplash.com/photo-1555529902-5261145633bf?auto=format&fit=crop&w=800&q=80", "for rent"],
+    ["Apartment", `/for-rent/apartments/${citySlug}`, "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80", "for rent"],
+    ["Villa", `/for-rent/villas/${citySlug}`, "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", "for rent"],
+    ["Independent Houses", `/for-rent/independent-houses/${citySlug}`, "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", "for rent"],
   ] as const;
 
   const helpItems = [
@@ -292,39 +292,33 @@ function CardRail({
   cards: readonly (readonly [string, string, string, string])[];
 }) {
   return (
-    <div className="grid! grid-cols-1! md:grid-cols-10! gap-5! md:gap-6!">
-      {cards.map(([title, href, image, text], i) => {
-        const isMain = i === 0;
-        const colSpan = isMain ? "md:col-span-6!" : "md:col-span-4!";
-        const rowSpan = isMain ? "md:row-span-2!" : "md:row-span-1!";
-        const height = isMain ? "min-h-[250px]! md:min-h-[400px]!" : "min-h-[250px]! md:min-h-[320px]!";
-
-        return (
-          <Link
-            key={title}
-            href={href}
-            className={`group! relative! overflow-hidden! rounded-3xl! bg-[#f9fafb]! flex! flex-col! justify-end! p-6! md:p-8! transition-all! duration-400! hover:shadow-[0_20px_40px_-15px_rgba(39,66,127,0.15)]! hover:-translate-y-1! ${colSpan} ${rowSpan} ${height}`}
-          >
-            <div className="absolute! inset-0! z-0! bg-[#eef2f6]!">
-              <img
-                src={image}
-                alt={title}
-                className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-105!"
-              />
-              <div className="absolute! inset-0! bg-linear-to-t! from-[#0a0a0a]/90! via-[#0a0a0a]/20! to-transparent! opacity-80! transition-opacity! duration-700! group-hover:opacity-100!" />
-            </div>
-            
-            <div className="relative! z-10! flex! flex-col! items-start! transform! transition-transform! duration-700! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:-translate-y-2">
-              <span className="mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3.5! py-1! text-[10px]! md:text-xs! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm!">
-                {text}
-              </span>
-              <h5 className="text-2xl! md:text-[32px]! font-['Lexend',sans-serif]! font-light! text-white! tracking-tight! leading-none! drop-shadow-sm!">
-                {title}
-              </h5>
-            </div>
-          </Link>
-        );
-      })}
+    <div className="grid! grid-cols-2! md:grid-cols-3! lg:grid-cols-5! gap-4! md:gap-5!">
+      {cards.map(([title, href, image, text], i) => (
+        <Link
+          key={title}
+          href={href}
+          className="group! relative! overflow-hidden! rounded-2xl! bg-[#f9fafb]! flex! flex-col! justify-end! p-5! md:p-6! h-[250px]! md:h-[320px]! transition-all! duration-500! hover:shadow-[0_20px_40px_-15px_rgba(39,66,127,0.2)]! hover:-translate-y-1.5!"
+        >
+          <div className="absolute! inset-0! z-0! bg-[#eef2f6]!">
+            <img
+              src={image}
+              alt={title}
+              className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-110!"
+            />
+            <div className="absolute! inset-0! bg-gradient-to-t! from-[#0a0a0a]/90! via-[#0a0a0a]/30! to-transparent! opacity-70! transition-opacity! duration-700! group-hover:opacity-95!" />
+          </div>
+          
+          <div className="relative! z-10! flex! flex-col! items-start! transform! transition-transform! duration-700! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:-translate-y-2">
+            <span className="mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3! py-1! text-[9px]! md:text-[10px]! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm!">
+              {text}
+            </span>
+            <h5 className="text-xl! md:text-2xl! font-['Lexend',sans-serif]! font-medium! text-white! tracking-tight! leading-tight! drop-shadow-sm!">
+              {title}
+            </h5>
+            <div className="mt-4! h-[2px]! w-0! bg-white! transition-all! duration-700! ease-out! group-hover:w-12!"></div>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }

@@ -71,40 +71,54 @@ export async function fetchApi<T>(
   path: string,
   init?: RequestInit,
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
-    next: init?.cache === "no-store" ? undefined : { revalidate: 60 },
-  });
+  let controller: AbortController | undefined;
+  let timeoutId: NodeJS.Timeout | undefined;
 
-  if (response.status === 401) {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem("majestan_access_token");
-      window.localStorage.removeItem("majestan_user");
-      window.location.href = "/login";
+  // Add an 8-second timeout to prevent SSR hanging on Docker network issues
+  if (!init?.signal) {
+    controller = new AbortController();
+    timeoutId = setTimeout(() => controller!.abort(), 8000);
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      signal: init?.signal || controller?.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...init?.headers,
+      },
+      next: init?.cache === "no-store" ? undefined : { revalidate: 60 },
+    });
+
+    if (response.status === 401) {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("majestan_access_token");
+        window.localStorage.removeItem("majestan_user");
+        window.location.href = "/login";
+      }
+      throw new Error("Session expired");
     }
-    throw new Error("Session expired");
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const payload = (await response.json()) as ApiEnvelope<T> | T;
+
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "success" in payload &&
+      "data" in payload
+    ) {
+      return (payload as ApiEnvelope<T>).data;
+    }
+
+    return payload as T;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-  }
-
-  const payload = (await response.json()) as ApiEnvelope<T> | T;
-
-  if (
-    typeof payload === "object" &&
-    payload !== null &&
-    "success" in payload &&
-    "data" in payload
-  ) {
-    return (payload as ApiEnvelope<T>).data;
-  }
-
-  return payload as T;
 }
 
 export async function getHomePageData(): Promise<HomePageData> {

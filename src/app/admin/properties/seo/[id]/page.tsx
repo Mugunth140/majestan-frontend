@@ -229,6 +229,7 @@ export default function PropertySeoEditPage() {
       setIsSaving(false);
     }
   }
+  }
 
   // ── Loading / Error states ─────────────────────────────────────────────────
 

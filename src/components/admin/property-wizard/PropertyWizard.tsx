@@ -249,7 +249,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     }
     
     let rawValues = methods.getValues();
-    let currentValues = Object.fromEntries(Object.entries(rawValues).filter(([_, v]) => v !== undefined && v !== null));
+    let currentValues: any = Object.fromEntries(Object.entries(rawValues).filter(([_, v]) => v !== undefined && v !== null));
     console.log("Validation passed", currentValues);
 
     // Immediately upload images after Step 6 to avoid losing File objects in localStorage
@@ -310,7 +310,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
   const handleBack = () => {
     if (currentStep > 1) {
       const rawValues = methods.getValues();
-      const currentValues = Object.fromEntries(
+      const currentValues: any = Object.fromEntries(
         Object.entries(rawValues).filter(([_, v]) => v !== undefined && v !== null)
       );
       updateFormData(currentValues);

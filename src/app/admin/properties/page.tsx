@@ -130,7 +130,7 @@ export default function AdminPropertiesPage() {
               <option value="coworking">Coworking</option>
               <option value="farmland">Farmland</option>
               <option value="industrial">Industrial Space</option>
-              <option value="individual_portion">Independent House</option>
+              <option value="individual_portion">Individual House</option>
             </select>
             {showFilters && (
               <select 

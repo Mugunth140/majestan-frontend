@@ -12,14 +12,17 @@ import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilter
 import { PropertySectionLinks } from "@/components/site/property/property-navigation";
 
 const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
-  apartment: "ap",
-  villa: "v",
-  "independent-house": "ip",
-  plot: "p",
-  farmland: "fl",
+  apartment:          "ap",
+  villa:              "v",
+  individual_portion: "ip",
+  "independent-house":"ip",
+  plot:               "p",
+  farmland:           "fl",
+  commercial:         "cs",
   "commercial-space": "cs",
+  industrial:         "in",
   "industrial-space": "in",
-  coworking: "cw",
+  coworking:          "cw",
 };
 
 const SORT_OPTIONS = [

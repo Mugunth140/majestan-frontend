@@ -213,16 +213,25 @@ export type PropertySearchResponse = {
   limit: number;
 };
 
-/** Map frontend form values to backend PropertyType enum values */
+/** Map frontend form values to backend PropertyType DB enum values */
 const PROPERTY_TYPE_MAP: Record<string, string> = {
-  apartment: "apartment",
-  villa: "villa",
-  independenthouse: "independent-house",
-  plot: "plot",
-  commercialspace: "commercial-space",
-  industrialspace: "industrial-space",
-  farmlands: "farmland",
-  coworking: "coworking",
+  // wizard/form values → DB enum values
+  apartment:          "apartment",
+  villa:              "villa",
+  plot:               "plot",
+  commercial:         "commercial",
+  commercialspace:    "commercial",
+  "commercial-space": "commercial",
+  industrial:         "industrial",
+  industrialspace:    "industrial",
+  "industrial-space": "industrial",
+  individual_portion: "individual_portion",
+  independenthouse:   "individual_portion",
+  "independent-house":"individual_portion",
+  "individual-house": "individual_portion",
+  farmland:           "farmland",
+  farmlands:          "farmland",
+  coworking:          "coworking",
 };
 
 export async function searchProperties(

@@ -114,7 +114,7 @@ export default function ViewPropertyPage() {
     apartment: "Apartment", villa: "Villa", plot: "Plot",
     commercial: "Commercial Space", coworking: "Coworking",
     farmland: "Farmland", industrial: "Industrial Space",
-    individual_portion: "Independent House",
+    individual_portion: "Individual House",
   };
 
   return (

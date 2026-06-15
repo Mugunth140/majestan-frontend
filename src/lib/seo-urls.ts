@@ -6,15 +6,18 @@ export const LISTING_TYPES = {
 } as const;
 
 // Map frontend URL slugs to backend API property types and readable labels
+// apiValue MUST match DB enum values in property.entity.ts:
+//   'apartment','villa','plot','commercial','industrial','individual_portion','farmland','coworking','other'
 export const PROPERTY_TYPES = {
   properties: { apiValue: "", label: "Properties" },
   apartments: { apiValue: "apartment", label: "Apartments" },
   villas: { apiValue: "villa", label: "Villas" },
-  "independent-houses": { apiValue: "independent-house", label: "Independent Houses" },
+  "independent-houses": { apiValue: "individual_portion", label: "Individual Houses" },
+  "individual-houses": { apiValue: "individual_portion", label: "Individual Houses" },
   plots: { apiValue: "plot", label: "Plots" },
   farmlands: { apiValue: "farmland", label: "Farmlands" },
-  "commercial-spaces": { apiValue: "commercial-space", label: "Commercial Spaces" },
-  "industrial-spaces": { apiValue: "industrial-space", label: "Industrial Spaces" },
+  "commercial-spaces": { apiValue: "commercial", label: "Commercial Spaces" },
+  "industrial-spaces": { apiValue: "industrial", label: "Industrial Spaces" },
   coworking: { apiValue: "coworking", label: "Coworking" },
 } as const;
 

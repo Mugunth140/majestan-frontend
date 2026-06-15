@@ -31,18 +31,21 @@ import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 /* ── Helpers ──────────────────────────────────────────────── */
 
 const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
-  apartment: "ap",
-  villa: "v",
-  "independent-house": "ip",
-  independenthouse: "ip",
-  plot: "p",
-  farmland: "fl",
-  farmlands: "fl",
+  apartment:          "ap",
+  villa:              "v",
+  individual_portion: "ip",
+  "independent-house":"ip",
+  independenthouse:   "ip",
+  plot:               "p",
+  farmland:           "fl",
+  farmlands:          "fl",
+  commercial:         "cs",
   "commercial-space": "cs",
-  commercialspace: "cs",
+  commercialspace:    "cs",
+  industrial:         "in",
   "industrial-space": "in",
-  industrialspace: "in",
-  coworking: "cw",
+  industrialspace:    "in",
+  coworking:          "cw",
 };
 
 const SORT_OPTIONS = [

@@ -13,7 +13,6 @@ export const PROPERTY_TYPES = {
   apartments: { apiValue: "apartment", label: "Apartments" },
   villas: { apiValue: "villa", label: "Villas" },
   "independent-houses": { apiValue: "individual_portion", label: "Individual Houses" },
-  "individual-houses": { apiValue: "individual_portion", label: "Individual Houses" },
   plots: { apiValue: "plot", label: "Plots" },
   farmlands: { apiValue: "farmland", label: "Farmlands" },
   "commercial-spaces": { apiValue: "commercial", label: "Commercial Spaces" },

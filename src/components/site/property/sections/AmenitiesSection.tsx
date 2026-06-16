@@ -24,6 +24,7 @@ import {
   Sparkles,
   MessageCircle,
   Armchair,
+  Check
 } from "lucide-react";
 
 type Amenity = {
@@ -38,66 +39,63 @@ type AmenityCategory = {
   amenities: Amenity[];
 };
 
+// Map keywords in amenity names to Lucide icons
+function getIconForAmenity(name: string): React.ElementType {
+  const n = name.toLowerCase();
+  if (n.includes("pool")) return Waves;
+  if (n.includes("gym") || n.includes("fitness")) return Dumbbell;
+  if (n.includes("club")) return Home;
+  if (n.includes("park") || n.includes("garden") || n.includes("tree") || n.includes("lawn")) return TreePine;
+  if (n.includes("play") || n.includes("kid") || n.includes("baby")) return Baby;
+  if (n.includes("party") || n.includes("hall") || n.includes("event")) return PartyPopper;
+  if (n.includes("lift") || n.includes("elevator")) return ArrowUpFromLine;
+  if (n.includes("intercom") || n.includes("phone")) return Intercom;
+  if (n.includes("gas")) return Flame;
+  if (n.includes("shop") || n.includes("market") || n.includes("mall") || n.includes("grocery")) return ShoppingCart;
+  if (n.includes("atm") || n.includes("bank")) return Landmark;
+  if (n.includes("badminton") || n.includes("court")) return Volleyball;
+  if (n.includes("tennis")) return Trophy;
+  if (n.includes("basket")) return CircleDot;
+  if (n.includes("jog") || n.includes("walk") || n.includes("run") || n.includes("track")) return Footprints;
+  if (n.includes("security") || n.includes("cctv") || n.includes("guard")) return Shield;
+  if (n.includes("power") || n.includes("electricity") || n.includes("backup")) return Zap;
+  if (n.includes("water") || n.includes("plumb")) return Droplets;
+  if (n.includes("park") || n.includes("car") || n.includes("garage")) return Car;
+  if (n.includes("furnish")) return Armchair;
+  return Sparkles; // Default generic icon
+}
+
 function getAmenityCategories(property: SeoProperty): AmenityCategory[] {
-  const hasParking = !!(property.details?.parking && property.details.parking > 0);
-  const isFurnished = property.details?.furnished === true;
+  // Read dynamically joined propertyAmenities from backend
+  const backendAmenities = ((property as any).propertyAmenities || []);
+  
+  if (!backendAmenities.length) return [];
 
-  // Extract all amenity names passed from the DB relation
-  const backendAmenities = ((property as any).propertyAmenities || []).map(
-    (pa: any) => pa.amenity?.name || ""
-  ).filter(Boolean);
+  const grouped: Record<string, Amenity[]> = {};
 
-  const checkAvailable = (name: string, fallback: boolean = false) => {
-    if (backendAmenities.length === 0) return fallback; // Safety fallback for older listings
-    return backendAmenities.includes(name);
-  };
+  backendAmenities.forEach((pa: any) => {
+    const am = pa.amenity;
+    if (!am) return;
 
-  return [
-    {
-      title: "Essentials",
-      description: "Core infrastructure & safety features",
-      amenities: [
-        { name: "24/7 Security", icon: Shield, available: checkAvailable("24/7 Security", true) },
-        { name: "Power Backup", icon: Zap, available: checkAvailable("Power Backup", true) },
-        { name: "Water Supply", icon: Droplets, available: checkAvailable("Water Supply", true) },
-        { name: "Reserved Parking", icon: Car, available: hasParking },
-        { name: "Furnished", icon: Armchair, available: isFurnished },
-      ],
-    },
-    {
-      title: "Lifestyle",
-      description: "Leisure & recreation amenities",
-      amenities: [
-        { name: "Swimming Pool", icon: Waves, available: checkAvailable("Swimming Pool") },
-        { name: "Gymnasium", icon: Dumbbell, available: checkAvailable("Gymnasium") },
-        { name: "Clubhouse", icon: Home, available: checkAvailable("Clubhouse") },
-        { name: "Garden / Park", icon: TreePine, available: checkAvailable("Garden / Park") },
-        { name: "Children's Play Area", icon: Baby, available: checkAvailable("Children's Play Area") },
-        { name: "Party Hall", icon: PartyPopper, available: checkAvailable("Party Hall") },
-      ],
-    },
-    {
-      title: "Convenience",
-      description: "Everyday comfort & access",
-      amenities: [
-        { name: "Lift", icon: ArrowUpFromLine, available: checkAvailable("Lift") },
-        { name: "Intercom", icon: Intercom, available: checkAvailable("Intercom") },
-        { name: "Piped Gas", icon: Flame, available: checkAvailable("Piped Gas") },
-        { name: "Shopping Center", icon: ShoppingCart, available: checkAvailable("Shopping Center") },
-        { name: "ATM", icon: Landmark, available: checkAvailable("ATM") },
-      ],
-    },
-    {
-      title: "Sports",
-      description: "Fitness & outdoor activities",
-      amenities: [
-        { name: "Badminton", icon: Volleyball, available: checkAvailable("Badminton") },
-        { name: "Tennis", icon: Trophy, available: checkAvailable("Tennis") },
-        { name: "Basketball Court", icon: CircleDot, available: checkAvailable("Basketball Court") },
-        { name: "Jogging Track", icon: Footprints, available: checkAvailable("Jogging Track") },
-      ],
-    },
-  ];
+    const catName = am.category || "other";
+    const title = catName.charAt(0).toUpperCase() + catName.slice(1);
+    
+    if (!grouped[title]) {
+      grouped[title] = [];
+    }
+
+    grouped[title].push({
+      name: am.name,
+      icon: getIconForAmenity(am.name),
+      available: true // By definition, if it's in propertyAmenities, it is available
+    });
+  });
+
+  return Object.entries(grouped).map(([title, amenities]) => ({
+    title: title.replace(/-/g, " "),
+    description: `Features in ${title.toLowerCase()}`,
+    amenities
+  }));
 }
 
 function AmenityCard({ amenity }: { amenity: Amenity }) {
@@ -143,6 +141,10 @@ type AmenitiesSectionProps = {
 export function AmenitiesSection({ property }: AmenitiesSectionProps) {
   const categories = getAmenityCategories(property);
 
+  if (categories.length === 0) {
+    return null; // Don't render section if no amenities
+  }
+
   return (
     <div className="space-y-8!">
       {/* About Amenities */}
@@ -168,7 +170,7 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
       {categories.map((category) => (
         <div key={category.title} className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
           <div className="mb-8!">
-            <h3 className="text-xl! md:text-2xl! font-semibold! text-gray-900!">
+            <h3 className="text-xl! md:text-2xl! font-semibold! text-gray-900! capitalize!">
               {category.title}
             </h3>
             <p className="text-sm! font-normal! text-gray-500! mt-2!">{category.description}</p>

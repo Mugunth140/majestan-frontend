@@ -183,7 +183,7 @@ function LuxuryCard({ property, isActive, imgSrc, onContact }: { property: Featu
           {/* Location */}
           <p className="flex! items-center! gap-1.5! text-[13px]! font-medium! tracking-wide! text-gray-400! mb-1.5!">
             <MapPin size={14} className="text-[#27427f]!" strokeWidth={2.5} />
-            <span className="truncate!">{property.sublocation || "Coimbatore"}</span>
+            <span className="truncate!">{property.sublocation}</span>
           </p>
           
           {/* Title */}

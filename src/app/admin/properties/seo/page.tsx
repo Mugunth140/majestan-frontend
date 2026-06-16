@@ -132,6 +132,8 @@ export default function AdminPropertiesSeoPage() {
   const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -172,6 +174,14 @@ export default function AdminPropertiesSeoPage() {
 
     return matchesSearch && matchesApproval;
   });
+
+  const totalItems = filtered.length;
+  const paginatedData = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset to page 1 on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, approvalFilter]);
 
   return (
     <div className="!w-full !space-y-6">
@@ -281,7 +291,7 @@ export default function AdminPropertiesSeoPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((property) => (
+                paginatedData.map((property) => (
                   <tr
                     key={property.id}
                     className="!bg-white dark:!bg-[#1a1f2e] hover:!bg-gray-50 dark:hover:!bg-[#1e2436] !transition-colors group"
@@ -347,17 +357,31 @@ export default function AdminPropertiesSeoPage() {
           </table>
         </div>
 
-        {/* Footer count */}
-        {!loading && !error && filtered.length > 0 && (
-          <div className="!p-5 !border-t !border-gray-200 dark:!border-[#262730]">
-            <span className="!text-[14px] !text-gray-500">
-              Showing{" "}
-              <span className="!font-medium !text-gray-900 dark:!text-white">{filtered.length}</span>{" "}
-              {filtered.length === 1 ? "property" : "properties"}
-              {filtered.length !== properties.length && (
+        {/* Pagination controls */}
+        {!loading && !error && totalItems > 0 && (
+          <div className="!p-5 !border-t !border-gray-200 dark:!border-[#262730] !flex !items-center !justify-between">
+            <span className="!text-[14px] !text-gray-500 dark:!text-gray-400">
+              Showing <span className="!font-medium !text-gray-800 dark:!text-white">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="!font-medium !text-gray-800 dark:!text-white">{Math.min(currentPage * itemsPerPage, totalItems)}</span> of <span className="!font-medium !text-gray-800 dark:!text-white">{totalItems}</span> properties
+              {totalItems !== properties.length && (
                 <> (filtered from {properties.length} total)</>
               )}
             </span>
+            <div className="!flex !gap-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="!px-4 !py-2 !text-[14px] !font-medium !text-gray-500 dark:!text-gray-400 !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-lg hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] disabled:!opacity-50 disabled:!cursor-not-allowed hover:!text-gray-800 dark:!text-white !transition-colors"
+              >
+                Previous
+              </button>
+              <button 
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={currentPage * itemsPerPage >= totalItems}
+                className="!px-4 !py-2 !text-[14px] !font-medium !text-gray-500 dark:!text-gray-400 !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-lg hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] disabled:!opacity-50 disabled:!cursor-not-allowed hover:!text-gray-800 dark:!text-white !transition-colors"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

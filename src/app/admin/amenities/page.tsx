@@ -20,16 +20,28 @@ export default function AdminAmenitiesPage() {
   const [amenities, setAmenities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
-    fetchAmenities();
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchAmenities(search, 1);
+    }
   }, []);
 
-  const fetchAmenities = async (searchQuery = search) => {
+  useEffect(() => {
+    fetchAmenities(search, currentPage);
+  }, [currentPage]);
+
+  const fetchAmenities = async (searchQuery = search, page = currentPage) => {
     setLoading(true);
     try {
       const token = window.localStorage.getItem("majestan_access_token");
       const url = new URL(`${API_BASE_URL}/admin/amenities`);
+      url.searchParams.append("page", String(page));
+      url.searchParams.append("limit", "10");
       if (searchQuery) url.searchParams.append("search", searchQuery);
       
       const res = await fetch(url.toString(), {
@@ -38,7 +50,8 @@ export default function AdminAmenitiesPage() {
       if (res.ok) {
         const json = await res.json();
         const arr = json.data?.items || json.items || json.data || json || [];
-          setAmenities(Array.isArray(arr) ? arr : []);
+          setAmenities(Array.isArray(arr) ? arr : []); 
+        setTotalItems(json.data?.total || json.total || 0);
       }
     } catch (e) {
       console.error(e);
@@ -49,7 +62,11 @@ export default function AdminAmenitiesPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchAmenities();
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchAmenities(search, 1);
+    }
   };
 
   const handleDelete = async (item: any) => {
@@ -189,6 +206,31 @@ export default function AdminAmenitiesPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination controls */}
+        {!loading && totalItems > 0 && (
+          <div className="!p-5 !border-t !border-gray-100 dark:!border-[#262730] !flex !items-center !justify-between">
+            <span className="!text-[14px] !text-gray-500 dark:!text-gray-400">
+              Showing <span className="!font-medium !text-gray-800 dark:!text-white">{(currentPage - 1) * 10 + 1}</span> to <span className="!font-medium !text-gray-800 dark:!text-white">{Math.min(currentPage * 10, totalItems)}</span> of <span className="!font-medium !text-gray-800 dark:!text-white">{totalItems}</span> items
+            </span>
+            <div className="!flex !gap-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="!px-4 !py-2 !text-[14px] !font-medium !text-gray-500 dark:!text-gray-400 !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-lg hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] disabled:!opacity-50 disabled:!cursor-not-allowed hover:!text-gray-800 dark:!text-white !transition-colors"
+              >
+                Previous
+              </button>
+              <button 
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={currentPage * 10 >= totalItems}
+                className="!px-4 !py-2 !text-[14px] !font-medium !text-gray-500 dark:!text-gray-400 !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] !rounded-lg hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] disabled:!opacity-50 disabled:!cursor-not-allowed hover:!text-gray-800 dark:!text-white !transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

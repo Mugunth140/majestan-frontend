@@ -48,6 +48,15 @@ export default function Step1BasicInfo() {
           registerProps={register('listingType')}
           error={errors.listingType?.message as string}
         />
+
+        <div className="md:!col-span-2">
+          <FloatingInput 
+            id="reraNumber"
+            label="RERA Number *"
+            registerProps={register('reraNumber')}
+            error={errors.reraNumber?.message as string}
+          />
+        </div>
       </div>
 
       <div className="!mt-8">

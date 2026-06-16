@@ -12,7 +12,7 @@ export const basicInfoSchema = z.object({
   status: z.enum(['AVAILABLE', 'UNAVAILABLE', 'SOLD', 'RENTED']).optional().default('AVAILABLE'),
   propertyCondition: z.enum(['New', 'Under Construction', 'Resale']).or(z.literal('')).optional(),
   ownershipType: z.enum(['Freehold', 'Leasehold']).or(z.literal('')).optional(),
-  reraNumber: z.string().optional(),
+  reraNumber: z.string().min(1, 'RERA Number is required').max(100, 'RERA Number is too long'),
   builderName: z.string().optional(),
   projectName: z.string().optional(),
 });

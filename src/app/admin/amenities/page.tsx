@@ -12,6 +12,7 @@ import {
   XCircle,
   Plus
 } from "lucide-react";
+import { AdminPagination } from "@/components/admin/ui/AdminPagination";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { toast } from "@/components/ui/toast-store";

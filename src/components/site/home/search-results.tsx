@@ -71,6 +71,15 @@ function getPhotoUrl(item: PropertySearchItem): string {
 }
 
 function getArea(item: PropertySearchItem): string | null {
+  if (item.units && item.units.length >= 2) {
+    const areas = item.units.map(u => Number(u.builtupAreaSqft || u.carpetAreaSqft)).filter(a => !isNaN(a) && a > 0);
+    if (areas.length >= 2) {
+      const min = Math.min(...areas);
+      const max = Math.max(...areas);
+      if (min !== max) return `${min} - ${max}`;
+    }
+  }
+
   const raw =
     item.build_up_area ??
     item.buildup_area ??
@@ -85,6 +94,9 @@ function getArea(item: PropertySearchItem): string | null {
 }
 
 function getUnitType(item: PropertySearchItem): string | null {
+  if (item.units && item.units.length >= 2) {
+    return `${item.units.length} Plans`;
+  }
   return item.unittype ?? item.configuration ?? null;
 }
 
@@ -113,6 +125,20 @@ function formatPrice(value: string | number | undefined | null): string {
 }
 
 function getDisplayPrice(item: PropertySearchItem): { price: string; label: string } {
+  if (item.units && item.units.length >= 2) {
+    const prices = item.units.map(u => Number(u.price)).filter(p => !isNaN(p) && p > 0);
+    if (prices.length >= 2) {
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      if (min !== max) {
+        return {
+          price: `${formatPrice(min)} - ${formatPrice(max)}`,
+          label: item.posttype === "Rent" ? "/ month" : "",
+        };
+      }
+    }
+  }
+
   if (item.posttype === "Rent") {
     return {
       price: formatPrice(item.monthly_rent),

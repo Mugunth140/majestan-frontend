@@ -122,6 +122,15 @@ export default function EditPropertyPage() {
 
             amenityIds: (p.propertyAmenities || []).map((a: any) => a.amenityId),
 
+            units: (p.propertyUnits || []).map((u: any) => ({
+              unitType: u.unitType || '',
+              title: u.title || '',
+              price: u.price || '',
+              sizeSqft: u.builtupAreaSqft ? Number(u.builtupAreaSqft) : (u.carpetAreaSqft ? Number(u.carpetAreaSqft) : 0),
+              floorPlanImageUrl: u.floorPlanImageUrl || '',
+              floorPlanImageKey: u.floorPlanImageKey || '',
+            })),
+
             existingImageUrls: (p.propertyImages || []).map((img: any) => ({
               url: img.imageUrl,
               key: img.imageKey

@@ -407,9 +407,33 @@ export function ListingPage({
                           </div>
                           <div className="text-right! shrink-0!">
                             <div className="font-['Lexend',sans-serif]! text-2xl! font-extrabold! text-[#27427f]!">
-                              {formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent)}
+                              {(() => {
+                                if (item.units && item.units.length >= 2) {
+                                  const prices = item.units.map(u => Number(u.price)).filter(p => !isNaN(p) && p > 0);
+                                  if (prices.length >= 2) {
+                                    const min = Math.min(...prices);
+                                    const max = Math.max(...prices);
+                                    if (min !== max) return `${formatPrice(min)} - ${formatPrice(max)}`;
+                                  }
+                                }
+                                return formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent);
+                              })()}
                             </div>
                             {(() => {
+                              if (item.units && item.units.length >= 2) {
+                                const areas = item.units.map(u => Number(u.builtupAreaSqft || u.carpetAreaSqft)).filter(a => !isNaN(a) && a > 0);
+                                if (areas.length >= 2) {
+                                  const min = Math.min(...areas);
+                                  const max = Math.max(...areas);
+                                  if (min !== max) {
+                                    return (
+                                      <div className="text-xs! font-semibold! text-gray-400! mt-1! uppercase! tracking-wider!">
+                                        {min} - {max} sq.ft
+                                      </div>
+                                    );
+                                  }
+                                }
+                              }
                               const area = getArea(item);
                               if (item.posttype === "Sell" && area) {
                                 return (
@@ -425,12 +449,17 @@ export function ListingPage({
                         
                         {/* Specs row */}
                         <div className="flex! flex-wrap! items-center! gap-5! mt-5! pb-5! border-b! border-gray-100/80!">
-                          {item.unittype && (
+                          {(item.units && item.units.length >= 2) ? (
+                            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
+                              <Layers className="w-4! h-4! text-[#27427f]! opacity-60!" />
+                              {item.units.length} Plans
+                            </span>
+                          ) : item.unittype ? (
                             <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
                               <Layers className="w-4! h-4! text-[#27427f]! opacity-60!" />
                               {item.unittype}
                             </span>
-                          )}
+                          ) : null}
                           {getArea(item) && (
                             <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
                               <Ruler className="w-4! h-4! text-[#27427f]! opacity-60!" />

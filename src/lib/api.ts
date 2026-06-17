@@ -186,6 +186,7 @@ export type PropertySearchItem = {
   super_build_up_area?: string;
   plot_area?: string;
   totalarea?: string;
+  units?: any[];
   unitsize?: string;
   project_area?: string;
   facing?: string;
@@ -287,6 +288,7 @@ export async function searchProperties(
         build_up_area: details.areaSqft?.toString() || "0",
         unittype: details.bedrooms ? `${details.bedrooms} BHK` : null,
         facing: details.facing || null,
+        units: item.propertyUnits || item.units || [],
       };
     });
   }

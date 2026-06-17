@@ -79,6 +79,19 @@ export const availabilitySchema = z.object({
   availabilityStatus: z.enum(['Available', 'Reserved', 'Sold', 'Rented']).default('Available'),
 });
 
+export const floorPlansSchema = z.object({
+  units: z.array(
+    z.object({
+      unitType: z.string().min(1, 'Unit type is required'),
+      title: z.string().min(1, 'Title is required'),
+      price: z.string().optional(),
+      sizeSqft: z.number().optional(),
+      floorPlanImageUrl: z.string().optional(),
+      floorPlanImageKey: z.string().optional(),
+    })
+  ).optional().default([]),
+});
+
 export const verificationSchema = z.object({
   verificationStatus: z.enum(['Pending', 'Verified', 'Rejected']).default('Pending'),
   approvalStatus: z.enum(['Pending', 'Approved', 'Rejected']).default('Pending'),

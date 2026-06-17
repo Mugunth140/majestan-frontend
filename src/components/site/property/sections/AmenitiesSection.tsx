@@ -19,18 +19,14 @@ import {
   Trophy,
   CircleDot,
   Footprints,
-  CheckCircle2,
-  XCircle,
   Sparkles,
   MessageCircle,
   Armchair,
-  Check
 } from "lucide-react";
 
 type Amenity = {
   name: string;
   icon: React.ElementType;
-  available: boolean;
 };
 
 type AmenityCategory = {
@@ -87,8 +83,7 @@ function getAmenityCategories(property: SeoProperty): AmenityCategory[] {
 
     grouped[title].push({
       name: am.name,
-      icon: getIconForAmenity(am.name),
-      available: true // By definition, if it's in propertyAmenities, it is available
+      icon: getIconForAmenity(am.name)
     });
   });
 
@@ -103,34 +98,13 @@ function AmenityCard({ amenity }: { amenity: Amenity }) {
   const Icon = amenity.icon;
 
   return (
-    <div
-      className={`flex! items-center! gap-4! p-5! rounded-[20px]! border! transition-all! duration-300! ${
-        amenity.available
-          ? "bg-white! border-gray-200! shadow-sm! hover:shadow-md! hover:border-gray-300! hover:-translate-y-0.5!"
-          : "bg-gray-50/60! border-gray-100/60! opacity-80! hover:opacity-100!"
-      }`}
-    >
-      <div
-        className={`w-12! h-12! rounded-full! flex! items-center! justify-center! shrink-0! ${
-          amenity.available
-            ? "bg-gray-50! text-gray-600!"
-            : "bg-gray-100! text-gray-400!"
-        }`}
-      >
-        <Icon className="w-5! h-5!" />
+    <div className="group flex! items-center! gap-4! p-4! rounded-2xl! bg-white! border! border-gray-100! hover:border-[#27427f]/20! hover:shadow-[0_4px_20px_rgba(39,66,127,0.06)]! transition-all! duration-300!">
+      <div className="w-12! h-12! rounded-xl! bg-gray-50! group-hover:bg-[#27427f]/5! flex! items-center! justify-center! shrink-0! transition-colors! duration-300!">
+        <Icon className="w-5! h-5! text-gray-500! group-hover:text-[#27427f]! transition-colors! duration-300!" strokeWidth={1.5} />
       </div>
-      <span
-        className={`font-medium! text-sm! flex-1! ${
-          amenity.available ? "text-gray-900!" : "text-gray-400!"
-        }`}
-      >
+      <span className="font-['Lexend',sans-serif]! font-medium! text-[15px]! text-gray-800! flex-1!">
         {amenity.name}
       </span>
-      {amenity.available ? (
-        <CheckCircle2 className="w-5! h-5! text-emerald-500! shrink-0!" />
-      ) : (
-        <XCircle className="w-5! h-5! text-gray-300! shrink-0!" />
-      )}
     </div>
   );
 }
@@ -143,74 +117,71 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
   const categories = getAmenityCategories(property);
 
   return (
-    <div className="space-y-8!">
-      {/* About Amenities */}
-      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-        <div className="flex! items-start! gap-5! mb-2!">
-          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
-            <Sparkles className="w-6! h-6! text-gray-600!" />
-          </div>
-          <div>
-            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-3!">
-              Amenities &amp; Features
-            </h2>
-            <p className="text-gray-500! text-base! font-light! leading-relaxed!">
-              Explore the amenities available at{" "}
-              <span className="font-medium! text-gray-900!">{property.title}</span>.
-              Verified amenities are shown as available; others may be confirmed upon inquiry.
-            </p>
-          </div>
-        </div>
-      </div>
-
+    <div className="space-y-12!">
+      
       {categories.length === 0 ? (
-        <div className="bg-white! rounded-[24px]! p-10! md:p-16! border! border-gray-200! shadow-sm! text-center!">
-          <div className="w-20! h-20! rounded-full! bg-gray-50! flex! items-center! justify-center! mx-auto! mb-6!">
-            <Shield className="w-8! h-8! text-gray-300!" />
+        <div className="bg-white! rounded-3xl! p-12! border! border-gray-100! text-center!">
+          <div className="w-20! h-20! rounded-2xl! bg-gray-50! flex! items-center! justify-center! mx-auto! mb-6!">
+            <Shield className="w-8! h-8! text-gray-300!" strokeWidth={1.5} />
           </div>
-          <h3 className="text-xl! font-semibold! text-gray-900! mb-2!">No Amenities Listed</h3>
-          <p className="text-gray-500! max-w-md! mx-auto!">
-            Specific amenities and features have not been listed for this property yet. Please contact us for more detailed information regarding the facilities.
+          <h3 className="font-['Lexend',sans-serif]! text-xl! font-semibold! text-gray-900! mb-2!">No Amenities Listed</h3>
+          <p className="text-gray-500! max-w-md! mx-auto! leading-relaxed!">
+            Specific amenities and features have not been listed for this property yet. Please contact us for more detailed information.
           </p>
         </div>
       ) : (
-        <>
-          {/* Amenity Categories */}
-          {categories.map((category) => (
-            <div key={category.title} className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-              <div className="mb-8!">
-                <h3 className="text-xl! md:text-2xl! font-semibold! text-gray-900! capitalize!">
-                  {category.title}
-                </h3>
-                <p className="text-sm! font-normal! text-gray-500! mt-2!">{category.description}</p>
-              </div>
-              <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-3! gap-4!">
-                {category.amenities.map((amenity) => (
-                  <AmenityCard key={amenity.name} amenity={amenity} />
-                ))}
-              </div>
+        <div className="bg-white! rounded-3xl! p-8! md:p-10! border! border-gray-100! shadow-sm!">
+          <div className="flex! items-start! gap-4! mb-10!">
+            <div className="w-12! h-12! rounded-xl! bg-[#27427f]/5! flex! items-center! justify-center! shrink-0!">
+              <Sparkles className="w-6! h-6! text-[#27427f]!" strokeWidth={1.5} />
             </div>
-          ))}
-        </>
+            <div>
+              <h2 className="font-['Lexend',sans-serif]! text-2xl! md:text-3xl! font-bold! text-gray-900! mb-2! tracking-tight!">
+                Amenities &amp; Features
+              </h2>
+              <p className="text-gray-500! text-[15px]! leading-relaxed!">
+                Explore the premium facilities available at <span className="font-medium! text-gray-800!">{property.title}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-10!">
+            {categories.map((category) => (
+              <div key={category.title} className="pt-6! border-t! border-gray-100! first:border-0! first:pt-0!">
+                <div className="mb-6!">
+                  <h3 className="font-['Lexend',sans-serif]! text-xl! font-bold! text-gray-900! capitalize! tracking-tight!">
+                    {category.title}
+                  </h3>
+                </div>
+                <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-3! gap-4! md:gap-5!">
+                  {category.amenities.map((amenity) => (
+                    <AmenityCard key={amenity.name} amenity={amenity} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* CTA Card */}
-      <div className="bg-gray-50! rounded-[24px]! p-8! md:p-10! border! border-gray-200!">
-        <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
+      <div className="bg-[#27427f]! rounded-3xl! p-8! md:p-10! overflow-hidden! relative!">
+        <div className="absolute! top-0! right-0! w-64! h-64! bg-white/5! rounded-full! blur-3xl! -translate-y-1/2! translate-x-1/4!"></div>
+        <div className="relative! z-10! flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
           <div className="flex! items-start! gap-5!">
-            <div className="w-14! h-14! rounded-full! bg-white! flex! items-center! justify-center! shrink-0! border! border-gray-200!">
-              <MessageCircle className="w-6! h-6! text-gray-600!" />
+            <div className="w-14! h-14! rounded-2xl! bg-white/10! flex! items-center! justify-center! shrink-0! backdrop-blur-sm!">
+              <MessageCircle className="w-6! h-6! text-white!" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="text-xl! font-semibold! mb-2! text-gray-900!">
-                Want to know more about amenities?
+              <h3 className="font-['Lexend',sans-serif]! text-xl! font-semibold! mb-2! text-white! tracking-tight!">
+                Need more details?
               </h3>
-              <p className="text-gray-500! font-light! text-base! leading-relaxed!">
+              <p className="text-blue-100! text-[15px]! leading-relaxed!">
                 Get the complete list of amenities and confirm availability with the property owner.
               </p>
             </div>
           </div>
-          <button className="w-full! md:w-auto! px-8! py-3.5! bg-gray-900! text-white! font-medium! rounded-full! hover:bg-gray-800! transition-all! shrink-0!">
+          <button className="w-full! md:w-auto! px-8! py-3.5! bg-white! text-[#27427f]! font-semibold! rounded-xl! hover:bg-blue-50! transition-all! shrink-0! shadow-lg!">
             Contact Us
           </button>
         </div>

@@ -98,11 +98,11 @@ function AmenityCard({ amenity }: { amenity: Amenity }) {
   const Icon = amenity.icon;
 
   return (
-    <div className="group flex! items-center! gap-4! p-4! rounded-2xl! bg-white! border! border-gray-100! hover:border-[#27427f]/20! hover:shadow-[0_4px_20px_rgba(39,66,127,0.06)]! transition-all! duration-300!">
+    <div className="group flex! items-center! gap-4! p-3! rounded-2xl! bg-white! border! border-gray-100! hover:border-[#27427f]/20! hover:shadow-[0_4px_20px_rgba(39,66,127,0.06)]! transition-all! duration-300!">
       <div className="w-12! h-12! rounded-xl! bg-gray-50! group-hover:bg-[#27427f]/5! flex! items-center! justify-center! shrink-0! transition-colors! duration-300!">
         <Icon className="w-5! h-5! text-gray-500! group-hover:text-[#27427f]! transition-colors! duration-300!" strokeWidth={1.5} />
       </div>
-      <span className="font-['Lexend',sans-serif]! font-medium! text-[15px]! text-gray-800! flex-1!">
+      <span className="font-sans! font-medium! text-base! text-gray-800! flex-1!">
         {amenity.name}
       </span>
     </div>
@@ -130,16 +130,16 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
           </p>
         </div>
       ) : (
-        <div className="bg-white! rounded-3xl! p-8! md:p-10! border! border-gray-100! shadow-sm!">
+        <div className="bg-white! rounded-4xl! p-8! md:p-10! border! border-gray-100! shadow-sm!">
           <div className="flex! items-start! gap-4! mb-10!">
-            <div className="w-12! h-12! rounded-xl! bg-[#27427f]/5! flex! items-center! justify-center! shrink-0!">
-              <Sparkles className="w-6! h-6! text-[#27427f]!" strokeWidth={1.5} />
+            <div className="size-12! rounded-xl! bg-[#27427f]/5! flex! items-center! justify-center! shrink-0!">
+              <Sparkles className="size-6! text-[#27427f]!" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="font-['Lexend',sans-serif]! text-2xl! md:text-3xl! font-bold! text-gray-900! mb-2! tracking-tight!">
+              <h2 className="font-['Lexend',sans-serif]! text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-2! tracking-tight!">
                 Amenities &amp; Features
               </h2>
-              <p className="text-gray-500! text-[15px]! leading-relaxed!">
+              <p className="text-gray-500! text-base! leading-relaxed!">
                 Explore the premium facilities available at <span className="font-medium! text-gray-800!">{property.title}</span>
               </p>
             </div>
@@ -147,9 +147,9 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
 
           <div className="space-y-10!">
             {categories.map((category) => (
-              <div key={category.title} className="pt-6! border-t! border-gray-100! first:border-0! first:pt-0!">
+              <div key={category.title} className="pt-6! border-t! border-gray-200! first:border-0! first:pt-0!">
                 <div className="mb-6!">
-                  <h3 className="font-['Lexend',sans-serif]! text-xl! font-bold! text-gray-900! capitalize! tracking-tight!">
+                  <h3 className="font-sans! text-xl! font-semibold! text-gray-700! capitalize! tracking-relaxed!">
                     {category.title}
                   </h3>
                 </div>
@@ -165,7 +165,7 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
       )}
 
       {/* CTA Card */}
-      <div className="bg-[#27427f]! rounded-3xl! p-8! md:p-10! overflow-hidden! relative!">
+      <div className="bg-[#27427f]! rounded-4xl! p-8! md:p-9! overflow-hidden! relative!">
         <div className="absolute! top-0! right-0! w-64! h-64! bg-white/5! rounded-full! blur-3xl! -translate-y-1/2! translate-x-1/4!"></div>
         <div className="relative! z-10! flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
           <div className="flex! items-start! gap-5!">
@@ -173,15 +173,15 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
               <MessageCircle className="w-6! h-6! text-white!" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-['Lexend',sans-serif]! text-xl! font-semibold! mb-2! text-white! tracking-tight!">
+              <h3 className="font-['Lexend',sans-serif]! text-xl! font-medium! mb-2! text-white! tracking-normal!">
                 Need more details?
               </h3>
-              <p className="text-blue-100! text-[15px]! leading-relaxed!">
+              <p className="text-blue-100! text-base! leading-normal!">
                 Get the complete list of amenities and confirm availability with the property owner.
               </p>
             </div>
           </div>
-          <button className="w-full! md:w-auto! px-8! py-3.5! bg-white! text-[#27427f]! font-semibold! rounded-xl! hover:bg-blue-50! transition-all! shrink-0! shadow-lg!">
+          <button className="w-full! md:w-auto! px-8! py-3.5! bg-white! text-[#27427f]! font-medium! rounded-4xl! hover:bg-blue-50! transition-all! shrink-0! shadow-lg!">
             Contact Us
           </button>
         </div>

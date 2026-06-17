@@ -170,9 +170,11 @@ export default function AdminPropertiesSeoPage() {
       p.title.toLowerCase().includes(q) ||
       (p.propertyCode ?? "").toLowerCase().includes(q);
 
-    const approvalStatus = p.approvalStatus ?? "draft";
+    const rawApprovalStatus = p.approvalStatus ?? "draft";
+    const normalizedStatus = rawApprovalStatus.toLowerCase() === "pending" ? "draft" : rawApprovalStatus.toLowerCase();
+    
     const matchesApproval =
-      approvalFilter === "all" || approvalStatus === approvalFilter;
+      approvalFilter === "all" || normalizedStatus === approvalFilter;
 
     return matchesSearch && matchesApproval;
   });

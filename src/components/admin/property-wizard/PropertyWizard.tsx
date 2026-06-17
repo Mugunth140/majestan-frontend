@@ -117,8 +117,8 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
       const existingKeys = (finalData.existingImageUrls || []).map((img: { url: string, key: string }) => img.key);
       const allImageKeys = [...existingKeys, ...stragglerKeys];
 
-      // Derive status: backend expects lowercase enum values
-      const rawStatus = finalData.publishImmediately ? 'available' : (finalData.status?.toLowerCase() || 'unavailable');
+      // Derive status: backend expects lowercase enum values from availabilityStatus
+      const rawStatus = finalData.availabilityStatus ? finalData.availabilityStatus.toLowerCase() : 'unavailable';
 
       // Resolve city name/state/country from selected cityId
       const selectedCity = availableCities.find(c => c.id === Number(finalData.cityId));

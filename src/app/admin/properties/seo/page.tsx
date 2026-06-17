@@ -19,7 +19,9 @@ interface PropertySeoItem {
   status: string;
   slug: string;
   propertyCode: string;
-  seo?: SeoRecord;
+  seoId: number | null;
+  verificationStatus: string | null;
+  approvalStatus: string | null;
 }
 
 function VerificationBadge({ status }: { status: string }) {
@@ -168,7 +170,7 @@ export default function AdminPropertiesSeoPage() {
       p.title.toLowerCase().includes(q) ||
       (p.propertyCode ?? "").toLowerCase().includes(q);
 
-    const approvalStatus = p.seo?.approvalStatus ?? "draft";
+    const approvalStatus = p.approvalStatus ?? "draft";
     const matchesApproval =
       approvalFilter === "all" || approvalStatus === approvalFilter;
 
@@ -322,9 +324,9 @@ export default function AdminPropertiesSeoPage() {
 
                     {/* SEO Status */}
                     <td className="!px-6 !py-4 !align-middle !text-center">
-                      {property.seo ? (
+                      {property.seoId ? (
                         <VerificationBadge
-                          status={property.seo.verificationStatus}
+                          status={property.verificationStatus || 'pending'}
                         />
                       ) : (
                         <span className="!inline-flex !items-center !px-2.5 !py-1 !rounded-full !text-[12px] !font-medium !bg-gray-500/20 !text-gray-500">
@@ -336,7 +338,7 @@ export default function AdminPropertiesSeoPage() {
                     {/* Publish Status */}
                     <td className="!px-6 !py-4 !align-middle !text-center">
                       <ApprovalBadge
-                        status={property.seo?.approvalStatus ?? "draft"}
+                        status={property.approvalStatus ?? "draft"}
                       />
                     </td>
 

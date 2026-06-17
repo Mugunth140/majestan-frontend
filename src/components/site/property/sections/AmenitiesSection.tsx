@@ -40,7 +40,8 @@ type AmenityCategory = {
 };
 
 // Map keywords in amenity names to Lucide icons
-function getIconForAmenity(name: string): React.ElementType {
+function getIconForAmenity(name?: string): React.ElementType {
+  if (!name) return Sparkles;
   const n = name.toLowerCase();
   if (n.includes("pool")) return Waves;
   if (n.includes("gym") || n.includes("fitness")) return Dumbbell;
@@ -75,7 +76,7 @@ function getAmenityCategories(property: SeoProperty): AmenityCategory[] {
 
   backendAmenities.forEach((pa: any) => {
     const am = pa.amenity;
-    if (!am) return;
+    if (!am || !am.name) return;
 
     const catName = am.category || "other";
     const title = catName.charAt(0).toUpperCase() + catName.slice(1);
@@ -141,10 +142,6 @@ type AmenitiesSectionProps = {
 export function AmenitiesSection({ property }: AmenitiesSectionProps) {
   const categories = getAmenityCategories(property);
 
-  if (categories.length === 0) {
-    return null; // Don't render section if no amenities
-  }
-
   return (
     <div className="space-y-8!">
       {/* About Amenities */}
@@ -166,22 +163,36 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
         </div>
       </div>
 
-      {/* Amenity Categories */}
-      {categories.map((category) => (
-        <div key={category.title} className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-          <div className="mb-8!">
-            <h3 className="text-xl! md:text-2xl! font-semibold! text-gray-900! capitalize!">
-              {category.title}
-            </h3>
-            <p className="text-sm! font-normal! text-gray-500! mt-2!">{category.description}</p>
+      {categories.length === 0 ? (
+        <div className="bg-white! rounded-[24px]! p-10! md:p-16! border! border-gray-200! shadow-sm! text-center!">
+          <div className="w-20! h-20! rounded-full! bg-gray-50! flex! items-center! justify-center! mx-auto! mb-6!">
+            <Shield className="w-8! h-8! text-gray-300!" />
           </div>
-          <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-3! gap-4!">
-            {category.amenities.map((amenity) => (
-              <AmenityCard key={amenity.name} amenity={amenity} />
-            ))}
-          </div>
+          <h3 className="text-xl! font-semibold! text-gray-900! mb-2!">No Amenities Listed</h3>
+          <p className="text-gray-500! max-w-md! mx-auto!">
+            Specific amenities and features have not been listed for this property yet. Please contact us for more detailed information regarding the facilities.
+          </p>
         </div>
-      ))}
+      ) : (
+        <>
+          {/* Amenity Categories */}
+          {categories.map((category) => (
+            <div key={category.title} className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
+              <div className="mb-8!">
+                <h3 className="text-xl! md:text-2xl! font-semibold! text-gray-900! capitalize!">
+                  {category.title}
+                </h3>
+                <p className="text-sm! font-normal! text-gray-500! mt-2!">{category.description}</p>
+              </div>
+              <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-3! gap-4!">
+                {category.amenities.map((amenity) => (
+                  <AmenityCard key={amenity.name} amenity={amenity} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
 
       {/* CTA Card */}
       <div className="bg-gray-50! rounded-[24px]! p-8! md:p-10! border! border-gray-200!">

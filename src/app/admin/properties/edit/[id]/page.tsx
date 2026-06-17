@@ -119,6 +119,14 @@ export default function EditPropertyPage() {
             powerBackup: det.powerBackup || "",
             roadWidth: det.roadWidth || "",
             openSides: det.openSides != null ? String(det.openSides) : "",
+            plotLength: det.plotLength != null ? String(det.plotLength) : "",
+            plotWidth: det.plotWidth != null ? String(det.plotWidth) : "",
+            boundaryWall: det.boundaryWall ?? false,
+            suitableFor: det.suitableFor || "",
+            hasPantry: det.hasPantry ?? false,
+            hasCentralAc: det.hasCentralAc ?? false,
+            ceilingHeightFt: det.ceilingHeightFt != null ? String(det.ceilingHeightFt) : "",
+            heavyVehicleAccess: det.heavyVehicleAccess ?? false,
 
             amenityIds: (p.propertyAmenities || []).map((a: any) => a.amenityId),
 

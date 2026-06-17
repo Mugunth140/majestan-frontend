@@ -67,7 +67,7 @@ const BROWSER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 export const API_BASE_URL =
   typeof window === "undefined" ? SERVER_API_BASE_URL : BROWSER_API_BASE_URL;
 
-export async function fetchApi<T>(
+async function fetchApi<T>(
   path: string,
   init?: RequestInit,
 ): Promise<T> {

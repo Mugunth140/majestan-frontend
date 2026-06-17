@@ -74,7 +74,7 @@ export const ownerInfoSchema = z.object({
   ownerPhone: z.string().min(10, 'Valid phone number required'),
 });
 
-export const seoSchema = z.object({
+const seoSchema = z.object({
   seoSlug: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
@@ -100,7 +100,7 @@ export const floorPlansSchema = z.object({
   ).optional().default([]),
 });
 
-export const verificationSchema = z.object({
+const verificationSchema = z.object({
   verificationStatus: z.enum(['Pending', 'Verified', 'Rejected']).default('Pending'),
   approvalStatus: z.enum(['Pending', 'Approved', 'Rejected']).default('Pending'),
   publishImmediately: z.boolean().default(false),

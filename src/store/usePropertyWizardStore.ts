@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export interface PropertyWizardState {
+interface PropertyWizardState {
   currentStep: number;
   formData: Record<string, any>;
   isComplete: boolean;

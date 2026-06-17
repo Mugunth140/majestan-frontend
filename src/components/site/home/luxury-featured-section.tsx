@@ -142,7 +142,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
   );
 }
 
-function LuxuryCard({ property, isActive, imgSrc, onContact }: { property: FeaturedProperty, isActive: boolean, imgSrc: string, onContact: () => void }) {
+function LuxuryCard({ property,  imgSrc, onContact }: { property: FeaturedProperty, isActive: boolean, imgSrc: string, onContact: () => void }) {
   // Mock data for missing fields
   const isSale = property.postType?.toLowerCase().includes("sale") || property.postType?.toLowerCase().includes("buy");
   const badgeLabel = isSale ? "FOR SALE" : "FOR RENT";

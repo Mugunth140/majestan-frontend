@@ -72,9 +72,9 @@ export default function Step4Specifications() {
             <div className="!flex !items-center !h-[50px] !pl-1">
               <label className="!flex !items-center !cursor-pointer">
                 <div className="!relative">
-                  <input type="checkbox" className="!sr-only" {...register('boundaryWall')} />
-                  <div className="!block !bg-gray-200 dark:!bg-[#262730] !w-10 !h-6 !rounded-full !transition-colors"></div>
-                  <div className="!dot !absolute !left-1 !top-1 !bg-white !w-4 !h-4 !rounded-full !transition-transform"></div>
+                  <input type="checkbox" className="sr-only peer" {...register('boundaryWall')} />
+                  <div className="!block !bg-gray-200 dark:!bg-[#262730] peer-checked:!bg-[#27427f] !w-10 !h-6 !rounded-full !transition-colors"></div>
+                  <div className="!absolute !left-1 !top-1 !bg-white peer-checked:!translate-x-full !w-4 !h-4 !rounded-full !transition-transform"></div>
                 </div>
                 <div className="!ml-3 !text-[13px] !font-medium !text-gray-700 dark:!text-gray-300">Boundary Wall</div>
               </label>
@@ -84,9 +84,9 @@ export default function Step4Specifications() {
             <div className="!flex !items-center !h-[50px] !pl-1">
               <label className="!flex !items-center !cursor-pointer">
                 <div className="!relative">
-                  <input type="checkbox" className="!sr-only" {...register('hasPantry')} />
-                  <div className="!block !bg-gray-200 dark:!bg-[#262730] !w-10 !h-6 !rounded-full !transition-colors"></div>
-                  <div className="!dot !absolute !left-1 !top-1 !bg-white !w-4 !h-4 !rounded-full !transition-transform"></div>
+                  <input type="checkbox" className="sr-only peer" {...register('hasPantry')} />
+                  <div className="!block !bg-gray-200 dark:!bg-[#262730] peer-checked:!bg-[#27427f] !w-10 !h-6 !rounded-full !transition-colors"></div>
+                  <div className="!absolute !left-1 !top-1 !bg-white peer-checked:!translate-x-full !w-4 !h-4 !rounded-full !transition-transform"></div>
                 </div>
                 <div className="!ml-3 !text-[13px] !font-medium !text-gray-700 dark:!text-gray-300">Has Pantry</div>
               </label>
@@ -96,9 +96,9 @@ export default function Step4Specifications() {
             <div className="!flex !items-center !h-[50px] !pl-1">
               <label className="!flex !items-center !cursor-pointer">
                 <div className="!relative">
-                  <input type="checkbox" className="!sr-only" {...register('hasCentralAc')} />
-                  <div className="!block !bg-gray-200 dark:!bg-[#262730] !w-10 !h-6 !rounded-full !transition-colors"></div>
-                  <div className="!dot !absolute !left-1 !top-1 !bg-white !w-4 !h-4 !rounded-full !transition-transform"></div>
+                  <input type="checkbox" className="sr-only peer" {...register('hasCentralAc')} />
+                  <div className="!block !bg-gray-200 dark:!bg-[#262730] peer-checked:!bg-[#27427f] !w-10 !h-6 !rounded-full !transition-colors"></div>
+                  <div className="!absolute !left-1 !top-1 !bg-white peer-checked:!translate-x-full !w-4 !h-4 !rounded-full !transition-transform"></div>
                 </div>
                 <div className="!ml-3 !text-[13px] !font-medium !text-gray-700 dark:!text-gray-300">Central AC</div>
               </label>
@@ -108,19 +108,15 @@ export default function Step4Specifications() {
             <div className="!flex !items-center !h-[50px] !pl-1">
               <label className="!flex !items-center !cursor-pointer">
                 <div className="!relative">
-                  <input type="checkbox" className="!sr-only" {...register('heavyVehicleAccess')} />
-                  <div className="!block !bg-gray-200 dark:!bg-[#262730] !w-10 !h-6 !rounded-full !transition-colors"></div>
-                  <div className="!dot !absolute !left-1 !top-1 !bg-white !w-4 !h-4 !rounded-full !transition-transform"></div>
+                  <input type="checkbox" className="sr-only peer" {...register('heavyVehicleAccess')} />
+                  <div className="!block !bg-gray-200 dark:!bg-[#262730] peer-checked:!bg-[#27427f] !w-10 !h-6 !rounded-full !transition-colors"></div>
+                  <div className="!absolute !left-1 !top-1 !bg-white peer-checked:!translate-x-full !w-4 !h-4 !rounded-full !transition-transform"></div>
                 </div>
                 <div className="!ml-3 !text-[13px] !font-medium !text-gray-700 dark:!text-gray-300">Heavy Vehicle Access</div>
               </label>
             </div>
           )}
         </div>
-        <style>{`
-          input:checked ~ .dot { transform: translateX(100%); }
-          input:checked ~ .block { background-color: #2563eb; }
-        `}</style>
       </div>
 
     </div>

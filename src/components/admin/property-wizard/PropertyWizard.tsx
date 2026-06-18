@@ -187,7 +187,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           propertyAge: finalData.propertyAge || undefined,
           possessionStatus: finalData.possessionStatus || undefined,
           waterSupply: finalData.waterSupply || undefined,
-          powerBackup: finalData.powerBackup || undefined,
+          powerBackup: finalData.powerBackup ?? undefined,
           roadWidth: finalData.roadWidth || undefined,
           openSides: safeNum(finalData.openSides),
           plotLength: safeNum(finalData.plotLength),

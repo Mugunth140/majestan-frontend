@@ -47,7 +47,7 @@ export const specificationsSchema = z.object({
   possessionStatus: z.enum(['Ready To Move', 'Under Construction', 'Immediate', 'Future Date']).or(z.literal('')).optional(),
   parkingSpaces: z.string().optional(),
   waterSupply: z.string().optional(),
-  powerBackup: z.string().optional(),
+  powerBackup: z.boolean().optional(),
   roadWidth: z.string().optional(),
   openSides: z.string().optional(),
   plotLength: z.string().optional(),

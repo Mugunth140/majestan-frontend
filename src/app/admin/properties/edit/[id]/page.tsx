@@ -116,7 +116,7 @@ export default function EditPropertyPage() {
             propertyAge: det.propertyAge || undefined,
             possessionStatus: det.possessionStatus || undefined,
             waterSupply: det.waterSupply || "",
-            powerBackup: det.powerBackup || "",
+                            powerBackup: det.powerBackup ?? false,
             roadWidth: det.roadWidth || "",
             openSides: det.openSides != null ? String(det.openSides) : "",
             plotLength: det.plotLength != null ? String(det.plotLength) : "",

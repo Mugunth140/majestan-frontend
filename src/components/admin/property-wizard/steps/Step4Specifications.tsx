@@ -12,8 +12,8 @@ const FIELD_VISIBILITY_MAP: Record<string, string[]> = {
   plot: ['plotArea', 'areaUnit', 'plotSizeCents', 'plotLength', 'plotWidth', 'openSides', 'boundaryWall', 'roadWidth', 'propertyFacing', 'suitableFor'],
   farmland: ['plotArea', 'areaUnit', 'plotSizeCents', 'plotLength', 'plotWidth', 'openSides', 'boundaryWall', 'roadWidth', 'propertyFacing', 'suitableFor'],
   commercial: ['bathrooms', 'floorsOccupied', 'totalFloors', 'parkingSpaces', 'superBuiltUpArea', 'carpetArea', 'furnishing', 'hasPantry', 'hasCentralAc', 'powerBackup'],
-  coworking: ['minSeats', 'rentPerSeat', 'privateCabins', 'meetingRooms', 'availableWorkstations', 'hasRestroom', 'floorNumber', 'totalFloors', 'parkingSpaces', 'carpetArea', 'powerBackup'],
-  industrial: ['bathrooms', 'floorNumber', 'plotArea', 'builtUpArea', 'coveredArea', 'openArea', 'ceilingHeightFt', 'heavyVehicleAccess', 'powerBackup', 'roadWidth', 'truckParking', 'carParking', 'bikeParking', 'floorType', 'powerSupplyHp'],
+  coworking: [],
+  industrial: ['bathrooms', 'ceilingHeightFt', 'plotArea', 'builtUpArea', 'coveredArea', 'openArea', 'heavyVehicleAccess', 'powerBackup', 'roadWidth', 'truckParking', 'carParking', 'bikeParking', 'floorType', 'powerSupplyHp'],
   other: ['bedrooms', 'bathrooms', 'balconies', 'floorNumber', 'totalFloors', 'plotArea', 'builtUpArea', 'carpetArea', 'superBuiltUpArea', 'furnishing', 'parkingSpaces', 'propertyFacing', 'propertyAge', 'possessionStatus', 'waterSupply', 'powerBackup', 'roadWidth', 'openSides', 'plotLength', 'plotWidth', 'boundaryWall', 'suitableFor', 'hasPantry', 'hasCentralAc', 'ceilingHeightFt', 'heavyVehicleAccess'],
 };
 
@@ -201,14 +201,12 @@ export default function Step4Specifications() {
             <FloatingInput id="privateCabins" label="Private Cabins (nos)" type="number" registerProps={register('privateCabins')} error={errors.privateCabins?.message as string} />
             <FloatingInput id="meetingRooms" label="Meeting Rooms (nos)" type="number" registerProps={register('meetingRooms')} error={errors.meetingRooms?.message as string} />
             <FloatingInput id="availableWorkstations" label="Available Workstations" type="number" registerProps={register('availableWorkstations')} error={errors.availableWorkstations?.message as string} />
-            <ToggleField label="Restroom Available" fieldName="hasRestroom" />
-          </div>
-          <div className="!mt-6 !grid !grid-cols-2 md:!grid-cols-4 !gap-x-5 !gap-y-6">
             <FloatingInput id="carpetArea" label="Total Area (Sq Ft)" type="number" registerProps={register('carpetArea')} error={errors.carpetArea?.message as string} />
             <FloatingInput id="floorNumber" label="Floor No." type="number" registerProps={register('floorNumber')} error={errors.floorNumber?.message as string} />
             <FloatingInput id="totalFloors" label="Total Floors" type="number" registerProps={register('totalFloors')} error={errors.totalFloors?.message as string} />
             <FloatingInput id="parkingSpaces" label="Parking Spaces" type="number" registerProps={register('parkingSpaces')} error={errors.parkingSpaces?.message as string} />
-            <FloatingInput id="powerBackup" label="Power Backup" type="text" registerProps={register('powerBackup')} error={errors.powerBackup?.message as string} />
+            <ToggleField label="Restroom Available" fieldName="hasRestroom" />
+            <ToggleField label="Power Backup Available" fieldName="powerBackup" />
           </div>
         </div>
       )}
@@ -249,7 +247,7 @@ export default function Step4Specifications() {
             {show('furnishing') && <FloatingSelect id="furnishing" label="Furnishing" options={toOptions(['', 'Furnished', 'Semi Furnished', 'Unfurnished'])} registerProps={register('furnishing')} error={errors.furnishing?.message as string} />}
             {show('possessionStatus') && <FloatingSelect id="possessionStatus" label="Possession" options={toOptions(['', 'Ready To Move', 'Under Construction', 'Immediate', 'Future Date'])} registerProps={register('possessionStatus')} error={errors.possessionStatus?.message as string} />}
             {show('waterSupply') && <FloatingInput id="waterSupply" label="Water Supply" type="text" registerProps={register('waterSupply')} error={errors.waterSupply?.message as string} />}
-            {show('powerBackup') && <FloatingInput id="powerBackup" label="Power Backup" type="text" registerProps={register('powerBackup')} error={errors.powerBackup?.message as string} />}
+            {show('powerBackup') && <ToggleField label="Power Backup Available" fieldName="powerBackup" />}
             {show('roadWidth') && <FloatingInput id="roadWidth" label="Road Width (ft)" type="number" registerProps={register('roadWidth')} error={errors.roadWidth?.message as string} />}
             {show('openSides') && <FloatingInput id="openSides" label="Open Sides" type="number" registerProps={register('openSides')} error={errors.openSides?.message as string} />}
             {show('suitableFor') && <FloatingInput id="suitableFor" label="Suitable For" type="text" registerProps={register('suitableFor')} error={errors.suitableFor?.message as string} />}

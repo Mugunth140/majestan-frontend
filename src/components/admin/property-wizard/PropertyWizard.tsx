@@ -78,10 +78,9 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
   }, [currentStep]);
 
   const uploadImagesToR2 = async (images: File[]): Promise<{url: string, key: string}[]> => {
-    const uploadedUrls: {url: string, key: string}[] = [];
     const token = window.localStorage.getItem("majestan_access_token") || window.localStorage.getItem("majestan_user_auth");
 
-    for (const file of images) {
+    const uploadOne = async (file: File): Promise<{url: string, key: string}> => {
       const presignedRes = await fetch(
         `${API_BASE_URL}/properties/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
@@ -98,15 +97,16 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           body: file,
         });
         if (!uploadRes.ok) throw new Error("Failed to upload " + file.name + " to R2");
-        
+
         // We use createObjectURL for local immediate preview, while storing the real key for backend.
-        uploadedUrls.push({ url: URL.createObjectURL(file), key });
+        return { url: URL.createObjectURL(file), key };
       } catch (err) {
         console.error("Upload error:", err);
         throw new Error("R2 Upload Error: Check your Cloudflare R2 CORS settings. Make sure your bucket allows PUT requests from this origin.");
       }
-    }
-    return uploadedUrls;
+    };
+
+    return Promise.all(images.map(uploadOne));
   };
 
   const handleFinalSubmit = async (finalData: any) => {

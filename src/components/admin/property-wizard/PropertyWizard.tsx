@@ -198,6 +198,27 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           hasCentralAc: finalData.hasCentralAc,
           ceilingHeightFt: safeNum(finalData.ceilingHeightFt),
           heavyVehicleAccess: finalData.heavyVehicleAccess,
+          // Plot
+          plotSizeCents: safeNum(finalData.plotSizeCents),
+          // Coworking
+          minSeats: safeNum(finalData.minSeats),
+          rentPerSeat: safeNum(finalData.rentPerSeat),
+          privateCabins: safeNum(finalData.privateCabins),
+          meetingRooms: safeNum(finalData.meetingRooms),
+          availableWorkstations: safeNum(finalData.availableWorkstations),
+          hasRestroom: finalData.hasRestroom,
+          // Commercial
+          floorsOccupied: finalData.floorsOccupied || [],
+          // Industrial
+          truckParking: safeNum(finalData.truckParking),
+          carParking: safeNum(finalData.carParking),
+          bikeParking: safeNum(finalData.bikeParking),
+          coveredArea: safeNum(finalData.coveredArea),
+          openArea: safeNum(finalData.openArea),
+          floorType: finalData.floorType || undefined,
+          powerSupplyHp: safeNum(finalData.powerSupplyHp),
+          // Apartment
+          guestParking: finalData.guestParking,
         },
         amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
         files: allImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),

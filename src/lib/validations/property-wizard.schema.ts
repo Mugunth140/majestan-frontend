@@ -58,6 +58,32 @@ export const specificationsSchema = z.object({
   hasCentralAc: z.boolean().optional(),
   ceilingHeightFt: z.string().optional(),
   heavyVehicleAccess: z.boolean().optional(),
+
+  // Plot
+  plotSizeCents: z.string().optional(),
+
+  // Coworking
+  minSeats: z.string().optional(),
+  rentPerSeat: z.string().optional(),
+  privateCabins: z.string().optional(),
+  meetingRooms: z.string().optional(),
+  availableWorkstations: z.string().optional(),
+  hasRestroom: z.boolean().optional(),
+
+  // Commercial
+  floorsOccupied: z.array(z.string()).optional().default([]),
+
+  // Industrial
+  truckParking: z.string().optional(),
+  carParking: z.string().optional(),
+  bikeParking: z.string().optional(),
+  coveredArea: z.string().optional(),
+  openArea: z.string().optional(),
+  floorType: z.string().optional(),
+  powerSupplyHp: z.string().optional(),
+
+  // Apartment
+  guestParking: z.boolean().optional(),
 });
 
 export const amenitiesSchema = z.object({
@@ -90,7 +116,7 @@ export const availabilitySchema = z.object({
 export const floorPlansSchema = z.object({
   units: z.array(
     z.object({
-      unitType: z.string().min(1, 'Unit type is required'),
+      unitType: z.string().optional().default(''),
       title: z.string().min(1, 'Title is required'),
       price: z.string().optional(),
       sizeSqft: z.number().optional(),

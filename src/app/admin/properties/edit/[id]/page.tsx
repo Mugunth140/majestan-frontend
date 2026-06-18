@@ -128,6 +128,32 @@ export default function EditPropertyPage() {
             ceilingHeightFt: det.ceilingHeightFt != null ? String(det.ceilingHeightFt) : "",
             heavyVehicleAccess: det.heavyVehicleAccess ?? false,
 
+            // Plot
+            plotSizeCents: det.plotSizeCents != null ? String(det.plotSizeCents) : "",
+
+            // Coworking
+            minSeats: det.minSeats != null ? String(det.minSeats) : "",
+            rentPerSeat: det.rentPerSeat != null ? String(det.rentPerSeat) : "",
+            privateCabins: det.privateCabins != null ? String(det.privateCabins) : "",
+            meetingRooms: det.meetingRooms != null ? String(det.meetingRooms) : "",
+            availableWorkstations: det.availableWorkstations != null ? String(det.availableWorkstations) : "",
+            hasRestroom: det.hasRestroom ?? false,
+
+            // Commercial
+            floorsOccupied: Array.isArray(det.floorsOccupied) ? det.floorsOccupied : [],
+
+            // Industrial
+            truckParking: det.truckParking != null ? String(det.truckParking) : "",
+            carParking: det.carParking != null ? String(det.carParking) : "",
+            bikeParking: det.bikeParking != null ? String(det.bikeParking) : "",
+            coveredArea: det.coveredArea != null ? String(det.coveredArea) : "",
+            openArea: det.openArea != null ? String(det.openArea) : "",
+            floorType: det.floorType || "",
+            powerSupplyHp: det.powerSupplyHp != null ? String(det.powerSupplyHp) : "",
+
+            // Apartment
+            guestParking: det.guestParking ?? false,
+
             amenityIds: (p.propertyAmenities || []).map((a: any) => a.amenityId),
 
             units: (p.propertyUnits || []).map((u: any) => ({

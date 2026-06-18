@@ -55,9 +55,9 @@ export default function Step2Pricing({ isAdmin }: { isAdmin?: boolean }) {
 
         <div>
           <FloatingInput 
-            id="securityDeposit"
+            id="securityDeposit-or-booking"
             type="text"
-            label={listingType === 'Rent' ? 'Security Deposit (e.g. 1 Lk)' : 'Booking Amount (e.g. 5 Lk)'}
+            label={listingType === 'Rent' ? 'Security Deposit (e.g. 1 Lk)' : 'Registration Charges (e.g. 5 Lk)'}
             registerProps={register(listingType === 'Rent' ? 'securityDeposit' : 'bookingAmount')}
             error={errors.securityDeposit?.message as string || errors.bookingAmount?.message as string}
           />

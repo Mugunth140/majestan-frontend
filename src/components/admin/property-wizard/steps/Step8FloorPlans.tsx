@@ -85,14 +85,8 @@ export default function Step8FloorPlans() {
               <div className="!grid !grid-cols-1 md:!grid-cols-2 !gap-6">
                 <FloatingInput 
                   id={`units.${index}.title`}
-                  label="Title (e.g. 'Standard 2BHK')"
+                  label="Plan Title (e.g. 'Ground Floor Layout')"
                   registerProps={register(`units.${index}.title` as const)}
-                />
-                
-                <FloatingInput 
-                  id={`units.${index}.unitType`}
-                  label="Unit Type (e.g. '2bhk', 'office')"
-                  registerProps={register(`units.${index}.unitType` as const)}
                 />
 
                 <FloatingInput 

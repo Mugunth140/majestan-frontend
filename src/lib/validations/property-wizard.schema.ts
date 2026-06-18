@@ -131,3 +131,13 @@ const verificationSchema = z.object({
   approvalStatus: z.enum(['Pending', 'Approved', 'Rejected']).default('Pending'),
   publishImmediately: z.boolean().default(false),
 });
+
+export const faqsSchema = z.object({
+  faqs: z.array(
+    z.object({
+      question: z.string().min(5, 'Question must be at least 5 characters'),
+      answer: z.string().min(5, 'Answer must be at least 5 characters'),
+      section: z.string().default('overview'),
+    })
+  ).optional().default([]),
+});

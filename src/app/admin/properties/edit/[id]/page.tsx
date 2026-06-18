@@ -180,6 +180,12 @@ export default function EditPropertyPage() {
             availabilityStatus: "Available",
             publishImmediately: p.status === 'AVAILABLE' || p.status === 'available',
             seoSlug: p.slug || "",
+
+            faqs: (p.propertyFaqs || p.faqs || []).map((f: any) => ({
+              question: f.question || '',
+              answer: f.answer || '',
+              section: f.section || 'overview',
+            })),
           });
 
           setStep(1);

@@ -19,7 +19,10 @@ export default function Step6Media() {
   // ── File input ────────────────────────────────────────────
   const handleFiles = (files: FileList | File[]) => {
     const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-    setValue('images', [...images, ...newFiles], { shouldValidate: true, shouldDirty: true });
+    const slots = MAX_IMAGES - (existingImageUrls.length + images.length);
+    if (slots <= 0) return;
+    const allowed = newFiles.slice(0, slots);
+    setValue('images', [...images, ...allowed], { shouldValidate: true, shouldDirty: true });
   };
 
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
@@ -74,17 +77,35 @@ export default function Step6Media() {
   };
 
   const totalCount = existingImageUrls.length + images.length;
+  const MAX_IMAGES = 10;
+  const remaining = MAX_IMAGES - totalCount;
+  const atLimit = totalCount >= MAX_IMAGES;
 
   return (
     <div className="!space-y-8">
 
+      {/* Limit counter */}
+      <div className="!flex !items-center !justify-between">
+        <p className="!text-sm !text-gray-500 dark:!text-gray-400">
+          <span className={`!font-bold ${atLimit ? '!text-red-500' : '!text-gray-900 dark:!text-white'}`}>{totalCount}</span>
+          <span> / {MAX_IMAGES} images</span>
+        </p>
+        {atLimit && (
+          <span className="!text-xs !font-semibold !text-red-500 !bg-red-50 dark:!bg-red-500/10 !px-3 !py-1 !rounded-full">
+            Maximum {MAX_IMAGES} images reached
+          </span>
+        )}
+      </div>
+
       {/* Drop zone */}
       <div
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
+        onDragOver={atLimit ? undefined : onDragOver}
+        onDragLeave={atLimit ? undefined : onDragLeave}
+        onDrop={atLimit ? undefined : onDrop}
         className={`!w-full !rounded-[2rem] !border-2 !border-dashed !flex !flex-col !items-center !justify-center !p-12 !text-center !transition-all !duration-200 ${
-          isDragging
+          atLimit
+            ? '!border-gray-100 dark:!border-[#1e1f2a] !bg-gray-50/30 dark:!bg-[#0f1015]/50 !opacity-60 !cursor-not-allowed'
+            : isDragging
             ? '!border-blue-500 !bg-blue-50 dark:!bg-blue-900/20'
             : '!border-gray-200 dark:!border-[#262730] !bg-gray-50/50 dark:!bg-[#0f1015] hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] hover:!border-gray-300 dark:hover:!border-gray-600'
         }`}
@@ -96,9 +117,11 @@ export default function Step6Media() {
           Drag and drop your images here
         </h3>
         <p className="!text-sm !text-gray-500 dark:!text-gray-400 !mb-6">
-          Support for JPG, PNG, WEBP. Max 5MB per file. First image becomes the cover photo.
+          {atLimit
+            ? `Limit reached. Remove an image to upload more.`
+            : `Support for JPG, PNG, WEBP. Max 5MB per file. ${remaining} slot${remaining === 1 ? '' : 's'} remaining. First image becomes the cover photo.`}
         </p>
-        <label className="!inline-flex !items-center !justify-center !gap-2 !px-6 !py-2.5 !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] hover:!border-gray-300 dark:hover:!border-gray-600 hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] !text-gray-700 dark:!text-gray-300 !text-sm !font-medium !rounded-xl !shadow-sm !transition-all active:!scale-[0.98] !cursor-pointer">
+        <label className={`!inline-flex !items-center !justify-center !gap-2 !px-6 !py-2.5 !bg-white dark:!bg-[#171821] !border !border-gray-200 dark:!border-[#262730] hover:!border-gray-300 dark:hover:!border-gray-600 hover:!bg-gray-50 dark:hover:!bg-[#1c1d27] !text-gray-700 dark:!text-gray-300 !text-sm !font-medium !rounded-xl !shadow-sm !transition-all active:!scale-[0.98] ${atLimit ? '!opacity-40 !cursor-not-allowed !pointer-events-none' : '!cursor-pointer'}`}>
           <ImagePlus size={18} />
           Browse Files
           <input
@@ -107,6 +130,7 @@ export default function Step6Media() {
             accept="image/*"
             className="!hidden"
             onChange={handleFileInput}
+            disabled={atLimit}
           />
         </label>
       </div>

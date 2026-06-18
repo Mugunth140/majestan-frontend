@@ -31,6 +31,8 @@ function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
   };
 }
 
+import { FaqSection } from "@/components/site/property/sections/FaqSection";
+
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
@@ -432,6 +434,13 @@ export default async function PropertySectionPage({
                   sectionKey={sectionKey}
                   property={property}
                 />
+                
+                {/* Per-Section FAQs */}
+                {(property.faqs || []).filter(f => f.section === sectionKey).length > 0 && (
+                  <div className="mt-8! bg-white! rounded-[24px]! p-8! border! border-gray-200! shadow-sm!">
+                    <FaqSection faqs={(property.faqs || []).filter(f => f.section === sectionKey)} />
+                  </div>
+                )}
               </div>
 
               {/* Sidebar */}

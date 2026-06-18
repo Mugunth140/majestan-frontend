@@ -5,7 +5,7 @@ import { usePropertyWizardStore } from '@/store/usePropertyWizardStore';
 import { 
   basicInfoSchema, pricingSchema, specificationsSchema, 
   amenitiesSchema, mediaSchema, ownerInfoSchema, 
-  availabilitySchema, floorPlansSchema
+  availabilitySchema, floorPlansSchema, faqsSchema
 } from '@/lib/validations/property-wizard.schema';
 import { z } from 'zod';
 import { toast } from '@/components/ui/toast-store';
@@ -24,6 +24,7 @@ import Step6Media from './steps/Step6Media';
 import Step7OwnerInfo from './steps/Step7OwnerInfo';
 import Step8FloorPlans from './steps/Step8FloorPlans';
 import Step9Availability from './steps/Step9Availability';
+import Step10Faqs from './steps/Step10Faqs';
 
 import type { AdminCity, AdminSublocation } from '@/lib/location-options';
 
@@ -60,6 +61,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     { id: 7, title: 'Owner', component: Step7OwnerInfo, schema: ownerInfoSchema },
     { id: 8, title: 'Floor Plans', component: Step8FloorPlans, schema: floorPlansSchema },
     { id: 9, title: 'Availability', component: Step9Availability, schema: availabilitySchema },
+    { id: 10, title: 'FAQs', component: Step10Faqs, schema: faqsSchema },
   ];
 
   const currentStepConfig = steps.find(s => s.id === currentStep) || steps[0];
@@ -223,6 +225,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
         files: allImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),
         units: finalData.units || [],
+        faqs: (finalData.faqs || []).filter((f: any) => f.question && f.answer),
       };
       
       console.log('Sending Property Payload:', payload);

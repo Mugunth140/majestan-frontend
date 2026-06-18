@@ -31,6 +31,14 @@ type SeoPageData = {
   robots?: string;
 };
 
+export type SeoPropertyFaq = {
+  id: number;
+  question: string;
+  answer: string;
+  section: string;
+  sortOrder: number;
+};
+
 export type SeoProperty = {
   id: number;
   propertyCode: string | null;
@@ -51,6 +59,7 @@ export type SeoProperty = {
   updatedAt: string;
   details: SeoPropertyDetails;
   images: SeoPropertyImage[];
+  faqs?: SeoPropertyFaq[];
   requestedSlug: string;
   canonicalSlug: string;
   shouldRedirect: boolean;
@@ -109,6 +118,7 @@ export async function getPropertyBySeoSlug(slug: string): Promise<SeoProperty | 
     data.images = data.images || data.propertyImages || data.__propertyImages__ || [];
     data.details = data.details || data.propertyDetails || data.__propertyDetails__ || null;
     data.locations = data.locations || data.propertyLocations || data.__propertyLocations__ || [];
+    data.faqs = data.faqs || data.propertyFaqs || data.__propertyFaqs__ || [];
   }
   
   return data as SeoProperty;

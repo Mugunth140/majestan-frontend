@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   Building2,
   Calendar,
-  Compass,
   Shield,
   Zap,
   Droplets,
@@ -23,10 +22,10 @@ import {
   Images,
   ArrowRight,
   Tag,
-  Clock,
   Info,
 } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { FaqSection } from "@/components/site/property/sections/FaqSection";
 
 type PropertyDetailsViewProps = {
   property: SeoProperty;
@@ -417,6 +416,9 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                 ))}
               </div>
             </div>
+
+            {/* FAQ Section (Overview only) */}
+            <FaqSection faqs={(property.faqs || []).filter(f => f.section === 'overview')} />
           </div>
 
           {/* Sidebar (Right Column) */}

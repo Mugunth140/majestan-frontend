@@ -232,11 +232,15 @@ export default function Step6Media() {
                     : '!border-gray-200 dark:!border-[#262730]'
                 }`}
               >
-                <img
-                  src={previewUrls[i] ?? ''}
-                  alt="Preview"
-                  className="!w-full !h-full !object-cover !pointer-events-none !transition-transform !duration-300 group-hover:!scale-110"
-                />
+                {previewUrls[i] ? (
+                  <img
+                    src={previewUrls[i]}
+                    alt="Preview"
+                    className="!w-full !h-full !object-cover !pointer-events-none !transition-transform !duration-300 group-hover:!scale-110"
+                  />
+                ) : (
+                  <div className="!w-full !h-full !bg-gray-100 dark:!bg-[#262730] !animate-pulse" />
+                )}
                 <div className="!absolute !inset-0 !bg-black/40 !opacity-0 group-hover:!opacity-100 !transition-opacity !duration-200" />
 
                 {/* Drag handle */}

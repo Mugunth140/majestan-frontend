@@ -69,10 +69,10 @@ export const parsePseoSlug = (slug: string): ParsedPseoData | null => {
     }
   }
 
-  if (propertyType || listingType || location || city) {
+  if (propertyType && city) {
     return {
       propertyType,
-      listingType,
+      listingType: listingType || "Sell", // Default to Sell if unspecified
       location,
       city,
       bedrooms

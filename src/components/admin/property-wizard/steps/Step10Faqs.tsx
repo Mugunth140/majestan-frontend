@@ -81,7 +81,7 @@ export default function Step10Faqs() {
               </div>
 
               {/* Hidden section input */}
-              <input type="hidden" {...register(`faqs.${index}.section` as const)} value={activeTab} />
+              <input type="hidden" {...register(`faqs.${index}.section` as const)} />
 
               <div className="!space-y-4">
                 <FloatingInput

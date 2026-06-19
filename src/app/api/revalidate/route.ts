@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
+const SECTION_PATHS = [
+  "",           // root slug
+  "/amenities",
+  "/floor-plan",
+  "/locality",
+  "/photos",
+  "/price",
+  "/specifications",
+  "/videos",
+];
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { slug, secret } = body;
 
-    // Basic security check - in production use an env variable
     if (secret !== process.env.REVALIDATE_SECRET && secret !== "majestan-isr-secret") {
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
@@ -15,10 +25,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Slug is required" }, { status: 400 });
     }
 
-    // Revalidate the main property page and all its section pages
-    revalidatePath(`/${slug}`, "layout");
+    // Revalidate the root slug and all known section sub-pages
+    for (const section of SECTION_PATHS) {
+      revalidatePath(`/${slug}${section}`, "page");
+    }
 
-    return NextResponse.json({ revalidated: true, slug });
+    return NextResponse.json({ revalidated: true, slug, sections: SECTION_PATHS.length });
   } catch (err) {
     return NextResponse.json({ message: "Error revalidating" }, { status: 500 });
   }

@@ -1,4 +1,4 @@
-import { type SeoProperty } from "@/lib/api/property-by-slug";
+import { type SeoProperty, type SeoPropertyUnit } from "@/lib/api/property-by-slug";
 import {
   Building2,
   BedDouble,
@@ -19,19 +19,33 @@ type FloorPlanSectionProps = {
 
 export function FloorPlanSection({ property }: FloorPlanSectionProps) {
   const details = property.details;
-  const hasFloorPlanImage = false; // API doesn't provide floor plan images yet
 
-  const formatArea = (area: string) => {
+  // Units that have a floor plan image uploaded
+  const unitsWithFloorPlans: SeoPropertyUnit[] = (property.units ?? []).filter(
+    (u) => !!u.floorPlanImageUrl
+  );
+  const hasFloorPlanImages = unitsWithFloorPlans.length > 0;
+
+  const formatArea = (area: string | null | undefined) => {
+    if (!area) return "—";
     const num = parseFloat(area);
     if (isNaN(num)) return area;
     return num.toLocaleString("en-IN");
+  };
+
+  const formatPrice = (price: string | null | undefined) => {
+    if (!price) return null;
+    const n = parseFloat(price);
+    if (!isFinite(n) || n === 0) return null;
+    if (n >= 10_000_000) return `₹${(n / 10_000_000).toFixed(2)} Cr`;
+    if (n >= 100_000) return `₹${(n / 100_000).toFixed(2)} Lk`;
+    return `₹${n.toLocaleString("en-IN")}`;
   };
 
   const propertyTypeLabel = property.propertyType
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  // Key measurements derived from available data
   const measurements = [
     {
       label: "Total Area",
@@ -57,7 +71,7 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
 
   return (
     <div className="space-y-8!">
-      {/* Floor Plan Display */}
+      {/* Floor Plan Image Display */}
       <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-center! gap-4! mb-8!">
           <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
@@ -71,9 +85,38 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
           </div>
         </div>
 
-        {hasFloorPlanImage ? (
-          <div className="relative! rounded-[20px]! overflow-hidden! border! border-gray-200!">
-            {/* Floor plan image would go here */}
+        {hasFloorPlanImages ? (
+          <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
+            {unitsWithFloorPlans.map((unit) => (
+              <div
+                key={unit.id}
+                className="rounded-[20px]! overflow-hidden! border! border-gray-200! bg-white! shadow-sm!"
+              >
+                <div className="relative! aspect-[4/3]! overflow-hidden!">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={unit.floorPlanImageUrl!}
+                    alt={unit.title ?? "Floor Plan"}
+                    className="w-full! h-full! object-contain! bg-gray-50!"
+                  />
+                </div>
+                {(unit.title || unit.price || unit.sizeSqft) && (
+                  <div className="p-4! border-t! border-gray-100! flex! items-center! justify-between! gap-4!">
+                    <p className="font-medium! text-gray-900! text-sm! truncate!">
+                      {unit.title ?? propertyTypeLabel}
+                    </p>
+                    <div className="flex! items-center! gap-3! shrink-0! text-sm! text-gray-500!">
+                      {unit.sizeSqft && (
+                        <span>{formatArea(unit.sizeSqft)} sq.ft</span>
+                      )}
+                      {unit.price && formatPrice(unit.price) && (
+                        <span className="font-semibold! text-gray-900!">{formatPrice(unit.price)}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         ) : (
           <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-20! px-6! text-center!">

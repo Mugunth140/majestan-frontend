@@ -104,6 +104,7 @@ const VALID_SECTIONS = new Set(Object.keys(SECTION_META));
 function formatPrice(price: string): string {
   const num = parseFloat(price);
   if (isNaN(num)) return price;
+  if (num === 0) return "Price on Request";
   if (num >= 10000000) return `₹ ${(num / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
   if (num >= 100000) return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lac`;
   return new Intl.NumberFormat("en-IN", {
@@ -160,8 +161,13 @@ export async function generateMetadata({
 
   try {
     property = await getPropertyBySeoSlug(slug);
-  } catch {
-    property = null;
+  } catch (err) {
+    console.error(`[generateMetadata] Failed to fetch property for slug "${slug}":`, err);
+    return {
+      title: "Majestan Realty",
+      description: "Browse premium properties in India.",
+      robots: { index: false, follow: true },
+    };
   }
 
   if (property) {
@@ -367,8 +373,9 @@ export default async function PropertySectionPage({
 
   try {
     property = await getPropertyBySeoSlug(slug);
-  } catch {
-    property = null;
+  } catch (err) {
+    console.error(`[PropertySectionPage] Failed to fetch property for slug "${slug}":`, err);
+    throw err; // Let Next.js Error Boundary handle it instead of caching a 404
   }
 
   if (property) {

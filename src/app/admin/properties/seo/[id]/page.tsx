@@ -223,6 +223,18 @@ export default function PropertySeoEditPage() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast.success('SEO data saved successfully');
+
+      // Trigger ISR revalidation for all property section pages
+      if (property?.slug) {
+        fetch(`/api/revalidate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: property.slug,
+            secret: process.env.NEXT_PUBLIC_REVALIDATE_SECRET ?? 'majestan-isr-secret',
+          }),
+        }).catch(() => {}); // fire-and-forget
+      }
     } catch {
       toast.error('Failed to save SEO data');
     } finally {

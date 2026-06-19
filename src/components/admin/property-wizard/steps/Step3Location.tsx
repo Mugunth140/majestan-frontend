@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FloatingInput, FloatingSelect } from '../ui/FloatingInput';
 import type { AdminCity, AdminSublocation } from '@/lib/location-options';
@@ -11,6 +11,7 @@ interface Step3LocationProps {
 export default function Step3Location({ availableCities, availableSublocations }: Step3LocationProps) {
   const { register, formState: { errors }, watch, setValue } = useFormContext();
   const cityId = watch('cityId');
+  const isFirstMount = useRef(true);
 
   const filteredSublocations = React.useMemo(() => {
     if (!cityId) return [];
@@ -25,7 +26,12 @@ export default function Step3Location({ availableCities, availableSublocations }
         setValue('country', cityData.country_name || 'India');
         setValue('city', cityData.city_name);
       }
+      // Reset sublocationId when city changes (skip on first mount in edit mode)
+      if (!isFirstMount.current) {
+        setValue('sublocationId', '');
+      }
     }
+    isFirstMount.current = false;
   }, [cityId, availableCities, setValue]);
 
   return (

@@ -1,6 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ImagePlus, X, UploadCloud, GripVertical, Star } from 'lucide-react';
+import { toast } from '@/components/ui/toast-store';
+
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE_MB = 5;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export default function Step6Media() {
   const { watch, setValue } = useFormContext();
@@ -13,15 +18,42 @@ export default function Step6Media() {
   const [isDragging, setIsDragging] = useState(false);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [draggingOver, setDraggingOver] = useState<number | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
+  // ── Manage object URLs to prevent memory leaks ────────────
+  useEffect(() => {
+    const urls = images.map(img => URL.createObjectURL(img));
+    setPreviewUrls(urls);
+    return () => {
+      urls.forEach(u => URL.revokeObjectURL(u));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images.length, images.map(i => i.name + i.size).join(',')]);
+
   // ── File input ────────────────────────────────────────────
   const handleFiles = (files: FileList | File[]) => {
-    const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+    const rejected: string[] = [];
+    const validFiles = Array.from(files).filter(f => {
+      if (!ALLOWED_MIME_TYPES.includes(f.type)) {
+        rejected.push(`${f.name}: unsupported format (JPG, PNG, WEBP only)`);
+        return false;
+      }
+      if (f.size > MAX_FILE_SIZE_BYTES) {
+        rejected.push(`${f.name}: exceeds ${MAX_FILE_SIZE_MB}MB limit`);
+        return false;
+      }
+      return true;
+    });
+
+    if (rejected.length > 0) {
+      toast.error(`${rejected.length} file(s) rejected:\n${rejected.join('\n')}`);
+    }
+
     const slots = MAX_IMAGES - (existingImageUrls.length + images.length);
     if (slots <= 0) return;
-    const allowed = newFiles.slice(0, slots);
+    const allowed = validFiles.slice(0, slots);
     setValue('images', [...images, ...allowed], { shouldValidate: true, shouldDirty: true });
   };
 
@@ -127,7 +159,7 @@ export default function Step6Media() {
           <input
             type="file"
             multiple
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             className="!hidden"
             onChange={handleFileInput}
             disabled={atLimit}
@@ -201,7 +233,7 @@ export default function Step6Media() {
                 }`}
               >
                 <img
-                  src={URL.createObjectURL(img)}
+                  src={previewUrls[i] ?? ''}
                   alt="Preview"
                   className="!w-full !h-full !object-cover !pointer-events-none !transition-transform !duration-300 group-hover:!scale-110"
                 />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AdminPagination } from "@/components/admin/ui/AdminPagination";
 import { API_BASE_URL } from "@/lib/api";
 import { 
@@ -9,6 +9,7 @@ import {
   Filter, 
   Edit, 
   Trash2, 
+  Loader2,
   Eye,
   CheckCircle,
   XCircle,
@@ -29,8 +30,18 @@ export default function AdminPropertiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   const fetchProperties = async (searchQuery = search, page = currentPage) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setLoading(true);
+    setError(null);
     try {
       const token = window.localStorage.getItem("majestan_access_token");
       const url = new URL(`${API_BASE_URL}/admin/properties/${filterType}`);
@@ -40,18 +51,26 @@ export default function AdminPropertiesPage() {
       if (listingTypeFilter !== "all") url.searchParams.append("listingType", listingTypeFilter);
       
       const res = await fetch(url.toString(), {
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Authorization": `Bearer ${token}` },
+        signal: controller.signal
       });
       if (res.ok) {
         const json = await res.json();
         const arr = json.data?.items || json.items || json.data || json || [];
         setProperties(Array.isArray(arr) ? arr : []);
         setTotalItems(json.data?.total || json.total || 0);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setError(err.message || "Failed to load properties");
       }
-    } catch (e) {
+    } catch (e: any) {
+      if (e.name === 'AbortError') return;
       console.error(e);
+      setError("Network error — could not fetch properties");
     } finally {
-      setLoading(false);
+      if (abortControllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   };
 
@@ -183,9 +202,20 @@ export default function AdminPropertiesPage() {
           </form>
         </div>
 
-        {/* Table */}
-        <div className="!overflow-x-auto">
-          <table className="!w-full !text-[14px] !text-left !text-gray-500 dark:!text-gray-400">
+        {error ? (
+          <div className="!flex !flex-col !items-center !justify-center !py-20 !text-gray-500">
+            <span className="!text-red-500 !mb-2"><XCircle size={40} /></span>
+            <p className="!text-[15px] !font-medium !text-red-500">{error}</p>
+            <button onClick={() => fetchProperties()} className="!mt-4 !px-4 !py-2 !text-sm !bg-blue-50 !text-blue-600 !rounded-lg !font-medium">Try Again</button>
+          </div>
+        ) : loading ? (
+          <div className="!flex !items-center !justify-center !py-20">
+            <Loader2 className="!w-8 !h-8 !text-blue-600 !animate-spin" />
+          </div>
+        ) : (
+          /* Table */
+          <div className="!overflow-x-auto">
+            <table className="!w-full !text-[14px] !text-left !text-gray-500 dark:!text-gray-400">
             <thead className="!text-[12px] !text-gray-400 !uppercase !bg-gray-50 dark:!bg-[#1c1d27]/50">
               <tr>
                 <th scope="col" className="!px-6 !py-4 !font-medium !text-center">Property</th>
@@ -196,16 +226,7 @@ export default function AdminPropertiesPage() {
               </tr>
             </thead>
             <tbody className="!divide-y !divide-gray-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="!px-6 !py-12 !text-center !text-gray-500 dark:!text-gray-400 !align-middle">
-                    <div className="!flex !justify-center !items-center !gap-2">
-                      <div className="!w-4 !h-4 !rounded-full !border-2 !border-gray-300 !border-t-gray-900 !animate-spin" />
-                      Loading properties...
-                    </div>
-                  </td>
-                </tr>
-              ) : properties.length === 0 ? (
+              {properties.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="!px-6 !py-12 !text-center !text-gray-500 dark:!text-gray-400 !align-middle">
                     No properties found. Try adjusting your filters.
@@ -256,7 +277,8 @@ export default function AdminPropertiesPage() {
               )}
             </tbody>
           </table>
-        </div>
+          </div>
+        )}
         
         {/* Pagination controls */}
         {!loading && properties.length > 0 && (

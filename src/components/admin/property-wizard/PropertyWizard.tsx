@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePropertyWizardStore } from '@/store/usePropertyWizardStore';
+import { useUserAuthStore } from '@/store/userAuthStore';
 import { 
   basicInfoSchema, pricingSchema, specificationsSchema, 
   amenitiesSchema, mediaSchema, ownerInfoSchema, 
@@ -43,11 +44,12 @@ const locationSchema = z.object({
   country: z.string().default('India'),
   addressLine1: z.string().min(5, 'Address is required'),
   addressLine2: z.string().optional(),
-  pincode: z.string().min(6, 'Valid pincode required'),
+  pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Invalid pincode format'),
 });
 
 export default function PropertyWizard({ isAdmin, availableCities, availableSublocations, amenities, editPropertyId }: PropertyWizardProps) {
   const { currentStep, setStep, formData, updateFormData, clearWizard } = usePropertyWizardStore();
+  const userToken = useUserAuthStore(s => s.token);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -78,7 +80,10 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
   }, [currentStep]);
 
   const uploadImagesToR2 = async (images: File[]): Promise<{url: string, key: string}[]> => {
-    const token = window.localStorage.getItem("majestan_access_token") || window.localStorage.getItem("majestan_user_auth");
+    // Admin token from localStorage; user token from Zustand store (avoids reading the full persisted JSON object)
+    const token = isAdmin
+      ? window.localStorage.getItem("majestan_access_token")
+      : userToken;
 
     const uploadOne = async (file: File): Promise<{url: string, key: string}> => {
       const presignedRes = await fetch(
@@ -223,14 +228,16 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           guestParking: finalData.guestParking,
         },
         amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
-        files: allImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key })),
+        files: allImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key, fileKey: key })),
         units: finalData.units || [],
         faqs: (finalData.faqs || []).filter((f: any) => f.question && f.answer),
       };
       
       console.log('Sending Property Payload:', payload);
 
-      const token = window.localStorage.getItem(isAdmin ? "majestan_access_token" : "majestan_user_auth");
+      const token = isAdmin
+        ? window.localStorage.getItem("majestan_access_token")
+        : userToken;
       
       let endpoint = '';
       let method = '';

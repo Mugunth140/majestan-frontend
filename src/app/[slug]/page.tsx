@@ -85,8 +85,13 @@ export async function generateMetadata({
 
   try {
     property = await getPropertyBySeoSlug(slug);
-  } catch {
-    property = null;
+  } catch (err) {
+    console.error(`[generateMetadata] Failed to fetch property for slug "${slug}":`, err);
+    return {
+      title: "Majestan Realty",
+      description: "Browse premium properties in India.",
+      robots: { index: false, follow: true },
+    };
   }
 
   if (property) {
@@ -292,8 +297,9 @@ export default async function SlugPage({
 
   try {
     property = await getPropertyBySeoSlug(slug);
-  } catch {
-    property = null;
+  } catch (err) {
+    console.error(`[SlugPage] Failed to fetch property for slug "${slug}":`, err);
+    throw err; // Let Next.js Error Boundary handle it instead of caching a 404
   }
 
   if (property) {

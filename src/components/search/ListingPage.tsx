@@ -81,6 +81,7 @@ function formatPrice(value: string | number | undefined | null): string {
   if (!value) return "Price on Request";
   const num = Number(value);
   if (isNaN(num)) return String(value);
+  if (num === 0) return "Price on Request";
   if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
   if (num >= 100000) return `₹${(num / 100000).toFixed(2)} L`;
   return `₹${num.toLocaleString("en-IN")}`;

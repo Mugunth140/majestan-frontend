@@ -3,6 +3,8 @@ import { useFormContext, useFieldArray } from 'react-hook-form';
 import { Plus, Trash2, UploadCloud, FileImage } from 'lucide-react';
 import { FloatingInput } from '../ui/FloatingInput';
 import { API_BASE_URL } from '@/lib/api';
+import { useUserAuthStore } from '@/store/userAuthStore';
+import { toast } from '@/components/ui/toast-store';
 
 const FLOOR_PLAN_LABELS: Record<string, string> = {
   apartment: 'Upload Floor Plan',
@@ -22,6 +24,8 @@ export default function Step8FloorPlans() {
     name: "units"
   });
 
+  const token = useUserAuthStore(s => s.token);
+
   const propertyType = watch('propertyType') || 'apartment';
   const headerLabel = FLOOR_PLAN_LABELS[propertyType] || 'Upload Floor Plan';
 
@@ -33,7 +37,6 @@ export default function Step8FloorPlans() {
 
     setUploadingIndex(index);
     try {
-      const token = window.localStorage.getItem("majestan_access_token") || window.localStorage.getItem("majestan_user_auth");
       const presignedRes = await fetch(
         `${API_BASE_URL}/properties/presigned-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -53,7 +56,7 @@ export default function Step8FloorPlans() {
       setValue(`units.${index}.floorPlanImageKey`, data.key, { shouldDirty: true });
     } catch (err) {
       console.error(err);
-      alert("Failed to upload image. Please try again.");
+          toast.error("Failed to upload image. Please try again.");
     } finally {
       setUploadingIndex(null);
     }
@@ -99,7 +102,7 @@ export default function Step8FloorPlans() {
                   id={`units.${index}.sizeSqft`}
                   label="Area (Sq.Ft)"
                   type="number"
-                  registerProps={register(`units.${index}.sizeSqft` as const, { valueAsNumber: true })}
+                  registerProps={register(`units.${index}.sizeSqft` as const, { setValueAs: (v) => v === "" ? undefined : Number(v) })}
                 />
               </div>
 

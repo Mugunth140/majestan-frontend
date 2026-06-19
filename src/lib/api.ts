@@ -56,8 +56,8 @@ type ApiEnvelope<T> = {
 
 const DEFAULT_API_BASE_URL = "http://localhost:5000/api/v1";
 const SERVER_API_BASE_URL =
-  process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  process.env.API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
   DEFAULT_API_BASE_URL;
 
 const BROWSER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL 

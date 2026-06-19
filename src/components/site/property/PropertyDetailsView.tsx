@@ -1,5 +1,5 @@
 import Link from "next/link";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import {
   MapPin,
@@ -355,7 +355,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
               {property.description ? (
                 <div
                   className="prose! max-w-none! text-gray-600! font-light! leading-loose! [&_p]:mb-6! [&_h3]:text-xl! [&_h3]:font-semibold! [&_h3]:text-gray-900! [&_h3]:mt-10! [&_h3]:mb-4! [&_ul]:list-disc! [&_ul]:pl-5! [&_li]:mb-2! [&_strong]:font-medium! [&_strong]:text-gray-900!"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(property.description) }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(property.description, { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['h1', 'h2', 'img']) }) }}
                 />
               ) : (
                 <p className="text-gray-500! font-light! italic!">

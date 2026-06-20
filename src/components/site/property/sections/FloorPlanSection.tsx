@@ -96,23 +96,23 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
         </div>
 
         {hasFloorPlanImages ? (
-          <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
+          <div className="grid! grid-cols-1! gap-8!">
             {floorPlansToDisplay.map((fp, idx) => (
               <div
                 key={idx}
                 className="rounded-[20px]! overflow-hidden! border! border-gray-200! bg-white! shadow-sm!"
               >
-                <div className="relative! aspect-[4/3]! overflow-hidden!">
+                <div className="relative! w-full! h-[60vh]! overflow-hidden! bg-gray-50!">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={fp.imageUrl!}
                     alt={fp.title ?? "Floor Plan"}
-                    className="w-full! h-full! object-contain! bg-gray-50!"
+                    className="w-full! h-full! object-contain!"
                   />
                 </div>
                 {fp.title && (
                   <div className="p-4! border-t! border-gray-100! flex! items-center! justify-between! gap-4!">
-                    <p className="font-medium! text-gray-900! text-sm! truncate!">
+                    <p className="font-medium! text-gray-900! text-lg! truncate!">
                       {fp.title}
                     </p>
                   </div>

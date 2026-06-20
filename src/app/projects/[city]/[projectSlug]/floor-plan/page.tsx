@@ -30,12 +30,12 @@ export default async function ProjectFloorPlanPage({ params }: { params: Promise
     <section className="bg-white! p-6! rounded-xl! shadow-sm!">
       <h2 className="text-2xl! font-bold! text-gray-900! mb-6!">Floor Plans</h2>
       {floorPlansToDisplay.length > 0 ? (
-        <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
+        <div className="grid! grid-cols-1! gap-8!">
           {floorPlansToDisplay.map((unit: any, index: number) => (
             <div key={index} className="border! border-gray-200! rounded-xl! overflow-hidden! hover:shadow-lg! transition-shadow!">
-              <div className="aspect-[4/3]! bg-gray-100! relative! flex! items-center! justify-center!">
+              <div className="w-full! h-[60vh]! bg-gray-50! relative! flex! items-center! justify-center!">
                 {unit.imageUrl ? (
-                  <Image src={unit.imageUrl} alt={unit.title || 'Floor Plan'} fill className="object-cover!" />
+                  <Image src={unit.imageUrl} alt={unit.title || 'Floor Plan'} fill className="object-contain!" />
                 ) : (
                   <span className="text-gray-400! font-medium!">No Plan Image Available</span>
                 )}
@@ -44,7 +44,7 @@ export default async function ProjectFloorPlanPage({ params }: { params: Promise
                 <div className="p-4! border-t! border-gray-200!">
                   <div className="flex! justify-between! items-start!">
                     <div>
-                      <h3 className="text-lg! font-bold! text-gray-900!">{unit.title}</h3>
+                      <h3 className="text-xl! font-bold! text-gray-900!">{unit.title}</h3>
                     </div>
                   </div>
                 </div>

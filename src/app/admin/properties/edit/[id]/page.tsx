@@ -98,6 +98,9 @@ export default function EditPropertyPage() {
             country: p.country || "India",
             addressLine1: loc.address || "",
             addressLine2: loc.landmark || "",
+            latitude: loc.latitude ? Number(loc.latitude) : undefined,
+            longitude: loc.longitude ? Number(loc.longitude) : undefined,
+            localityData: loc.localityData || { categories: [], connectivity: [] },
             pincode: loc.pincode || "",
 
             bedrooms: det.bedrooms != null ? String(det.bedrooms) : "",

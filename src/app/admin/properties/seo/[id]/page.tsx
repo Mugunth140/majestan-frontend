@@ -458,6 +458,31 @@ export default function PropertySeoEditPage() {
                 <p className="!text-[13px] !font-semibold !text-gray-300 !uppercase !tracking-wider !mb-5">
                   Locality Content
                 </p>
+                <div className="!flex !justify-end !mb-4">
+                  <button
+                    onClick={async () => {
+                      try {
+                        const token = window.localStorage.getItem('majestan_access_token');
+                        toast.info('Generating Locality Data from Google Maps...');
+                        const res = await fetch(`${API_BASE_URL}/admin/seo/properties/${id}/generate-locality`, {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (!res.ok) {
+                          const err = await res.json().catch(() => ({}));
+                          throw new Error(err.message || 'Failed to generate');
+                        }
+                        toast.success('Locality Data Generated Successfully!');
+                        fetchData(); // reload
+                      } catch (e: any) {
+                        toast.error(e.message);
+                      }
+                    }}
+                    className="!px-4 !py-2 !bg-[#27427f] !text-white !rounded-lg !text-sm !font-medium hover:!bg-[#1c2f5a] !transition-colors"
+                  >
+                    Generate Nearby Places from Google Maps
+                  </button>
+                </div>
                 <div className="!space-y-6">
                   <FieldGroup>
                     <label className={LABEL_CLASS}>Content: Overview</label>

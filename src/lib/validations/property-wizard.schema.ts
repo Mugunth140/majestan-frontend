@@ -141,3 +141,21 @@ export const faqsSchema = z.object({
     })
   ).optional().default([]),
 });
+
+export const localitiesSchema = z.object({
+  localityData: z.object({
+    categories: z.array(z.object({
+      title: z.string(),
+      icon: z.string(),
+      places: z.array(z.object({
+        name: z.string(),
+        distance: z.string(),
+      }))
+    })).optional().default([]),
+    connectivity: z.array(z.object({
+      icon: z.string(),
+      label: z.string(),
+      detail: z.string()
+    })).optional().default([])
+  }).optional()
+});

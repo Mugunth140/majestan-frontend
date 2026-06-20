@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FloatingInput, FloatingSelect } from '../ui/FloatingInput';
 import type { AdminCity, AdminSublocation } from '@/lib/location-options';
+import { GoogleMapPicker } from './GoogleMapPicker';
 
 interface Step3LocationProps {
   availableCities: AdminCity[];
@@ -97,6 +98,44 @@ export default function Step3Location({ availableCities, availableSublocations }
           registerProps={register('pincode')}
           error={errors.pincode?.message as string}
         />
+
+        <FloatingInput 
+          id="latitude"
+          label="Latitude"
+          type="number"
+          step="any"
+          registerProps={register('latitude', { setValueAs: (v: string) => v === "" ? undefined : Number(v) })}
+          error={errors.latitude?.message as string}
+        />
+
+        <FloatingInput 
+          id="longitude"
+          label="Longitude"
+          type="number"
+          step="any"
+          registerProps={register('longitude', { setValueAs: (v: string) => v === "" ? undefined : Number(v) })}
+          error={errors.longitude?.message as string}
+        />
+
+        <div className="md:!col-span-2 !mt-4">
+          <label className="!block !text-[13px] !font-bold !text-gray-700 dark:!text-gray-300 !uppercase !tracking-wider !mb-3">
+            Exact Location on Map
+          </label>
+          <GoogleMapPicker 
+            initialLat={watch('latitude')}
+            initialLng={watch('longitude')}
+            onLocationSelect={(lat, lng, address) => {
+              setValue('latitude', lat, { shouldValidate: true, shouldDirty: true });
+              setValue('longitude', lng, { shouldValidate: true, shouldDirty: true });
+              if (address && !watch('addressLine1')) {
+                setValue('addressLine1', address, { shouldValidate: true, shouldDirty: true });
+              }
+            }}
+          />
+          {(errors.latitude || errors.longitude) && (
+            <p className="!text-xs !text-red-500 !mt-2">Please drop a pin on the map to set the exact location.</p>
+          )}
+        </div>
 
       </div>
     </div>

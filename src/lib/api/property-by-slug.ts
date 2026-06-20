@@ -81,6 +81,7 @@ export type SeoProperty = {
   amenities?: SeoPropertyAmenity[];
   units?: SeoPropertyUnit[];
   faqs?: SeoPropertyFaq[];
+  locations?: { latitude?: string | number | null; longitude?: string | number | null; localityData?: any }[];
   requestedSlug: string;
   canonicalSlug: string;
   shouldRedirect: boolean;

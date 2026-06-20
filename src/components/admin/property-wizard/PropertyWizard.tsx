@@ -6,7 +6,7 @@ import { useUserAuthStore } from '@/store/userAuthStore';
 import { 
   basicInfoSchema, pricingSchema, specificationsSchema, 
   amenitiesSchema, mediaSchema, ownerInfoSchema, 
-  availabilitySchema, floorPlansSchema, faqsSchema
+  availabilitySchema, floorPlansSchema, faqsSchema, localitiesSchema
 } from '@/lib/validations/property-wizard.schema';
 import { z } from 'zod';
 import { toast } from '@/components/ui/toast-store';
@@ -19,13 +19,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Step1BasicInfo from './steps/Step1BasicInfo';
 import Step2Pricing from './steps/Step2Pricing';
 import Step3Location from './steps/Step3Location';
-import Step4Specifications from './steps/Step4Specifications';
-import Step5Amenities from './steps/Step5Amenities';
-import Step6Media from './steps/Step6Media';
-import Step7OwnerInfo from './steps/Step7OwnerInfo';
-import Step8FloorPlans from './steps/Step8FloorPlans';
-import Step9Availability from './steps/Step9Availability';
-import Step10Faqs from './steps/Step10Faqs';
+import Step4Localities from './steps/Step4Localities';
+import Step5Specifications from './steps/Step4Specifications';
+import Step6Amenities from './steps/Step5Amenities';
+import Step7Media from './steps/Step6Media';
+import Step8OwnerInfo from './steps/Step7OwnerInfo';
+import Step9FloorPlans from './steps/Step8FloorPlans';
+import Step10Availability from './steps/Step9Availability';
+import Step11Faqs from './steps/Step10Faqs';
 
 import type { AdminCity, AdminSublocation } from '@/lib/location-options';
 
@@ -45,6 +46,8 @@ const locationSchema = z.object({
   addressLine1: z.string().min(5, 'Address is required'),
   addressLine2: z.string().optional(),
   pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Invalid pincode format'),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 export default function PropertyWizard({ isAdmin, availableCities, availableSublocations, amenities, editPropertyId }: PropertyWizardProps) {
@@ -57,13 +60,14 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     { id: 1, title: 'Basic Info', component: Step1BasicInfo, schema: basicInfoSchema },
     { id: 2, title: 'Pricing', component: Step2Pricing, schema: pricingSchema },
     { id: 3, title: 'Location', component: Step3Location, schema: locationSchema },
-    { id: 4, title: 'Specs', component: Step4Specifications, schema: specificationsSchema },
-    { id: 5, title: 'Amenities', component: Step5Amenities, schema: amenitiesSchema },
-    { id: 6, title: 'Media', component: Step6Media, schema: mediaSchema },
-    { id: 7, title: 'Owner', component: Step7OwnerInfo, schema: ownerInfoSchema },
-    { id: 8, title: 'Floor Plans', component: Step8FloorPlans, schema: floorPlansSchema },
-    { id: 9, title: 'Availability', component: Step9Availability, schema: availabilitySchema },
-    { id: 10, title: 'FAQs', component: Step10Faqs, schema: faqsSchema },
+    { id: 4, title: 'Localities', component: Step4Localities, schema: localitiesSchema },
+    { id: 5, title: 'Specs', component: Step5Specifications, schema: specificationsSchema },
+    { id: 6, title: 'Amenities', component: Step6Amenities, schema: amenitiesSchema },
+    { id: 7, title: 'Media', component: Step7Media, schema: mediaSchema },
+    { id: 8, title: 'Owner', component: Step8OwnerInfo, schema: ownerInfoSchema },
+    { id: 9, title: 'Floor Plans', component: Step9FloorPlans, schema: floorPlansSchema },
+    { id: 10, title: 'Availability', component: Step10Availability, schema: availabilitySchema },
+    { id: 11, title: 'FAQs', component: Step11Faqs, schema: faqsSchema },
   ];
 
   const currentStepConfig = steps.find(s => s.id === currentStep) || steps[0];
@@ -176,6 +180,9 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
         location: {
           address: [finalData.addressLine1, finalData.addressLine2].filter(Boolean).join(', '),
           pincode: finalData.pincode,
+          latitude: safeNum(finalData.latitude),
+          longitude: safeNum(finalData.longitude),
+          localityData: finalData.localityData || undefined,
         },
         details: {
           bedrooms: safeNum(finalData.bedrooms),
@@ -294,8 +301,8 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
     let currentValues: any = Object.fromEntries(Object.entries(rawValues).filter(([_, v]) => v !== undefined && v !== null));
     console.log("Validation passed", currentValues);
 
-    // Immediately upload images after Step 6 to avoid losing File objects in localStorage
-    if (currentStep === 6) {
+    // Immediately upload images after Step 7 to avoid losing File objects in localStorage
+    if (currentStep === 7) {
       const filesToUpload = currentValues.images?.filter((f: any) => f instanceof File || f instanceof Blob) || [];
       if (filesToUpload.length > 0) {
         setIsSubmitting(true);

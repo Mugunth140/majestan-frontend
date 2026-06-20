@@ -299,7 +299,14 @@ export default async function SlugPage({
     property = await getPropertyBySeoSlug(slug);
   } catch (err) {
     console.error(`[SlugPage] Failed to fetch property for slug "${slug}":`, err);
-    throw err; // Let Next.js Error Boundary handle it instead of caching a 404
+    return (
+      <div className="!min-h-[60vh] !flex !items-center !justify-center">
+        <div className="!text-center !p-8 !bg-red-50 !rounded-2xl !max-w-md">
+          <h2 className="!text-xl !font-bold !text-red-600 !mb-2">Service Unavailable</h2>
+          <p className="!text-gray-600">The backend server could not be reached. Please make sure the backend is running on port 5000.</p>
+        </div>
+      </div>
+    );
   }
 
   if (property) {

@@ -13,6 +13,19 @@ import {
   Plane,
   MapPinned,
 } from "lucide-react";
+import { LocalityGoogleMap } from './LocalityGoogleMap';
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  GraduationCap,
+  Heart,
+  ShoppingBag,
+  Bus,
+  Clapperboard,
+  Building,
+  Navigation,
+  Train,
+  Plane,
+};
 
 type NearbyPlace = {
   name: string;
@@ -110,8 +123,19 @@ type LocalitySectionProps = {
 };
 
 export function LocalitySection({ property }: LocalitySectionProps) {
-  const categories = getLocalityCategoriesForCity(property.city);
-  const connectivityHighlights = getConnectivityHighlights(property.city);
+  const localityData = property.locations?.[0]?.localityData;
+  const customCategories = localityData?.categories || (property.seo?.seoData?.locality as any)?.categories;
+  const categories: LocalityCategory[] = customCategories && customCategories.length > 0 
+    ? customCategories.map((c: any) => ({ ...c, icon: ICON_MAP[c.icon] || MapPin })) 
+    : getLocalityCategoriesForCity(property.city);
+
+  const customConnectivity = localityData?.connectivity;
+  const connectivityHighlights: ConnectivityHighlight[] = customConnectivity && customConnectivity.length > 0
+    ? customConnectivity.map((c: any) => ({ ...c, icon: ICON_MAP[c.icon] || Navigation }))
+    : getConnectivityHighlights(property.city);
+
+  const lat = property.locations?.[0]?.latitude ? Number(property.locations[0].latitude) : null;
+  const lng = property.locations?.[0]?.longitude ? Number(property.locations[0].longitude) : null;
 
   return (
     <div className="space-y-8!">
@@ -171,9 +195,9 @@ export function LocalitySection({ property }: LocalitySectionProps) {
                 </h3>
               </div>
               <ul className="space-y-4!">
-                {category.places.map((place) => (
+                {category.places.map((place, idx) => (
                   <li
-                    key={place.name}
+                    key={idx}
                     className="flex! items-center! justify-between! gap-4! group!"
                   >
                     <span className="text-sm! font-light! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>
@@ -239,18 +263,7 @@ export function LocalitySection({ property }: LocalitySectionProps) {
           </div>
         </div>
 
-        <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-20! text-center! hover:bg-gray-50! transition-colors!">
-          <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-5!">
-            <MapPin className="w-8! h-8! text-gray-400!" />
-          </div>
-          <h4 className="text-xl! font-medium! text-gray-900! mb-2!">
-            {property.city}
-            {property.state ? `, ${property.state}` : ""}
-          </h4>
-          <p className="text-gray-500! text-sm! font-light!">
-            Interactive map coming soon
-          </p>
-        </div>
+        <LocalityGoogleMap lat={lat} lng={lng} city={property.city} state={property.state} />
       </div>
     </div>
   );

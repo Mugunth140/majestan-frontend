@@ -31,6 +31,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@react-google-maps/api": "^2.20.8",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -42,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "jsdom": "^29.1.1",
+    "majestan-frontend": "/run/media/zendex/Dev/work/Majestan/majestan-frontend",
     "playwright": "^1.60.0",
     "tailwindcss": "^4",
     "typescript": "^5",

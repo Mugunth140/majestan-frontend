@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
       revalidatePath(`/${slug}${section}`, "page");
     }
 
+    // Also revalidate the global layout to catch dynamic paths like /projects/[city]/[slug]
+    revalidatePath('/', 'layout');
+
     return NextResponse.json({ revalidated: true, slug, sections: SECTION_PATHS.length });
   } catch (err) {
     return NextResponse.json({ message: "Error revalidating" }, { status: 500 });

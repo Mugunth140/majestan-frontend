@@ -11,6 +11,8 @@ export type SeoPropertyDetails = {
   areaSqft: string;
   parking: number;
   furnished: boolean;
+  roomDimensions?: { name: string; dimensions: string }[];
+  floorPlanImages?: { title: string; imageUrl: string; imageKey: string }[];
 } | null;
 
 export type SeoPropertyImage = {

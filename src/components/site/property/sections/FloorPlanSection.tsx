@@ -21,10 +21,20 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
   const details = property.details;
 
   // Units that have a floor plan image uploaded
-  const unitsWithFloorPlans: SeoPropertyUnit[] = (property.units ?? []).filter(
+  const legacyUnitsWithFloorPlans: SeoPropertyUnit[] = (property.units ?? []).filter(
     (u) => !!u.floorPlanImageUrl
   );
-  const hasFloorPlanImages = unitsWithFloorPlans.length > 0;
+  
+  const newFloorPlanImages = property.details?.floorPlanImages || [];
+  
+  const floorPlansToDisplay = newFloorPlanImages.length > 0 
+    ? newFloorPlanImages 
+    : legacyUnitsWithFloorPlans.map(u => ({ title: u.title, imageUrl: u.floorPlanImageUrl, imageKey: u.floorPlanImageKey }));
+
+  const hasFloorPlanImages = floorPlansToDisplay.length > 0;
+  
+  const roomDimensions = property.details?.roomDimensions || [];
+  const hasRoomDimensions = roomDimensions.length > 0;
 
   const formatArea = (area: string | null | undefined) => {
     if (!area) return "—";
@@ -87,32 +97,24 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
 
         {hasFloorPlanImages ? (
           <div className="grid! grid-cols-1! md:grid-cols-2! gap-6!">
-            {unitsWithFloorPlans.map((unit) => (
+            {floorPlansToDisplay.map((fp, idx) => (
               <div
-                key={unit.id}
+                key={idx}
                 className="rounded-[20px]! overflow-hidden! border! border-gray-200! bg-white! shadow-sm!"
               >
                 <div className="relative! aspect-[4/3]! overflow-hidden!">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={unit.floorPlanImageUrl!}
-                    alt={unit.title ?? "Floor Plan"}
+                    src={fp.imageUrl!}
+                    alt={fp.title ?? "Floor Plan"}
                     className="w-full! h-full! object-contain! bg-gray-50!"
                   />
                 </div>
-                {(unit.title || unit.price || unit.sizeSqft) && (
+                {fp.title && (
                   <div className="p-4! border-t! border-gray-100! flex! items-center! justify-between! gap-4!">
                     <p className="font-medium! text-gray-900! text-sm! truncate!">
-                      {unit.title ?? propertyTypeLabel}
+                      {fp.title}
                     </p>
-                    <div className="flex! items-center! gap-3! shrink-0! text-sm! text-gray-500!">
-                      {unit.sizeSqft && (
-                        <span>{formatArea(unit.sizeSqft)} sq.ft</span>
-                      )}
-                      {unit.price && formatPrice(unit.price) && (
-                        <span className="font-semibold! text-gray-900!">{formatPrice(unit.price)}</span>
-                      )}
-                    </div>
                   </div>
                 )}
               </div>
@@ -169,7 +171,34 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
         </div>
       </div>
 
-      {/* Unit Configuration Table */}
+      {/* Room Dimensions */}
+      {hasRoomDimensions && (
+        <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
+          <div className="flex! items-center! gap-4! mb-8!">
+            <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
+              <Ruler className="w-6! h-6! text-gray-600!" />
+            </div>
+            <div>
+              <h3 className="text-2xl! font-semibold! text-gray-900!">
+                Room Dimensions
+              </h3>
+              <p className="text-sm! font-normal! text-gray-500! mt-1!">Detailed dimensions of the property rooms</p>
+            </div>
+          </div>
+
+          <div className="grid! grid-cols-1! sm:grid-cols-2! md:grid-cols-3! gap-4!">
+            {roomDimensions.map((room: any, index: number) => (
+              <div key={index} className="flex! items-center! justify-between! p-4! rounded-xl! bg-gray-50! border! border-gray-100!">
+                <span className="text-gray-700! font-medium!">{room.name}</span>
+                <span className="text-gray-900! font-semibold! bg-white! px-3! py-1! rounded-lg! shadow-sm! border! border-gray-200! text-sm!">{room.dimensions}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Unit Configuration Table (Commented out as requested for projects) */}
+      {/* 
       <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="flex! items-center! gap-4! mb-8!">
           <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
@@ -225,6 +254,7 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
           </table>
         </div>
       </div>
+      */}
 
       {/* Request Floor Plan CTA */}
       <div className="bg-gray-50! rounded-[24px]! p-8! md:p-10! border! border-gray-200!">

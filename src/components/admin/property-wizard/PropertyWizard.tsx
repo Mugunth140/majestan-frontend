@@ -233,6 +233,9 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           powerSupplyHp: safeNum(finalData.powerSupplyHp),
           // Apartment
           guestParking: finalData.guestParking,
+          // Floor Plans & Rooms
+          roomDimensions: finalData.details?.roomDimensions || [],
+          floorPlanImages: finalData.details?.floorPlanImages || [],
         },
         amenities: (finalData.amenityIds || []).map((id: number) => ({ amenityId: id })),
         files: allImageKeys.map((key) => ({ fileType: "IMAGE", fileUrl: key, fileKey: key })),

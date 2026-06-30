@@ -37,7 +37,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy site stack via compose
+      - name: Deploy site stack via infra repo
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -45,6 +45,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            cd ${{ secrets.SERVER_REPO_PATH }}
-            git pull
-            ./scripts/deploy.sh site
+            cd ${{ secrets.SERVER_PATH }}
+            docker compose -f site-compose.yml pull && docker compose -f site-compose.yml up -d --no-build site

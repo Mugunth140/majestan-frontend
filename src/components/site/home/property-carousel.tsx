@@ -85,7 +85,8 @@ function CurvedPathCarousel({ properties }: { properties: FeaturedProperty[] }) 
         grabCursor={true}
         centeredSlides={true}
         slidesPerView="auto"
-        loop={true}
+        loop={properties.length > 3}
+        watchOverflow={true}
         coverflowEffect={{
           rotate: 35,
           stretch: 0,

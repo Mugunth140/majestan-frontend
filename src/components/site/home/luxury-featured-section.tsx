@@ -57,7 +57,8 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
             </p>
           </div>
 
-          {/* Navigation Arrows (Top Right) */}
+          {/* Navigation Arrows (Top Right) - only when swiper is active */}
+          {properties.length >= 4 && (
           <div className="hidden! md:flex! items-center! gap-3! mt-6! md:mt-0!">
             <button 
               onClick={() => swiperInstance?.slidePrev()}
@@ -74,50 +75,69 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
               <ChevronRight size={20} />
             </button>
           </div>
+          )}
         </div>
 
-        {/* Carousel */}
+        {/* Carousel — static centered grid for 1-3 items, infinite 4-in-row swiper for 4+ */}
         <div className="relative! w-full! -mx-4! px-4! sm:mx-0! sm:px-0!">
+          {properties.length <= 3 ? (
+            <div className={`grid! gap-6! pt-4! pb-4! place-items-center! ${properties.length === 1 ? 'grid-cols-1! max-w-[420px]! mx-auto!' : properties.length === 2 ? 'grid-cols-1! sm:grid-cols-2! max-w-[900px]! mx-auto!' : 'grid-cols-1! sm:grid-cols-2! lg:grid-cols-3!'}`}>
+              {properties.map((prop, i) => (
+                <LuxuryCard
+                  key={`${prop.id}-${i}`}
+                  property={prop}
+                  isActive={true}
+                  imgSrc={prop.photo ?? FALLBACK[i % FALLBACK.length]}
+                  onContact={() => setEnquiry(prop)}
+                />
+              ))}
+            </div>
+          ) : (
+          <>
           <Swiper
             key={mounted ? "client" : "server"}
             modules={[A11y, Autoplay, Pagination]}
             onSwiper={setSwiperInstance}
-            onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+            onSlideChange={(swiper) => setActiveIndex(swiper.realIndex % properties.length)}
             slidesPerView={1}
-            spaceBetween={24}
-            centeredSlides={true}
-            loop={properties.length > 3}
+            spaceBetween={20}
+            centeredSlides={false}
+            loop={true}
+            watchOverflow={false}
+            loopAdditionalSlides={2}
             autoplay={{
               delay: 3000,
               disableOnInteraction: false,
               pauseOnMouseEnter: true,
             }}
             breakpoints={{
-              768: { slidesPerView: 2, centeredSlides: false },
-              1024: { slidesPerView: 3, centeredSlides: true },
+              640: { slidesPerView: 1, spaceBetween: 16 },
+              768: { slidesPerView: 2, spaceBetween: 20 },
+              1024: { slidesPerView: 4, spaceBetween: 20 },
+              1280: { slidesPerView: 4, spaceBetween: 20 },
             }}
             className="pb-16! pt-4!"
           >
-            {properties.map((prop, i) => (
+            {(properties.length === 4 ? [...properties, ...properties] : properties).map((prop, i) => (
               <SwiperSlide key={`${prop.id}-${i}`} className="flex! justify-center! items-center!">
                 {({ isActive }) => (
                   <LuxuryCard 
                     property={prop} 
                     isActive={isActive} 
-                    imgSrc={prop.photo ?? FALLBACK[i % FALLBACK.length]}
-                    onContact={() => setEnquiry(prop)}
+                    imgSrc={prop.photo ?? FALLBACK[(i % properties.length) % FALLBACK.length]}
+                    onContact={() => setEnquiry(properties[i % properties.length])}
                   />
                 )}
               </SwiperSlide>
             ))}
           </Swiper>
 
-          {/* Dots Navigation (Bottom Center) */}
+          {/* Dots Navigation (Bottom Center) — swiper only */}
           <div className="flex! items-center! justify-center! gap-2! absolute! bottom-0! left-1/2! -translate-x-1/2! z-20!">
             {properties.map((_, i) => (
               <button 
                 key={i} 
-                onClick={() => properties.length > 3 ? swiperInstance?.slideToLoop(i) : swiperInstance?.slideTo(i)}
+                onClick={() => swiperInstance?.slideToLoop(i)}
                 className="focus:outline-none!"
                 aria-label={`Go to slide ${i + 1}`}
               >
@@ -132,6 +152,8 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
               </button>
             ))}
           </div>
+          </>
+          )}
         </div>
       </div>
 

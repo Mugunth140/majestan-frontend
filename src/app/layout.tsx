@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="/assets/css/animate.min.css" />

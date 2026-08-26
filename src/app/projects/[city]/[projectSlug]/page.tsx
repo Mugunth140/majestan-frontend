@@ -7,9 +7,9 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   
   return {
     title: `${property.title} in ${property.city} | Overview`,
-    description: property.description.substring(0, 160),
+    description: property.description.replace(/<[^>]*>/g, "").trim().slice(0, 160),
     alternates: {
-      canonical: `/projects/${(await params).city}/${property.canonicalSlug}`
+      canonical: `/${property.canonicalSlug}`
     }
   };
 }

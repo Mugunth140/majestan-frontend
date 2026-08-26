@@ -503,38 +503,43 @@ export function ListingPage({
                 </div>
 
                 {/* Pagination */}
-                {data && data.total > data.limit && (
+                {data && data.total > data.limit && (() => {
+                  const totalPages = Math.ceil(data.total / data.limit);
+                  const prevParams = new URLSearchParams(searchParams.toString());
+                  prevParams.set("page", String(page - 1));
+                  const nextParams = new URLSearchParams(searchParams.toString());
+                  nextParams.set("page", String(page + 1));
+                  const prevHref = page > 1 ? `${pathname}?${prevParams.toString()}` : null;
+                  const nextHref = page < totalPages ? `${pathname}?${nextParams.toString()}` : null;
+                  return (
                   <div className="flex! justify-center! mt-12!">
                     <div className="inline-flex! bg-white! rounded-2xl! shadow-sm! border! border-gray-100/60! p-1.5!">
-                      <button 
-                        onClick={() => {
-                          const params = new URLSearchParams(searchParams.toString());
-                          params.set("page", String(page - 1));
-                          router.push(`${pathname}?${params.toString()}`);
-                        }}
-                        disabled={page === 1}
-                        className="p-2.5! rounded-xl! text-gray-500! hover:bg-gray-50! disabled:opacity-40! disabled:hover:bg-transparent! transition-colors!"
-                      >
-                        <ChevronLeft className="w-5! h-5!" />
-                      </button>
+                      {prevHref ? (
+                        <Link href={prevHref} prefetch className="p-2.5! rounded-xl! text-gray-500! hover:bg-gray-50! transition-colors!">
+                          <ChevronLeft className="w-5! h-5!" />
+                        </Link>
+                      ) : (
+                        <span className="p-2.5! rounded-xl! text-gray-400! opacity-40!">
+                          <ChevronLeft className="w-5! h-5!" />
+                        </span>
+                      )}
                       <div className="flex! items-center! px-6! text-sm! font-bold! text-gray-700!">
-                        Page {page} of {Math.ceil(data.total / data.limit)}
+                        Page {page} of {totalPages}
                       </div>
-                      <button 
-                        onClick={() => {
-                          const params = new URLSearchParams(searchParams.toString());
-                          params.set("page", String(page + 1));
-                          router.push(`${pathname}?${params.toString()}`);
-                        }}
-                        disabled={page >= Math.ceil(data.total / data.limit)}
-                        className="p-2.5! rounded-xl! text-gray-500! hover:bg-gray-50! disabled:opacity-40! disabled:hover:bg-transparent! transition-colors!"
-                      >
-                        <ChevronRight className="w-5! h-5!" />
-                      </button>
+                      {nextHref ? (
+                        <Link href={nextHref} prefetch className="p-2.5! rounded-xl! text-gray-500! hover:bg-gray-50! transition-colors!">
+                          <ChevronRight className="w-5! h-5!" />
+                        </Link>
+                      ) : (
+                        <span className="p-2.5! rounded-xl! text-gray-400! opacity-40!">
+                          <ChevronRight className="w-5! h-5!" />
+                        </span>
+                      )}
                     </div>
                   </div>
-                )}
-              </>
+                  );
+                })()}
+                </>
             )}
           </main>
         </div>

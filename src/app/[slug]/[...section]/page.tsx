@@ -208,7 +208,12 @@ export async function generateMetadata({
       seoPage?.og_title ||
       `${sectionConfig.titlePrefix} - ${property.title} | Majestan Realty`;
     const ogDescription = seoPage?.og_description || description;
-    const robots = parseRobots(seoPage?.robots);
+    const baseRobots = parseRobots(seoPage?.robots);
+    const isIndexableStatus = property.status?.toLowerCase() === "available";
+    const robots = {
+      index: isIndexableStatus ? baseRobots.index : false,
+      follow: baseRobots.follow,
+    };
 
     const ogImages = seoPage?.og_image
       ? [
@@ -445,6 +450,7 @@ export default async function PropertySectionPage({
               />
             </div>
 
+            <h1 className="text-3xl! font-bold! text-gray-900! mb-6!">{sectionConfig.titlePrefix} — {property.title} in {property.city}</h1>
             <div className="grid! grid-cols-1! lg:grid-cols-3! gap-8! pb-24!">
               {/* Main Content */}
               <div className="lg:col-span-2!">

@@ -171,9 +171,11 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'prismarkcrm.in', pathname: '/**' },
+      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
     ],
     // Bound the image optimizer cache growth in .next/cache/images
     minimumCacheTTL: 86400,
+    formats: ["image/avif", "image/webp"],
   },
 };
 

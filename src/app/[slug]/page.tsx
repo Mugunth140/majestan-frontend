@@ -119,7 +119,12 @@ export async function generateMetadata({
       );
     const ogTitle = seoPage?.og_title || `${property.title} | Majestan Realty`;
     const ogDescription = seoPage?.og_description || description;
-    const robots = parseRobots(seoPage?.robots);
+    const baseRobots = parseRobots(seoPage?.robots);
+    const isIndexableStatus = property.status?.toLowerCase() === "available";
+    const robots = {
+      index: isIndexableStatus ? baseRobots.index : false,
+      follow: baseRobots.follow,
+    };
 
     const ogImages = seoPage?.og_image
       ? [
@@ -184,7 +189,7 @@ export async function generateMetadata({
     };
   }
 
-  // PSEO Parsing
+  // PSEO Parsing — doorway pages: noindex until they have unique copy + listings
   const parsedPseo = parsePseoSlug(slug);
   if (parsedPseo) {
     const loc = parsedPseo.location ? `${parsedPseo.location}, ` : "";
@@ -196,7 +201,8 @@ export async function generateMetadata({
     return {
       title: `${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} ${parsedPseo.listingType === 'Rent' ? 'for Rent' : 'for Sale'} in ${loc}${cityText} | Majestan Realty`,
       description: `Explore top ${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} in ${loc}${cityText}. Find your dream property today with Majestan Realty.`,
-      alternates: { canonical: pathname }
+      alternates: { canonical: pathname },
+      robots: { index: false, follow: true },
     };
   }
 

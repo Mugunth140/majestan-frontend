@@ -59,8 +59,24 @@ export default async function ForRentListingPageRoute({ params, searchParams }: 
     console.error("Failed to fetch initial properties", error);
   }
 
+  const itemListJsonLd = initialData?.items?.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: `${parsed.propertyLabel} for Rent in ${parsed.locality ? parsed.locality + ", " : ""}${parsed.city}`,
+        itemListElement: initialData.items.map((item: any, index: number) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `https://www.majestanrealty.com/${item.canonicalSlug || item.slug_url || item.slug || ""}`,
+        })),
+      }
+    : null;
+
   return (
     <Suspense fallback={<div className="min-h-screen mt-24 text-center">Loading properties...</div>}>
+      {itemListJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+      )}
       <ListingPage 
         initialListingType={parsed.apiListingType}
         initialPropertyType={parsed.apiPropertyType}

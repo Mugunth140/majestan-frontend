@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/register",
   },
+  robots: { index: false, follow: false },
 };
 
 export default function RegisterPage(): React.JSX.Element {

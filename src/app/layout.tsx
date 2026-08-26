@@ -77,8 +77,44 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "@id": "https://www.majestanrealty.com#organization",
+    name: "Majestan Realty",
+    url: "https://www.majestanrealty.com",
+    logo: "https://www.majestanrealty.com/assets/images/logo/logo.png",
+    image: "https://www.majestanrealty.com/assets/images/logo/logo.png",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Coimbatore",
+      addressLocality: "Coimbatore",
+      addressRegion: "Tamil Nadu",
+      addressCountry: "IN",
+    },
+    sameAs: [
+      "https://www.facebook.com/majestanrealty",
+      "https://www.instagram.com/majestanrealty",
+      "https://www.linkedin.com/company/majestanrealty",
+    ],
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://www.majestanrealty.com#website",
+    url: "https://www.majestanrealty.com",
+    name: "Majestan Realty",
+    publisher: { "@id": "https://www.majestanrealty.com#organization" },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://www.majestanrealty.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en-IN" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="/assets/css/animate.min.css" />
@@ -94,6 +130,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://prismarkcrm.in" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
@@ -102,6 +139,14 @@ export default function RootLayout({
         <link rel="apple-touch-icon-precomposed" href="/assets/images/logo/fav.png" />
       </head>
       <body className="theme-color-3 majestan-app-root" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         <QueryProvider>
           <LocationProvider>
             {children}

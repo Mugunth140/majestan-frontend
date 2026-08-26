@@ -1,0 +1,16 @@
+{
+  "name": "Majestan Realty",
+  "short_name": "Majestan",
+  "description": "Majestan Realty — Buy, rent and sell properties in Coimbatore",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#27427f",
+  "icons": [
+    {
+      "src": "/assets/images/logo/fav.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

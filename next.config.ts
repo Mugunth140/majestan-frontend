@@ -36,6 +36,9 @@ function generateFooterRedirects() {
 }
 
 const nextConfig: NextConfig = {
+  // Produce .next/standalone with a minimal server.js — the Docker runner
+  // executes this with Node instead of `next start` under Bun (memory retention).
+  output: "standalone",
   async redirects() {
     return [
       // 1. Specific SEO 301 Redirects (Chain to the new location)
@@ -169,6 +172,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'prismarkcrm.in', pathname: '/**' },
     ],
+    // Bound the image optimizer cache growth in .next/cache/images
+    minimumCacheTTL: 86400,
   },
 };
 

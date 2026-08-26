@@ -124,7 +124,7 @@ const unwrapPayload = async <T>(response: Response): Promise<T> => {
 
 export async function getPropertyBySeoSlug(slug: string): Promise<SeoProperty | null> {
   const response = await fetch(`${API_BASE_URL}/properties/by-slug/${encodeURIComponent(slug)}`, {
-    next: { revalidate: 3600 }, // Fallback revalidation; on-demand ISR is primary
+    next: { revalidate: 300 }, // Bounded staleness; on-demand ISR is primary
   });
 
   if (response.status === 404) {

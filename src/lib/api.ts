@@ -260,8 +260,10 @@ export async function searchProperties(
   if (params.page) query.set("page", String(params.page));
   if (params.limit) query.set("limit", String(params.limit));
 
+  // No ISR caching here: every unique query-string permutation would create a
+  // separate cache entry in .next/cache (unbounded growth from crawlers/filters).
   const res = await fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, {
-    next: { revalidate: 3600 },
+    cache: "no-store",
   });
 
   if (res && Array.isArray(res.items)) {

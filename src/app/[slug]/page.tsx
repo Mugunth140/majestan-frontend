@@ -14,6 +14,9 @@ import { ListingPage } from "@/components/search/ListingPage";
 import { searchProperties } from "@/lib/api";
 
 export const dynamicParams = true;
+// Bound the ISR full-route cache: crawler/scanner garbage URLs must not
+// accumulate rendered pages in .next/cache indefinitely.
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   try {

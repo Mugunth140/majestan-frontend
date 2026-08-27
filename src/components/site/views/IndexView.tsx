@@ -62,11 +62,8 @@ type FaqItem = {
   answer: string;
 };
 
-export function IndexView(): React.JSX.Element {
-  const { location: contextLocation } = useLocationContext();
-  const citySlug = contextLocation.toLowerCase().replace(/[\s,]+/g, '-');
-  
-  const rotatingWords = ["Buy", "Sell", "Rent"] as const;
+// ─── Module-level static constants (never depend on runtime state) ───────────
+// Declared outside the component to avoid re-allocation on every render.
 
 const listingTypeOptions: Option[] = [
   { label: "Buy", value: "Sell" },
@@ -180,81 +177,6 @@ const propertyTiles: PropertyTile[] = [
   },
 ];
 
-const salePropertyCards: PropertyCard[] = [
-  {
-    title: "Apartment",
-    subtitle: "for sale",
-    href: `/buy-apartments-${citySlug}`,
-    image: "/assets/images/about/residential-roperties.png",
-  },
-  {
-    title: "Villa",
-    subtitle: "for sale",
-    href: `/buy-villas-${citySlug}`,
-    image: "/assets/images/liaisoning/villa.png",
-  },
-  {
-    title: "Independent Houses",
-    subtitle: "for sale",
-    href: `/buy-independent-houses-${citySlug}`,
-    image: "/assets/images/section/box-house.jpg",
-  },
-  {
-    title: "Plot",
-    subtitle: "for sale",
-    href: `/buy-plots-${citySlug}`,
-    image: "/assets/images/about/plotted-developments.png",
-  },
-  {
-    title: "Commercial Space",
-    subtitle: "for sale",
-    href: `/buy-commercial-space-${citySlug}`,
-    image: "/assets/images/about/commercial-leasing-and-sales.png",
-  },
-];
-
-const featuredApartmentCards: FeaturedCard[] = [
-  {
-    title: "Majestan Skyline Apartments",
-    location: `Peelamedu, ${contextLocation}`,
-    href: `/buy-apartments-${citySlug}`,
-    image: "/assets/images/about/residential-roperties.png",
-    price: "1.05 Cr",
-    pricePerSqft: "₹ 7,200 / Sqft",
-  },
-  {
-    title: "Park Avenue Residences",
-    location: `Saravanampatti, ${contextLocation}`,
-    href: `/buy-apartments-${citySlug}`,
-    image: "/assets/images/section/about-1.png",
-    price: "82 L",
-    pricePerSqft: "₹ 6,450 / Sqft",
-  },
-  {
-    title: "Green Heights",
-    location: `Race Course, ${contextLocation}`,
-    href: `/buy-apartments-${citySlug}`,
-    image: "/assets/images/section/about-2.png",
-    price: "1.28 Cr",
-    pricePerSqft: "₹ 8,050 / Sqft",
-  },
-];
-
-const bannerSlides: BannerSlide[] = [
-  {
-    image: "/assets/images/section/footer-banner.png",
-    href: "/projects",
-  },
-  {
-    image: "/assets/images/section/page-title-1.jpg",
-    href: `/buy-apartments-${citySlug}`,
-  },
-  {
-    image: "/assets/images/section/section-realty.jpg",
-    href: "/rent-or-sell-your-property",
-  },
-];
-
 const helpCards: ServiceCard[] = [
   {
     icon: "/assets/images/icons/map.png",
@@ -279,72 +201,6 @@ const helpCards: ServiceCard[] = [
     title: "Market Insights and Updates",
     description:
       "Stay informed with real estate trends, investment ideas, and new launch opportunities.",
-  },
-];
-
-const rentPropertyCards: PropertyCard[] = [
-  {
-    title: "Office Space",
-    subtitle: `for Rent in ${contextLocation}`,
-    href: `/rent-commercial-space-${citySlug}`,
-    image: "/assets/images/liaisoning/office_space.png",
-  },
-  {
-    title: "Ware House",
-    subtitle: `for Rent in ${contextLocation}`,
-    href: `/rent-industrials-${citySlug}`,
-    image: "/assets/images/liaisoning/wherehouses.png",
-  },
-  {
-    title: "Showroom",
-    subtitle: `for Rent in ${contextLocation}`,
-    href: `/rent-commercial-space-${citySlug}`,
-    image: "/assets/images/liaisoning/retail_space.png",
-  },
-  {
-    title: "Apartment",
-    subtitle: `for Rent in ${contextLocation}`,
-    href: `/rent-apartments-${citySlug}`,
-    image: "/assets/images/about/residential-roperties.png",
-  },
-  {
-    title: "Villa",
-    subtitle: `for Rent in ${contextLocation}`,
-    href: `/rent-villas-${citySlug}`,
-    image: "/assets/images/liaisoning/villa.png",
-  },
-  {
-    title: "Independent Houses",
-    subtitle: `for Rent in ${contextLocation}`,
-    href: `/rent-independent-houses-${citySlug}`,
-    image: "/assets/images/section/box-house.jpg",
-  },
-];
-
-const featuredVillaCards: FeaturedCard[] = [
-  {
-    title: "Majestan Valley Villas",
-    location: `RS Puram, ${contextLocation}`,
-    href: `/buy-villas-${citySlug}`,
-    image: "/assets/images/liaisoning/villa.png",
-    price: "2.1 Cr",
-    pricePerSqft: "₹ 8,900 / Sqft",
-  },
-  {
-    title: "Palm Grove Villas",
-    location: `Saravanampatti, ${contextLocation}`,
-    href: `/buy-villas-${citySlug}`,
-    image: "/assets/images/section/page-title-2.jpg",
-    price: "1.75 Cr",
-    pricePerSqft: "₹ 7,800 / Sqft",
-  },
-  {
-    title: "Crescent Luxury Villas",
-    location: `Avinashi Road, ${contextLocation}`,
-    href: `/buy-villas-${citySlug}`,
-    image: "/assets/images/section/page-title-3.jpg",
-    price: "2.45 Cr",
-    pricePerSqft: "₹ 9,250 / Sqft",
   },
 ];
 
@@ -392,56 +248,205 @@ const sellerServiceCards: ServiceCard[] = [
   },
 ];
 
-const faqItems: FaqItem[] = [
-  {
-    id: "one",
-    question: `How can I buy a property in ${contextLocation} through Majestan Realty?`,
-    answer:
-      "Browse apartments, villas, plots, and commercial properties on our website or contact our team for personalized recommendations based on your budget and preferred location.",
-  },
-  {
-    id: "two",
-    question: "Do you assist with property registration and legal verification?",
-    answer:
-      "Yes. We provide complete support including legal verification, documentation, registration, and liaison with the right authorities.",
-  },
-  {
-    id: "three",
-    question: "Can I list my property for sale or rent on Majestan Realty?",
-    answer:
-      "Absolutely. Owners can list apartments, villas, independent houses, and commercial properties for sale or rent to reach genuine buyers and tenants.",
-  },
-  {
-    id: "four",
-    question: "Do you offer rental and property management services?",
-    answer:
-      "Yes. We offer rental assistance, tenant screening, agreement support, and end-to-end property management services.",
-  },
-  {
-    id: "five",
-    question: `Is ${contextLocation} a good city for real estate investment?`,
-    answer:
-      `Yes. ${contextLocation} is one of Tamil Nadu's fastest-growing real estate markets with strong demand across residential, commercial, and industrial segments.`,
-  },
-];
+// ─────────────────────────────────────────────────────────────────────────────
 
-const blogCards: BlogCard[] = [
-  {
-    title: `Top Locations to Buy Apartments in ${contextLocation}`,
-    href: "/blogs",
-    image: "/assets/images/section/page-title-5.jpg",
-  },
-  {
-    title: "How to Evaluate Property Legal Documents Before Purchase",
-    href: "/blogs",
-    image: "/assets/images/section/our-process.jpg",
-  },
-  {
-    title: `Why ${contextLocation} Continues to Be a Strong Investment Market`,
-    href: "/blogs",
-    image: "/assets/images/section/section-calculate.jpg",
-  },
-];
+export function IndexView(): React.JSX.Element {
+  const { location: contextLocation } = useLocationContext();
+  const citySlug = contextLocation.toLowerCase().replace(/[\s,]+/g, '-');
+  
+  const rotatingWords = ["Buy", "Sell", "Rent"] as const;
+
+  const salePropertyCards: PropertyCard[] = [
+    {
+      title: "Apartment",
+      subtitle: "for sale",
+      href: `/buy-apartments-${citySlug}`,
+      image: "/assets/images/about/residential-roperties.png",
+    },
+    {
+      title: "Villa",
+      subtitle: "for sale",
+      href: `/buy-villas-${citySlug}`,
+      image: "/assets/images/liaisoning/villa.png",
+    },
+    {
+      title: "Independent Houses",
+      subtitle: "for sale",
+      href: `/buy-independent-houses-${citySlug}`,
+      image: "/assets/images/section/box-house.jpg",
+    },
+    {
+      title: "Plot",
+      subtitle: "for sale",
+      href: `/buy-plots-${citySlug}`,
+      image: "/assets/images/about/plotted-developments.png",
+    },
+    {
+      title: "Commercial Space",
+      subtitle: "for sale",
+      href: `/buy-commercial-space-${citySlug}`,
+      image: "/assets/images/about/commercial-leasing-and-sales.png",
+    },
+  ];
+
+  const featuredApartmentCards: FeaturedCard[] = [
+    {
+      title: "Majestan Skyline Apartments",
+      location: `Peelamedu, ${contextLocation}`,
+      href: `/buy-apartments-${citySlug}`,
+      image: "/assets/images/about/residential-roperties.png",
+      price: "1.05 Cr",
+      pricePerSqft: "₹ 7,200 / Sqft",
+    },
+    {
+      title: "Park Avenue Residences",
+      location: `Saravanampatti, ${contextLocation}`,
+      href: `/buy-apartments-${citySlug}`,
+      image: "/assets/images/section/about-1.png",
+      price: "82 L",
+      pricePerSqft: "₹ 6,450 / Sqft",
+    },
+    {
+      title: "Green Heights",
+      location: `Race Course, ${contextLocation}`,
+      href: `/buy-apartments-${citySlug}`,
+      image: "/assets/images/section/about-2.png",
+      price: "1.28 Cr",
+      pricePerSqft: "₹ 8,050 / Sqft",
+    },
+  ];
+
+  const bannerSlides: BannerSlide[] = [
+    {
+      image: "/assets/images/section/footer-banner.png",
+      href: "/projects",
+    },
+    {
+      image: "/assets/images/section/page-title-1.jpg",
+      href: `/buy-apartments-${citySlug}`,
+    },
+    {
+      image: "/assets/images/section/section-realty.jpg",
+      href: "/rent-or-sell-your-property",
+    },
+  ];
+
+  const rentPropertyCards: PropertyCard[] = [
+    {
+      title: "Office Space",
+      subtitle: `for Rent in ${contextLocation}`,
+      href: `/rent-commercial-space-${citySlug}`,
+      image: "/assets/images/liaisoning/office_space.png",
+    },
+    {
+      title: "Ware House",
+      subtitle: `for Rent in ${contextLocation}`,
+      href: `/rent-industrials-${citySlug}`,
+      image: "/assets/images/liaisoning/wherehouses.png",
+    },
+    {
+      title: "Showroom",
+      subtitle: `for Rent in ${contextLocation}`,
+      href: `/rent-commercial-space-${citySlug}`,
+      image: "/assets/images/liaisoning/retail_space.png",
+    },
+    {
+      title: "Apartment",
+      subtitle: `for Rent in ${contextLocation}`,
+      href: `/rent-apartments-${citySlug}`,
+      image: "/assets/images/about/residential-roperties.png",
+    },
+    {
+      title: "Villa",
+      subtitle: `for Rent in ${contextLocation}`,
+      href: `/rent-villas-${citySlug}`,
+      image: "/assets/images/liaisoning/villa.png",
+    },
+    {
+      title: "Independent Houses",
+      subtitle: `for Rent in ${contextLocation}`,
+      href: `/rent-independent-houses-${citySlug}`,
+      image: "/assets/images/section/box-house.jpg",
+    },
+  ];
+
+  const featuredVillaCards: FeaturedCard[] = [
+    {
+      title: "Majestan Valley Villas",
+      location: `RS Puram, ${contextLocation}`,
+      href: `/buy-villas-${citySlug}`,
+      image: "/assets/images/liaisoning/villa.png",
+      price: "2.1 Cr",
+      pricePerSqft: "₹ 8,900 / Sqft",
+    },
+    {
+      title: "Palm Grove Villas",
+      location: `Saravanampatti, ${contextLocation}`,
+      href: `/buy-villas-${citySlug}`,
+      image: "/assets/images/section/page-title-2.jpg",
+      price: "1.75 Cr",
+      pricePerSqft: "₹ 7,800 / Sqft",
+    },
+    {
+      title: "Crescent Luxury Villas",
+      location: `Avinashi Road, ${contextLocation}`,
+      href: `/buy-villas-${citySlug}`,
+      image: "/assets/images/section/page-title-3.jpg",
+      price: "2.45 Cr",
+      pricePerSqft: "₹ 9,250 / Sqft",
+    },
+  ];
+
+  const faqItems: FaqItem[] = [
+    {
+      id: "one",
+      question: `How can I buy a property in ${contextLocation} through Majestan Realty?`,
+      answer:
+        "Browse apartments, villas, plots, and commercial properties on our website or contact our team for personalized recommendations based on your budget and preferred location.",
+    },
+    {
+      id: "two",
+      question: "Do you assist with property registration and legal verification?",
+      answer:
+        "Yes. We provide complete support including legal verification, documentation, registration, and liaison with the right authorities.",
+    },
+    {
+      id: "three",
+      question: "Can I list my property for sale or rent on Majestan Realty?",
+      answer:
+        "Absolutely. Owners can list apartments, villas, independent houses, and commercial properties for sale or rent to reach genuine buyers and tenants.",
+    },
+    {
+      id: "four",
+      question: "Do you offer rental and property management services?",
+      answer:
+        "Yes. We offer rental assistance, tenant screening, agreement support, and end-to-end property management services.",
+    },
+    {
+      id: "five",
+      question: `Is ${contextLocation} a good city for real estate investment?`,
+      answer:
+        `Yes. ${contextLocation} is one of Tamil Nadu's fastest-growing real estate markets with strong demand across residential, commercial, and industrial segments.`,
+    },
+  ];
+
+  const blogCards: BlogCard[] = [
+    {
+      title: `Top Locations to Buy Apartments in ${contextLocation}`,
+      href: "/blogs",
+      image: "/assets/images/section/page-title-5.jpg",
+    },
+    {
+      title: "How to Evaluate Property Legal Documents Before Purchase",
+      href: "/blogs",
+      image: "/assets/images/section/our-process.jpg",
+    },
+    {
+      title: `Why ${contextLocation} Continues to Be a Strong Investment Market`,
+      href: "/blogs",
+      image: "/assets/images/section/section-calculate.jpg",
+    },
+  ];
 
 // Extracted to top level to avoid React Compiler errors
 function SwiperNav({

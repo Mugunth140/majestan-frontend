@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { API_BASE_URL } from "@/lib/api";
 
 type ApiEnvelope<T> = {
@@ -122,7 +123,7 @@ const unwrapPayload = async <T>(response: Response): Promise<T> => {
   return payload as T;
 };
 
-export async function getPropertyBySeoSlug(slug: string): Promise<SeoProperty | null> {
+export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(slug: string): Promise<SeoProperty | null> {
   const response = await fetch(`${API_BASE_URL}/properties/by-slug/${encodeURIComponent(slug)}`, {
     next: { revalidate: 300 }, // Bounded staleness; on-demand ISR is primary
   });
@@ -162,4 +163,4 @@ export async function getPropertyBySeoSlug(slug: string): Promise<SeoProperty | 
   }
 
   return data as SeoProperty;
-}
+});

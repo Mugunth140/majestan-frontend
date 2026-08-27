@@ -125,8 +125,8 @@ export async function getHomePageData(): Promise<HomePageData> {
   return fetchApi<HomePageData>("/home");
 }
 
-export async function getCities(): Promise<City[]> {
-  return fetchApi<City[]>("/metadata/cities", { next: { revalidate: 3600 } });
+export async function getCities(signal?: AbortSignal): Promise<City[]> {
+  return fetchApi<City[]>("/metadata/cities", { next: { revalidate: 3600 }, signal });
 }
 
 export async function createEnquiry(payload: {

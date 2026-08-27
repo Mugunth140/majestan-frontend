@@ -3,16 +3,25 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
+// Module-level: track the native fetch so re-mounts don't stack wrappers.
+// In StrictMode, effects run twice (mount → unmount → mount). Without this guard,
+// each mount captures the already-wrapped fetch as "original", nesting layers.
+let nativeFetch: typeof window.fetch | null = null;
+
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Intercept 401 Unauthorized globally for the admin panel to auto-logout
-    const originalFetch = window.fetch;
+    // Capture the true native fetch only on first application.
+    if (!nativeFetch) {
+      nativeFetch = window.fetch;
+    }
+    const original = nativeFetch;
+
     window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
+      const response = await original(...args);
       if (response.status === 401) {
         window.localStorage.removeItem("majestan_access_token");
         window.localStorage.removeItem("majestan_user");
@@ -22,7 +31,8 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return () => {
-      window.fetch = originalFetch;
+      // Restore to native on unmount; nativeFetch reference persists for re-mount.
+      window.fetch = original;
     };
   }, []);
 

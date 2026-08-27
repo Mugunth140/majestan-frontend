@@ -64,16 +64,22 @@ export function SiteHeader(): React.JSX.Element {
     };
     window.addEventListener("scroll", handleScroll);
 
+    const controller = new AbortController();
     const updateCount = async () => {
       try {
-        const res = await fetch('/Apartment/get_wishlist_count');
+        const res = await fetch('/Apartment/get_wishlist_count', { signal: controller.signal });
         const data = await res.json();
         if (data.success) setWishlistCount(data.cart_count);
-      } catch {}
+      } catch (err) {
+        if ((err as Error)?.name === "AbortError") return;
+      }
     };
     updateCount();
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      controller.abort();
+    };
   }, []);
 
 

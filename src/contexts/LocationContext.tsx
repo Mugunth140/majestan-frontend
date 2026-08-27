@@ -21,12 +21,12 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
 
     async function loadCities() {
       try {
-        const availableCities = await getCities();
-        if (cancelled) return;
+        const availableCities = await getCities(controller.signal);
+        if (controller.signal.aborted) return;
 
         setCities(availableCities);
 
@@ -46,15 +46,16 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           localStorage.setItem("majestan_city", defaultCity.city);
         }
       } catch (error) {
+        if ((error as Error)?.name === "AbortError") return;
         console.error("Failed to load cities", error);
       } finally {
-        if (!cancelled) setIsLoadingCities(false);
+        if (!controller.signal.aborted) setIsLoadingCities(false);
       }
     }
 
     loadCities();
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, []);
 

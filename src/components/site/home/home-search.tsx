@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Sublocation, UnitType } from "@/lib/api";
-import { MapPin, ChevronDown, Search } from "lucide-react";
+import { MapPin, ChevronDown, Search, Home } from "lucide-react";
 import { buildListingUrl } from "@/lib/seo-urls";
 import { useLocationContext } from "@/contexts/LocationContext";
 
@@ -28,37 +28,31 @@ export function HomeSearch({
   const { location: selectedCity } = useLocationContext();
   const [listingType, setListingType] = useState<"Sell" | "Rent">("Sell");
   const [propertyType, setPropertyType] = useState("");
-  const [location, setLocation] = useState("");
+  const [locality, setLocality] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
-  const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
+  const [isLocalityMenuOpen, setIsLocalityMenuOpen] = useState(false);
   const [isPropertyMenuOpen, setIsPropertyMenuOpen] = useState(false);
-  const locationMenuRef = useRef<HTMLDivElement>(null);
+  const localityMenuRef = useRef<HTMLDivElement>(null);
   const propertyMenuRef = useRef<HTMLDivElement>(null);
 
   const selectedPropertyLabel =
     propertyTypeOptions.find(([value]) => value === propertyType)?.[1] ?? "Select type...";
 
   const filteredSublocations = useMemo(() => {
-    const query = location.trim().toLowerCase();
     const citySublocations = sublocations.filter(
       (item) => item.city.toLowerCase() === selectedCity.toLowerCase(),
     );
-    const matches = query
-      ? citySublocations.filter((item) =>
-          item.sublocation.toLowerCase().includes(query),
-        )
-      : citySublocations;
-
-    return matches.slice(0, 8);
-  }, [location, selectedCity, sublocations]);
+    return citySublocations.slice(0, 8);
+  }, [selectedCity, sublocations]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        locationMenuRef.current &&
-        !locationMenuRef.current.contains(event.target as Node)
+        localityMenuRef.current &&
+        !localityMenuRef.current.contains(event.target as Node)
       ) {
-        setIsLocationMenuOpen(false);
+        setIsLocalityMenuOpen(false);
       }
 
       if (
@@ -87,7 +81,8 @@ export function HomeSearch({
       listingType,
       propertyType,
       selectedCity,
-      location || undefined,
+      locality || undefined,
+      searchQuery || undefined
     );
 
     router.push(url);
@@ -112,7 +107,7 @@ export function HomeSearch({
                 key={tab.value}
                 type="button"
                 onClick={() => setListingType(tab.value as "Sell" | "Rent")}
-                className={`px-6! py-2! rounded-full! text-[14px]! font-semibold! transition-all! duration-200! whitespace-nowrap! ${
+                className={`px-6! h-[38px]! rounded-full! text-[14px]! font-semibold! leading-none! transition-all! duration-200! whitespace-nowrap! inline-flex! items-center! justify-center! ${
                   listingType === tab.value
                     ? "bg-[#27427f]! text-white! shadow-sm! border! border-transparent!"
                     : "bg-white! text-gray-500! border! border-gray-200! hover:border-gray-300! hover:text-[#27427f]!"
@@ -131,13 +126,14 @@ export function HomeSearch({
               type="button"
               aria-haspopup="listbox"
               aria-expanded={isPropertyMenuOpen}
-              className="flex! items-center! justify-between! gap-2! bg-white! border! border-gray-200! hover:border-gray-300! rounded-full! px-5! py-2! transition-colors!"
+              className="flex! items-center! gap-2! bg-white! border! border-gray-200! hover:border-gray-300! rounded-full! px-5! h-[38px]! transition-colors!"
               onClick={() => setIsPropertyMenuOpen((open) => !open)}
               onKeyDown={(event) => {
                 if (event.key === "Escape") setIsPropertyMenuOpen(false);
               }}
             >
-              <span className={`text-[14px]! font-medium! ${propertyType ? "text-gray-700!" : "text-gray-500!"}`}>
+              <Home className="text-[#27427f]! shrink-0!" size={16} strokeWidth={2} />
+              <span className={`text-[14px]! font-medium! leading-none! ${propertyType ? "text-gray-700!" : "text-gray-500!"}`}>
                 {propertyType ? selectedPropertyLabel : "Property Type"}
               </span>
               <ChevronDown className="text-gray-400! shrink-0!" size={16} strokeWidth={2.5} />
@@ -171,35 +167,30 @@ export function HomeSearch({
               </div>
             )}
           </div>
-        </div>
 
-        {/* ── ROW 2: Search Bar ──────────────────────────────── */}
-        <div className="flex! items-center! justify-between! p-2! md:p-3! md:pl-6! relative!">
-          <div ref={locationMenuRef} className="flex-1! flex! items-center! gap-3! relative!">
-            <Search className="text-gray-400! shrink-0!" size={22} strokeWidth={2} />
-            <input
-              type="text"
-              role="combobox"
-              aria-autocomplete="list"
-              aria-expanded={isLocationMenuOpen}
-              placeholder="Search by Locality, Project or Builder..."
-              className="w-full! outline-none! bg-transparent! text-gray-800! placeholder-gray-400! font-medium! text-[16px]! border-none! p-0! m-0! shadow-none! focus:ring-0! truncate!"
-              value={location}
-              onChange={(e) => {
-                setLocation(e.target.value);
-                setIsLocationMenuOpen(true);
-              }}
-              onFocus={() => setIsLocationMenuOpen(true)}
+          {/* Locality Dropdown */}
+          <div ref={localityMenuRef} className="relative! shrink-0!">
+            <button
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded={isLocalityMenuOpen}
+              className="flex! items-center! gap-2! bg-white! border! border-gray-200! hover:border-gray-300! rounded-full! px-5! h-[38px]! transition-colors!"
+              onClick={() => setIsLocalityMenuOpen((open) => !open)}
               onKeyDown={(event) => {
-                if (event.key === "Escape") setIsLocationMenuOpen(false);
+                if (event.key === "Escape") setIsLocalityMenuOpen(false);
               }}
-            />
+            >
+              <MapPin className="text-[#27427f]! shrink-0!" size={16} strokeWidth={2.5} />
+              <span className={`text-[14px]! font-medium! leading-none! ${locality ? "text-gray-700!" : "text-gray-500!"}`}>
+                {locality || "Locality"}
+              </span>
+              <ChevronDown className={`text-gray-400! shrink-0! transition-transform! ${isLocalityMenuOpen ? "rotate-180!" : ""}`} size={16} strokeWidth={2.5} />
+            </button>
 
-            {/* Location Autocomplete Dropdown */}
-            {isLocationMenuOpen && (
+            {isLocalityMenuOpen && (
               <div
                 role="listbox"
-                className="absolute! left-0! right-0! top-[calc(100%+16px)]! z-50! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
+                className="absolute! left-0! top-[calc(100%+8px)]! z-50! w-56! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
               >
                 {filteredSublocations.length > 0 ? (
                   filteredSublocations.map((item) => (
@@ -207,27 +198,41 @@ export function HomeSearch({
                       key={item.id}
                       type="button"
                       role="option"
-                      aria-selected={location === item.sublocation}
-                      className={`w-full! rounded-xl! border-none! px-4! py-3! text-left! text-sm! font-medium! transition-colors! ${
-                        location === item.sublocation
+                      aria-selected={locality === item.sublocation}
+                      className={`w-full! rounded-xl! border-none! px-4! py-2.5! text-left! text-sm! font-medium! transition-colors! ${
+                        locality === item.sublocation
                           ? "bg-[#27427f]! text-white!"
                           : "bg-transparent! text-gray-700! hover:bg-gray-50! hover:text-[#27427f]!"
                       }`}
                       onClick={() => {
-                        setLocation(item.sublocation);
-                        setIsLocationMenuOpen(false);
+                        setLocality(item.sublocation);
+                        setIsLocalityMenuOpen(false);
                       }}
                     >
                       {item.sublocation}
                     </button>
                   ))
                 ) : (
-                  <p className="m-0! px-4! py-3! text-sm! font-medium! text-gray-400!">
+                  <p className="m-0! px-4! py-2.5! text-sm! font-medium! text-gray-400!">
                     No matching locations
                   </p>
                 )}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ── ROW 2: Search Bar ──────────────────────────────── */}
+        <div className="flex! items-center! justify-between! p-2! md:p-3! md:pl-6! relative!">
+          <div className="flex-1! flex! items-center! gap-3! relative!">
+            <Search className="text-gray-400! shrink-0!" size={22} strokeWidth={2} />
+            <input
+              type="text"
+              placeholder="Search by Project or Builder..."
+              className="w-full! outline-none! bg-transparent! text-gray-800! placeholder-gray-400! font-medium! text-[16px]! border-none! p-0! m-0! shadow-none! focus:ring-0! truncate!"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
           <div className="shrink-0! ml-4!">

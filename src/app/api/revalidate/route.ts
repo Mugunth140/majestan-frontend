@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     // Tag-based revalidation (for listing pages)
     if (tag) {
-      revalidateTag(tag);
+      revalidateTag(tag, "default");
       return NextResponse.json({ revalidated: true, tag });
     }
 

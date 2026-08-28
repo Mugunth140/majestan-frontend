@@ -43,7 +43,8 @@ export function buildListingUrl(
   listingType: "sell" | "rent" | "Sell" | "Rent" | ListingTypeSlug,
   propertyType: PropertyTypeSlug | string,
   city: string,
-  locality?: string
+  locality?: string,
+  bedrooms?: number
 ): string {
   // Normalize listing type
   const normalizedListingType =
@@ -64,7 +65,10 @@ export function buildListingUrl(
   }
 
   const base = `/${normalizedListingType}/${normalizedPropertyType}/${toLocationSlug(city)}`;
-  return locality ? `${base}/${toLocationSlug(locality)}` : base;
+  const BEDROOM_TYPES = ['apartments', 'villas', 'independent-houses'];
+  const localityPart = locality ? `/${toLocationSlug(locality)}` : '';
+  const bedroomPart = (bedrooms && BEDROOM_TYPES.includes(normalizedPropertyType)) ? `/${bedrooms}-bhk` : '';
+  return `${base}${localityPart}${bedroomPart}`;
 }
 
 /**
@@ -89,6 +93,15 @@ export function parseListingUrl(
   const locality = locationSegments[1]
     ? fromLocationSlug(locationSegments[1])
     : undefined;
+  // Extract bedroom from third segment (e.g. "2-bhk")
+  let bedrooms: number | undefined;
+  const bedroomSegment = locationSegments[2];
+  if (bedroomSegment) {
+    const match = bedroomSegment.match(/^(\d+)-bhk$/);
+    if (match) {
+      bedrooms = parseInt(match[1], 10);
+    }
+  }
   // Join the rest if needed, or just use locality
   const fullLocation = locationSegments.join(" ");
 
@@ -99,5 +112,6 @@ export function parseListingUrl(
     city,
     locality,
     fullLocation,
+    bedrooms,
   };
 }

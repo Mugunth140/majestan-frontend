@@ -43,7 +43,7 @@ const navItems: (NavItem | NavGroup)[] = [
     defaultOpen: true,
     items: [
       { title: "All Properties", href: "/admin/properties", icon: Home },
-      { title: "SEO & Publish", href: "/admin/properties/seo", icon: Search },
+      { title: "Property SEO", href: "/admin/properties/seo", icon: Search },
       { title: "Add Property", href: "/admin/properties/new", icon: PlusCircle },
       { title: "Amenities", href: "/admin/amenities", icon: List },
     ]

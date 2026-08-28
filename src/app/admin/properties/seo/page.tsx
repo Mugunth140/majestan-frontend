@@ -193,7 +193,7 @@ export default function AdminPropertiesSeoPage() {
       <div className="!flex !flex-col sm:!flex-row sm:!items-center !justify-between !gap-4">
         <div className="!ml-2.5">
           <h2 className="!text-2xl !font-medium !text-gray-900 dark:!text-white !tracking-tight">
-            SEO &amp; Publish
+            Property SEO
           </h2>
           <p className="!text-[14px] !text-gray-500 dark:!text-gray-400 !mt-1">
             Manage SEO metadata and publish status for all property listings

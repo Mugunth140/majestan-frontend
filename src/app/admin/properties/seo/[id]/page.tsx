@@ -281,7 +281,7 @@ export default function PropertySeoEditPage() {
         </button>
         <div>
           <h2 className="!text-2xl !font-medium !text-gray-900 dark:!text-white !tracking-tight">
-            SEO &amp; Publish
+            Property SEO
           </h2>
           {property && (
             <p className="!text-[14px] !text-gray-400 !mt-0.5">

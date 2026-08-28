@@ -36,6 +36,8 @@ export function HomeSearch({
   const localityMenuRef = useRef<HTMLDivElement>(null);
   const propertyMenuRef = useRef<HTMLDivElement>(null);
 
+  const [isSearching, setIsSearching] = useState(false);
+
   const selectedPropertyLabel =
     propertyTypeOptions.find(([value]) => value === propertyType)?.[1] ?? "Select type...";
 
@@ -67,25 +69,55 @@ export function HomeSearch({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
 
-    if (!propertyType) {
-      setError("Please select a property type to continue.");
+    // Case 1: Property type selected — build URL directly from Row 1 filters
+    if (propertyType) {
+      const url = buildListingUrl(
+        listingType,
+        propertyType,
+        selectedCity,
+        locality || undefined,
+      );
+      router.push(url);
       return;
     }
 
-    setError("");
+    // Case 2: Only text search — call /api/search and navigate to canonical URL
+    if (searchQuery.trim()) {
+      setIsSearching(true);
+      try {
+        const res = await fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            q: searchQuery,
+            city: selectedCity,
+            listingType: listingType === "Sell" ? "Sell" : "Rent",
+            locality: locality || undefined,
+          }),
+        });
+        const data = await res.json();
+        const topHit = data?.hits?.[0];
+        if (topHit?.canonicalUrl) {
+          router.push(topHit.canonicalUrl);
+          return;
+        }
+      } catch {
+        // Fall through to fallback
+      } finally {
+        setIsSearching(false);
+      }
+      // Fallback: go to generic listing page with keyword
+      const fallbackListingType = listingType === "Sell" ? "for-sale" : "for-rent";
+      router.push(`/${fallbackListingType}/properties/coimbatore?keyword=${encodeURIComponent(searchQuery)}`);
+      return;
+    }
 
-    const url = buildListingUrl(
-      listingType,
-      propertyType,
-      selectedCity,
-      locality || undefined,
-      searchQuery || undefined
-    );
-
-    router.push(url);
+    // Nothing selected or typed
+    setError("Please select a property type or enter a search term.");
   }
 
   return (
@@ -238,9 +270,10 @@ export function HomeSearch({
           <div className="shrink-0! ml-4!">
             <button
               type="submit"
-              className="flex! items-center! justify-center! bg-[#27427f]! hover:bg-[#ffc900]! text-white! hover:text-[#27427f]! rounded-full! px-12! py-3.5! font-semibold! text-[15px]! transition-all! shadow-md! gap-2! h-[52px]!"
+              disabled={isSearching}
+              className="flex! items-center! justify-center! bg-[#27427f]! hover:bg-[#ffc900]! text-white! hover:text-[#27427f]! rounded-full! px-12! py-3.5! font-semibold! text-[15px]! transition-all! shadow-md! gap-2! h-[52px]! disabled:opacity-70!"
             >
-              Search
+              {isSearching ? "..." : "Search"}
             </button>
           </div>
         </div>

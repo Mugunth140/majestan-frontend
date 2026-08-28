@@ -88,7 +88,7 @@ async function fetchApi<T>(
         "Content-Type": "application/json",
         ...init?.headers,
       },
-      next: init?.cache === "no-store" ? undefined : { revalidate: 60 },
+      next: (init as any)?.next ?? (init?.cache === "no-store" ? undefined : { revalidate: 60 }),
     });
 
     if (response.status === 401) {
@@ -237,6 +237,7 @@ const PROPERTY_TYPE_MAP: Record<string, string> = {
 
 export async function searchProperties(
   params: PropertySearchParams,
+  isrTags?: string[],
 ): Promise<PropertySearchResponse> {
   const query = new URLSearchParams();
 
@@ -262,9 +263,11 @@ export async function searchProperties(
 
   // No ISR caching here: every unique query-string permutation would create a
   // separate cache entry in .next/cache (unbounded growth from crawlers/filters).
-  const res = await fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, {
-    cache: "no-store",
-  });
+  const fetchOptions: RequestInit = isrTags && isrTags.length > 0
+    ? { next: { tags: isrTags, revalidate: 3600 } } as any
+    : { cache: "no-store" };
+
+  const res = await fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, fetchOptions);
 
   if (res && Array.isArray(res.items)) {
     res.items = res.items.map((item: any) => {

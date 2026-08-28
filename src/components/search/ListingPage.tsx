@@ -92,6 +92,7 @@ interface ListingPageProps {
   initialPropertyType: string;
   initialCity: string;
   initialLocality?: string;
+  initialBedrooms?: number;
   initialSearchData?: PropertySearchResponse | null;
 }
 
@@ -100,6 +101,7 @@ export function ListingPage({
   initialPropertyType,
   initialCity,
   initialLocality,
+  initialBedrooms,
   initialSearchData
 }: ListingPageProps) {
   const router = useRouter();
@@ -124,7 +126,7 @@ export function ListingPage({
     maxPrice: searchParams.get("maxPrice") || "",
     minArea: searchParams.get("minArea") || "",
     maxArea: searchParams.get("maxArea") || "",
-    bedrooms: searchParams.get("bedrooms") || "",
+    bedrooms: searchParams.get("bedrooms") || (initialBedrooms ? String(initialBedrooms) : ""),
     facing: searchParams.get("facing") || "",
     furnishing: searchParams.get("furnishing") || "",
     propertyAge: searchParams.get("propertyAge") || "",

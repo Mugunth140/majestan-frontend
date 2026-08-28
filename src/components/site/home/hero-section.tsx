@@ -1,20 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { Home as HomeIcon, Key, TrendingUp } from "lucide-react";
 import { HomeSearch } from "./home-search";
 import type { Sublocation, UnitType } from "@/lib/api";
 import Image from "next/image";
 import { useLocationContext } from "@/contexts/LocationContext";
 import { toLocationSlug } from "@/lib/seo-urls";
-
-const TAGLINES = [
-  { id: 0, text: "Buy Your Dream Home", Icon: HomeIcon },
-  { id: 1, text: "Rent Premium Spaces", Icon: Key },
-  { id: 2, text: "Sell with Confidence", Icon: TrendingUp },
-] as const;
 
 interface HeroSectionProps {
   sublocations: Sublocation[];
@@ -23,7 +14,6 @@ interface HeroSectionProps {
 
 export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
   const { location: city } = useLocationContext();
-  const [activeIdx, setActiveIdx] = useState(0);
   const citySlug = toLocationSlug(city);
   const propertyCategories = [
     ["Apartment", `/for-sale/apartments/${citySlug}`, "/assets/icons/properties/apartment.png"],
@@ -35,45 +25,6 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
     ["Farmland", `/for-sale/farmlands/${citySlug}`, "/assets/icons/properties/farm-land.png"],
     ["Co-Working", `/for-rent/coworking/${citySlug}`, "/assets/icons/properties/co-living.png"],
   ] as const;
-
-  /* ── Cycle taglines ─────────────────────────────────────────── */
-  useEffect(() => {
-    const id = setInterval(
-      () => setActiveIdx((i) => (i + 1) % TAGLINES.length),
-      3000
-    );
-    return () => clearInterval(id);
-  }, []);
-
-  const { Icon: ActiveIcon } = TAGLINES[activeIdx];
-
-  const taglineContainerVariants = {
-    hidden: { opacity: 0, y: 44 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        type: "spring" as const, stiffness: 100, damping: 10,
-        staggerChildren: 0.08,
-        delayChildren: 0.05
-      }
-    },
-    exit: { opacity: 0, y: -44, transition: { duration: 0.2 } }
-  };
-
-  const taglineWordVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { type: "spring" as const, damping: 10, stiffness: 100 } 
-    }
-  };
-
-  const taglineIconVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1, transition: { type: "spring" as const, stiffness: 100 } }
-  };
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white">
@@ -112,67 +63,6 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
           <span className="text-[#27427f] font-semibold">{city}</span>
         </h1>
 
-        {/* Animated tagline block */}
-        <div className="mb-10 max-[640px]:mb-8 flex flex-col items-center w-full">
-          {/* Fixed-height row — prevents layout shift */}
-          <div
-            className="flex items-center justify-center gap-3 overflow-hidden"
-            style={{ height: "clamp(36px, 4vw, 50px)" }}
-          >
-            {/* Gold accent bar */}
-            <div className="w-[4px] h-9 rounded-full bg-[#ffc900] shrink-0 max-[640px]:h-7 hidden sm:block" />
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIdx}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={taglineContainerVariants}
-                className="flex items-center justify-center gap-2.5"
-              >
-                <motion.div variants={taglineIconVariants}>
-                  <ActiveIcon
-                    size={22}
-                    className="text-[#27427f] shrink-0 max-[640px]:hidden"
-                    strokeWidth={2.5}
-                  />
-                </motion.div>
-                <div
-                  className="font-['Lexend',sans-serif] font-semibold text-[#27427f] whitespace-nowrap drop-shadow-sm flex"
-                  style={{ fontSize: "clamp(17px, 1.9vw, 25px)" }}
-                >
-                  {TAGLINES[activeIdx].text.split(" ").map((word) => (
-                    <motion.span
-                      key={word}
-                      variants={taglineWordVariants}
-                      className="inline-block mr-[0.25em]"
-                      style={{ willChange: "transform, opacity" }}
-                    >
-                      {word}{"\u00a0"}
-                    </motion.span>
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Progress pill indicators */}
-          {/* <div className="flex items-center justify-center gap-[7px] mt-4">
-            {TAGLINES.map(({ id, text }, i) => (
-              <button
-                key={id}
-                onClick={() => setActiveIdx(i)}
-                aria-label={`Show: ${text}`}
-                className={`h-[5px] rounded-full border-0 p-0 transition-all duration-500 cursor-pointer ${i === activeIdx
-                    ? "w-8 bg-[#27427f]"
-                    : "w-[5px] bg-[#27427f]/25 hover:bg-[#27427f]/45"
-                  }`}
-              />
-            ))}
-          </div> */}
-        </div>
-
         {/* Search bar */}
         <div className="w-full">
           <HomeSearch
@@ -182,12 +72,8 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
           />
         </div>
 
-        {/* Quick Links */}
-        <motion.div 
+        <div 
           className="grid grid-cols-4 sm:hidden md:flex justsm:flex-wrapify-center justify-around items-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl mx-auto h-25 mt-12!"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
         >
           {propertyCategories.map(([title, href, iconSource]) => (
             <Link 
@@ -203,7 +89,7 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
               </span>
             </Link>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -132,17 +132,17 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header
-        className={`fixed! left-1/2 z-[1000] -translate-x-1/2 border border-white/30! bg-white/45! backdrop-blur-xs! font-['Lexend',sans-serif] transition-all duration-350 ${isScrolled ? "top-0! w-full! max-w-full! rounded-none! py-2.5! px-5! shadow-[0_10px_30px_rgba(22,30,45,0.08),inset_0_1px_0_rgba(255,255,255,0.8)]!" : "top-4! w-[min(95vw,1400px)]! max-w-[1400px]! rounded-full! py-3! shadow-[0_18px_45px_rgba(22,30,45,0.18),inset_0_1px_0_rgba(255,255,255,0.8)]! max-[640px]:top-2.5! max-[640px]:w-[calc(100vw-20px)]!"}`}
+        className="fixed! top-0! w-full! max-w-full! left-0 z-[1000] border-b border-white/30! bg-white/45! backdrop-blur-xs! py-2.5! px-5! font-['Lexend',sans-serif] shadow-[0_10px_30px_rgba(22,30,45,0.08),inset_0_1px_0_rgba(255,255,255,0.8)]!"
         onMouseLeave={() => setHoveredCategory(null)}
       >
-        <div className="w-full px-5 max-[640px]:px-3!">
+        <div className="w-full mx-auto" style={{ maxWidth: "1400px" }}>
           <div className="flex! min-h-11 items-center! justify-between! gap-3 max-[1024px]:gap-2">
             {/* Logo */}
             <Link href="/" className="inline-flex! shrink-0 transition-transform active:scale-95" aria-label="Majestan Realty Home">
               <img
                 src="/assets/images/logo/logo.png"
                 alt="Majestan Realty"
-                className={`w-auto! object-contain transition-all duration-300 max-[1180px]:h-[38px]! max-[900px]:h-8! max-[640px]:h-7! max-[640px]:max-w-[180px]! ${isScrolled ? "h-9!" : "h-10!"}`}
+                className="w-auto! h-10! object-contain transition-all duration-300 max-[1180px]:h-[38px]! max-[900px]:h-8! max-[640px]:h-7! max-[640px]:max-w-[180px]!"
               />
             </Link>
 

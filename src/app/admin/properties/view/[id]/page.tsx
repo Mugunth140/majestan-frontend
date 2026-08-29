@@ -6,7 +6,6 @@ import { API_BASE_URL } from "@/lib/api";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Edit,
   Building2,
   MapPin,
   Tag,
@@ -132,12 +131,6 @@ export default function ViewPropertyPage() {
         </div>
         <div className="!flex !items-center !gap-3">
           {statusBadge}
-          <Link
-            href={`/admin/properties/edit/${id}?type=${propertyType}`}
-            className="!inline-flex !items-center !gap-2 !px-4 !py-2 !bg-blue-600 hover:!bg-blue-700 !text-white !rounded-xl !text-[14px] !font-medium !transition-all !shadow-sm"
-          >
-            <Edit size={15} /> Edit Property
-          </Link>
         </div>
       </div>
 

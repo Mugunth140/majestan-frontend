@@ -7,17 +7,14 @@ import {
   Building2, 
   Search, 
   Filter, 
-  Edit, 
-  Trash2, 
   Loader2,
   Eye,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Info
 } from "lucide-react";
 import Link from "next/link";
-import Swal from "sweetalert2";
-import { toast } from "@/components/ui/toast-store";
 import { formatToShortIndianCurrency } from "@/lib/utils/currency.util";
 
 export default function AdminPropertiesPage() {
@@ -95,36 +92,6 @@ export default function AdminPropertiesPage() {
     }
   };
 
-  const handleDelete = async (property: any) => {
-    const result = await Swal.fire({
-      title: "Delete property?",
-      text: `"${property.title}" will be permanently deleted.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#9ca3af",
-      confirmButtonText: "Yes, delete it",
-      cancelButtonText: "Cancel",
-    });
-    if (!result.isConfirmed) return;
-    try {
-      const token = window.localStorage.getItem("majestan_access_token");
-      const res = await fetch(
-        `${API_BASE_URL}/admin/properties/${property.propertyType}/${property.id}`,
-        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.ok) {
-        toast.success("Property deleted successfully");
-        fetchProperties();
-      } else {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err.message || "Failed to delete property");
-      }
-    } catch {
-      toast.error("Network error — could not delete property");
-    }
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'available':
@@ -143,11 +110,13 @@ export default function AdminPropertiesPage() {
   return (
     <div className="!w-full !space-y-6">
       <div className="!flex !flex-col sm:!flex-row sm:!items-center !justify-between !gap-4">
-        <h2 className="!text-2xl !font-medium !text-gray-800 dark:!text-white !tracking-tight !ml-2.5">Properties Management</h2>
-        <Link href="/admin/properties/new" className="!inline-flex !items-center !gap-2 !bg-blue-600 hover:!bg-blue-700 !text-white !shadow-sm hover:!shadow-blue-500/20 !px-5 !py-2.5 !rounded-xl !font-medium !transition-all">
-          <Building2 size={18} />
-          Add Property
-        </Link>
+        <h2 className="!text-2xl !font-medium !text-gray-800 dark:!text-white !tracking-tight !ml-2.5">Properties</h2>
+      </div>
+
+      {/* Read-only notice */}
+      <div className="!flex !items-start !gap-3 !rounded-xl !border !border-blue-100 dark:!border-blue-900/40 !bg-blue-50 dark:!bg-blue-950/20 !px-4 !py-3 !text-[13px] !text-blue-700 dark:!text-blue-300">
+        <Info size={16} className="!shrink-0 !mt-0.5" />
+        <span>Property management (add, edit, visibility) is now handled in the <strong>CRM → Properties</strong> module. This view is read-only. SEO can still be managed here via the Property SEO link.</span>
       </div>
       
       <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] shadow-[0_4px_20px_rgba(0,0,0,0.03)!] !overflow-hidden">
@@ -264,12 +233,9 @@ export default function AdminPropertiesPage() {
                         <Link href={`/admin/properties/view/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-blue-600 hover:!bg-blue-50 dark:hover:!bg-blue-950/30 !rounded-lg !transition-colors" title="View Details">
                           <Eye size={16} />
                         </Link>
-                        <Link href={`/admin/properties/edit/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 dark:hover:!bg-emerald-950/30 !rounded-lg !transition-colors" title="Edit Property">
-                          <Edit size={16} />
+                        <Link href={`/admin/properties/seo/${property.id}`} className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 dark:hover:!bg-emerald-950/30 !rounded-lg !transition-colors" title="SEO Settings">
+                          <Search size={16} />
                         </Link>
-                        <button onClick={() => handleDelete(property)} className="!p-2 !text-gray-400 hover:!text-rose-600 hover:!bg-rose-50 dark:hover:!bg-rose-950/30 !rounded-lg !transition-colors" title="Delete Property">
-                          <Trash2 size={16} />
-                        </button>
                       </div>
                     </td>
                   </tr>

@@ -12,8 +12,6 @@ import {
   Map, 
   Image as ImageIcon, 
   FileText, 
-  List, 
-  PlusCircle, 
   Globe,
   ChevronDown,
   Users,
@@ -44,8 +42,6 @@ const navItems: (NavItem | NavGroup)[] = [
     items: [
       { title: "All Properties", href: "/admin/properties", icon: Home },
       { title: "Property SEO", href: "/admin/properties/seo", icon: Search },
-      { title: "Add Property", href: "/admin/properties/new", icon: PlusCircle },
-      { title: "Amenities", href: "/admin/amenities", icon: List },
     ]
   },
   {

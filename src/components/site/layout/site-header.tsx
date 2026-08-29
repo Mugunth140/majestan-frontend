@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, Phone } from "lucide-react";
@@ -44,7 +44,29 @@ export function SiteHeader(): React.JSX.Element {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<MegaMenuLink | null>(null);
+  const cityDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) return;
+    setIsCityMenuOpen(false);
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isCityMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node)) {
+        setIsCityMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isCityMenuOpen]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -375,7 +397,7 @@ export function SiteHeader(): React.JSX.Element {
             <motion.div
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 15 }}
-              className="fixed! top-0 right-0 bottom-0 z-[1101] w-full max-w-full bg-white/95! backdrop-blur-2xl! border-l border-white/40! shadow-[-18px_0_45px_rgba(22,30,45,0.20),inset_1px_0_0_rgba(255,255,255,0.8)]! flex flex-col"
+              className="fixed! top-0 right-0 bottom-0 z-[1101] w-full max-w-full bg-white! border-l border-[#27427f]/10! shadow-[-18px_0_45px_rgba(22,30,45,0.20)]! flex flex-col"
             >
               {/* Drawer header */}
               <div className="flex! items-center! justify-between! px-5 py-4 border-b border-[#27427f]/10 shrink-0">
@@ -390,63 +412,103 @@ export function SiteHeader(): React.JSX.Element {
               </div>
 
               {/* Scrollable nav links */}
-              <div className="flex-1 overflow-y-auto px-5 py-4">
-                <div className="grid gap-5">
-                  {(["Buy", "Rent", "Services"] as const).map((cat) => (
-                    <div key={cat} className="grid gap-1.5">
-                      <h6 className="m-0 px-1 text-[14px]! font-semibold! leading-none tracking-[0.5em] text-[#27427f]/45! uppercase">{cat}</h6>
-                      <div className="grid! gap-1.5">
-                        {getLinks(cat).slice(0, 4).map((link) => (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex! items-center! gap-3 rounded-xl bg-[#27427f]/5 px-3 py-2.5! text-[13px]! font-bold text-[#27427f]! no-underline"
-                          >
-                            {link.icon} {link.text}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="grid gap-1.5 border-t border-[#27427f]/10 pt-4">
-                    <h6 className="m-0 px-1 text-[12px]! font-semibold! tracking-[0.18em] text-[#27427f]/45! uppercase">
-                      City
+              <div className="flex-1 overflow-y-auto px-5 py-5">
+                <div className="flex flex-col gap-6">
+                  {/* City Selector */}
+                  <div className="grid gap-2.5">
+                    <h6 className="m-0 px-1 text-[13px]! font-extrabold! leading-none tracking-[0.25em] text-[#27427f]/80! uppercase">
+                      Current City
                     </h6>
-                    <div className="flex flex-wrap gap-2">
-                      {cities.map((city) => (
-                        <button
-                          key={city.id}
-                          type="button"
-                          onClick={() => setLocation(city.city)}
-                          className={`rounded-full border px-3 py-2 text-[12px]! font-bold ${
-                            location === city.city
-                              ? "border-[#27427f] bg-[#27427f] text-white"
-                              : "border-[#27427f]/15 bg-[#27427f]/5 text-[#27427f]"
-                          }`}
-                        >
-                          {city.city}
-                        </button>
-                      ))}
+                    <div className="relative" ref={cityDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsCityMenuOpen((v) => !v)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        className={`w-full flex items-center justify-between gap-2 rounded-xl bg-[#27427f]/8 px-4 py-3.5 text-[14px]! font-bold text-[#27427f] outline-none border transition-colors cursor-pointer ${
+                          isCityMenuOpen
+                            ? "border-[#27427f]/40 bg-[#27427f]/10"
+                            : "border-[#27427f]/15 hover:border-[#27427f]/35 hover:bg-[#27427f]/10"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 truncate">
+                          <MapPin size={16} className="shrink-0 text-[#27427f]" />
+                          <span className="truncate">{location || "Select City"}</span>
+                        </span>
+                        <ChevronDown size={18} className={`shrink-0 text-[#27427f]/70 transition-transform duration-200 ${isCityMenuOpen ? "rotate-180" : ""}`} />
+                      </button>
+
+                      <AnimatePresence>
+                        {isCityMenuOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                            transition={{ duration: 0.15 }}
+                            className="absolute! left-0! right-0! top-full! mt-2! z-50! rounded-xl! bg-white! shadow-[0_12px_32px_rgba(22,30,45,0.18)]! border! border-[#27427f]/15! p-1.5! max-h-64! overflow-y-auto!"
+                          >
+                            {cities.map((city) => (
+                              <button
+                                key={city.id}
+                                type="button"
+                                onClick={() => {
+                                  setLocation(city.city);
+                                  setIsCityMenuOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-2.5 rounded-lg px-3.5 py-3 text-left text-[14px]! font-bold transition-colors cursor-pointer ${
+                                  location === city.city
+                                    ? "bg-[#27427f] text-white"
+                                    : "text-[#27427f] hover:bg-[#27427f]/8"
+                                }`}
+                              >
+                                <MapPin size={15} className={`shrink-0 ${location === city.city ? "text-white" : "text-[#27427f]/50"}`} />
+                                {city.city}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
+
+                  <div className="h-px w-full bg-[#27427f]/15" />
+
+                  <div className="grid gap-6">
+                    {(["Buy", "Rent", "Services"] as const).map((cat) => (
+                      <div key={cat} className="grid gap-2">
+                        <h6 className="m-0 px-1 text-[13px]! font-extrabold! leading-none tracking-[0.25em] text-[#27427f]/80! uppercase">{cat}</h6>
+                        <div className="grid! gap-1.5">
+                          {getLinks(cat).slice(0, 4).map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="flex! items-center! gap-3 rounded-xl bg-transparent px-3 py-3! text-[14px]! font-bold text-[#27427f]! no-underline hover:bg-[#27427f]/10 transition-colors border border-[#27427f]/10 hover:border-[#27427f]/25"
+                            >
+                              <span className="text-[#27427f]">{link.icon}</span> {link.text}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="h-px w-full bg-[#27427f]/15 mt-2" />
                   
                   {/* Additional Mobile Links */}
-                  <div className="grid gap-1.5 mt-2 border-t border-[#27427f]/10 pt-4">
+                  <div className="grid gap-1.5 pb-4">
                     <Link
                       href="/contact-us"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex! items-center! gap-3 rounded-xl bg-[#27427f]/5 px-3 py-2.5! text-[13px]! font-bold text-[#27427f]! no-underline"
+                      className="flex! items-center! gap-3 rounded-xl bg-transparent px-3 py-3! text-[14px]! font-bold text-[#27427f]! no-underline hover:bg-[#27427f]/10 transition-colors border border-[#27427f]/10 hover:border-[#27427f]/25"
                     >
-                      <Phone size={16} /> Contact Us
+                      <span className="text-[#27427f]"><Phone size={18} /></span> Contact Us
                     </Link>
                   </div>
                 </div>
               </div>
 
               {/* Bottom CTAs — pinned */}
-              <div className="shrink-0 border-t border-[#27427f]/10 px-5 py-4 grid gap-3">
+              <div className="shrink-0 border-t border-[#27427f]/20 bg-[#27427f]/[0.03] px-5 py-4 grid gap-3">
                 <Link 
                   href="/rent-or-sell-your-property"
                   onClick={(e) => { handleProtectedRoute(e, "/rent-or-sell-your-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}

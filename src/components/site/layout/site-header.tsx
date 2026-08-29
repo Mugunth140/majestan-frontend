@@ -132,7 +132,7 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header
-        className="fixed! top-0! w-full! max-w-full! left-0 z-[1000] border-b border-white/30! bg-white/45! backdrop-blur-xs! py-2.5! px-5! font-['Lexend',sans-serif] shadow-[0_10px_30px_rgba(22,30,45,0.08),inset_0_1px_0_rgba(255,255,255,0.8)]!"
+        className="fixed! top-0! w-full! max-w-full! left-0 z-[1000] bg-white/95! backdrop-blur-xs! py-2.5! px-5! font-['Lexend',sans-serif] shadow-[0_4px_20px_rgba(22,30,45,0.06)]!"
         onMouseLeave={() => setHoveredCategory(null)}
       >
         <div className="w-full mx-auto" style={{ maxWidth: "1400px" }}>
@@ -275,9 +275,10 @@ export function SiteHeader(): React.JSX.Element {
 
               {/* Post Property */}
               <Link href="/rent-or-sell-your-property"
-                className="hidden! items-center! gap-2 rounded-full bg-[#ffc900] px-3 py-3 text-[13px]! font-bold! text-black/80! leading-none no-underline transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white! lg:inline-flex!"
+                className="hidden! relative items-center! gap-2 rounded-full bg-[#ffc900] px-6! py-3 text-[13px]! font-bold! text-black/80! leading-none no-underline transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white! lg:inline-flex!"
                onClick={(e) => { handleProtectedRoute(e, "/rent-or-sell-your-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}>
-                Rent / Sell your Property
+                Post Property
+                <span className="absolute! -right-2.5 -top-1.5 rounded-lg bg-[#22c55e] px-3! py-0.2! text-[10px]! font-black leading-none tracking-widest text-white shadow-sm">FREE</span>
               </Link>
 
 
@@ -449,9 +450,10 @@ export function SiteHeader(): React.JSX.Element {
                 <Link 
                   href="/rent-or-sell-your-property"
                   onClick={(e) => { handleProtectedRoute(e, "/rent-or-sell-your-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}
-                  className="w-full rounded-xl bg-[#ffc900] py-3 text-[13px]! font-semibold! leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline text-center transition-colors hover:bg-[#27427f] hover:text-white"
+                  className="relative w-full rounded-xl bg-[#ffc900] py-3 text-[13px]! font-semibold! leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline text-center transition-colors hover:bg-[#27427f] hover:text-white"
                 >
                   Post Property
+                  <span className="absolute! -right-1 -top-2 rounded-full bg-[#22c55e] px-2.5 py-1 text-[8px]! font-black leading-none tracking-widest text-white shadow-sm normal-case">FREE</span>
                 </Link>
               </div>
             </motion.div>

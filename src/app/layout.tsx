@@ -23,6 +23,18 @@ export const metadata: Metadata = {
     "industrial property Coimbatore",
     "Majestan Realty",
   ],
+  icons: {
+    icon: [
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicon/apple-touch-icon.png" },
+    ],
+    other: [
+      { rel: "shortcut icon", url: "/favicon/favicon.ico" },
+    ],
+  },
   alternates: {
     canonical: "/",
   },
@@ -135,8 +147,10 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         />
-        <link rel="shortcut icon" href="/assets/images/logo/fav.png" />
-        <link rel="apple-touch-icon-precomposed" href="/assets/images/logo/fav.png" />
+        <link rel="shortcut icon" href="/favicon/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
       </head>
       <body className="theme-color-3 majestan-app-root" suppressHydrationWarning>
         <script

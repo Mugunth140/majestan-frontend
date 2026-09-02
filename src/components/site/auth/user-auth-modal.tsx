@@ -80,7 +80,7 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 16 }}
             transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
-            className="!relative !w-full !max-w-[480px] !flex !flex-col !justify-center !p-8 sm:!p-10 md:!p-12 !bg-white/95 !backdrop-blur-xl !rounded-[2rem] sm:!rounded-[2.5rem] !shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] !border !border-white/50"
+            className="!relative !w-full !max-w-[400px] !flex !flex-col !justify-center !p-8 !bg-white/95 !backdrop-blur-xl !rounded-[2rem] !shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] !border !border-white/50"
           >
             {/* Close button */}
             <button
@@ -92,23 +92,23 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
             </button>
 
             {/* Logo */}
-            <div className="!mb-8 sm:!mb-10 !flex !items-center !justify-center">
+            <div className="!mb-6 !flex !items-center !justify-center">
               <Image
                 src="/assets/images/logo/logo.png"
                 alt="Majestan Realty"
-                width={64}
-                height={64}
+                width={120}
+                height={120}
                 className="!object-contain"
                 priority
               />
             </div>
 
             {/* Heading */}
-            <div className="!mb-8 sm:!mb-10">
-              <h1 className="!mb-2 !text-2xl sm:!text-3xl md:!text-4xl !font-bold !tracking-tight !text-gray-900 !text-center">
+            <div className="!mb-7">
+              <h1 className="!mb-2 !text-2xl !font-bold !tracking-tight !text-gray-900 !text-center">
                 Welcome back
               </h1>
-              <p className="!text-[14px] sm:!text-[15px] !text-gray-500 !mt-2 sm:!mt-3 !text-center !leading-relaxed">
+              <p className="!text-[14px] !text-gray-500 !mt-2 !text-center !leading-relaxed">
                 Enter your mobile number to instantly access your account.
               </p>
             </div>
@@ -127,13 +127,13 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
                 <label className="!text-xs !font-semibold !tracking-wide !text-gray-500 !ml-1">
                   Mobile Number
                 </label>
-                <div className="!relative !mt-1 !flex !items-stretch !h-12 sm:!h-14 !rounded-xl !bg-gray-50 !border !border-gray-200 !overflow-hidden !transition-all hover:!bg-gray-100 focus-within:!bg-white focus-within:!ring-2 focus-within:!ring-[#27427f]/20 focus-within:!border-[#27427f]">
+                <div className="!relative !mt-1 !flex !items-stretch !rounded-xl !bg-gray-50 !border !border-gray-200 !overflow-hidden !transition-all hover:!bg-gray-100 focus-within:!bg-white focus-within:!ring-2 focus-within:!ring-[#27427f]/20 focus-within:!border-[#27427f]">
                   {/* Country code select */}
-                  <div className="!relative !flex !shrink-0 !items-center !border-r !border-gray-200 !bg-transparent">
+                  <div className="!relative !flex !shrink-0 !items-center !border-r !border-gray-200">
                     <select
                       value={countryCode}
                       onChange={(e) => setCountryCode(e.target.value)}
-                      className="!h-full !appearance-none !bg-transparent !pl-4 !pr-7 !text-[15px] !font-semibold !text-gray-700 !outline-none !cursor-pointer"
+                      className="!appearance-none !bg-transparent !h-12 !pl-3.5 !pr-7 !text-[14px] !font-semibold !text-gray-700 !outline-none !cursor-pointer"
                     >
                       <option value="+91">+91</option>
                       <option value="+1">+1</option>
@@ -152,7 +152,7 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="99999 99999"
-                    className="!flex-1 !min-w-0 !bg-transparent !px-4 !text-[15px] !text-gray-900 !placeholder-gray-400 !outline-none"
+                    className="!flex-1 !min-w-0 !bg-transparent !h-12 !px-4 !text-[15px] !text-gray-900 !placeholder-gray-400 !outline-none"
                     required
                     autoFocus
                   />
@@ -160,11 +160,11 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
               </div>
 
               {/* Submit */}
-              <div className="!pt-2 sm:!pt-4">
+              <div className="!pt-1">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="!flex !h-12 sm:!h-14 !w-full !items-center !justify-center !gap-2 !rounded-xl !bg-[#27427f] !text-white !text-[15px] !font-semibold !shadow-[0_8px_20px_-6px_rgba(39,66,127,0.45)] !transition-all hover:!bg-[#1e3366] active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
+                  className="!flex !h-12 !w-full !items-center !justify-center !gap-2 !rounded-xl !bg-[#27427f] !text-white !text-[15px] !font-semibold !shadow-[0_8px_20px_-6px_rgba(39,66,127,0.45)] !transition-all hover:!bg-[#1e3366] active:!scale-[0.98] disabled:!opacity-70 disabled:!cursor-not-allowed"
                 >
                   {loading ? (
                     <Loader2 size={20} className="!animate-spin" />

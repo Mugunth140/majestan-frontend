@@ -3,16 +3,17 @@
 import { useEffect, useState, useRef } from "react";
 import { AdminPagination } from "@/components/admin/ui/AdminPagination";
 import { API_BASE_URL } from "@/lib/api";
-import { 
-  Building2, 
-  Search, 
-  Filter, 
+import {
+  Building2,
+  Search,
+  Filter,
   Loader2,
   Eye,
+  Pencil,
+  Plus,
   CheckCircle,
   XCircle,
-  Clock,
-  Info
+  Clock
 } from "lucide-react";
 import Link from "next/link";
 import { formatToShortIndianCurrency } from "@/lib/utils/currency.util";
@@ -111,12 +112,10 @@ export default function AdminPropertiesPage() {
     <div className="!w-full !space-y-6">
       <div className="!flex !flex-col sm:!flex-row sm:!items-center !justify-between !gap-4">
         <h2 className="!text-2xl !font-medium !text-gray-800 dark:!text-white !tracking-tight !ml-2.5">Properties</h2>
-      </div>
-
-      {/* Read-only notice */}
-      <div className="!flex !items-start !gap-3 !rounded-xl !border !border-blue-100 dark:!border-blue-900/40 !bg-blue-50 dark:!bg-blue-950/20 !px-4 !py-3 !text-[13px] !text-blue-700 dark:!text-blue-300">
-        <Info size={16} className="!shrink-0 !mt-0.5" />
-        <span>Property management (add, edit, visibility) is now handled in the <strong>CRM → Properties</strong> module. This view is read-only. SEO can still be managed here via the Property SEO link.</span>
+        <Link href="/admin/properties/new" className="!inline-flex !items-center !gap-2 !rounded-xl !bg-blue-600 !px-4 !py-2.5 !text-[14px] !font-medium !text-white !shadow-sm hover:!bg-blue-700 !transition-colors">
+          <Plus size={16} />
+          Add Property
+        </Link>
       </div>
       
       <div className="!bg-white dark:!bg-[#171821] !rounded-2xl !border !border-gray-100 dark:!border-[#262730] shadow-[0_4px_20px_rgba(0,0,0,0.03)!] !overflow-hidden">
@@ -232,6 +231,9 @@ export default function AdminPropertiesPage() {
                       <div className="!flex !items-center !justify-center !gap-2">
                         <Link href={`/admin/properties/view/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-blue-600 hover:!bg-blue-50 dark:hover:!bg-blue-950/30 !rounded-lg !transition-colors" title="View Details">
                           <Eye size={16} />
+                        </Link>
+                        <Link href={`/admin/properties/edit/${property.id}?type=${property.propertyType}`} className="!p-2 !text-gray-400 hover:!text-amber-600 hover:!bg-amber-50 dark:hover:!bg-amber-950/30 !rounded-lg !transition-colors" title="Edit Property">
+                          <Pencil size={16} />
                         </Link>
                         <Link href={`/admin/properties/seo/${property.id}`} className="!p-2 !text-gray-400 hover:!text-emerald-600 hover:!bg-emerald-50 dark:hover:!bg-emerald-950/30 !rounded-lg !transition-colors" title="SEO Settings">
                           <Search size={16} />

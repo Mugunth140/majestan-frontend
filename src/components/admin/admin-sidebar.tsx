@@ -5,17 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  LayoutDashboard, 
-  Home, 
-  MapPin, 
-  Map, 
-  Image as ImageIcon, 
-  FileText, 
+import {
+  LayoutDashboard,
+  Home,
+  MapPin,
+  Map,
+  Image as ImageIcon,
+  FileText,
   Globe,
   ChevronDown,
   Users,
-  Search
+  Search,
+  Plus
 } from "lucide-react";
 
 type NavItem = {
@@ -41,6 +42,7 @@ const navItems: (NavItem | NavGroup)[] = [
     defaultOpen: true,
     items: [
       { title: "All Properties", href: "/admin/properties", icon: Home },
+      { title: "Add Property", href: "/admin/properties/new", icon: Plus },
       { title: "Property SEO", href: "/admin/properties/seo", icon: Search },
     ]
   },

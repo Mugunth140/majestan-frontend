@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_BASE_URL } from "@/lib/api";
 import { 
   FileText, 
@@ -33,6 +33,23 @@ export default function AdminBlogsPage() {
   useEffect(() => {
     fetchBlogs(search, currentPage);
   }, [currentPage]);
+
+  const searchFirstRun = useRef(true);
+  useEffect(() => {
+    if (searchFirstRun.current) {
+      searchFirstRun.current = false;
+      return;
+    }
+    const handler = setTimeout(() => {
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      } else {
+        fetchBlogs(search, 1);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const fetchBlogs = async (searchQuery = search, page = currentPage) => {
     setLoading(true);

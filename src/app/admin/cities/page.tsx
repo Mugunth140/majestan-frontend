@@ -12,11 +12,11 @@ export default function AdminCitiesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const fetchCities = async () => {
+  const fetchCities = async (searchQuery = search) => {
     try {
       const token = window.localStorage.getItem("majestan_access_token");
       const url = new URL(`${API_BASE_URL}/admin/cities`);
-      if (search) url.searchParams.append("search", search);
+      if (searchQuery) url.searchParams.append("search", searchQuery);
       
       const res = await fetch(url.toString(), {
         headers: { "Authorization": `Bearer ${token}` }
@@ -34,7 +34,12 @@ export default function AdminCitiesPage() {
   };
 
   useEffect(() => {
-    fetchCities();
+    const handler = setTimeout(() => {
+      setLoading(true);
+      fetchCities(search);
+    }, 500);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const handleDelete = async (id: number) => {

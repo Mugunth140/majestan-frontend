@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_BASE_URL } from "@/lib/api";
 import { 
   CheckCircle2, 
@@ -35,6 +35,23 @@ export default function AdminAmenitiesPage() {
   useEffect(() => {
     fetchAmenities(search, currentPage);
   }, [currentPage]);
+
+  const searchFirstRun = useRef(true);
+  useEffect(() => {
+    if (searchFirstRun.current) {
+      searchFirstRun.current = false;
+      return;
+    }
+    const handler = setTimeout(() => {
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      } else {
+        fetchAmenities(search, 1);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const fetchAmenities = async (searchQuery = search, page = currentPage) => {
     setLoading(true);

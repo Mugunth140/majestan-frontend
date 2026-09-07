@@ -84,6 +84,23 @@ export default function AdminPropertiesPage() {
     fetchProperties(search, currentPage);
   }, [currentPage]);
 
+  const searchFirstRun = useRef(true);
+  useEffect(() => {
+    if (searchFirstRun.current) {
+      searchFirstRun.current = false;
+      return;
+    }
+    const handler = setTimeout(() => {
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      } else {
+        fetchProperties(search, 1);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentPage !== 1) {

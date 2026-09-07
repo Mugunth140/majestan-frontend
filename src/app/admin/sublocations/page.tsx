@@ -12,11 +12,11 @@ export default function AdminSublocationsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const fetchSublocations = async () => {
+  const fetchSublocations = async (searchQuery = search) => {
     try {
       const token = window.localStorage.getItem("majestan_access_token");
       const url = new URL(`${API_BASE_URL}/admin/sublocations`);
-      if (search) url.searchParams.append("search", search);
+      if (searchQuery) url.searchParams.append("search", searchQuery);
       
       const res = await fetch(url.toString(), {
         headers: { "Authorization": `Bearer ${token}` }
@@ -34,7 +34,12 @@ export default function AdminSublocationsPage() {
   };
 
   useEffect(() => {
-    fetchSublocations();
+    const handler = setTimeout(() => {
+      setLoading(true);
+      fetchSublocations(search);
+    }, 500);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const handleDelete = async (id: number) => {

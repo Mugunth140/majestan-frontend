@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Search, MapPin, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 export type FilterValues = {
   keyword: string;
@@ -32,8 +34,48 @@ export function PropertySearchFilters({
   compact = false,
 }: PropertySearchFiltersProps) {
 
+  const [textFields, setTextFields] = useState({
+    keyword: values.keyword,
+    location: values.location,
+    minPrice: values.minPrice,
+    maxPrice: values.maxPrice,
+    minArea: values.minArea,
+    maxArea: values.maxArea,
+  });
+
+  useEffect(() => {
+    setTextFields({
+      keyword: values.keyword,
+      location: values.location,
+      minPrice: values.minPrice,
+      maxPrice: values.maxPrice,
+      minArea: values.minArea,
+      maxArea: values.maxArea,
+    });
+  }, [values.keyword, values.location, values.minPrice, values.maxPrice, values.minArea, values.maxArea]);
+
+  const debouncedText = useDebouncedValue(textFields, 500);
+
+  useEffect(() => {
+    if (
+      debouncedText.keyword !== values.keyword ||
+      debouncedText.location !== values.location ||
+      debouncedText.minPrice !== values.minPrice ||
+      debouncedText.maxPrice !== values.maxPrice ||
+      debouncedText.minArea !== values.minArea ||
+      debouncedText.maxArea !== values.maxArea
+    ) {
+      onChange({ ...values, ...debouncedText });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedText]);
+
+  const updateTextField = (key: keyof typeof textFields, value: string) => {
+    setTextFields((prev) => ({ ...prev, [key]: value }));
+  };
+
   const updateFilter = (key: keyof FilterValues, value: string) => {
-    onChange({ ...values, [key]: value });
+    onChange({ ...values, ...textFields, [key]: value });
   };
 
   const presetPrices = [
@@ -72,8 +114,8 @@ export function PropertySearchFilters({
             <input
               type="text"
               placeholder="Search properties..."
-              value={values.keyword}
-              onChange={(e) => updateFilter("keyword", e.target.value)}
+              value={textFields.keyword}
+              onChange={(e) => updateTextField("keyword", e.target.value)}
               className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-3! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
             />
           </div>
@@ -89,8 +131,8 @@ export function PropertySearchFilters({
             <input
               type="text"
               placeholder="City or locality..."
-              value={values.location}
-              onChange={(e) => updateFilter("location", e.target.value)}
+              value={textFields.location}
+              onChange={(e) => updateTextField("location", e.target.value)}
               className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-3! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
             />
           </div>
@@ -154,8 +196,8 @@ export function PropertySearchFilters({
               <input
                 type="number"
                 placeholder="Min"
-                value={values.minPrice}
-                onChange={(e) => updateFilter("minPrice", e.target.value)}
+                value={textFields.minPrice}
+                onChange={(e) => updateTextField("minPrice", e.target.value)}
                 className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
               />
             </div>
@@ -165,8 +207,8 @@ export function PropertySearchFilters({
               <input
                 type="number"
                 placeholder="Max"
-                value={values.maxPrice}
-                onChange={(e) => updateFilter("maxPrice", e.target.value)}
+                value={textFields.maxPrice}
+                onChange={(e) => updateTextField("maxPrice", e.target.value)}
                 className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
               />
             </div>
@@ -176,8 +218,9 @@ export function PropertySearchFilters({
               <button
                 key={i}
                 onClick={() => {
-                  updateFilter("minPrice", preset.min);
-                  updateFilter("maxPrice", preset.max);
+                  const next = { ...textFields, minPrice: preset.min, maxPrice: preset.max };
+                  setTextFields(next);
+                  onChange({ ...values, ...next });
                 }}
                 className={`px-2.5! py-1.5! rounded-md! border! text-[11px]! font-bold! transition-all! ${
                   values.minPrice === preset.min && values.maxPrice === preset.max
@@ -225,16 +268,16 @@ export function PropertySearchFilters({
             <input
               type="number"
               placeholder="Min"
-              value={values.minArea}
-              onChange={(e) => updateFilter("minArea", e.target.value)}
+              value={textFields.minArea}
+              onChange={(e) => updateTextField("minArea", e.target.value)}
               className="flex-1! min-w-0! w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
             />
             <span className="text-gray-300! text-xs! shrink-0!">—</span>
             <input
               type="number"
               placeholder="Max"
-              value={values.maxArea}
-              onChange={(e) => updateFilter("maxArea", e.target.value)}
+              value={textFields.maxArea}
+              onChange={(e) => updateTextField("maxArea", e.target.value)}
               className="flex-1! min-w-0! w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
             />
           </div>

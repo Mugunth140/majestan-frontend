@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AdminPagination } from "@/components/admin/ui/AdminPagination";
 import { API_BASE_URL } from "@/lib/api";
 import { 
@@ -30,6 +30,23 @@ export default function AdminLeadsPage() {
   useEffect(() => {
     fetchLeads(search, currentPage);
   }, [currentPage]);
+
+  const searchFirstRun = useRef(true);
+  useEffect(() => {
+    if (searchFirstRun.current) {
+      searchFirstRun.current = false;
+      return;
+    }
+    const handler = setTimeout(() => {
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      } else {
+        fetchLeads(search, 1);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const fetchLeads = async (searchQuery = search, page = currentPage) => {
     setLoading(true);

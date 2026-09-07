@@ -327,7 +327,7 @@ export function SiteHeader(): React.JSX.Element {
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="absolute! top-full left-1/2 z-1005 w-[min(920px,88vw)] pt-2.5!"
             >
-              <div className="flex! gap-9 rounded-[28px] border p-6! shadow-[0_22px_55px_rgba(22,30,45,0.20),inset_0_1px_0_rgba(255,255,255,0.8)]! border-white/30! bg-white/95! backdrop-blur-xl!">
+              <div className="flex! gap-9 rounded-[28px] border border-[#e5e9f0]! bg-white! p-6! shadow-[0_24px_60px_rgba(22,30,45,0.18)]!">
                 <div className="flex-1">
                   <div className="mb-4.5 border-b border-[#ffc900]/30 pb-3.5">
                     <p className="m-0 mb-2 text-[18px]! font-semibold! leading-tight text-[#27427f]!">{getFeatured(hoveredCategory)?.title}</p>

@@ -35,6 +35,18 @@ async function getPropertySlugs(): Promise<string[]> {
   }
 }
 
+async function getProjectSlugs(): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_BASE}/projects/all-slugs`, { next: { revalidate: 3600 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const slugs: string[] = Array.isArray(data) ? data : data.data || data.items || [];
+    return slugs.filter(Boolean).map((s: string) => String(s).replace(/^\/+/, ""));
+  } catch {
+    return [];
+  }
+}
+
 async function getSublocations(): Promise<Array<{ sublocation: string; city: string }>> {
   try {
     const res = await fetch(`${API_BASE}/metadata/sublocations`, { next: { revalidate: 3600 } });
@@ -48,10 +60,18 @@ async function getSublocations(): Promise<Array<{ sublocation: string; city: str
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [slugs, sublocations] = await Promise.all([
+  const [slugs, sublocations, projectSlugs] = await Promise.all([
     getPropertySlugs(),
     getSublocations(),
+    getProjectSlugs(),
   ]);
+
+  const projectUrls: MetadataRoute.Sitemap = projectSlugs.map((slug) => ({
+    url: `${SITE_URL}/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.85,
+  }));
 
   const propertyUrls: MetadataRoute.Sitemap = slugs.map((slug) => ({
     url: `${SITE_URL}/${slug}`,
@@ -120,5 +140,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === "" ? 1 : 0.5,
   }));
 
-  return [...staticUrls, ...listingUrls, ...propertyUrls, ...sectionUrls];
+  return [...staticUrls, ...listingUrls, ...propertyUrls, ...sectionUrls, ...projectUrls];
 }

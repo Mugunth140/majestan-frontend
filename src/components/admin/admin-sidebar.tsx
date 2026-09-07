@@ -55,6 +55,13 @@ const navItems: (NavItem | NavGroup)[] = [
     ]
   },
   {
+    title: "Projects",
+    defaultOpen: false,
+    items: [
+      { title: "Project SEO", href: "/admin/projects/seo", icon: Search },
+    ]
+  },
+  {
     title: "Content & SEO",
     defaultOpen: false,
     items: [

@@ -179,9 +179,16 @@ export function ProjectsExplorer() {
                   )}
                 </div>
                 <div className="p-5!">
-                  <p className="text-[11px]! font-bold! uppercase! tracking-wider! text-gray-400! mb-1!">
-                    {item.projectType === "villa" ? "Villa Project" : "Apartment Project"}
-                  </p>
+                  <div className="flex! items-center! justify-between! mb-1!">
+                    <p className="text-[11px]! font-bold! uppercase! tracking-wider! text-gray-400! m-0!">
+                      {item.projectType === "villa" ? "Villa Project" : "Apartment Project"}
+                    </p>
+                    {item.projectCode && (
+                      <span className="font-mono! text-[10px]! font-semibold! text-gray-400! bg-gray-100! rounded! px-1.5! py-0.5!">
+                        {item.projectCode}
+                      </span>
+                    )}
+                  </div>
                   <h3 className="font-['Lexend',sans-serif]! text-lg! font-bold! text-gray-900! line-clamp-1!">{item.name}</h3>
                   <p className="text-sm! text-gray-500! flex! items-center! gap-1! mt-1!">
                     <MapPin className="w-3.5! h-3.5! shrink-0!" />

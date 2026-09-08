@@ -28,6 +28,7 @@ export type ProjectRanges = {
 
 export type ProjectDetail = {
   id: number;
+  projectCode: string | null;
   name: string;
   slug: string;
   canonicalSlug: string;

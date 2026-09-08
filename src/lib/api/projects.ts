@@ -87,10 +87,15 @@ export type ProjectListParams = {
 
 type ApiEnvelope<T> = { success: boolean; data: T };
 
-const API_BASE =
+const SERVER_API_BASE =
   process.env.API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   "http://localhost:5000/api/v1";
+
+// Browsers must go through the same-origin /site-api rewrite (see next.config.ts):
+// NEXT_PUBLIC_API_BASE_URL points at localhost, which is unreachable from user devices.
+const API_BASE =
+  typeof window === "undefined" ? SERVER_API_BASE : "/site-api";
 
 async function fetchProjectApi<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

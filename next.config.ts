@@ -39,6 +39,15 @@ const nextConfig: NextConfig = {
   // Produce .next/standalone with a minimal server.js — the Docker runner
   // executes this with Node instead of `next start` under Bun (memory retention).
   output: "standalone",
+  async rewrites() {
+    const siteBackendBase = process.env.SITE_BACKEND_URL || "http://localhost:5000";
+    return [
+      {
+        source: "/site-api/:path*",
+        destination: `${siteBackendBase}/api/v1/:path*`,
+      },
+    ];
+  },
   async redirects() {
     return [
       // 1. Specific SEO 301 Redirects (Chain to the new location)

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { ProjectsExplorer } from "@/components/projects/ProjectsExplorer";
+import { Suspense } from "react";
+import { SiteHeader } from "@/components/site/layout/site-header";
+import { SiteFooter } from "@/components/site/layout/site-footer";
+import { ProjectsListingPage } from "@/components/projects/ProjectsListingPage";
 
 export const metadata: Metadata = {
   title: "New Villa & Apartment Projects | Majestan Realty",
@@ -9,5 +12,13 @@ export const metadata: Metadata = {
 };
 
 export default function ProjectsIndexPage() {
-  return <ProjectsExplorer />;
+  return (
+    <div className="min-h-screen! bg-gray-50!">
+      <SiteHeader />
+      <Suspense>
+        <ProjectsListingPage />
+      </Suspense>
+      <SiteFooter />
+    </div>
+  );
 }

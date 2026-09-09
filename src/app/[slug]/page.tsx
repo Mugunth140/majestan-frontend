@@ -12,6 +12,13 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { parsePseoSlug } from "@/lib/seo/pseo-parser";
 import { ListingPage } from "@/components/search/ListingPage";
 import { searchProperties } from "@/lib/api";
+import { getProjectBySlugUrl, getAllProjectSlugs, formatINR as formatProjectINR } from "@/lib/api/projects";
+import { ProjectNavigation } from "@/components/site/project/project-navigation";
+import { ProjectDetailsView } from "@/components/site/project/ProjectDetailsView";
+import { ProjectFloorPlanSection } from "@/components/site/project/sections/ProjectFloorPlanSection";
+import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
+import { ProjectAmenitiesSection } from "@/components/site/project/sections/ProjectAmenitiesSection";
+import { ProjectLocalitySection } from "@/components/site/project/sections/ProjectLocalitySection";
 
 export const dynamicParams = true;
 // Bound the ISR full-route cache: crawler/scanner garbage URLs must not
@@ -19,19 +26,28 @@ export const dynamicParams = true;
 export const revalidate = 300;
 
 export async function generateStaticParams() {
+  const out: { slug: string }[] = [];
   try {
     const { API_BASE_URL } = await import("@/lib/api");
     const res = await fetch(`${API_BASE_URL}/properties/all-slugs`);
-    if (!res.ok) return [];
-    
-    const data = await res.json();
-    const slugs: string[] = Array.isArray(data) ? data : (data.data || data.items || []);
-    
-    return slugs.map((slug) => ({ slug }));
+    if (res.ok) {
+      const data = await res.json();
+      const slugs: string[] = Array.isArray(data) ? data : (data.data || data.items || []);
+      for (const slug of slugs) out.push({ slug });
+    }
   } catch (error) {
     console.error("Failed to fetch slugs for static generation:", error);
-    return [];
   }
+  try {
+    const projectSlugs = await getAllProjectSlugs();
+    for (const full of projectSlugs) {
+      const clean = full.replace(/^\/+/, "");
+      if (clean && !clean.includes("/")) out.push({ slug: clean });
+    }
+  } catch (error) {
+    console.error("Failed to fetch project slugs for static generation:", error);
+  }
+  return out;
 }
 
 const RESERVED_SLUGS = new Set([
@@ -180,6 +196,33 @@ export async function generateMetadata({
       },
     };
   }
+
+  try {
+    const project = await getProjectBySlugUrl(slug).catch(() => null);
+    if (project) {
+      const canonicalPath = `/${project.canonicalSlug}`;
+      const seo = project.seo?.seoData?.overview;
+      const typeLabel = project.projectType === "villa" ? "Villa" : "Apartment";
+      const bhkLabel = project.ranges.bhk.length ? `${project.ranges.bhk.join(", ")} BHK ` : "";
+      const priceLabel = project.ranges.minPrice != null ? ` ${formatProjectINR(project.ranges.minPrice)}${project.ranges.maxPrice && project.ranges.maxPrice !== project.ranges.minPrice ? ` - ${formatProjectINR(project.ranges.maxPrice)}` : ""}` : "";
+      const title = seo?.title || `${project.name} - ${bhkLabel}${typeLabel} in ${project.city} | Majestan Realty`;
+      const description = seo?.description || `${project.name}, ${bhkLabel}${typeLabel.toLowerCase()} project in ${project.city}.${priceLabel ? ` Price${priceLabel}.` : ""} View configurations, floor plans, photos and locality details.`;
+      const ogImage = seo?.og_image || project.coverImageUrl || undefined;
+      return {
+        title, description,
+        alternates: { canonical: canonicalPath },
+        openGraph: {
+          title: seo?.og_title || title, description: seo?.og_description || description,
+          url: canonicalPath, type: "article",
+          ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630, alt: project.name }] } : {}),
+        },
+        twitter: {
+          card: "summary_large_image", title: seo?.og_title || title, description: seo?.og_description || description,
+          ...(ogImage ? { images: [ogImage] } : {}),
+        },
+      };
+    }
+  } catch { /* fall through to static/PSEO/404 */ }
 
   const pathname = `/${slug}`;
   const viewName = resolveViewForPath(pathname);
@@ -351,6 +394,48 @@ export default async function SlugPage({
       </>
     );
   }
+
+  try {
+    const project = await getProjectBySlugUrl(slug).catch(() => null);
+    if (project) {
+      const breadcrumbItems = [
+        { label: "Projects", href: "/projects" },
+        { label: project.city, href: "/projects" },
+        { label: project.name },
+      ];
+      const units = project.units.filter((u) => u.status === "available");
+      const prices = units.map((u) => Number(u.price)).filter((n) => Number.isFinite(n) && n > 0);
+      return (
+        <>
+          <SiteHeader />
+          <div className="min-h-screen! bg-gray-50!">
+            <div className="pt-24! md:pt-28!">
+              <ProjectNavigation />
+            </div>
+            <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-8! scroll-smooth!">
+              <div className="flex! flex-col! gap-6!">
+                <Breadcrumbs items={breadcrumbItems} jsonLd />
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+                  "@context": "https://schema.org", "@type": "ApartmentComplex",
+                  name: project.name, url: `https://www.majestanrealty.com/${project.canonicalSlug}`,
+                  address: { "@type": "PostalAddress", addressLocality: project.sublocation || project.city, addressRegion: project.city },
+                  ...(prices.length ? { offers: { "@type": "AggregateOffer", lowPrice: Math.min(...prices), highPrice: Math.max(...prices), priceCurrency: "INR", offerCount: units.length } } : {}),
+                }) }} />
+                <div id="overview" className="scroll-mt-40!">
+                  <ProjectDetailsView project={project} />
+                </div>
+                <ProjectFloorPlanSection project={project} />
+                <ProjectPhotosSection project={project} />
+                <ProjectAmenitiesSection project={project} />
+                <ProjectLocalitySection project={project} />
+              </div>
+            </main>
+          </div>
+          <SiteFooter />
+        </>
+      );
+    }
+  } catch { /* fall through to static/PSEO/404 */ }
 
   const pathname = `/${slug}`;
   const viewName = resolveViewForPath(pathname);

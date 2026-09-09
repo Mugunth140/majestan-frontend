@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
-import { ProjectsListingPage } from "@/components/projects/ProjectsListingPage";
+import { ProjectsListingShell } from "@/components/projects/ProjectsListingShell";
 
 export const metadata: Metadata = {
   title: "New Villa & Apartment Projects | Majestan Realty",
@@ -16,7 +16,7 @@ export default function ProjectsIndexPage() {
     <div className="min-h-screen! bg-gray-50!">
       <SiteHeader />
       <Suspense>
-        <ProjectsListingPage />
+        <ProjectsListingShell />
       </Suspense>
       <SiteFooter />
     </div>

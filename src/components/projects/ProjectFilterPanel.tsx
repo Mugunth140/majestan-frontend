@@ -5,6 +5,7 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 export type ProjectFilterValues = {
+  city: string;
   keyword: string;
   projectType: string;
   minPrice: string;
@@ -13,7 +14,7 @@ export type ProjectFilterValues = {
 };
 
 export const EMPTY_PROJECT_FILTERS: ProjectFilterValues = {
-  keyword: "", projectType: "", minPrice: "", maxPrice: "", bhk: "",
+  city: "", keyword: "", projectType: "", minPrice: "", maxPrice: "", bhk: "",
 };
 
 const PRICE_PRESETS = [

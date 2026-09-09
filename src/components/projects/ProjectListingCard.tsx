@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Layers, Ruler, Phone, BedDouble } from "lucide-react";
+import { MapPin, Layers, Ruler, Phone, BedDouble, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images } from "lucide-react";
 import { formatINR, type ProjectListItem } from "@/lib/api/projects";
 
 export function ProjectListingCard({ item }: { item: ProjectListItem }) {
@@ -71,7 +71,27 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           )}
         </div>
         <div className="mt-auto! pt-5!">
-          <div className="flex! items-center! justify-between! pt-5! border-t! border-gray-100/80!">
+          <div className="flex! flex-wrap! gap-2! mt-4!">
+            {[
+              { href: `/${item.canonicalSlug}#overview`, label: "Overview", icon: <LayoutDashboard className="w-4! h-4!" /> },
+              { href: `/${item.canonicalSlug}#amenities`, label: "Amenities", icon: <Sparkles className="w-4! h-4!" /> },
+              { href: `/${item.canonicalSlug}#floor-plans`, label: "Floor Plan", icon: <Grid3X3 className="w-4! h-4!" /> },
+              { href: `/${item.canonicalSlug}#locality`, label: "Locality", icon: <MapPinned className="w-4! h-4!" /> },
+              { href: `/${item.canonicalSlug}#photos`, label: "Photos", icon: <Images className="w-4! h-4!" /> },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex! items-center! gap-1.5! rounded-lg! bg-gray-50! border! border-gray-200/60! px-3! py-1.5! text-[11px]! font-bold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
+              >
+                <span className="text-gray-400! group-hover:text-white/90! transition-colors!">
+                  {link.icon}
+                </span>
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-5! flex! items-center! justify-between! pt-5! border-t! border-gray-100/80!">
             <div className="flex! gap-3!">
               <button className="flex! items-center! gap-2! px-5! py-2.5! rounded-xl! text-sm! font-bold! text-[#27427f]! bg-[#27427f]/5! hover:bg-[#27427f]/15! transition-colors! cursor-pointer!">
                 <Phone className="w-4! h-4!" />

@@ -10,7 +10,9 @@ import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { parsePseoSlug } from "@/lib/seo/pseo-parser";
-import { ListingPage } from "@/components/search/ListingPage";
+import { ListingShell } from "@/components/search/ListingPage";
+import { createPropertyAdapter } from "@/components/search/property-listing-adapter";
+import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
 import { getProjectBySlugUrl, getAllProjectSlugs, formatINR as formatProjectINR } from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
@@ -486,15 +488,40 @@ export default async function SlugPage({
       }))
     };
 
+    const pseoListingType = ((parsedPseo.listingType as "Sell" | "Rent") || "Sell");
+    const pseoPropertyType = parsedPseo.propertyType || "apartment";
+    const pseoCity = parsedPseo.city || "";
+    const pseoLocation = parsedPseo.location || "";
+
+    const pseoInitialFilters: FilterValues = {
+      keyword: "",
+      propertyType: pseoPropertyType,
+      listingType: pseoListingType,
+      location: pseoLocation,
+      minPrice: "",
+      maxPrice: "",
+      minArea: "",
+      maxArea: "",
+      bedrooms: "",
+      facing: "",
+      furnishing: "",
+      propertyAge: "",
+    };
+
+    const pseoAdapter = createPropertyAdapter({
+      initialListingType: pseoListingType,
+      initialPropertyType: pseoPropertyType,
+      initialCity: pseoCity,
+      initialLocality: parsedPseo.location,
+    });
+
     return (
       <>
         <SiteHeader />
-        <ListingPage 
-          initialListingType={(parsedPseo.listingType as "Sell" | "Rent") || "Sell"}
-          initialPropertyType={parsedPseo.propertyType || "apartment"}
-          initialCity={parsedPseo.city || ""}
-          initialLocality={parsedPseo.location || ""}
-          initialSearchData={initialData}
+        <ListingShell
+          adapter={pseoAdapter}
+          initialFilters={pseoInitialFilters}
+          initialData={initialData}
         />
         <script
           type="application/ld+json"

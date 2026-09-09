@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { notFound } from "next/navigation";
-import { ListingPage } from "@/components/search/ListingPage";
+import { ListingShell } from "@/components/search/ListingPage";
+import { createPropertyAdapter } from "@/components/search/property-listing-adapter";
+import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
 import { parseListingUrl, toLocationSlug } from "@/lib/seo-urls";
 import type { Metadata } from "next";
@@ -104,18 +106,40 @@ export default async function ForSaleListingPageRoute({ params, searchParams }: 
       }
     : null;
 
+  const getParam = (key: string) => typeof sp[key] === "string" ? (sp[key] as string) : "";
+
+  const initialFilters: FilterValues = {
+    keyword: getParam("keyword"),
+    propertyType: parsed.apiPropertyType,
+    listingType: parsed.apiListingType,
+    location: parsed.locality || "",
+    minPrice: getParam("minPrice"),
+    maxPrice: getParam("maxPrice"),
+    minArea: getParam("minArea"),
+    maxArea: getParam("maxArea"),
+    bedrooms: getParam("bedrooms") || (parsed.bedrooms ? String(parsed.bedrooms) : ""),
+    facing: getParam("facing"),
+    furnishing: getParam("furnishing"),
+    propertyAge: getParam("propertyAge"),
+  };
+
+  const adapter = createPropertyAdapter({
+    initialListingType: parsed.apiListingType,
+    initialPropertyType: parsed.apiPropertyType,
+    initialCity: parsed.city,
+    initialLocality: parsed.locality,
+    initialBedrooms: parsed.bedrooms,
+  });
+
   return (
     <Suspense fallback={<div className="min-h-screen mt-24 text-center">Loading properties...</div>}>
       {itemListJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       )}
-      <ListingPage 
-        initialListingType={parsed.apiListingType}
-        initialPropertyType={parsed.apiPropertyType}
-        initialCity={parsed.city}
-        initialLocality={parsed.locality}
-        initialBedrooms={parsed.bedrooms}
-        initialSearchData={initialData}
+      <ListingShell
+        adapter={adapter}
+        initialFilters={initialFilters}
+        initialData={initialData}
       />
     </Suspense>
   );

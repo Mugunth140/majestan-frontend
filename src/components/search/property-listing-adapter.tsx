@@ -3,7 +3,6 @@ import { MapPin, X, Ruler, Compass, Layers, Phone } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import { PROPERTY_TYPES, buildListingUrl } from "@/lib/seo-urls";
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
-import { PropertySectionLinks } from "@/components/site/property/property-navigation";
 import type { ListingAdapter } from "./listing-adapter";
 
 const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
@@ -61,11 +60,18 @@ function getPhotoUrl(item: any): string {
   return photo;
 }
 
-function getArea(item: PropertySearchItem): string | null {
-  if (item.sq_ft && item.sq_ft !== "0") return `${item.sq_ft} sq.ft`;
-  if (item.cents && item.cents !== "0") return `${item.cents} cents`;
-  if (item.acres && item.acres !== "0") return `${item.acres} acres`;
-  if (item.build_up_area && item.build_up_area !== "0") return `${item.build_up_area} sq.ft`;
+function getArea(item: PropertySearchItem & { isProject?: boolean, ranges?: any }): string | null {
+  if (item.isProject && item.ranges) {
+    if (item.ranges.minArea && item.ranges.maxArea && item.ranges.minArea !== item.ranges.maxArea) {
+      return `${item.ranges.minArea} - ${item.ranges.maxArea} sq.ft`;
+    }
+    if (item.ranges.minArea) return `${item.ranges.minArea} sq.ft`;
+  }
+  const nonZero = (v: unknown) => typeof v === "string" && parseFloat(v) > 0;
+  if (nonZero(item.sq_ft)) return `${item.sq_ft} sq.ft`;
+  if (nonZero(item.cents)) return `${item.cents} cents`;
+  if (nonZero(item.acres)) return `${item.acres} acres`;
+  if (nonZero(item.build_up_area)) return `${item.build_up_area} sq.ft`;
   return null;
 }
 
@@ -85,129 +91,123 @@ function formatPrice(value: string | number | undefined | null): string {
 
 function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   const detailPath = getDetailPath(item);
-  const slug = detailPath.substring(1);
-  return (
-    <div className="bg-white! rounded-2xl! shadow-sm! hover:shadow-xl! border! border-gray-100/60! overflow-hidden! transition-all! duration-300! hover:-translate-y-1! flex! flex-col! md:flex-row! group!">
+  const rawArea = getArea(item);
+  // Suppress zero/null area values like "0.00 sq.ft"
+  const area = rawArea && !rawArea.match(/^0(\.0+)?\s/) ? rawArea : null;
+  const facing = getFacing(item);
 
-      {/* Image section */}
-      <Link href={detailPath} className="relative! w-full! md:w-[340px]! shrink-0! block! overflow-hidden!">
-        <div className="aspect-[4/3]! md:h-full! w-full!">
-          <img
-            src={getPhotoUrl(item)}
-            alt={item.propertyname || 'Property'}
-            className="w-full! h-full! object-cover! group-hover:scale-110! transition-transform! duration-700! ease-out!"
-          />
-          <div className="absolute! inset-0! bg-gradient-to-t! from-black/50! via-transparent! to-transparent! opacity-0! group-hover:opacity-100! transition-opacity! duration-300!"></div>
-        </div>
-        <div className="absolute! top-4! left-4! flex! gap-2!">
-          <span className="px-3! py-1.5! bg-white/95! backdrop-blur-md! text-[#27427f]! text-xs! font-extrabold! rounded-lg! shadow-sm! uppercase! tracking-wider!">
+  const priceDisplay = (() => {
+    if ((item as any).isProject && (item as any).ranges && (item as any).ranges.unitsCount >= 2) {
+      const min = (item as any).ranges.minPrice;
+      const max = (item as any).ranges.maxPrice;
+      if (min != null && max != null && min !== max) return `${formatPrice(min)} – ${formatPrice(max)}`;
+      if (min != null) return formatPrice(min);
+    } else if (item.units && item.units.length >= 2) {
+      const prices = item.units.map((u) => Number(u.price)).filter((p) => !isNaN(p) && p > 0);
+      if (prices.length >= 2) {
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        if (min !== max) return `${formatPrice(min)} – ${formatPrice(max)}`;
+      }
+    }
+    return formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent);
+  })();
+
+  const unitSpec = (() => {
+    if ((item as any).isProject && (item as any).ranges?.unitsCount >= 2) {
+      const ranges = (item as any).ranges;
+      if (ranges.bhk?.length > 0) return `${ranges.bhk.join(", ")} BHK`;
+      return `${ranges.unitsCount} Plans`;
+    }
+    if (item.units && item.units.length >= 2) return `${item.units.length} Plans`;
+    if (item.unittype) return item.unittype;
+    return null;
+  })();
+
+  const hasSpecs = !!(unitSpec || area || facing);
+
+  return (
+    <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_1px_4px_rgba(0,0,0,0.06)]! hover:shadow-[0_4px_16px_rgba(0,0,0,0.10)]! transition-shadow! duration-200! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0!">
+
+      {/* Image — relative wrapper so badge can be absolutely positioned */}
+      <div className="relative! w-full! xl:w-[220px]! shrink-0! overflow-hidden! bg-gray-100!">
+        <Link href={detailPath} className="block! w-full! h-full!">
+          <div className="aspect-[16/10]! xl:aspect-auto! xl:absolute! xl:inset-0!">
+            <img
+              src={getPhotoUrl(item)}
+              alt={item.propertyname || "Property"}
+              className="w-full! h-full! object-cover!"
+              loading="lazy"
+            />
+          </div>
+        </Link>
+        {/* Badge — absolutely positioned over image */}
+        <div className="absolute! top-2! left-2! z-10!">
+          <span className="px-2! py-0.5! bg-white! text-[#27427f]! text-[10px]! font-extrabold! rounded! shadow-sm! uppercase! tracking-wider!">
             {item.posttype === "Sell" ? "For Sale" : "For Rent"}
           </span>
         </div>
-      </Link>
+      </div>
 
-      {/* Content section */}
-      <div className="p-6! flex! flex-col! flex-1!">
-        <div className="flex! justify-between! items-start! gap-4!">
-          <div className="flex-1!">
-            <Link href={detailPath} className="hover:text-[#27427f]! transition-colors! no-underline!">
-              <h3 className="font-['Lexend',sans-serif]! text-xl! font-bold! text-gray-900! line-clamp-2! leading-tight!">{item.propertyname}</h3>
-            </Link>
-            <p className="text-sm! font-medium! text-gray-500! flex! items-center! gap-1.5! mt-2!">
-              <MapPin className="w-4! h-4! shrink-0! text-gray-400!" />
-              <span className="line-clamp-1!">{item.sublocation || item.address}</span>
-            </p>
-          </div>
-          <div className="text-right! shrink-0!">
-            <div className="font-['Lexend',sans-serif]! text-2xl! font-extrabold! text-[#27427f]!">
-              {(() => {
-                if (item.units && item.units.length >= 2) {
-                  const prices = item.units.map(u => Number(u.price)).filter(p => !isNaN(p) && p > 0);
-                  if (prices.length >= 2) {
-                    const min = Math.min(...prices);
-                    const max = Math.max(...prices);
-                    if (min !== max) return `${formatPrice(min)} - ${formatPrice(max)}`;
-                  }
-                }
-                return formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent);
-              })()}
-            </div>
-            {(() => {
-              if (item.units && item.units.length >= 2) {
-                const areas = item.units.map(u => Number(u.builtupAreaSqft || u.carpetAreaSqft)).filter(a => !isNaN(a) && a > 0);
-                if (areas.length >= 2) {
-                  const min = Math.min(...areas);
-                  const max = Math.max(...areas);
-                  if (min !== max) {
-                    return (
-                      <div className="text-xs! font-semibold! text-gray-400! mt-1! uppercase! tracking-wider!">
-                        {min} - {max} sq.ft
-                      </div>
-                    );
-                  }
-                }
-              }
-              const area = getArea(item);
-              if (item.posttype === "Sell" && area) {
-                return (
-                  <div className="text-xs! font-semibold! text-gray-400! mt-1! uppercase! tracking-wider!">
-                    {(Number(item.expectedsaleprice) / Number(area.split(' ')[0])).toFixed(0)} / sq.ft
-                  </div>
-                );
-              }
-              return null;
-            })()}
+      {/* Content */}
+      <div className="p-4! flex! flex-col! flex-1! min-w-0! gap-0!">
+
+        {/* Title + location */}
+        <div className="min-w-0!">
+          <Link href={detailPath} className="no-underline!">
+            <h3 className="font-['Lexend',sans-serif]! text-[15px]! font-bold! text-gray-900! line-clamp-1! leading-snug! hover:text-[#27427f]! transition-colors!">
+              {item.propertyname}
+            </h3>
+          </Link>
+          <p className="flex! items-center! gap-1! text-[12px]! text-gray-400! mt-0.5! min-w-0!">
+            <MapPin className="w-3! h-3! shrink-0!" />
+            <span className="truncate!">{item.sublocation || item.address}</span>
+          </p>
+        </div>
+
+        {/* Price */}
+        <div className="mt-2!">
+          <div className="font-['Lexend',sans-serif]! text-lg! font-extrabold! text-[#27427f]! leading-tight!">
+            {priceDisplay}
           </div>
         </div>
 
-        {/* Specs row */}
-        <div className="flex! flex-wrap! items-center! gap-5! mt-5! pb-5! border-b! border-gray-100/80!">
-          {(item.units && item.units.length >= 2) ? (
-            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
-              <Layers className="w-4! h-4! text-[#27427f]! opacity-60!" />
-              {item.units.length} Plans
-            </span>
-          ) : item.unittype ? (
-            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
-              <Layers className="w-4! h-4! text-[#27427f]! opacity-60!" />
-              {item.unittype}
-            </span>
-          ) : null}
-          {getArea(item) && (
-            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
-              <Ruler className="w-4! h-4! text-[#27427f]! opacity-60!" />
-              {getArea(item)}
-            </span>
-          )}
-          {getFacing(item) && (
-            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
-              <Compass className="w-4! h-4! text-[#27427f]! opacity-60!" />
-              {getFacing(item)} Facing
-            </span>
-          )}
-        </div>
-
-        <div className="mt-auto! pt-5!">
-          <PropertySectionLinks slug={slug} compact />
-
-          {/* Actions */}
-          <div className="mt-5! flex! items-center! justify-between! pt-5! border-t! border-gray-100/80!">
-            {/* <div className="text-xs! font-bold! text-gray-500! uppercase! tracking-wider! bg-gray-50! px-3! py-1.5! rounded-lg! whitespace-nowrap!">
-              {Object.values(PROPERTY_TYPES).find(p => p.apiValue === item.propertyType)?.label || item.propertyType}
-            </div> */}
-            <div className="flex! gap-3!">
-              <button className="flex! items-center! gap-2! px-5! py-2.5! rounded-xl! text-sm! font-bold! text-[#27427f]! bg-[#27427f]/5! hover:bg-[#27427f]/15! transition-colors!">
-                <Phone className="w-4! h-4!" />
-                <span className="hidden! sm:inline!">Contact</span>
-              </button>
-              <Link
-                href={detailPath}
-                className="flex! items-center! justify-center! px-5! py-2.5! rounded-xl! text-sm! font-bold! text-white! bg-[#27427f]! hover:bg-[#1a2d59]! hover:shadow-lg! hover:shadow-[#27427f]/20! transition-all! no-underline!"
-              >
-                View Details
-              </Link>
-            </div>
+        {/* Specs row — only shown when there's real data */}
+        {hasSpecs && (
+          <div className="flex! flex-wrap! items-center! gap-x-3! gap-y-1! mt-2! pt-2! border-t! border-gray-100!">
+            {unitSpec && (
+              <span className="flex! items-center! gap-1! text-[12px]! font-medium! text-gray-500!">
+                <Layers className="w-3! h-3! text-[#27427f]/40! shrink-0!" />
+                {unitSpec}
+              </span>
+            )}
+            {area && (
+              <span className="flex! items-center! gap-1! text-[12px]! font-medium! text-gray-500!">
+                <Ruler className="w-3! h-3! text-[#27427f]/40! shrink-0!" />
+                {area}
+              </span>
+            )}
+            {facing && (
+              <span className="flex! items-center! gap-1! text-[12px]! font-medium! text-gray-500!">
+                <Compass className="w-3! h-3! text-[#27427f]/40! shrink-0!" />
+                {facing} Facing
+              </span>
+            )}
           </div>
+        )}
+
+        {/* Actions — always at bottom */}
+        <div className="mt-auto! pt-3! flex! items-center! gap-2!">
+          <button className="flex! items-center! gap-1.5! px-3! py-1.5! rounded-lg! text-xs! font-bold! text-[#27427f]! border! border-[#27427f]/25! hover:bg-[#27427f]/5! hover:border-[#27427f]/50! transition-colors! cursor-pointer! whitespace-nowrap!">
+            <Phone className="w-3! h-3!" />
+            Enquire
+          </button>
+          <Link
+            href={detailPath}
+            className="flex! items-center! justify-center! px-4! py-1.5! rounded-lg! text-xs! font-bold! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! no-underline! whitespace-nowrap!"
+          >
+            View Details
+          </Link>
         </div>
       </div>
     </div>
@@ -232,6 +232,8 @@ export function createPropertyAdapter(init: {
     resetFilters,
 
     fetchItems: async ({ filters, sort, page }) => {
+      // Property listings show properties only. Projects live exclusively
+      // on the /projects listing page (createProjectAdapter).
       return searchProperties({
         listingType: filters.listingType,
         propertyType: filters.propertyType,
@@ -360,7 +362,7 @@ export function createPropertyAdapter(init: {
       keyword: searchParams.get("keyword") || "",
       propertyType: init.initialPropertyType,
       listingType: init.initialListingType,
-      location: init.initialLocality || "",
+      location: searchParams.get("location") || init.initialLocality || init.initialCity, // Use param if present
       minPrice: searchParams.get("minPrice") || "",
       maxPrice: searchParams.get("maxPrice") || "",
       minArea: searchParams.get("minArea") || "",

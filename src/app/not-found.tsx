@@ -1,100 +1,95 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'motion/react';
-import { ArrowLeft, Home, Search } from 'lucide-react';
+import { Breadcrumbs } from '@/components/site/layout/breadcrumbs';
+import { SiteHeader } from '@/components/site/layout/site-header';
+import { SiteFooter } from '@/components/site/home/site-footer';
+
+const CARDS = [
+  {
+    title: 'Buy a Property',
+    badge: 'for sale',
+    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
+    href: '/for-sale/apartments/coimbatore',
+  },
+  {
+    title: 'Rent a Property',
+    badge: 'for rent',
+    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
+    href: '/for-rent/apartments/coimbatore',
+  },
+  {
+    title: 'View Projects',
+    badge: 'new projects',
+    image: '/assets/images/home/ready_to_move.webp',
+    href: '/projects',
+  },
+] as const;
 
 export default function NotFound() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: 'easeOut' as const },
-    },
-  };
-
   return (
-    <main className="min-h-screen! bg-linear-to-b! from-white! via-[#f8f9ff]! to-[#eef0ff]! flex! items-center! justify-center! px-4! py-6!">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-2xl! w-full! text-center!"
-      >
-        {/* 404 Number */}
-        <motion.div variants={itemVariants} className="mb-6!">
-          <h1 className="text-[120px]! md:text-[180px]! font-black! text-[#27427f]/20! leading-none!">
-            404
-          </h1>
-        </motion.div>
+    <>
+      <SiteHeader />
+      <main className="min-h-screen! pb-12! mt-20! md:mt-24!">
+        <div className="max-w-[1400px]! mx-auto! px-4! sm:px-6! md:px-8! py-8!">
+          <div className="px-1!">
+            <Breadcrumbs items={[{ label: 'Page not found' }]} jsonLd={false} />
+          </div>
 
-        {/* Icon */}
-        <motion.div variants={itemVariants} className="mb-6! flex! justify-center!">
-          <div className="relative!">
-            <div className="absolute! inset-0! bg-linear-to-r! from-[#27427f]! to-[#ffc900]! rounded-full! blur-2xl! opacity-20! animate-pulse!" />
-            <div className="relative! bg-white! rounded-full! p-6! shadow-lg!">
-              <Search size={56} className="text-[#27427f]!" />
+          <div className="relative! mt-4! mb-8! overflow-hidden!">
+            {/* Giant numeral — decorative background anchor */}
+            <span
+              aria-hidden="true"
+              className="absolute! top-1/2! -translate-y-1/2! left-0! font-extrabold! font-['Lexend',sans-serif]! leading-none! select-none! pointer-events-none! text-[160px]! md:text-[220px]! text-[#27427f]/[0.06]!"
+            >
+              404
+            </span>
+
+            {/* Heading content sits on top */}
+            <div className="relative! z-10! py-8! md:py-10!">
+              <h1 className="text-3xl! sm:text-4xl! md:text-5xl! font-extrabold! text-gray-900! font-['Lexend',sans-serif]! mb-4! tracking-tight! leading-tight!">
+                We couldn&apos;t find<br className="hidden! sm:block!" /> that page
+              </h1>
+              <p className="text-gray-500! max-w-sm! text-base!">
+                It may have been moved or no longer exists.<br />Try one of these instead.
+              </p>
             </div>
           </div>
-        </motion.div>
 
-        {/* Title */}
-        <motion.h2 variants={itemVariants} className="text-3xl! md:text-4xl! font-black! text-[#27427f]! mb-4!">
-          Page Not Found
-        </motion.h2>
+          <div className="grid! grid-cols-1! sm:grid-cols-3! gap-4! md:gap-5!">
+            {CARDS.map(({ title, badge, image, href }) => (
+              <Link
+                key={title}
+                href={href}
+                className="group! relative! overflow-hidden! rounded-2xl! bg-[#f9fafb]! flex! flex-col! justify-end! p-5! md:p-6! h-[250px]! md:h-[320px]! transition-all! duration-500! hover:shadow-[0_20px_40px_-15px_rgba(39,66,127,0.2)]! hover:-translate-y-1.5! no-underline!"
+              >
+                {/* Background image */}
+                <div className="absolute! inset-0! z-0! bg-[#eef2f6]!">
+                  <img
+                    src={image}
+                    alt={title}
+                    className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-110!"
+                  />
+                  {/* Gradient overlay */}
+                  <div className="absolute! inset-0! bg-gradient-to-t! from-[#0a0a0a]/90! via-[#0a0a0a]/30! to-transparent! opacity-70! transition-opacity! duration-700! group-hover:opacity-95!" />
+                </div>
 
-        {/* Description */}
-        <motion.p
-          variants={itemVariants}
-          className="text-lg! md:text-xl! text-[#27427f]/70! mb-8! leading-relaxed!"
-        >
-          Sorry, we couldn't find the page you're looking for. It might have been moved or doesn't exist anymore.
-        </motion.p>
-
-        {/* Suggestions */}
-        <motion.div variants={itemVariants} className="mb-10! p-6! bg-white! rounded-2xl! border! border-[#27427f]/10! shadow-sm!">
-          <p className="text-sm! text-[#27427f]/60! mb-4!">Did you mean to:</p>
-          <div className="flex! flex-col! sm:flex-row! gap-3! justify-center!">
-            <Link
-              href="/"
-              className="inline-flex! items-center! justify-center! gap-2! px-6! py-3! rounded-full! bg-[#27427f]! text-white! font-semibold! hover:bg-[#27427f]/90! transition-colors!"
-            >
-              <Home size={18} />
-              Go Home
-            </Link>
-            <Link
-              href="/buy-apartments-coimbatore"
-              className="inline-flex! items-center! justify-center! gap-2! px-6! py-3! rounded-full! border-2! border-[#27427f]! text-[#27427f]! font-semibold! hover:bg-[#27427f]/5! transition-colors!"
-            >
-              <Search size={18} />
-              Browse Properties
-            </Link>
+                {/* Content */}
+                <div className="relative! z-10! flex! flex-col! items-start! transform! transition-transform! duration-700! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:-translate-y-2!">
+                  <span className="mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3! py-1! text-[10px]! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm!">
+                    {badge}
+                  </span>
+                  <h5 className="text-xl! md:text-2xl! font-['Lexend',sans-serif]! font-medium! text-white! tracking-tight! leading-tight! drop-shadow-sm!">
+                    {title}
+                  </h5>
+                  <div className="mt-4! h-[2px]! w-0! bg-white! transition-all! duration-700! ease-out! group-hover:w-12!" />
+                </div>
+              </Link>
+            ))}
           </div>
-        </motion.div>
-
-        {/* Additional Info */}
-        <motion.div variants={itemVariants} className="space-y-4! text-sm! text-[#27427f]/60!">
-          <p>
-            If you believe this is a mistake, please{' '}
-          <Link href="/contact-us" className="text-[#27427f]/60! hover:text-[#ffc900]/80! underline! underline-offset-1! transition-colors">
-              contact us
-            </Link>
-          </p>
-          
-        </motion.div>
-      </motion.div>
-    </main>
+        </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

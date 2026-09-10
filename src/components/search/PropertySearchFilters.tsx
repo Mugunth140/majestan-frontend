@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Search, MapPin, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { getHomePageData, type Sublocation } from "@/lib/api";
+import { useLocationContext } from "@/contexts/LocationContext";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 export type FilterValues = {
@@ -33,34 +35,43 @@ export function PropertySearchFilters({
   onReset,
   compact = false,
 }: PropertySearchFiltersProps) {
+  const { location: currentCity } = useLocationContext();
+  const [sublocations, setSublocations] = useState<Sublocation[]>([]);
+
+  useEffect(() => {
+    getHomePageData().then(data => {
+      setSublocations(data.filters?.sublocations || []);
+    }).catch(err => {
+      console.error("Failed to load sublocations", err);
+    });
+  }, []);
+
+  const citySublocations = sublocations.filter(s => s.city.toLowerCase() === currentCity.toLowerCase());
 
   const [textFields, setTextFields] = useState({
     keyword: values.keyword,
-    location: values.location,
+    
     minPrice: values.minPrice,
     maxPrice: values.maxPrice,
     minArea: values.minArea,
     maxArea: values.maxArea,
   });
 
+  // Only sync down if it's a reset (all empty) to avoid loop
   useEffect(() => {
-    setTextFields({
-      keyword: values.keyword,
-      location: values.location,
-      minPrice: values.minPrice,
-      maxPrice: values.maxPrice,
-      minArea: values.minArea,
-      maxArea: values.maxArea,
-    });
-  }, [values.keyword, values.location, values.minPrice, values.maxPrice, values.minArea, values.maxArea]);
+    if (!values.keyword && !values.minPrice && !values.maxPrice && !values.minArea && !values.maxArea) {
+      setTextFields({
+        keyword: "", minPrice: "", maxPrice: "", minArea: "", maxArea: ""
+      });
+    }
+  }, [values.keyword, values.minPrice, values.maxPrice, values.minArea, values.maxArea]);
 
   const debouncedText = useDebouncedValue(textFields, 500);
 
   useEffect(() => {
     if (
       debouncedText.keyword !== values.keyword ||
-      debouncedText.location !== values.location ||
-      debouncedText.minPrice !== values.minPrice ||
+            debouncedText.minPrice !== values.minPrice ||
       debouncedText.maxPrice !== values.maxPrice ||
       debouncedText.minArea !== values.minArea ||
       debouncedText.maxArea !== values.maxArea
@@ -86,9 +97,9 @@ export function PropertySearchFilters({
   ];
 
   return (
-    <div className="bg-white! rounded-2xl! border! border-gray-200/60! shadow-sm! w-full!">
+    <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! w-full!">
       {/* Header */}
-      <div className="px-5! py-4! border-b! border-gray-100! flex! items-center! justify-between!">
+      <div className="px-5! py-4! border-b! border-gray-100! flex! items-center! justify-between! bg-[#27427f]/[0.03]! rounded-t-2xl!">
         <h3 className="font-['Lexend',sans-serif]! text-base! font-bold! text-gray-900! flex! items-center! gap-2!">
           <SlidersHorizontal className="w-4! h-4! text-[#27427f]!" />
           Filters
@@ -116,7 +127,7 @@ export function PropertySearchFilters({
               placeholder="Search properties..."
               value={textFields.keyword}
               onChange={(e) => updateTextField("keyword", e.target.value)}
-              className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-3! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+              className="w-full! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-3! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
             />
           </div>
         </div>
@@ -127,14 +138,22 @@ export function PropertySearchFilters({
             Location
           </label>
           <div className="relative!">
-            <MapPin className="absolute! left-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400!" />
-            <input
-              type="text"
-              placeholder="City or locality..."
-              value={textFields.location}
-              onChange={(e) => updateTextField("location", e.target.value)}
-              className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-3! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
-            />
+            <MapPin className="absolute! left-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! z-10!" />
+            <select
+              value={values.location.toLowerCase() === currentCity.toLowerCase() || values.location === "" ? "" : values.location.toLowerCase()}
+              onChange={(e) => {
+                 const newVal = e.target.value;
+                 onChange({ ...values, ...textFields, location: newVal || currentCity });
+              }}
+              style={{ appearance: 'none', WebkitAppearance: 'none' }}
+              className={`w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-8! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer! ${values.location.toLowerCase() === currentCity.toLowerCase() || values.location === "" ? "text-gray-400!" : "text-gray-900!"}`}
+            >
+              <option value="">All of {currentCity}</option>
+              {citySublocations.map(sub => (
+                <option key={sub.id} value={sub.sublocation.toLowerCase()}>{sub.sublocation}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
           </div>
         </div>
 
@@ -170,7 +189,7 @@ export function PropertySearchFilters({
               value={values.propertyType}
               onChange={(e) => updateFilter("propertyType", e.target.value)}
               style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
+              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
             >
               {Object.entries(PROPERTY_TYPES).map(([slug, data]) => (
                 <option key={slug} value={data.apiValue}>
@@ -198,7 +217,7 @@ export function PropertySearchFilters({
                 placeholder="Min"
                 value={textFields.minPrice}
                 onChange={(e) => updateTextField("minPrice", e.target.value)}
-                className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+                className="w-full! bg-white! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
               />
             </div>
             <span className="text-gray-300! text-xs!">—</span>
@@ -209,7 +228,7 @@ export function PropertySearchFilters({
                 placeholder="Max"
                 value={textFields.maxPrice}
                 onChange={(e) => updateTextField("maxPrice", e.target.value)}
-                className="w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+                className="w-full! bg-white! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
               />
             </div>
           </div>
@@ -222,7 +241,7 @@ export function PropertySearchFilters({
                   setTextFields(next);
                   onChange({ ...values, ...next });
                 }}
-                className={`px-2.5! py-1.5! rounded-md! border! text-[11px]! font-bold! transition-all! ${
+                className={`px-2.5! py-1.5! rounded-full! border! text-[11px]! font-bold! transition-all! ${
                   values.minPrice === preset.min && values.maxPrice === preset.max
                     ? "bg-[#27427f]! text-white! border-[#27427f]!"
                     : "bg-white! text-gray-600! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
@@ -244,7 +263,7 @@ export function PropertySearchFilters({
               <button
                 key={num}
                 onClick={() => updateFilter("bedrooms", values.bedrooms === num ? "" : num)}
-                className={`flex-1! py-2! rounded-md! border! text-sm! font-bold! transition-all! ${
+                className={`flex-1! py-2! rounded-full! border! text-sm! font-bold! transition-all! ${
                   values.bedrooms === num
                     ? "bg-[#27427f]! text-white! border-[#27427f]!"
                     : "bg-white! text-gray-600! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
@@ -256,8 +275,23 @@ export function PropertySearchFilters({
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t! border-gray-100!"></div>
+        {/* Advanced filters accordion */}
+        <details className="group!">
+          <summary className="flex! items-center! justify-between! cursor-pointer! list-none! py-1! border-t! border-gray-100!">
+            <span className="text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider!">
+              Advanced Filters
+            </span>
+            <svg
+              className="w-4! h-4! text-gray-400! transition-transform! duration-200! group-open:rotate-180!"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div className="pt-4! space-y-5!">
 
         {/* Area */}
         <div className="w-full!">
@@ -270,7 +304,7 @@ export function PropertySearchFilters({
               placeholder="Min"
               value={textFields.minArea}
               onChange={(e) => updateTextField("minArea", e.target.value)}
-              className="flex-1! min-w-0! w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+              className="flex-1! min-w-0! w-full! bg-white! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
             />
             <span className="text-gray-300! text-xs! shrink-0!">—</span>
             <input
@@ -278,7 +312,7 @@ export function PropertySearchFilters({
               placeholder="Max"
               value={textFields.maxArea}
               onChange={(e) => updateTextField("maxArea", e.target.value)}
-              className="flex-1! min-w-0! w-full! bg-gray-50! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+              className="flex-1! min-w-0! w-full! bg-white! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
             />
           </div>
         </div>
@@ -293,7 +327,7 @@ export function PropertySearchFilters({
               value={values.furnishing}
               onChange={(e) => updateFilter("furnishing", e.target.value)}
               style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
+              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
             >
               <option value="">Any</option>
               <option value="furnished">Furnished</option>
@@ -314,7 +348,7 @@ export function PropertySearchFilters({
               value={values.facing}
               onChange={(e) => updateFilter("facing", e.target.value)}
               style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
+              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
             >
               <option value="">Any</option>
               {["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"].map((dir) => (
@@ -335,7 +369,7 @@ export function PropertySearchFilters({
               value={values.propertyAge}
               onChange={(e) => updateFilter("propertyAge", e.target.value)}
               style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-gray-50! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
+              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
             >
               <option value="">Any</option>
               <option value="new">Under Construction / New</option>
@@ -346,6 +380,9 @@ export function PropertySearchFilters({
             <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
           </div>
         </div>
+
+          </div>{/* end accordion body */}
+        </details>
       </div>
     </div>
   );

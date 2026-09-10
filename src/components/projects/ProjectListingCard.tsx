@@ -1,107 +1,136 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { MapPin, Layers, Ruler, Phone, BedDouble, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images } from "lucide-react";
+import { MapPin, Layers, Ruler, BedDouble, Phone } from "lucide-react";
 import { formatINR, type ProjectListItem } from "@/lib/api/projects";
 
+function formatCompactINR(value: number | null | undefined): string {
+  if (value == null) return "Price on Request";
+  return formatINR(value)
+    .replace(/\.00(?= [A-Z])/, "")
+    .replace(/(\.\d)0(?= [A-Z])/, "$1");
+}
+
 export function ProjectListingCard({ item }: { item: ProjectListItem }) {
+  const [imgOk, setImgOk] = useState(true);
   const detailPath = `/${item.canonicalSlug}`;
-  const typeLabel = item.projectType === "villa" ? "Villa Project" : "Apartment Project";
-  const price = item.ranges.minPrice == null && item.ranges.maxPrice == null
-    ? "Price on Request"
-    : item.ranges.minPrice != null && item.ranges.maxPrice != null && item.ranges.minPrice !== item.ranges.maxPrice
-      ? `${formatINR(item.ranges.minPrice)} - ${formatINR(item.ranges.maxPrice)}`
-      : formatINR(item.ranges.minPrice ?? item.ranges.maxPrice);
-  const area = item.ranges.minArea != null
-    ? item.ranges.minArea !== item.ranges.maxArea
-      ? `${item.ranges.minArea.toLocaleString("en-IN")} - ${item.ranges.maxArea?.toLocaleString("en-IN")} sq.ft`
-      : `${item.ranges.minArea.toLocaleString("en-IN")} sq.ft`
-    : null;
+  const showImg = Boolean(item.coverImageUrl) && imgOk;
+
+  const typeLabel =
+    item.projectType === "villa" ? "Villa Project" : "Apartment Project";
+
+  const price =
+    item.ranges.minPrice == null && item.ranges.maxPrice == null
+      ? "Price on Request"
+      : item.ranges.minPrice != null &&
+        item.ranges.maxPrice != null &&
+        item.ranges.minPrice !== item.ranges.maxPrice
+      ? `${formatCompactINR(item.ranges.minPrice)} – ${formatCompactINR(item.ranges.maxPrice)}`
+      : formatCompactINR(item.ranges.minPrice ?? item.ranges.maxPrice);
+
+  const area =
+    item.ranges.minArea != null
+      ? item.ranges.minArea !== item.ranges.maxArea
+        ? `${item.ranges.minArea.toLocaleString("en-IN")} – ${item.ranges.maxArea?.toLocaleString("en-IN")} sq.ft`
+        : `${item.ranges.minArea.toLocaleString("en-IN")} sq.ft`
+      : null;
 
   return (
-    <div className="bg-white! rounded-2xl! shadow-sm! hover:shadow-xl! border! border-gray-100/60! overflow-hidden! transition-all! duration-300! hover:-translate-y-1! flex! flex-col! md:flex-row! group!">
-      <Link href={detailPath} className="relative! w-full! md:w-[340px]! shrink-0! block! overflow-hidden!">
-        <div className="aspect-[4/3]! md:h-full! w-full! bg-gray-100!">
-          {item.coverImageUrl ? (
-            <img src={item.coverImageUrl} alt={item.name} className="w-full! h-full! object-cover! group-hover:scale-110! transition-transform! duration-700! ease-out!" loading="lazy" />
-          ) : (
-            <div className="w-full! h-full! flex! items-center! justify-center! text-gray-300! font-['Lexend',sans-serif]! text-4xl! font-bold!">{item.name.charAt(0)}</div>
+    <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! hover:shadow-md! transition-shadow! duration-200! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0!">
+
+      {/* Image */}
+      <Link
+        href={detailPath}
+        className="relative! block! w-full! xl:w-[280px]! shrink-0! overflow-hidden! bg-gradient-to-br! from-[#27427f]/8! to-[#27427f]/3!"
+      >
+        <div className="aspect-[16/9]! xl:aspect-auto! xl:h-full! xl:min-h-[240px]! w-full! relative!">
+          {!showImg && (
+            <div className="absolute! inset-0! flex! items-center! justify-center! font-['Lexend',sans-serif]! text-6xl! font-bold! text-[#27427f]/15!">
+              {item.name.charAt(0)}
+            </div>
           )}
-          <div className="absolute! inset-0! bg-gradient-to-t! from-black/50! via-transparent! to-transparent! opacity-0! group-hover:opacity-100! transition-opacity! duration-300!"></div>
+          {showImg && (
+            <img
+              src={item.coverImageUrl!}
+              alt={item.name}
+              onError={() => setImgOk(false)}
+              className="absolute! inset-0! w-full! h-full! object-cover!"
+              loading="lazy"
+            />
+          )}
         </div>
-        <div className="absolute! top-4! left-4! flex! gap-2!">
-          <span className="px-3! py-1.5! bg-white/95! backdrop-blur-md! text-[#27427f]! text-xs! font-extrabold! rounded-lg! shadow-sm! uppercase! tracking-wider!">{typeLabel}</span>
+        <div className="absolute! top-3! left-3! flex! gap-1.5!">
+          <span className="px-2.5! py-1! bg-white/95! backdrop-blur-sm! text-[#27427f]! text-[11px]! font-extrabold! rounded-lg! shadow-sm! uppercase! tracking-wider!">
+            {typeLabel}
+          </span>
           {item.projectCode && (
-            <span className="px-3! py-1.5! bg-[#27427f]/95! backdrop-blur-md! text-white! text-xs! font-mono! font-bold! rounded-lg! shadow-sm! tracking-wider!">{item.projectCode}</span>
+            <span className="px-2.5! py-1! bg-[#27427f]/90! text-white! text-[11px]! font-mono! font-bold! rounded-lg! shadow-sm! tracking-wider!">
+              {item.projectCode}
+            </span>
           )}
         </div>
       </Link>
-      <div className="p-6! flex! flex-col! flex-1!">
-        <div className="flex! justify-between! items-start! gap-4!">
-          <div className="flex-1!">
-            <Link href={detailPath} className="hover:text-[#27427f]! transition-colors! no-underline!">
-              <h3 className="font-['Lexend',sans-serif]! text-xl! font-bold! text-gray-900! line-clamp-2! leading-tight!">{item.name}</h3>
-            </Link>
-            <p className="text-sm! font-medium! text-gray-500! flex! items-center! gap-1.5! mt-2!">
-              <MapPin className="w-4! h-4! shrink-0! text-gray-400!" />
-              <span className="line-clamp-1!">{[item.sublocation, item.city].filter(Boolean).join(", ")}</span>
-            </p>
-          </div>
-          <div className="text-right! shrink-0!">
-            <div className="font-['Lexend',sans-serif]! text-2xl! font-extrabold! text-[#27427f]!">{price}</div>
-            {area && <div className="text-xs! font-semibold! text-gray-400! mt-1! uppercase! tracking-wider!">{area}</div>}
+
+      {/* Content */}
+      <div className="p-5! flex! flex-col! gap-2.5! flex-1! min-w-0!">
+
+        {/* Title + location */}
+        <div className="min-w-0!">
+          <Link href={detailPath} className="no-underline!">
+            <h3 className="font-['Lexend',sans-serif]! text-[17px]! font-bold! text-gray-900! line-clamp-2! leading-snug! hover:text-[#27427f]! transition-colors!">
+              {item.name}
+            </h3>
+          </Link>
+          <p className="flex! items-center! gap-1.5! text-sm! text-gray-500! mt-1! min-w-0!">
+            <MapPin className="w-3.5! h-3.5! shrink-0! text-gray-400!" />
+            <span className="truncate!">
+              {[item.sublocation, item.city].filter(Boolean).join(", ")}
+            </span>
+          </p>
+        </div>
+
+        {/* Price */}
+        <div>
+          <div className="font-['Lexend',sans-serif]! text-2xl! font-extrabold! text-[#27427f]! leading-none!">
+            {price}
           </div>
         </div>
-        <div className="flex! flex-wrap! items-center! gap-5! mt-5! pb-5! border-b! border-gray-100/80!">
+
+        {/* Specs */}
+        <div className="flex! flex-wrap! items-center! gap-x-4! gap-y-1.5! pt-1!">
           {item.ranges.unitsCount > 0 && (
-            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
-              <Layers className="w-4! h-4! text-[#27427f]! opacity-60!" />
+            <span className="flex! items-center! gap-1.5! text-sm! font-medium! text-gray-600!">
+              <Layers className="w-3.5! h-3.5! text-[#27427f]/50! shrink-0!" />
               {item.ranges.unitsCount} Units
             </span>
           )}
           {item.ranges.bhk.length > 0 && (
-            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
-              <BedDouble className="w-4! h-4! text-[#27427f]! opacity-60!" />
+            <span className="flex! items-center! gap-1.5! text-sm! font-medium! text-gray-600!">
+              <BedDouble className="w-3.5! h-3.5! text-[#27427f]/50! shrink-0!" />
               {item.ranges.bhk.map((b) => `${b} BHK`).join(" · ")}
             </span>
           )}
           {area && (
-            <span className="flex! items-center! gap-2! text-sm! font-semibold! text-gray-700!">
-              <Ruler className="w-4! h-4! text-[#27427f]! opacity-60!" />
+            <span className="flex! items-center! gap-1.5! text-sm! font-medium! text-gray-600!">
+              <Ruler className="w-3.5! h-3.5! text-[#27427f]/50! shrink-0!" />
               {area}
             </span>
           )}
         </div>
-        <div className="mt-auto! pt-5!">
-          <div className="flex! flex-wrap! gap-2! mt-4!">
-            {[
-              { href: `/${item.canonicalSlug}#overview`, label: "Overview", icon: <LayoutDashboard className="w-4! h-4!" /> },
-              { href: `/${item.canonicalSlug}#amenities`, label: "Amenities", icon: <Sparkles className="w-4! h-4!" /> },
-              { href: `/${item.canonicalSlug}#floor-plans`, label: "Floor Plan", icon: <Grid3X3 className="w-4! h-4!" /> },
-              { href: `/${item.canonicalSlug}#locality`, label: "Locality", icon: <MapPinned className="w-4! h-4!" /> },
-              { href: `/${item.canonicalSlug}#photos`, label: "Photos", icon: <Images className="w-4! h-4!" /> },
-            ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="flex! items-center! gap-1.5! rounded-lg! bg-gray-50! border! border-gray-200/60! px-3! py-1.5! text-[11px]! font-bold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
-              >
-                <span className="text-gray-400! group-hover:text-white/90! transition-colors!">
-                  {link.icon}
-                </span>
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          <div className="mt-5! flex! items-center! justify-between! pt-5! border-t! border-gray-100/80!">
-            <div className="flex! gap-3!">
-              <button className="flex! items-center! gap-2! px-5! py-2.5! rounded-xl! text-sm! font-bold! text-[#27427f]! bg-[#27427f]/5! hover:bg-[#27427f]/15! transition-colors! cursor-pointer!">
-                <Phone className="w-4! h-4!" />
-                <span className="hidden! sm:inline!">Contact</span>
-              </button>
-              <Link href={detailPath} className="flex! items-center! justify-center! px-5! py-2.5! rounded-xl! text-sm! font-bold! text-white! bg-[#27427f]! hover:bg-[#1a2d59]! hover:shadow-lg! hover:shadow-[#27427f]/20! transition-all! no-underline!">
-                View Details
-              </Link>
-            </div>
-          </div>
+
+        {/* Actions */}
+        <div className="mt-auto! pt-3! border-t! border-gray-100! flex! items-center! gap-2.5!">
+          <button className="flex! items-center! gap-2! px-4! py-2! rounded-lg! text-sm! font-bold! text-[#27427f]! border! border-[#27427f]/30! hover:bg-[#27427f]/5! transition-colors! cursor-pointer! whitespace-nowrap!">
+            <Phone className="w-3.5! h-3.5!" />
+            Enquire
+          </button>
+          <Link
+            href={detailPath}
+            className="flex! items-center! justify-center! px-5! py-2! rounded-lg! text-sm! font-bold! text-white! bg-[#27427f]! hover:bg-[#1a2d59]! transition-colors! no-underline! whitespace-nowrap!"
+          >
+            View Details
+          </Link>
         </div>
       </div>
     </div>

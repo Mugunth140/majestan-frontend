@@ -42,10 +42,10 @@ export function ProjectNavigation() {
   };
 
   return (
-    <div className="bg-white! sticky! top-[64px]! md:top-[68px]! z-40! border-b! border-gray-100! shadow-sm!">
+    <div className="bg-white! sticky! top-[64px]! z-40! border-b! border-gray-100! shadow-sm!">
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <nav className="mx-4! px-4! md:mx-0! md:px-0!" aria-label="Project sections">
-          <div className="flex! items-center! gap-2! overflow-x-auto! hide-scrollbar! py-2! md:py-2! md:px-2!">
+          <div className="flex! items-center! gap-2! overflow-x-auto! hide-scrollbar! py-2!">
             {PROJECT_SECTIONS.map((s) => {
               const isActive = active === s.id;
               return (

@@ -88,15 +88,35 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
     emptyTitle: "No projects found",
     emptyHint: () => "Try adjusting your filters.",
 
-    syncUrl: ({ sort, pathname, searchParams }) => {
+    syncUrl: ({ filters, sort, pathname, searchParams }) => {
       const params = new URLSearchParams(searchParams.toString());
       if (sort) params.set("sort", sort);
       else params.delete("sort");
+      
+      if (filters.keyword) params.set("keyword", filters.keyword);
+      else params.delete("keyword");
+      
+      if (filters.minPrice) params.set("minPrice", filters.minPrice);
+      else params.delete("minPrice");
+      
+      if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+      else params.delete("maxPrice");
+      
+      if (filters.bhk) params.set("bhk", filters.bhk);
+      else params.delete("bhk");
+
       params.delete("page");
       const qs = params.toString();
       return qs ? `${pathname}?${qs}` : pathname;
     },
 
-    filtersFromParams: () => ({}),
+    filtersFromParams: (searchParams) => ({
+      city: city, // from outer scope (the `city` argument passed to `createProjectAdapter`)
+      keyword: searchParams.get("keyword") || "",
+      projectType: searchParams.get("projectType") || "",
+      minPrice: searchParams.get("minPrice") || "",
+      maxPrice: searchParams.get("maxPrice") || "",
+      bhk: searchParams.get("bhk") || "",
+    }),
   };
 }

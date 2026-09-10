@@ -10,8 +10,7 @@ import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { parsePseoSlug } from "@/lib/seo/pseo-parser";
-import { ListingShell } from "@/components/search/ListingPage";
-import { createPropertyAdapter } from "@/components/search/property-listing-adapter";
+import { PropertyListingShell } from "@/components/search/PropertyListingShell";
 import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
 import { getProjectBySlugUrl, getAllProjectSlugs, formatINR as formatProjectINR } from "@/lib/api/projects";
@@ -374,17 +373,19 @@ export default async function SlugPage({
     return (
       <>
         <SiteHeader />
-        <div className="pt-25! bg-[#f8f9fa]! min-h-screen!">
-          <div className="container! mx-auto! px-4! max-w-7xl! pt-2!">
-            <Breadcrumbs items={breadcrumbItems} jsonLd />
+        {/* Spacer matching fixed header height (64px constant across breakpoints) */}
+        <div className="h-[64px]!" aria-hidden="true" />
+        <PropertyNavigation
+          slug={property.canonicalSlug}
+          activeSection=""
+        />
+        <div className="bg-[#f8f9fa]! min-h-screen!">
+          <div className="container! mx-auto! px-4! max-w-7xl! pt-8! pb-24!">
             <div className="mb-2!">
-              <PropertyNavigation
-                slug={property.canonicalSlug}
-                activeSection=""
-              />
+              <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
+            <PropertyDetailsView property={property} />
           </div>
-          <PropertyDetailsView property={property} />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
@@ -411,12 +412,14 @@ export default async function SlugPage({
         <>
           <SiteHeader />
           <div className="min-h-screen! bg-gray-50!">
-            <div className="pt-24! md:pt-28!">
-              <ProjectNavigation />
-            </div>
-            <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-8! scroll-smooth!">
+            {/* Spacer matching fixed header height (64px) */}
+            <div className="h-[64px]!" aria-hidden="true" />
+            <ProjectNavigation />
+            <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-8! pb-24! scroll-smooth!">
               <div className="flex! flex-col! gap-6!">
-                <Breadcrumbs items={breadcrumbItems} jsonLd />
+                <div className="mb-2!">
+                  <Breadcrumbs items={breadcrumbItems} jsonLd />
+                </div>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
                   "@context": "https://schema.org", "@type": "ApartmentComplex",
                   name: project.name, url: `https://www.majestanrealty.com/${project.canonicalSlug}`,
@@ -508,18 +511,16 @@ export default async function SlugPage({
       propertyAge: "",
     };
 
-    const pseoAdapter = createPropertyAdapter({
-      initialListingType: pseoListingType,
-      initialPropertyType: pseoPropertyType,
-      initialCity: pseoCity,
-      initialLocality: parsedPseo.location,
-    });
-
     return (
       <>
         <SiteHeader />
-        <ListingShell
-          adapter={pseoAdapter}
+        <PropertyListingShell
+          adapterInit={{
+            initialListingType: pseoListingType,
+            initialPropertyType: pseoPropertyType,
+            initialCity: pseoCity,
+            initialLocality: parsedPseo.location,
+          }}
           initialFilters={pseoInitialFilters}
           initialData={initialData}
         />

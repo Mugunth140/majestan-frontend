@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import { notFound } from "next/navigation";
-import { ListingShell } from "@/components/search/ListingPage";
-import { createPropertyAdapter } from "@/components/search/property-listing-adapter";
+import { PropertyListingShell } from "@/components/search/PropertyListingShell";
 import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
 import { parseListingUrl, toLocationSlug } from "@/lib/seo-urls";
@@ -123,21 +122,19 @@ export default async function ForRentListingPageRoute({ params, searchParams }: 
     propertyAge: getParam("propertyAge"),
   };
 
-  const adapter = createPropertyAdapter({
-    initialListingType: parsed.apiListingType,
-    initialPropertyType: parsed.apiPropertyType,
-    initialCity: parsed.city,
-    initialLocality: parsed.locality,
-    initialBedrooms: parsed.bedrooms,
-  });
-
   return (
     <Suspense fallback={<div className="min-h-screen mt-24 text-center">Loading properties...</div>}>
       {itemListJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       )}
-      <ListingShell
-        adapter={adapter}
+      <PropertyListingShell
+        adapterInit={{
+          initialListingType: parsed.apiListingType,
+          initialPropertyType: parsed.apiPropertyType,
+          initialCity: parsed.city,
+          initialLocality: parsed.locality,
+          initialBedrooms: parsed.bedrooms,
+        }}
         initialFilters={initialFilters}
         initialData={initialData}
       />

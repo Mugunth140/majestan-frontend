@@ -440,15 +440,15 @@ export default async function PropertySectionPage({
     return (
       <>
         <SiteHeader />
-        <div className="pt-[100px]! bg-[#f2f5f9]! min-h-screen!">
+        {/* Spacer matching fixed header height (64px) */}
+        <div className="h-[64px]!" aria-hidden="true" />
+        <PropertyNavigation
+          slug={property.canonicalSlug}
+          activeSection={sectionKey}
+        />
+        <div className="bg-[#f2f5f9]! min-h-screen!">
           <div className="container! mx-auto! px-4! sm:px-6! py-6! max-w-7xl!">
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
-            <div className="mb-6!">
-              <PropertyNavigation
-                slug={property.canonicalSlug}
-                activeSection={sectionKey}
-              />
-            </div>
 
             <h1 className="text-3xl! font-bold! text-gray-900! mb-6!">{sectionConfig.titlePrefix} — {property.title} in {property.city}</h1>
             <div className="grid! grid-cols-1! lg:grid-cols-3! gap-8! pb-24!">

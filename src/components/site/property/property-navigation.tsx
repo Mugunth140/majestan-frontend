@@ -70,36 +70,40 @@ export function PropertyNavigation({
   };
 
   return (
-    <nav
-      className="mx-4! px-4! md:mx-0! md:px-0!"
-      aria-label="Property sections"
-    >
-      <div className="flex! items-center! gap-2! overflow-x-auto! hide-scrollbar! py-2! md:py-2! md:px-2!">
-        {links.map((link) => {
-          const isActive = getIsActive(link);
+    <div className="bg-white! sticky! top-[64px]! z-40! border-b! border-gray-100! shadow-sm!">
+      <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
+        <nav
+          className="mx-4! px-4! md:mx-0! md:px-0!"
+          aria-label="Property sections"
+        >
+          <div className="flex! items-center! gap-2! overflow-x-auto! hide-scrollbar! py-2!">
+            {links.map((link) => {
+              const isActive = getIsActive(link);
 
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`relative! flex! items-center! gap-2! whitespace-nowrap! rounded-full! px-5! py-3! text-[13px]! font-semibold! transition-all! duration-300! no-underline! shrink-0! ${
-                isActive
-                  ? "bg-[#27427f]! text-white! shadow-md! shadow-[#27427f]/20!"
-                  : "bg-transparent! text-gray-600! hover:text-[#27427f]! hover:bg-[#27427f]/10!"
-              }`}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <span
-                className={`transition-colors! ${isActive ? "text-white/90!" : "text-gray-400!  group-hover:text-[#27427f]!"}`}
-              >
-                {link.icon}
-              </span>
-              {link.label}
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative! flex! items-center! gap-2! whitespace-nowrap! rounded-full! px-5! py-3! text-[13px]! font-semibold! transition-all! duration-300! no-underline! shrink-0! ${
+                    isActive
+                      ? "bg-[#27427f]! text-white! shadow-md! shadow-[#27427f]/20!"
+                      : "bg-transparent! text-gray-600! hover:text-[#27427f]! hover:bg-[#27427f]/10!"
+                  }`}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  <span
+                    className={`transition-colors! ${isActive ? "text-white/90!" : "text-gray-400!  group-hover:text-[#27427f]!"}`}
+                  >
+                    {link.icon}
+                  </span>
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
-    </nav>
+    </div>
   );
 }
 

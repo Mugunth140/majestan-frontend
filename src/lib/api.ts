@@ -282,7 +282,7 @@ export async function searchProperties(
       return {
         ...item,
         propertyname: item.title,
-        sublocation: locations[0]?.name || item.city,
+        sublocation: (locations[0]?.name || locations[0]?.address || item.city || "").split(",")[0].trim(),
         address: item.city ? `${item.city}, ${item.state || ''}`.replace(/,\s*$/, '') : '',
         posttype: item.listingType || (item.status === 'rented' || item.status?.toLowerCase().includes('rent') ? 'Rent' : 'Sell'),
         expectedsaleprice: item.price,

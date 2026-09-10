@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { MapPin, X, Ruler, Compass, Phone, BedDouble, Bath, Building2, Sofa, CalendarDays, Car, BadgeCheck, Sparkles, Grid3X3, MapPinned, Images } from "lucide-react";
+import { useState } from "react";
+import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Heart, Share2, Check, BadgeCheck } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import { PROPERTY_TYPES, buildListingUrl } from "@/lib/seo-urls";
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
@@ -104,7 +107,7 @@ function getFurnishing(item: PropertySearchItem): string | null {
 function getFloor(item: PropertySearchItem): string | null {
   const d = getDetails(item);
   if (d.floorNumber == null || String(d.floorNumber).trim() === "") return null;
-  return d.totalFloors ? `Floor ${d.floorNumber} of ${d.totalFloors}` : `Floor ${d.floorNumber}`;
+  return d.totalFloors ? `${d.floorNumber} of ${d.totalFloors}` : `${d.floorNumber}`;
 }
 
 function getAge(item: PropertySearchItem): string | null {
@@ -115,9 +118,46 @@ function getAge(item: PropertySearchItem): string | null {
 function getParking(item: PropertySearchItem): string | null {
   const d = getDetails(item);
   const n = nzNum(d.parking);
-  if (n != null) return `${n} Parking`;
+  if (n != null) return `${n}`;
   if (d.guestParking) return "Guest Parking";
   return null;
+}
+
+function fmtShortDate(v: unknown): string | null {
+  if (typeof v !== "string" || !v.trim()) return null;
+  const dt = new Date(v);
+  if (isNaN(dt.getTime())) return null;
+  const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.getMonth()];
+  return `${String(dt.getDate()).padStart(2, "0")}-${mon}-${dt.getFullYear()}`;
+}
+
+function getTypeLabel(item: PropertySearchItem): string | null {
+  const raw = Object.values(PROPERTY_TYPES).find((p) => p.apiValue === item.propertyType)?.label
+    ?? (typeof item.propertyType === "string" ? item.propertyType : "");
+  const pretty = raw.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  if (!pretty) return null;
+  const titled = pretty.charAt(0).toUpperCase() + pretty.slice(1);
+  return titled.length > 3 && titled.endsWith("s") ? titled.slice(0, -1) : titled;
+}
+
+function getAreaCell(item: PropertySearchItem): { label: string; value: string } | null {
+  const d = getDetails(item);
+  if (nzNum(d.superBuiltUpArea) != null) return { label: "Built-Up Area", value: fmtArea(d.superBuiltUpArea)! };
+  if (nzNum(d.areaSqft) != null) return { label: "Built-Up Area", value: fmtArea(d.areaSqft)! };
+  if (nzNum(d.carpetArea) != null) return { label: "Carpet Area", value: fmtArea(d.carpetArea)! };
+  if (nzNum((item as any).cents) != null) return { label: "Plot Area", value: `${(item as any).cents} cents` };
+  if (nzNum((item as any).acres) != null) return { label: "Plot Area", value: `${(item as any).acres} acres` };
+  return null;
+}
+
+function getPossession(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  if (typeof d.possessionStatus === "string" && d.possessionStatus.trim()) return d.possessionStatus.trim();
+  return fmtShortDate((item as any).availableFrom);
+}
+
+function trimNum(n: number): string {
+  return String(parseFloat(n.toFixed(2)));
 }
 
 function formatPrice(value: string | number | undefined | null): string {
@@ -125,27 +165,32 @@ function formatPrice(value: string | number | undefined | null): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
   if (num === 0) return "Price on Request";
-  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
-  if (num >= 100000) return `₹${(num / 100000).toFixed(2)} L`;
-  return `₹${num.toLocaleString("en-IN")}`;
+  if (num >= 10000000) return `₹ ${trimNum(num / 10000000)} Cr`;
+  if (num >= 100000) return `₹ ${trimNum(num / 100000)} Lakh`;
+  return `₹ ${num.toLocaleString("en-IN")}`;
+}
+
+function isReraVerified(item: PropertySearchItem): boolean {
+  const v = (item as any).reraNumber;
+  if (typeof v !== "string") return false;
+  const t = v.trim().toLowerCase();
+  return t !== "" && t !== "not applicable" && t !== "n/a" && t !== "na" && t !== "none" && t !== "-";
+}
+
+function getLocationLabel(item: PropertySearchItem): string {
+  const sub = (item.sublocation || "").trim();
+  const city = ((item as any).city || "").trim();
+  if (sub && city && sub.toLowerCase() !== city.toLowerCase()) return `${sub}, ${city}`;
+  return sub || city || item.address || "";
 }
 
 function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   const detailPath = getDetailPath(item);
-  const d = getDetails(item);
-  const area = getArea(item);
   const facing = getFacing(item);
-  const furnishing = getFurnishing(item);
-  const floor = getFloor(item);
-  const age = getAge(item);
-  const parking = getParking(item);
-  const bathrooms = nzNum(d.bathrooms) != null ? `${d.bathrooms} Bath` : null;
-  const possession = typeof d.possessionStatus === "string" && d.possessionStatus ? d.possessionStatus : null;
-  const verified = (item as any).verificationStatus === "Verified";
-  const propertyCode = (item as any).propertyCode as string | undefined;
-
-  const pillIcon = "w-3! h-3! text-[#27427f]/60! shrink-0!";
-  const specPills: { icon: React.ReactNode; label: string }[] = [];
+  const possession = getPossession(item);
+  const locationLabel = getLocationLabel(item);
+  const areaCell = getAreaCell(item);
+  const reraVerified = isReraVerified(item);
 
   const sectionLinks = [
     { href: `${detailPath}/amenities`, label: "Amenities", icon: <Sparkles className="w-3.5! h-3.5!" /> },
@@ -158,14 +203,14 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     if ((item as any).isProject && (item as any).ranges && (item as any).ranges.unitsCount >= 2) {
       const min = (item as any).ranges.minPrice;
       const max = (item as any).ranges.maxPrice;
-      if (min != null && max != null && min !== max) return `${formatPrice(min)} – ${formatPrice(max)}`;
+      if (min != null && max != null && min !== max) return `${formatPrice(min)} - ${formatPrice(max)}`;
       if (min != null) return formatPrice(min);
     } else if (item.units && item.units.length >= 2) {
       const prices = item.units.map((u) => Number(u.price)).filter((p) => !isNaN(p) && p > 0);
       if (prices.length >= 2) {
         const min = Math.min(...prices);
         const max = Math.max(...prices);
-        if (min !== max) return `${formatPrice(min)} – ${formatPrice(max)}`;
+        if (min !== max) return `${formatPrice(min)} - ${formatPrice(max)}`;
       }
     }
     return formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent);
@@ -182,105 +227,116 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     return null;
   })();
 
-  if (unitSpec) specPills.push({ icon: <BedDouble className={pillIcon} />, label: unitSpec });
-  if (bathrooms) specPills.push({ icon: <Bath className={pillIcon} />, label: bathrooms });
-  if (area) specPills.push({ icon: <Ruler className={pillIcon} />, label: area });
-  if (facing) specPills.push({ icon: <Compass className={pillIcon} />, label: `${facing} Facing` });
-  if (floor) specPills.push({ icon: <Building2 className={pillIcon} />, label: floor });
-  if (furnishing) specPills.push({ icon: <Sofa className={pillIcon} />, label: furnishing });
-  if (age) specPills.push({ icon: <CalendarDays className={pillIcon} />, label: age });
-  if (parking) specPills.push({ icon: <Car className={pillIcon} />, label: parking });
+  const [wished, setWished] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const hasSpecs = specPills.length > 0;
+  const handleShare = async () => {
+    const url = `${window.location.origin}${detailPath}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: item.propertyname, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* user dismissed */
+    }
+  };
+
+  const specCells: { label: string; value: React.ReactNode }[] = [];
+  if (unitSpec) specCells.push({ label: "BHK", value: unitSpec });
+  if (areaCell) specCells.push({ label: "Built-Up Area", value: areaCell.value });
+  if (facing) specCells.push({ label: "Facing", value: facing });
+  if (possession) specCells.push({ label: "Possession", value: possession });
+  if (reraVerified)
+    specCells.push({
+      label: "RERA",
+      value: (
+        <span className="inline-flex! items-center! gap-1! text-[#1d9bf0]!">
+          <BadgeCheck className="w-3.5! h-3.5!" />
+          Verified
+        </span>
+      ),
+    });
 
   return (
-    <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_1px_4px_rgba(0,0,0,0.06)]! hover:shadow-[0_4px_16px_rgba(0,0,0,0.10)]! transition-shadow! duration-200! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0!">
+    <div className="bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0! group!">
 
-      {/* Image — relative wrapper so badge can be absolutely positioned */}
+      {/* Image — clean photo, heart wishlist only */}
       <div className="relative! w-full! xl:w-[270px]! shrink-0! overflow-hidden! bg-gray-100!">
         <Link href={detailPath} className="block! w-full! h-full!">
-          <div className="aspect-[16/10]! xl:aspect-auto! xl:absolute! xl:inset-0! xl:min-h-[264px]!">
+          <div className="aspect-[16/10]! xl:aspect-auto! xl:absolute! xl:inset-0! xl:min-h-[300px]!">
             <img
               src={getPhotoUrl(item)}
               alt={item.propertyname || "Property"}
-              className="w-full! h-full! object-cover!"
+              className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
               loading="lazy"
             />
           </div>
         </Link>
-        {/* Badges — absolutely positioned over image */}
-        <div className="absolute! top-3! left-3! z-10! flex! gap-1.5!">
-          <span className="px-2.5! py-1! bg-white! text-[#27427f]! text-[11px]! font-extrabold! rounded-md! shadow-sm! uppercase! tracking-wider!">
-            {item.posttype === "Sell" ? "For Sale" : "For Rent"}
-          </span>
-          {verified && (
-            <span className="px-2.5! py-1! bg-green-600! text-white! text-[11px]! font-extrabold! rounded-md! shadow-sm! uppercase! tracking-wider!">
-              Verified
-            </span>
-          )}
-        </div>
-        {propertyCode && (
-          <div className="absolute! bottom-3! left-3! z-10!">
-            <span className="px-2! py-0.5! bg-black/55! text-white! text-[10px]! font-mono! font-bold! rounded! tracking-wider!">
-              {propertyCode}
-            </span>
-          </div>
-        )}
+        {/* Wishlist heart — outline only, pink on hover/wishlisted */}
+        <button
+          onClick={() => setWished((w) => !w)}
+          aria-label="Save to wishlist"
+          className="absolute! top-3! right-3! z-10! p-1.5! cursor-pointer! transition-transform! hover:scale-110!"
+        >
+          <Heart
+            className={`w-5! h-5! drop-shadow-md! transition-colors! ${wished ? "text-pink-500! fill-pink-500!" : "text-white! fill-transparent! hover:text-pink-400! hover:fill-pink-400!"}`}
+          />
+        </button>
       </div>
+      <div className="p-5! flex! flex-col! flex-1! min-w-0!">
 
-      {/* Content */}
-      <div className="p-5! sm:p-6! flex! flex-col! flex-1! min-w-0! gap-0!">
-
-        {/* Title + location */}
-        <div className="min-w-0!">
-          <Link href={detailPath} className="no-underline!">
-            <h3 className="font-['Lexend',sans-serif]! text-[17px]! font-bold! text-gray-900! line-clamp-2! leading-snug! hover:text-[#27427f]! transition-colors! flex! items-center! gap-1.5!">
-              <span className="line-clamp-2!">{item.propertyname}</span>
-              {verified && <BadgeCheck className="w-4! h-4! text-green-600! shrink-0!" />}
-            </h3>
-          </Link>
-          <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-400! mt-1! min-w-0!">
-            <MapPin className="w-3.5! h-3.5! shrink-0!" />
-            <span className="truncate!">{item.sublocation || item.address}</span>
-          </p>
+        {/* Title + share */}
+        <div className="flex! items-start! gap-2! min-w-0!">
+          <div className="min-w-0! flex-1!">
+            <Link href={detailPath} className="no-underline!">
+              <h3 className="text-[17px]! font-medium! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
+                {item.propertyname}
+              </h3>
+            </Link>
+            <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-500! mt-1! min-w-0!">
+              <MapPin className="w-3.5! h-3.5! text-gray-400! shrink-0!" />
+              <span className="truncate!">{locationLabel}</span>
+            </p>
+          </div>
+          <button
+            onClick={handleShare}
+            aria-label="Share this property"
+            className="p-2! rounded-full! text-gray-400! hover:text-[#27427f]! hover:bg-gray-100! transition-colors! cursor-pointer! shrink-0!"
+          >
+            {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
+          </button>
         </div>
 
-        {/* Spec pills */}
-        {hasSpecs && (
-          <div className="flex! flex-wrap! gap-1.5! mt-2.5!">
-            {specPills.map((pill) => (
-              <span
-                key={pill.label}
-                className="inline-flex! items-center! gap-1.5! bg-[#27427f]/[0.07]! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold! whitespace-nowrap!"
-              >
-                {pill.icon}
-                {pill.label}
-              </span>
+        {/* Spec table */}
+        {specCells.length > 0 && (
+          <div className="mt-4! border-y! border-dashed! border-gray-200! py-3.5! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
+            {specCells.map((cell) => (
+              <div key={cell.label} className="min-w-0!">
+                <div className="text-[11px]! text-gray-500! font-light!">{cell.label}</div>
+                <div className="text-[13px]! font-medium! text-gray-800! truncate! mt-0.5!">{cell.value}</div>
+              </div>
             ))}
           </div>
         )}
 
-        {/* Price + possession */}
-        <div className="mt-2.5! flex! flex-wrap! items-center! gap-x-3! gap-y-1!">
-          <div className="font-['Lexend',sans-serif]! text-[22px]! font-extrabold! text-[#27427f]! leading-tight!">
-            {priceDisplay}
-          </div>
-          {possession && (
-            <span className="px-2! py-0.5! bg-green-50! border! border-green-200! text-green-700! text-[11px]! font-bold! rounded-md! uppercase! tracking-wide!">
-              {possession}
-            </span>
-          )}
+        {/* Price */}
+        <div className="mt-3.5! text-[20px]! font-medium! text-[#27427f]! leading-none!">
+          {priceDisplay}
         </div>
 
-        {/* Section shortcut buttons */}
-        <div className="flex! flex-wrap! gap-2! mt-3! pt-3! border-t! border-gray-100!">
+        {/* Section links */}
+        <div className="flex! flex-wrap! items-center! gap-x-5! gap-y-2! mt-3.5! pt-3.5! border-t! border-gray-100!">
           {sectionLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="flex! items-center! gap-1.5! rounded-lg! bg-gray-50! border! border-gray-200/60! px-3! py-1.5! text-[11px]! font-bold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
+              className="flex! items-center! gap-1.5! text-[12px]! font-medium! text-gray-500! hover:text-[#27427f]! transition-colors! no-underline! group/link!"
             >
-              <span className="text-gray-400! group-hover:text-white/90! transition-colors!">
+              <span className="text-gray-400! group-hover/link:text-[#27427f]! transition-colors!">
                 {link.icon}
               </span>
               {link.label}
@@ -288,15 +344,15 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           ))}
         </div>
 
-        {/* Actions — always at bottom */}
-        <div className="mt-auto! pt-4! flex! items-center! gap-2.5!">
-          <button className="flex! items-center! gap-2! px-4! py-2.5! rounded-lg! text-sm! font-bold! text-[#27427f]! border! border-[#27427f]/25! hover:bg-[#27427f]/5! hover:border-[#27427f]/50! transition-colors! cursor-pointer! whitespace-nowrap!">
-            <Phone className="w-3.5! h-3.5!" />
+        {/* Actions */}
+        <div className="mt-3.5! flex! gap-2.5!">
+          <button className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-[#27427f]! bg-[#eef2f7]! hover:bg-[#dde5f0]! transition-colors! cursor-pointer!">
+            <Phone className="w-4! h-4!" />
             Enquire
           </button>
           <Link
             href={detailPath}
-            className="flex! items-center! justify-center! px-5! py-2.5! rounded-lg! text-sm! font-bold! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! no-underline! whitespace-nowrap!"
+            className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! no-underline!"
           >
             View Details
           </Link>

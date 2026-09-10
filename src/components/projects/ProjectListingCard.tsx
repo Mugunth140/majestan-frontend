@@ -100,7 +100,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     });
 
   return (
-    <div className="bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0! group!">
+    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0! group!">
 
       {/* Image — clean photo, heart wishlist only */}
       <div className="relative! w-full! xl:w-[270px]! shrink-0! overflow-hidden! bg-gradient-to-br! from-[#27427f]/8! to-[#27427f]/3!">
@@ -141,7 +141,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
             <Link href={detailPath} className="no-underline!">
-              <h3 className="text-[17px]! font-medium! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
+              <h3 className="font-['Manrope',sans-serif]! text-[17px]! font-medium! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
                 {item.name}
               </h3>
             </Link>

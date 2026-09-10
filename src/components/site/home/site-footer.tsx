@@ -76,7 +76,7 @@ export function SiteFooter() {
   return (
     <>
       {/* ── Popular Searches — Light Mode Section ── */}
-      <section className="w-full! bg-white! border-t! border-gray-100! py-14! font-['Lexend',sans-serif]!">
+      <section className="relative! z-10! w-full! bg-white! border-t! border-gray-100! py-14! font-['Lexend',sans-serif]!">
         <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
           {/* Heading */}
           <div className="flex! items-center! gap-3! mb-8!">
@@ -113,7 +113,7 @@ export function SiteFooter() {
       </section>
 
       {/* ── Dark Footer ── */}
-      <footer className="w-full! bg-[#161e2d]! pt-16! pb-10! text-white! font-['Lexend',sans-serif]!">
+      <footer className="relative! z-10! w-full! bg-[#161e2d]! pt-16! pb-10! text-white! font-['Lexend',sans-serif]!">
         <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
 
           <div className="grid! grid-cols-1! lg:grid-cols-12! gap-12! lg:gap-8! mb-14!">

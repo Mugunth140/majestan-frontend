@@ -10,6 +10,7 @@ import {
   ArrowUpDown,
   X,
   Phone,
+  Send,
   CheckCircle2,
 } from "lucide-react";
 import { MapPlaceholder } from "./MapPlaceholder";
@@ -64,65 +65,116 @@ function getTypeLabel(filters: Record<string, string>): string {
 
 // ─── default right rail ─────────────────────────────────────────────────────
 
+function EnquireForm() {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [sent, setSent] = useState(false);
+
+  return (
+    <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! p-5! flex! flex-col! gap-3!">
+      <div className="text-[11px]! font-bold! uppercase! tracking-widest! text-gray-400!">
+        Enquire Now
+      </div>
+      <h3 className="font-['Lexend',sans-serif]! text-base! font-bold! text-gray-900! leading-snug!">
+        Get full details on WhatsApp
+      </h3>
+      {sent ? (
+        <div className="flex! items-start! gap-2! bg-green-50! border! border-green-100! rounded-xl! p-3!">
+          <CheckCircle2 className="w-4! h-4! text-green-600! mt-0.5! shrink-0!" />
+          <p className="text-[13px]! text-green-800! font-medium! leading-relaxed!">
+            Thanks {name.split(" ")[0] || "there"}! Our advisor will call you
+            shortly.
+          </p>
+        </div>
+      ) : (
+        <form
+          className="flex! flex-col! gap-2.5!"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.trim() && phone.trim()) setSent(true);
+          }}
+        >
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            required
+            className="w-full! text-sm! px-3! py-2! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
+          />
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Phone number"
+            required
+            pattern="[0-9+ ]{10,15}"
+            className="w-full! text-sm! px-3! py-2! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
+          />
+          <button
+            type="submit"
+            className="flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-bold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors!"
+          >
+            <Send className="w-3.5! h-3.5!" />
+            Request Callback
+          </button>
+        </form>
+      )}
+      <a
+        href="tel:+914222345678"
+        className="flex! items-center! justify-center! gap-2! w-full! py-2.5! border! border-[#27427f]/25! text-[#27427f]! text-sm! font-bold! rounded-xl! no-underline! hover:bg-[#27427f]/5! transition-colors!"
+      >
+        <Phone className="w-3.5! h-3.5!" />
+        Call Now
+      </a>
+    </div>
+  );
+}
+
 function DefaultRightRail() {
   return (
     <div className="flex! flex-col! gap-4!">
-      {/* Enquiry CTA */}
-      <div className="bg-[#27427f]! rounded-2xl! p-5! text-white! flex! flex-col! gap-3!">
-        <div className="text-[11px]! font-bold! uppercase! tracking-widest! text-white/60!">
-          Need help?
+      <EnquireForm />
+
+      {/* Vertical marketing banner */}
+      <div className="relative! overflow-hidden! rounded-2xl! bg-gradient-to-b! from-[#27427f]! to-[#16294f]! p-5! text-white! flex! flex-col! gap-3! min-h-[320px]!">
+        <div
+          aria-hidden="true"
+          className="absolute! -top-10! -right-10! w-40! h-40! rounded-full! bg-[#ffc900]/20! blur-2xl!"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute! -bottom-12! -left-12! w-44! h-44! rounded-full! bg-white/10! blur-2xl!"
+        />
+        <div className="relative! text-[11px]! font-bold! uppercase! tracking-widest! text-[#ffc900]!">
+          Majestan Realty
         </div>
-        <h3 className="font-['Lexend',sans-serif]! text-base! font-bold! leading-snug!">
-          Talk to a property expert
+        <h3 className="relative! font-['Lexend',sans-serif]! text-xl! font-extrabold! leading-snug!">
+          Selling your property?
         </h3>
-        <p className="text-sm! text-white/75! leading-relaxed!">
-          Our advisors help you find the right home — at no extra cost.
+        <p className="relative! text-sm! text-white/75! leading-relaxed!">
+          List it free and reach thousands of genuine buyers in Coimbatore.
         </p>
+        <ul className="relative! flex! flex-col! gap-2! mt-1!">
+          {["Free listing", "Verified buyer leads", "Zero hidden charges"].map(
+            (point) => (
+              <li
+                key={point}
+                className="flex! items-center! gap-2! text-[13px]! font-medium! text-white/90!"
+              >
+                <CheckCircle2 className="w-4! h-4! text-[#ffc900]! shrink-0!" />
+                {point}
+              </li>
+            )
+          )}
+        </ul>
         <a
           href="tel:+914222345678"
-          className="flex! items-center! justify-center! gap-2! mt-1! px-4! py-2.5! bg-[#ffc900]! text-[#27427f]! text-sm! font-extrabold! rounded-xl! no-underline! hover:bg-[#ffda4d]! transition-colors!"
+          className="relative! flex! items-center! justify-center! gap-2! mt-auto! px-4! py-2.5! bg-[#ffc900]! text-[#27427f]! text-sm! font-extrabold! rounded-xl! no-underline! hover:bg-[#ffda4d]! transition-colors!"
         >
           <Phone className="w-4! h-4!" />
-          Call Now
+          Post Property Free
         </a>
-      </div>
-
-      {/* Why Majestan */}
-      <div className="bg-white! rounded-2xl! border! border-gray-100! p-5! flex! flex-col! gap-3!">
-        <div className="text-[11px]! font-bold! uppercase! tracking-widest! text-gray-400!">
-          Why Majestan
-        </div>
-        <ul className="flex! flex-col! gap-2.5!">
-          {[
-            "Verified listings only",
-            "Direct builder pricing",
-            "Zero brokerage deals",
-            "Legal & loan assistance",
-          ].map((point) => (
-            <li key={point} className="flex! items-start! gap-2! text-sm! text-gray-700!">
-              <CheckCircle2 className="w-4! h-4! text-[#27427f]! mt-0.5! shrink-0!" />
-              {point}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Newsletter / alert */}
-      <div className="bg-amber-50! border! border-amber-100! rounded-2xl! p-5! flex! flex-col! gap-3!">
-        <div className="text-[11px]! font-bold! uppercase! tracking-widest! text-amber-600!">
-          Price Alerts
-        </div>
-        <p className="text-sm! text-gray-700! leading-relaxed!">
-          Get notified when new properties match your search.
-        </p>
-        <input
-          type="email"
-          placeholder="your@email.com"
-          className="w-full! text-sm! px-3! py-2! border! border-amber-200! rounded-lg! bg-white! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]!"
-        />
-        <button className="w-full! py-2! bg-[#27427f]! text-white! text-sm! font-bold! rounded-lg! cursor-pointer! hover:bg-[#1a2d59]! transition-colors!">
-          Notify Me
-        </button>
       </div>
     </div>
   );
@@ -307,11 +359,11 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
       )}
 
       {/* ── Page body ── */}
-      <div className="max-w-[1400px]! mx-auto! px-4! xl:px-8! pt-6! pb-16!">
-        <div className="flex! gap-8! items-start!">
+      <div className="max-w-[1440px]! mx-auto! px-4! xl:px-6! pt-6! pb-16!">
+        <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}
-          <aside className="hidden! xl:flex! xl:flex-col! xl:gap-4! w-[300px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-64px)]! overflow-y-auto! pt-6! pb-6! pr-1!">
+          <aside className="hidden! xl:flex! xl:flex-col! xl:gap-4! w-[280px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-64px)]! overflow-y-auto! pt-6! pb-6! pr-1!">
             {adapter.renderFilters({
               values: filters,
               onChange: handleFilterChange,
@@ -384,7 +436,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                         key={i}
                         className="bg-white! rounded-2xl! border! border-gray-100! overflow-hidden! flex! flex-col! xl:flex-row! animate-pulse!"
                       >
-                        <div className="w-full! xl:w-[220px]! shrink-0! aspect-[16/10]! xl:aspect-auto! xl:min-h-[180px]! bg-gray-200!" />
+                        <div className="w-full! xl:w-[260px]! shrink-0! aspect-[16/10]! xl:aspect-auto! xl:min-h-[230px]! bg-gray-200!" />
                         <div className="p-4! flex! flex-col! gap-2! flex-1!">
                           <div className="h-4! bg-gray-200! rounded! w-3/4!" />
                           <div className="h-3! bg-gray-200! rounded! w-1/2!" />
@@ -478,8 +530,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                 )}
               </div>
 
-              {/* ── Right rail (2xl+) ── */}
-              <aside className="hidden! 2xl:block! w-[220px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-80px)]! overflow-y-auto!">
+              {/* ── Right rail (xl+) ── */}
+              <aside className="hidden! xl:block! w-[260px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-80px)]! overflow-y-auto!">
                 {adapter.renderRightRail
                   ? adapter.renderRightRail(filters)
                   : <DefaultRightRail />}

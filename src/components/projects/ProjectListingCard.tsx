@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MapPin, Layers, Ruler, BedDouble, Phone } from "lucide-react";
+import { MapPin, Layers, Ruler, BedDouble, Phone, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images } from "lucide-react";
 import { formatINR, type ProjectListItem } from "@/lib/api/projects";
 
 function formatCompactINR(value: number | null | undefined): string {
@@ -15,6 +15,14 @@ function formatCompactINR(value: number | null | undefined): string {
 export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const [imgOk, setImgOk] = useState(true);
   const detailPath = `/${item.canonicalSlug}`;
+
+  const projectSections = [
+    { hash: "overview", label: "Overview", icon: <LayoutDashboard className="w-3.5! h-3.5!" /> },
+    { hash: "amenities", label: "Amenities", icon: <Sparkles className="w-3.5! h-3.5!" /> },
+    { hash: "floor-plans", label: "Floor Plan", icon: <Grid3X3 className="w-3.5! h-3.5!" /> },
+    { hash: "locality", label: "Locality", icon: <MapPinned className="w-3.5! h-3.5!" /> },
+    { hash: "photos", label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
+  ];
   const showImg = Boolean(item.coverImageUrl) && imgOk;
 
   const typeLabel =
@@ -119,8 +127,24 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           )}
         </div>
 
+        {/* Section shortcut buttons — anchor-navigate to page sections */}
+        <div className="flex! flex-wrap! gap-2! mt-3! pt-3! border-t! border-gray-100!">
+          {projectSections.map((s) => (
+            <Link
+              key={s.hash}
+              href={`${detailPath}#${s.hash}`}
+              className="flex! items-center! gap-1.5! rounded-lg! bg-gray-50! border! border-gray-200/60! px-3! py-1.5! text-[11px]! font-bold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
+            >
+              <span className="text-gray-400! group-hover:text-white/90! transition-colors!">
+                {s.icon}
+              </span>
+              {s.label}
+            </Link>
+          ))}
+        </div>
+
         {/* Actions */}
-        <div className="mt-auto! pt-3! border-t! border-gray-100! flex! items-center! gap-2.5!">
+        <div className="mt-auto! pt-3! flex! items-center! gap-2.5!">
           <button className="flex! items-center! gap-2! px-4! py-2! rounded-lg! text-sm! font-bold! text-[#27427f]! border! border-[#27427f]/30! hover:bg-[#27427f]/5! transition-colors! cursor-pointer! whitespace-nowrap!">
             <Phone className="w-3.5! h-3.5!" />
             Enquire

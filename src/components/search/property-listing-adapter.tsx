@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, X, Ruler, Compass, Layers, Phone } from "lucide-react";
+import { MapPin, X, Ruler, Compass, Phone, BedDouble, Bath, Building2, Sofa, CalendarDays, Car, BadgeCheck, Sparkles, Grid3X3, MapPinned, Images } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import { PROPERTY_TYPES, buildListingUrl } from "@/lib/seo-urls";
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
@@ -60,23 +60,64 @@ function getPhotoUrl(item: any): string {
   return photo;
 }
 
-function getArea(item: PropertySearchItem & { isProject?: boolean, ranges?: any }): string | null {
-  if (item.isProject && item.ranges) {
-    if (item.ranges.minArea && item.ranges.maxArea && item.ranges.minArea !== item.ranges.maxArea) {
-      return `${item.ranges.minArea} - ${item.ranges.maxArea} sq.ft`;
-    }
-    if (item.ranges.minArea) return `${item.ranges.minArea} sq.ft`;
-  }
-  const nonZero = (v: unknown) => typeof v === "string" && parseFloat(v) > 0;
-  if (nonZero(item.sq_ft)) return `${item.sq_ft} sq.ft`;
-  if (nonZero(item.cents)) return `${item.cents} cents`;
-  if (nonZero(item.acres)) return `${item.acres} acres`;
-  if (nonZero(item.build_up_area)) return `${item.build_up_area} sq.ft`;
-  return null;
+function nzNum(v: unknown): number | null {
+  const n = typeof v === "string" ? parseFloat(v) : typeof v === "number" ? v : NaN;
+  return !isNaN(n) && n > 0 ? n : null;
+}
+
+function fmtArea(v: unknown): string | null {
+  const n = nzNum(v);
+  return n == null ? null : `${n.toLocaleString("en-IN")} sq.ft`;
+}
+
+function getDetails(item: PropertySearchItem): Record<string, any> {
+  const raw = (item as any).__propertyDetails__ ?? (item as any).propertyDetails ?? (item as any).details ?? {};
+  return typeof raw === "object" && raw !== null ? raw : {};
+}
+
+function getArea(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  return (
+    fmtArea(d.carpetArea) ??
+    fmtArea(d.superBuiltUpArea) ??
+    fmtArea(d.areaSqft) ??
+    fmtArea((item as any).sq_ft) ??
+    fmtArea((item as any).build_up_area) ??
+    fmtArea((item as any).buildup_area) ??
+    (nzNum((item as any).cents) != null ? `${(item as any).cents} cents` : null) ??
+    (nzNum((item as any).acres) != null ? `${(item as any).acres} acres` : null)
+  );
 }
 
 function getFacing(item: PropertySearchItem): string | null {
-  return item.facing ?? item.facing_direction ?? null;
+  const d = getDetails(item);
+  return d.propertyFacing ?? item.facing ?? item.facing_direction ?? null;
+}
+
+function getFurnishing(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  if (d.furnished === true) return "Furnished";
+  if (typeof d.furnishing_status === "string" && d.furnishing_status) return d.furnishing_status;
+  return (item as any).furnishing_status ?? null;
+}
+
+function getFloor(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  if (d.floorNumber == null || String(d.floorNumber).trim() === "") return null;
+  return d.totalFloors ? `Floor ${d.floorNumber} of ${d.totalFloors}` : `Floor ${d.floorNumber}`;
+}
+
+function getAge(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  return d.propertyAge ?? (item as any).property_age ?? (item as any).ageofproperty ?? (item as any).age_of_property ?? null;
+}
+
+function getParking(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  const n = nzNum(d.parking);
+  if (n != null) return `${n} Parking`;
+  if (d.guestParking) return "Guest Parking";
+  return null;
 }
 
 function formatPrice(value: string | number | undefined | null): string {
@@ -91,10 +132,27 @@ function formatPrice(value: string | number | undefined | null): string {
 
 function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   const detailPath = getDetailPath(item);
-  const rawArea = getArea(item);
-  // Suppress zero/null area values like "0.00 sq.ft"
-  const area = rawArea && !rawArea.match(/^0(\.0+)?\s/) ? rawArea : null;
+  const d = getDetails(item);
+  const area = getArea(item);
   const facing = getFacing(item);
+  const furnishing = getFurnishing(item);
+  const floor = getFloor(item);
+  const age = getAge(item);
+  const parking = getParking(item);
+  const bathrooms = nzNum(d.bathrooms) != null ? `${d.bathrooms} Bath` : null;
+  const possession = typeof d.possessionStatus === "string" && d.possessionStatus ? d.possessionStatus : null;
+  const verified = (item as any).verificationStatus === "Verified";
+  const propertyCode = (item as any).propertyCode as string | undefined;
+
+  const pillIcon = "w-3! h-3! text-[#27427f]/60! shrink-0!";
+  const specPills: { icon: React.ReactNode; label: string }[] = [];
+
+  const sectionLinks = [
+    { href: `${detailPath}/amenities`, label: "Amenities", icon: <Sparkles className="w-3.5! h-3.5!" /> },
+    { href: `${detailPath}/floor-plan`, label: "Floor Plan", icon: <Grid3X3 className="w-3.5! h-3.5!" /> },
+    { href: `${detailPath}/locality`, label: "Locality", icon: <MapPinned className="w-3.5! h-3.5!" /> },
+    { href: `${detailPath}/photos`, label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
+  ];
 
   const priceDisplay = (() => {
     if ((item as any).isProject && (item as any).ranges && (item as any).ranges.unitsCount >= 2) {
@@ -124,15 +182,24 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     return null;
   })();
 
-  const hasSpecs = !!(unitSpec || area || facing);
+  if (unitSpec) specPills.push({ icon: <BedDouble className={pillIcon} />, label: unitSpec });
+  if (bathrooms) specPills.push({ icon: <Bath className={pillIcon} />, label: bathrooms });
+  if (area) specPills.push({ icon: <Ruler className={pillIcon} />, label: area });
+  if (facing) specPills.push({ icon: <Compass className={pillIcon} />, label: `${facing} Facing` });
+  if (floor) specPills.push({ icon: <Building2 className={pillIcon} />, label: floor });
+  if (furnishing) specPills.push({ icon: <Sofa className={pillIcon} />, label: furnishing });
+  if (age) specPills.push({ icon: <CalendarDays className={pillIcon} />, label: age });
+  if (parking) specPills.push({ icon: <Car className={pillIcon} />, label: parking });
+
+  const hasSpecs = specPills.length > 0;
 
   return (
     <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-[0_1px_4px_rgba(0,0,0,0.06)]! hover:shadow-[0_4px_16px_rgba(0,0,0,0.10)]! transition-shadow! duration-200! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0!">
 
       {/* Image — relative wrapper so badge can be absolutely positioned */}
-      <div className="relative! w-full! xl:w-[260px]! shrink-0! overflow-hidden! bg-gray-100!">
+      <div className="relative! w-full! xl:w-[270px]! shrink-0! overflow-hidden! bg-gray-100!">
         <Link href={detailPath} className="block! w-full! h-full!">
-          <div className="aspect-[16/10]! xl:aspect-auto! xl:absolute! xl:inset-0! xl:min-h-[230px]!">
+          <div className="aspect-[16/10]! xl:aspect-auto! xl:absolute! xl:inset-0! xl:min-h-[264px]!">
             <img
               src={getPhotoUrl(item)}
               alt={item.propertyname || "Property"}
@@ -141,22 +208,35 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             />
           </div>
         </Link>
-        {/* Badge — absolutely positioned over image */}
-        <div className="absolute! top-3! left-3! z-10!">
+        {/* Badges — absolutely positioned over image */}
+        <div className="absolute! top-3! left-3! z-10! flex! gap-1.5!">
           <span className="px-2.5! py-1! bg-white! text-[#27427f]! text-[11px]! font-extrabold! rounded-md! shadow-sm! uppercase! tracking-wider!">
             {item.posttype === "Sell" ? "For Sale" : "For Rent"}
           </span>
+          {verified && (
+            <span className="px-2.5! py-1! bg-green-600! text-white! text-[11px]! font-extrabold! rounded-md! shadow-sm! uppercase! tracking-wider!">
+              Verified
+            </span>
+          )}
         </div>
+        {propertyCode && (
+          <div className="absolute! bottom-3! left-3! z-10!">
+            <span className="px-2! py-0.5! bg-black/55! text-white! text-[10px]! font-mono! font-bold! rounded! tracking-wider!">
+              {propertyCode}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
-      <div className="p-5! flex! flex-col! flex-1! min-w-0! gap-0!">
+      <div className="p-5! sm:p-6! flex! flex-col! flex-1! min-w-0! gap-0!">
 
         {/* Title + location */}
         <div className="min-w-0!">
           <Link href={detailPath} className="no-underline!">
-            <h3 className="font-['Lexend',sans-serif]! text-[17px]! font-bold! text-gray-900! line-clamp-2! leading-snug! hover:text-[#27427f]! transition-colors!">
-              {item.propertyname}
+            <h3 className="font-['Lexend',sans-serif]! text-[17px]! font-bold! text-gray-900! line-clamp-2! leading-snug! hover:text-[#27427f]! transition-colors! flex! items-center! gap-1.5!">
+              <span className="line-clamp-2!">{item.propertyname}</span>
+              {verified && <BadgeCheck className="w-4! h-4! text-green-600! shrink-0!" />}
             </h3>
           </Link>
           <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-400! mt-1! min-w-0!">
@@ -165,39 +245,51 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           </p>
         </div>
 
-        {/* Price */}
-        <div className="mt-2.5!">
-          <div className="font-['Lexend',sans-serif]! text-[22px]! font-extrabold! text-[#27427f]! leading-tight!">
-            {priceDisplay}
-          </div>
-        </div>
-
-        {/* Specs row — only shown when there's real data */}
+        {/* Spec pills */}
         {hasSpecs && (
-          <div className="flex! flex-wrap! items-center! gap-x-4! gap-y-1.5! mt-2.5! pt-2.5! border-t! border-gray-100!">
-            {unitSpec && (
-              <span className="flex! items-center! gap-1.5! text-[13px]! font-medium! text-gray-500!">
-                <Layers className="w-3.5! h-3.5! text-[#27427f]/40! shrink-0!" />
-                {unitSpec}
+          <div className="flex! flex-wrap! gap-1.5! mt-2.5!">
+            {specPills.map((pill) => (
+              <span
+                key={pill.label}
+                className="inline-flex! items-center! gap-1.5! bg-[#27427f]/[0.07]! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold! whitespace-nowrap!"
+              >
+                {pill.icon}
+                {pill.label}
               </span>
-            )}
-            {area && (
-              <span className="flex! items-center! gap-1.5! text-[13px]! font-medium! text-gray-500!">
-                <Ruler className="w-3.5! h-3.5! text-[#27427f]/40! shrink-0!" />
-                {area}
-              </span>
-            )}
-            {facing && (
-              <span className="flex! items-center! gap-1.5! text-[13px]! font-medium! text-gray-500!">
-                <Compass className="w-3.5! h-3.5! text-[#27427f]/40! shrink-0!" />
-                {facing} Facing
-              </span>
-            )}
+            ))}
           </div>
         )}
 
+        {/* Price + possession */}
+        <div className="mt-2.5! flex! flex-wrap! items-center! gap-x-3! gap-y-1!">
+          <div className="font-['Lexend',sans-serif]! text-[22px]! font-extrabold! text-[#27427f]! leading-tight!">
+            {priceDisplay}
+          </div>
+          {possession && (
+            <span className="px-2! py-0.5! bg-green-50! border! border-green-200! text-green-700! text-[11px]! font-bold! rounded-md! uppercase! tracking-wide!">
+              {possession}
+            </span>
+          )}
+        </div>
+
+        {/* Section shortcut buttons */}
+        <div className="flex! flex-wrap! gap-2! mt-3! pt-3! border-t! border-gray-100!">
+          {sectionLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex! items-center! gap-1.5! rounded-lg! bg-gray-50! border! border-gray-200/60! px-3! py-1.5! text-[11px]! font-bold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
+            >
+              <span className="text-gray-400! group-hover:text-white/90! transition-colors!">
+                {link.icon}
+              </span>
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
         {/* Actions — always at bottom */}
-        <div className="mt-auto! pt-3.5! flex! items-center! gap-2.5!">
+        <div className="mt-auto! pt-4! flex! items-center! gap-2.5!">
           <button className="flex! items-center! gap-2! px-4! py-2.5! rounded-lg! text-sm! font-bold! text-[#27427f]! border! border-[#27427f]/25! hover:bg-[#27427f]/5! hover:border-[#27427f]/50! transition-colors! cursor-pointer! whitespace-nowrap!">
             <Phone className="w-3.5! h-3.5!" />
             Enquire

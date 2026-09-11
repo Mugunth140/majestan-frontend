@@ -168,6 +168,21 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   const queryClient = useQueryClient();
   const [showDrawer, setShowDrawer] = useState(false);
 
+  // Track the fixed header height live so the mobile bar sits flush with zero gap.
+  const [headerH, setHeaderH] = useState(64);
+  useEffect(() => {
+    const el = document.querySelector("header");
+    if (!el) return;
+    const measure = () => {
+      const h = el.getBoundingClientRect().height;
+      if (h) setHeaderH((prev) => (prev === Math.round(h) ? prev : Math.round(h)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const page = Number(searchParams.get("page")) || 1;
   const sort = searchParams.get("sort") || "";
 
@@ -284,8 +299,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
 
   return (
     <div className="min-h-screen! bg-[#f6f7f9]!">
-      {/* Header spacer — fixed header is 64px */}
-      <div className="h-[64px]!" aria-hidden="true" />
+      {/* Header spacer — measured from the fixed header */}
+      <div style={{ height: headerH }} aria-hidden="true" />
 
       {/* ── Mobile filter bar ── */}
       <MobileFilterBar
@@ -295,11 +310,14 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
         typeLabel={getTypeLabel(filtersAsRecord)}
         activeFilterCount={activeFilterCount}
         onOpenDrawer={() => setShowDrawer(true)}
+        sort={sort}
+        sortOptions={adapter.sortOptions}
+        topOffset={headerH}
       />
 
       {/* ── Mobile drawer ── */}
       {showDrawer && (
-        <div className="fixed! inset-0! z-50! xl:hidden!">
+          <div className="fixed! inset-0! z-50! lg:hidden!">
           {/* overlay */}
           <div
             className="absolute! inset-0! bg-black/40! backdrop-blur-sm!"
@@ -336,6 +354,27 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             </div>
             {/* scrollable filter body */}
             <div className="flex-1! overflow-y-auto! px-4! py-4!">
+              {/* Sort */}
+              <div className="mb-4!">
+                <div className="text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-2!">
+                  Sort By
+                </div>
+                <div className="flex! flex-wrap! gap-1.5!">
+                  {adapter.sortOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleSortChange(opt.value)}
+                      className={`px-3! py-1.5! rounded-lg! border! text-[12px]! font-medium! transition-all! cursor-pointer! ${
+                        sort === opt.value
+                          ? "bg-[#27427f]! text-white! border-[#27427f]!"
+                          : "bg-white! text-gray-500! border-gray-200!"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {adapter.renderFilters({
                 values: filters,
                 onChange: handleFilterChange,
@@ -356,11 +395,11 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
       )}
 
       {/* ── Page body ── */}
-      <div className="max-w-[1440px]! mx-auto! px-4! xl:px-6! pt-6! pb-16!">
+      <div className="max-w-[1440px]! mx-auto! px-4! xl:px-6! pt-0! lg:pt-6! pb-16!">
         <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}
-          <aside className="hidden! xl:flex! xl:flex-col! xl:gap-4! w-[280px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-64px)]! overflow-y-auto! pt-6! pb-6! pr-1!">
+          <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-64px)]! overflow-y-auto! pt-6! pb-6! pr-1!">
             {adapter.renderFilters({
               values: filters,
               onChange: handleFilterChange,
@@ -376,7 +415,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           </aside>
 
           {/* ── Main column ── */}
-          <main className="flex-1! min-w-0! flex! flex-col! pt-6!">
+          <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-6!">
 
             {/* Breadcrumbs */}
             <div className="">
@@ -384,7 +423,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             </div>
 
             {/* Sticky sub-header */}
-            <div className="sticky! top-[64px]! z-20! bg-[#f6f7f9]/95! backdrop-blur-sm! border-b! border-gray-200/60! py-3! mb-5! -mx-4! xl:mx-0! px-4! xl:px-0!">
+            <div className="lg:sticky! lg:top-[64px]! z-20! bg-[#f6f7f9]! border-b! border-gray-200/60! py-3! mb-5! -mx-4! lg:mx-0! px-4! lg:px-0!">
               <div className="flex! flex-col! sm:flex-row! sm:items-center! sm:justify-between! gap-2!">
                 <div className="min-w-0!">
                   <h1 className="font-['Manrope',sans-serif]! text-xl! sm:text-2xl! font-semibold! text-gray-900! leading-snug! capitalize! truncate!">
@@ -402,7 +441,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     )}
                   </p>
                 </div>
-                <div className="relative! shrink-0! w-[180px]!">
+                <div className="relative! shrink-0! w-[180px]! hidden! lg:block!">
                   <CustomSelect
                     value={sort}
                     options={adapter.sortOptions.map((opt) => ({
@@ -421,7 +460,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             </div>
 
             {/* Active chips on mobile */}
-            <div className="xl:hidden! mb-4!">
+            <div className="lg:hidden! mb-4!">
               {adapter.renderActiveChips(filters, handleFilterChange)}
             </div>
 
@@ -435,9 +474,9 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     {[1, 2, 3, 4].map((i) => (
                       <div
                         key={i}
-                        className="bg-white! rounded-2xl! border! border-gray-100! overflow-hidden! flex! flex-col! xl:flex-row! animate-pulse!"
+                        className="bg-white! rounded-2xl! border! border-gray-100! overflow-hidden! flex! flex-col! md:flex-row! animate-pulse!"
                       >
-                        <div className="w-full! xl:w-[260px]! shrink-0! aspect-[16/10]! xl:aspect-auto! xl:min-h-[230px]! bg-gray-200!" />
+                        <div className="w-full! md:w-[240px]! shrink-0! aspect-[16/10]! md:aspect-auto! md:min-h-[230px]! bg-gray-200!" />
                         <div className="p-4! flex! flex-col! gap-2! flex-1!">
                           <div className="h-4! bg-gray-200! rounded! w-3/4!" />
                           <div className="h-3! bg-gray-200! rounded! w-1/2!" />
@@ -502,7 +541,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                         </p>
                       <nav
                         aria-label="Listing pages"
-                        className="flex! items-center! justify-center! gap-1!"
+                        className="flex! flex-wrap! items-center! justify-center! gap-1!"
                       >
                         {page > 1 ? (
                           <Link

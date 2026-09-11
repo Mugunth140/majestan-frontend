@@ -267,12 +267,12 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   if (possession) specCells.push({ label: "Possession", value: possession });
 
   return (
-    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0! group!">
+    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! md:flex-row! overflow-hidden! min-w-0! group!">
 
       {/* Image — clean photo, heart wishlist only */}
-      <div className="relative! w-full! xl:w-[270px]! shrink-0! overflow-hidden! bg-gray-100!">
+      <div className="relative! w-full! md:w-[240px]! xl:w-[270px]! shrink-0! overflow-hidden! bg-gray-100!">
         <Link href={detailPath} className="block! w-full! h-full!">
-          <div className="aspect-[16/10]! xl:aspect-auto! xl:absolute! xl:inset-0! xl:min-h-[300px]!">
+          <div className="aspect-[16/10]! md:aspect-auto! md:absolute! md:inset-0! md:min-h-[280px]! xl:min-h-[300px]!">
             <img
               src={getPhotoUrl(item)}
               alt={item.propertyname || "Property"}
@@ -362,7 +362,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         </div>
 
         {/* Actions */}
-        <div className="mt-3.5! flex! gap-2.5!">
+        <div className="mt-3.5! flex! flex-col! sm:flex-row! gap-2.5!">
           <button className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-[#27427f]! bg-[#eef2f7]! hover:bg-[#dde5f0]! transition-colors! cursor-pointer!">
             <Phone className="w-4! h-4!" />
             Enquire

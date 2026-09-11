@@ -12,7 +12,7 @@ import {
   X,
   Phone,
 } from "lucide-react";
-import { MapPlaceholder } from "./MapPlaceholder";
+import { LocalityMap } from "./LocalityMap";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { MobileFilterBar } from "./MobileFilterBar";
 import type { ListingAdapter, ListingPageData } from "./listing-adapter";
@@ -367,7 +367,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             })}
             {adapter.renderActiveChips(filters, handleFilterChange)}
             <div className="h-[240px]! rounded-2xl! overflow-hidden! shadow-sm! border! border-gray-100! shrink-0!">
-              <MapPlaceholder
+              <LocalityMap
                 city={adapter.mapCity(filters)}
                 locality={adapter.mapLocality?.(filters)}
               />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Search, MapPin, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import { getHomePageData, type Sublocation } from "@/lib/api";
@@ -28,6 +28,43 @@ export type PropertySearchFiltersProps = {
   onReset: () => void;
   compact?: boolean;
 };
+
+const fieldClass =
+  "w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! text-[13px]! font-medium! text-gray-800! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400! placeholder:font-normal!";
+
+function Section({
+  title,
+  value,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  value?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details
+      open={defaultOpen}
+      className="group! border-b! border-gray-100! last:border-b-0!"
+    >
+      <summary className="flex! items-center! justify-between! cursor-pointer! list-none! py-3.5! [&::-webkit-details-marker]:hidden!">
+        <span className="min-w-0!">
+          <span className="block! text-[13px]! font-medium! text-gray-800!">
+            {title}
+          </span>
+          {value ? (
+            <span className="block! text-[11px]! font-light! text-[#27427f]! truncate! mt-0.5!">
+              {value}
+            </span>
+          ) : null}
+        </span>
+        <ChevronDown className="w-4! h-4! text-gray-400! shrink-0! transition-transform! duration-200! group-open:rotate-180!" />
+      </summary>
+      <div className="pb-4!">{children}</div>
+    </details>
+  );
+}
 
 export function PropertySearchFilters({
   values,
@@ -96,57 +133,79 @@ export function PropertySearchFilters({
     { label: "₹2Cr+", min: "20000000", max: "" },
   ];
 
+  const isAll = values.location.toLowerCase() === currentCity.toLowerCase() || values.location === "";
+  const locationSummary = isAll
+    ? `All of ${currentCity}`
+    : (citySublocations.find(s => s.sublocation.toLowerCase() === values.location.toLowerCase())?.sublocation ?? values.location);
+  const typeSummary = Object.values(PROPERTY_TYPES).find(p => p.apiValue === values.propertyType)?.label ?? "";
+  const priceSummary = values.minPrice || values.maxPrice
+    ? `${values.minPrice ? `₹${Number(values.minPrice) / 100000}L` : "0"} – ${values.maxPrice ? `₹${Number(values.maxPrice) / 100000}L` : "Any"}`
+    : "";
+  const bhkSummary = values.bedrooms ? `${values.bedrooms} BHK` : "";
+  const moreCount = [values.minArea, values.maxArea, values.furnishing, values.facing, values.propertyAge].filter(Boolean).length;
+  const moreSummary = moreCount > 0 ? `${moreCount} selected` : "";
+
   return (
-    <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! w-full!">
+    <div className="font-['Manrope',sans-serif]! bg-white! rounded-xl! border! border-gray-200/70! shadow-sm! w-full!">
       {/* Header */}
-      <div className="px-5! py-4! border-b! border-gray-100! flex! items-center! justify-between! bg-[#27427f]/[0.03]! rounded-t-2xl!">
-        <h3 className="font-['Lexend',sans-serif]! text-base! font-bold! text-gray-900! flex! items-center! gap-2!">
-          <SlidersHorizontal className="w-4! h-4! text-[#27427f]!" />
+      <div className="px-5! py-4! border-b! border-gray-100! flex! items-center! justify-between!">
+        <h3 className="text-[15px]! font-medium! text-gray-800! flex! items-center! gap-2!">
+          <SlidersHorizontal className="w-4! h-4! text-gray-400!" />
           Filters
         </h3>
         <button
           onClick={onReset}
-          className="text-xs! font-bold! text-[#27427f]! hover:text-[#1d3261]! transition-colors! uppercase! tracking-wider!"
+          className="text-[11px]! font-medium! bg-neutral-100! p-2! rounded-lg! text-gray-500! hover:text-red-500! transition-colors! tracking-wider! cursor-pointer!"
         >
-          Reset All
+          Reset
         </button>
       </div>
 
-      {/* Filter sections — no scroll */}
-      <div className="p-5! space-y-5!">
-
+      <div className="px-5! py-4!">
         {/* Keyword Search */}
-        <div>
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Keyword
-          </label>
-          <div className="relative!">
-            <Search className="absolute! left-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400!" />
-            <input
-              type="text"
-              placeholder="Search properties..."
-              value={textFields.keyword}
-              onChange={(e) => updateTextField("keyword", e.target.value)}
-              className="w-full! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-3! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
-            />
-          </div>
+        <div className="relative!">
+          <Search className="absolute! left-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400!" />
+          <input
+            type="text"
+            placeholder="Search properties..."
+            value={textFields.keyword}
+            onChange={(e) => updateTextField("keyword", e.target.value)}
+            className={`${fieldClass} pl-9! pr-3!`}
+          />
         </div>
 
-        {/* Location */}
-        <div>
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Location
-          </label>
+        {/* Listing Type Toggle */}
+        <div className="flex! bg-gray-100! p-1! rounded-lg! gap-1! mt-3!">
+          {["Sell", "Rent"].map((type) => (
+            <button
+              key={type}
+              onClick={() => updateFilter("listingType", type)}
+              className={`flex-1! py-2! text-[13px]! font-medium! rounded-md! transition-all! duration-200! cursor-pointer! ${
+                values.listingType === type
+                  ? "bg-white! text-[#27427f]! shadow-sm!"
+                  : "text-gray-500! hover:text-gray-700!"
+              }`}
+            >
+              {type === "Sell" ? "Buy" : "Rent"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Accordion sections */}
+      <div className="px-5! pb-2! border-t! border-gray-100!">
+
+        <Section title="Location" value={locationSummary} defaultOpen>
           <div className="relative!">
             <MapPin className="absolute! left-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! z-10!" />
             <select
-              value={values.location.toLowerCase() === currentCity.toLowerCase() || values.location === "" ? "" : values.location.toLowerCase()}
+              value={isAll ? "" : values.location.toLowerCase()}
               onChange={(e) => {
                  const newVal = e.target.value;
                  onChange({ ...values, ...textFields, location: newVal || currentCity });
               }}
               style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className={`w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-9! pr-8! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer! ${values.location.toLowerCase() === currentCity.toLowerCase() || values.location === "" ? "text-gray-400!" : "text-gray-900!"}`}
+              className={`${fieldClass} pl-9! pr-8! cursor-pointer! ${isAll ? "text-gray-400!" : ""}`}
             >
               <option value="">All of {currentCity}</option>
               {citySublocations.map(sub => (
@@ -155,41 +214,15 @@ export function PropertySearchFilters({
             </select>
             <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
           </div>
-        </div>
+        </Section>
 
-        {/* Listing Type Toggle */}
-        <div>
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Looking For
-          </label>
-          <div className="flex! bg-gray-100! p-1! rounded-lg! gap-1!">
-            {["Sell", "Rent"].map((type) => (
-              <button
-                key={type}
-                onClick={() => updateFilter("listingType", type)}
-                className={`flex-1! py-2! text-sm! font-bold! rounded-md! transition-all! duration-200! ${
-                  values.listingType === type
-                    ? "bg-white! text-[#27427f]! shadow-sm!"
-                    : "text-gray-500! hover:text-gray-700!"
-                }`}
-              >
-                {type === "Sell" ? "Buy" : "Rent"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Property Type */}
-        <div>
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Property Type
-          </label>
+        <Section title="Property Type" value={typeSummary}>
           <div className="relative!">
             <select
               value={values.propertyType}
               onChange={(e) => updateFilter("propertyType", e.target.value)}
               style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer!"
+              className={`${fieldClass} pl-3! pr-8! cursor-pointer!`}
             >
               {Object.entries(PROPERTY_TYPES).map(([slug, data]) => (
                 <option key={slug} value={data.apiValue}>
@@ -199,36 +232,29 @@ export function PropertySearchFilters({
             </select>
             <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
           </div>
-        </div>
+        </Section>
 
-        {/* Divider */}
-        <div className="border-t! border-gray-100!"></div>
-
-        {/* Price Range */}
-        <div>
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Price Range
-          </label>
+        <Section title="Price Range" value={priceSummary}>
           <div className="flex! items-center! gap-2! mb-3!">
             <div className="flex-1! relative!">
-              <span className="absolute! left-3! top-1/2! -translate-y-1/2! text-gray-400! text-xs! font-medium!">₹</span>
+              <span className="absolute! left-3! top-1/2! -translate-y-1/2! text-gray-400! text-xs!">₹</span>
               <input
                 type="number"
                 placeholder="Min"
                 value={textFields.minPrice}
                 onChange={(e) => updateTextField("minPrice", e.target.value)}
-                className="w-full! bg-white! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+                className={`${fieldClass} py-2! pl-7! pr-2! tabular-nums!`}
               />
             </div>
             <span className="text-gray-300! text-xs!">—</span>
             <div className="flex-1! relative!">
-              <span className="absolute! left-3! top-1/2! -translate-y-1/2! text-gray-400! text-xs! font-medium!">₹</span>
+              <span className="absolute! left-3! top-1/2! -translate-y-1/2! text-gray-400! text-xs!">₹</span>
               <input
                 type="number"
                 placeholder="Max"
                 value={textFields.maxPrice}
                 onChange={(e) => updateTextField("maxPrice", e.target.value)}
-                className="w-full! bg-white! border! border-gray-200! rounded-lg! py-2! pl-7! pr-2! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
+                className={`${fieldClass} py-2! pl-7! pr-2! tabular-nums!`}
               />
             </div>
           </div>
@@ -241,148 +267,85 @@ export function PropertySearchFilters({
                   setTextFields(next);
                   onChange({ ...values, ...next });
                 }}
-                className={`px-2.5! py-1.5! rounded-full! border! text-[11px]! font-bold! transition-all! ${
+                className={`px-2.5! py-1.5! rounded-lg! border! text-[11px]! font-medium! transition-all! cursor-pointer! tabular-nums! ${
                   values.minPrice === preset.min && values.maxPrice === preset.max
                     ? "bg-[#27427f]! text-white! border-[#27427f]!"
-                    : "bg-white! text-gray-600! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
+                    : "bg-white! text-gray-500! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
                 }`}
               >
                 {preset.label}
               </button>
             ))}
           </div>
-        </div>
+        </Section>
 
-        {/* Bedrooms */}
-        <div>
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Bedrooms
-          </label>
+        <Section title="Bedrooms" value={bhkSummary}>
           <div className="flex! gap-1.5!">
             {["1", "2", "3", "4", "5+"].map((num) => (
               <button
                 key={num}
                 onClick={() => updateFilter("bedrooms", values.bedrooms === num ? "" : num)}
-                className={`flex-1! py-2! rounded-full! border! text-sm! font-bold! transition-all! ${
+                className={`flex-1! h-9! rounded-lg! border! text-[13px]! font-medium! transition-all! cursor-pointer! tabular-nums! ${
                   values.bedrooms === num
                     ? "bg-[#27427f]! text-white! border-[#27427f]!"
-                    : "bg-white! text-gray-600! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
+                    : "bg-white! text-gray-500! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
                 }`}
               >
                 {num}
               </button>
             ))}
           </div>
-        </div>
+        </Section>
 
-        {/* Advanced filters accordion */}
-        <details className="group!">
-          <summary className="flex! items-center! justify-between! cursor-pointer! list-none! py-1! border-t! border-gray-100!">
-            <span className="text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider!">
-              Advanced Filters
-            </span>
-            <svg
-              className="w-4! h-4! text-gray-400! transition-transform! duration-200! group-open:rotate-180!"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </summary>
-          <div className="pt-4! space-y-5!">
-
-        {/* Area */}
-        <div className="w-full!">
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Area (sq.ft)
-          </label>
-          <div className="flex! items-center! gap-2! w-full!">
-            <input
-              type="number"
-              placeholder="Min"
-              value={textFields.minArea}
-              onChange={(e) => updateTextField("minArea", e.target.value)}
-              className="flex-1! min-w-0! w-full! bg-white! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
-            />
-            <span className="text-gray-300! text-xs! shrink-0!">—</span>
-            <input
-              type="number"
-              placeholder="Max"
-              value={textFields.maxArea}
-              onChange={(e) => updateTextField("maxArea", e.target.value)}
-              className="flex-1! min-w-0! w-full! bg-white! border! border-gray-200! rounded-lg! py-2! px-3! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! placeholder:text-gray-400!"
-            />
+        <Section title="More Filters" value={moreSummary}>
+          <div className="space-y-4!">
+            <div>
+              <div className="text-[11px]! font-light! text-gray-500! mb-1.5!">Area (sq.ft)</div>
+              <div className="flex! items-center! gap-2!">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={textFields.minArea}
+                  onChange={(e) => updateTextField("minArea", e.target.value)}
+                  className={`${fieldClass} flex-1! min-w-0! py-2! px-3! tabular-nums!`}
+                />
+                <span className="text-gray-300! text-xs! shrink-0!">—</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={textFields.maxArea}
+                  onChange={(e) => updateTextField("maxArea", e.target.value)}
+                  className={`${fieldClass} flex-1! min-w-0! py-2! px-3! tabular-nums!`}
+                />
+              </div>
+            </div>
+            {(
+              [
+                { label: "Furnishing", value: values.furnishing, key: "furnishing" as const, options: [["", "Any"], ["furnished", "Furnished"], ["semi", "Semi-Furnished"], ["unfurnished", "Unfurnished"]] },
+                { label: "Facing", value: values.facing, key: "facing" as const, options: [["", "Any"], ...["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"].map((d): [string, string] => [d, d])] },
+                { label: "Property Age", value: values.propertyAge, key: "propertyAge" as const, options: [["", "Any"], ["new", "Under Construction / New"], ["1-5", "1 to 5 Years"], ["5-10", "5 to 10 Years"], ["10+", "10+ Years"]] },
+              ]
+            ).map((f) => (
+              <div key={f.key}>
+                <div className="text-[11px]! font-light! text-gray-500! mb-1.5!">{f.label}</div>
+                <div className="relative!">
+                  <select
+                    value={f.value}
+                    onChange={(e) => updateFilter(f.key, e.target.value)}
+                    style={{ appearance: 'none', WebkitAppearance: 'none' }}
+                    className={`${fieldClass} pl-3! pr-8! cursor-pointer!`}
+                  >
+                    {f.options.map(([v, l]) => (
+                      <option key={v} value={v}>{l}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        </Section>
 
-        {/* Furnishing */}
-        <div className="w-full!">
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Furnishing
-          </label>
-          <div className="relative! w-full!">
-            <select
-              value={values.furnishing}
-              onChange={(e) => updateFilter("furnishing", e.target.value)}
-              style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
-            >
-              <option value="">Any</option>
-              <option value="furnished">Furnished</option>
-              <option value="semi">Semi-Furnished</option>
-              <option value="unfurnished">Unfurnished</option>
-            </select>
-            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
-          </div>
-        </div>
-
-        {/* Facing */}
-        <div className="w-full!">
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Facing
-          </label>
-          <div className="relative! w-full!">
-            <select
-              value={values.facing}
-              onChange={(e) => updateFilter("facing", e.target.value)}
-              style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
-            >
-              <option value="">Any</option>
-              {["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"].map((dir) => (
-                <option key={dir} value={dir}>{dir}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
-          </div>
-        </div>
-
-        {/* Property Age */}
-        <div className="w-full!">
-          <label className="block! text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-1.5!">
-            Property Age
-          </label>
-          <div className="relative! w-full!">
-            <select
-              value={values.propertyAge}
-              onChange={(e) => updateFilter("propertyAge", e.target.value)}
-              style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className="w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-sm! focus:outline-none! focus:border-[#27427f]! transition-all! cursor-pointer!"
-            >
-              <option value="">Any</option>
-              <option value="new">Under Construction / New</option>
-              <option value="1-5">1 to 5 Years</option>
-              <option value="5-10">5 to 10 Years</option>
-              <option value="10+">10+ Years</option>
-            </select>
-            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
-          </div>
-        </div>
-
-          </div>{/* end accordion body */}
-        </details>
       </div>
     </div>
   );

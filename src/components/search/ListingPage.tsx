@@ -133,36 +133,17 @@ function DefaultRightRail() {
     <div className="flex! flex-col! gap-4!">
       <EnquireForm />
 
-      {/* Ad card — photo with overlay CTA */}
+      {/* Ad image */}
       <a
         href="tel:+914222345678"
-        className="relative! block! rounded-2xl! overflow-hidden! shadow-sm! border! border-gray-100! min-h-[380px]! no-underline! group/ad!"
+        className="block! rounded-md! overflow-hidden! no-underline!"
       >
         <img
           src="/assets/images/banners/banner_1.jpeg"
-          alt="Sell your property with Majestan Realty"
+          alt="Advertisement"
           loading="lazy"
-          className="absolute! inset-0! w-full! h-full! object-cover! group-hover/ad:scale-105! transition-transform! duration-700! ease-out!"
+          className="w-full! h-[420px]! object-cover! object-center!"
         />
-        <div
-          aria-hidden="true"
-          className="absolute! inset-0! bg-gradient-to-t! from-[#16294f]! via-[#16294f]/45! to-transparent!"
-        />
-        <div className="relative! flex! flex-col! justify-end! min-h-[380px]! p-5!">
-          <div className="text-[11px]! font-bold! uppercase! tracking-widest! text-[#ffc900]!">
-            Majestan Realty
-          </div>
-          <div className="font-['Lexend',sans-serif]! text-xl! font-extrabold! text-white! leading-snug! mt-1!">
-            Selling your property?
-          </div>
-          <p className="text-[13px]! text-white/85! leading-relaxed! mt-1!">
-            List it free and reach thousands of genuine buyers in Coimbatore.
-          </p>
-          <span className="flex! items-center! justify-center! gap-2! mt-3! px-4! py-2.5! bg-[#ffc900]! text-[#27427f]! text-sm! font-extrabold! rounded-xl! group-hover/ad:bg-[#ffda4d]! transition-colors!">
-            <Phone className="w-4! h-4!" />
-            Post Property Free
-          </span>
-        </div>
       </a>
     </div>
   );

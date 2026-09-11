@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   Search,
@@ -192,13 +193,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const [data, setData] = useState<ListingPageData<TItem> | null>(
-    initialData || null
-  );
-  const [loading, setLoading] = useState(!initialData);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [showDrawer, setShowDrawer] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
 
   const page = Number(searchParams.get("page")) || 1;
   const sort = searchParams.get("sort") || "";
@@ -208,32 +204,49 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
     ...(adapter.filtersFromParams(searchParams) as TFilters),
   });
 
-  const isFirstRender = useRef(true);
+  const queryKey = ["listings", pathname, filters, sort, page] as const;
+  const {
+    data,
+    error: queryError,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: () => adapter.fetchItems({ filters, sort, page }),
+    initialData: initialData ?? undefined,
+    initialDataUpdatedAt: initialData ? Date.now() : undefined,
+    placeholderData: keepPreviousData,
+    staleTime: 60 * 1000,
+  });
+  const loading = isLoading && !data;
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Failed to load listings"
+    : null;
 
+  // Prefetch the next page in the background for instant "Next" navigation.
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (initialData && retryCount === 0) return;
+    if (!data) return;
+    const totalPages = Math.ceil(data.total / data.limit);
+    if (page >= totalPages) return;
+    queryClient.prefetchQuery({
+      queryKey: ["listings", pathname, filters, sort, page + 1],
+      queryFn: () => adapter.fetchItems({ filters, sort, page: page + 1 }),
+      staleTime: 60 * 1000,
+    });
+  }, [queryClient, adapter, pathname, filters, sort, page, data]);
+
+  // Smooth-scroll the feed into view on page change.
+  const feedRef = useRef<HTMLDivElement>(null);
+  const prevPageRef = useRef(page);
+  useEffect(() => {
+    if (prevPageRef.current !== page) {
+      prevPageRef.current = page;
+      feedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    const controller = new AbortController();
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await adapter.fetchItems({ filters, sort, page });
-        if (!controller.signal.aborted) setData(res);
-      } catch (err: any) {
-        if (!controller.signal.aborted)
-          setError(
-            err instanceof Error ? err.message : "Failed to load listings"
-          );
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    };
-    fetchData();
-    return () => controller.abort();
-  }, [adapter, filters, page, sort, initialData, retryCount]);
+  }, [page]);
 
   // Close drawer when viewport reaches xl
   useEffect(() => {
@@ -275,12 +288,27 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   const filtersAsRecord = filters as Record<string, string>;
 
   const totalPages = data ? Math.ceil(data.total / data.limit) : 0;
-  const prevParams = new URLSearchParams(searchParams.toString());
-  prevParams.set("page", String(page - 1));
-  const nextParams = new URLSearchParams(searchParams.toString());
-  nextParams.set("page", String(page + 1));
-  const prevHref = page > 1 ? `${pathname}?${prevParams}` : null;
-  const nextHref = page < totalPages ? `${pathname}?${nextParams}` : null;
+  const pageHref = (pageNum: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(pageNum));
+    const qs = params.toString();
+    return qs ? `${pathname}?${qs}` : pathname;
+  };
+
+  // Compact window: first, last, current ±1, ellipsis elsewhere.
+  const pageNumbers: (number | "…")[] = (() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const keep = new Set([1, 2, page - 1, page, page + 1, totalPages - 1, totalPages]);
+    const out: (number | "…")[] = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (!keep.has(i)) {
+        if (out[out.length - 1] !== "…") out.push("…");
+        continue;
+      }
+      out.push(i);
+    }
+    return out;
+  })();
 
   return (
     <div className="min-h-screen! bg-[#f6f7f9]!">
@@ -395,6 +423,11 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                       {data?.total ?? 0}
                     </span>{" "}
                     properties found
+                    {isFetching && !isLoading && (
+                      <span className="ml-2! text-xs! text-gray-400! animate-pulse!">
+                        Updating…
+                      </span>
+                    )}
                   </p>
                 </div>
                 <div className="relative! shrink-0!">
@@ -424,7 +457,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             <div className="flex! gap-6! items-start!">
 
               {/* ── Card feed ── */}
-              <div className="flex-1! min-w-0!">
+              <div ref={feedRef} className="flex-1! min-w-0! scroll-mt-[130px]!">
                 {/* ── Cards / states ── */}
                 {loading ? (
                   <div className="flex! flex-col! gap-3!">
@@ -450,7 +483,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                   <div className="bg-white! border! border-red-100! rounded-2xl! p-10! text-center!">
                     <p className="text-red-500! font-semibold! mb-4!">{error}</p>
                     <button
-                      onClick={() => setRetryCount((c) => c + 1)}
+                      onClick={() => refetch()}
                       className="px-5! py-2! bg-red-50! text-red-600! rounded-lg! text-sm! font-bold! hover:bg-red-100! transition-colors! cursor-pointer!"
                     >
                       Try Again
@@ -481,46 +514,86 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     </div>
 
                     {/* Pagination */}
-                    {data && data.total > data.limit && (
-                      <div className="flex! items-center! justify-between! mt-8! pt-6! border-t! border-gray-200/60!">
-                        {prevHref ? (
-                          <Link
-                            href={prevHref}
-                            prefetch
-                            className="flex! items-center! gap-2! px-4! py-2! border! border-gray-200! rounded-lg! text-sm! font-bold! text-gray-600! hover:border-[#27427f]! hover:text-[#27427f]! transition-colors! no-underline!"
-                          >
-                            <ChevronLeft className="w-4! h-4!" />
-                            Previous
-                          </Link>
-                        ) : (
-                          <span className="flex! items-center! gap-2! px-4! py-2! border! border-gray-100! rounded-lg! text-sm! font-bold! text-gray-300!">
-                            <ChevronLeft className="w-4! h-4!" />
-                            Previous
-                          </span>
-                        )}
-                        <span className="text-sm! text-gray-500!">
-                          Page{" "}
-                          <span className="font-bold! text-gray-900!">{page}</span>{" "}
+                    {data && (
+                      <div className="font-['Manrope',sans-serif]! mt-8! pt-6! border-t! border-gray-200/60! flex! flex-col! items-center! gap-3.5!">
+                        <p className="text-[13px]! text-gray-500! tabular-nums!">
+                          Showing{" "}
+                          <span className="font-semibold! text-gray-900!">
+                            {data.total === 0
+                              ? 0
+                              : `${(page - 1) * (data.limit || 12) + 1}–${Math.min(page * (data.limit || 12), data.total)}`}
+                          </span>{" "}
                           of{" "}
-                          <span className="font-bold! text-gray-900!">
-                            {totalPages}
-                          </span>
-                        </span>
-                        {nextHref ? (
+                          <span className="font-semibold! text-gray-900!">
+                            {data.total}
+                          </span>{" "}
+                          properties
+                        </p>
+                      <nav
+                        aria-label="Listing pages"
+                        className="flex! items-center! justify-center! gap-1!"
+                      >
+                        {page > 1 ? (
                           <Link
-                            href={nextHref}
+                            href={pageHref(page - 1)}
                             prefetch
-                            className="flex! items-center! gap-2! px-4! py-2! border! border-gray-200! rounded-lg! text-sm! font-bold! text-gray-600! hover:border-[#27427f]! hover:text-[#27427f]! transition-colors! no-underline!"
+                            scroll={false}
+                            aria-label="Previous page"
+                            className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-600! hover:bg-gray-100! hover:text-[#27427f]! transition-colors! no-underline!"
                           >
-                            Next
+                            <ChevronLeft className="w-4! h-4!" />
+                            <span className="hidden! sm:inline!">Previous</span>
+                          </Link>
+                        ) : (
+                          <span className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-300! cursor-default!">
+                            <ChevronLeft className="w-4! h-4!" />
+                            <span className="hidden! sm:inline!">Previous</span>
+                          </span>
+                        )}
+                        {pageNumbers.map((p, i) =>
+                          p === "…" ? (
+                            <span key={`e${i}`} className="w-9! text-center! text-sm! text-gray-400!">
+                              …
+                            </span>
+                          ) : p === page ? (
+                            <span
+                              key={p}
+                              aria-current="page"
+                              className="w-9! h-9! flex! items-center! justify-center! rounded-lg! text-[13px]! font-bold! text-white! bg-[#27427f]! tabular-nums!"
+                            >
+                              {p}
+                            </span>
+                          ) : (
+                            <Link
+                              key={p}
+                              href={pageHref(p)}
+                              prefetch
+                              scroll={false}
+                              aria-label={`Page ${p}`}
+                              className="w-9! h-9! flex! items-center! justify-center! rounded-lg! text-[13px]! font-medium! text-gray-600! hover:bg-gray-100! hover:text-[#27427f]! transition-colors! no-underline! tabular-nums!"
+                            >
+                              {p}
+                            </Link>
+                          )
+                        )}
+                        {page < totalPages ? (
+                          <Link
+                            href={pageHref(page + 1)}
+                            prefetch
+                            scroll={false}
+                            aria-label="Next page"
+                            className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-600! hover:bg-gray-100! hover:text-[#27427f]! transition-colors! no-underline!"
+                          >
+                            <span className="hidden! sm:inline!">Next</span>
                             <ChevronRight className="w-4! h-4!" />
                           </Link>
                         ) : (
-                          <span className="flex! items-center! gap-2! px-4! py-2! border! border-gray-100! rounded-lg! text-sm! font-bold! text-gray-300!">
-                            Next
+                          <span className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-300! cursor-default!">
+                            <span className="hidden! sm:inline!">Next</span>
                             <ChevronRight className="w-4! h-4!" />
                           </span>
                         )}
+                      </nav>
                       </div>
                     )}
                   </>

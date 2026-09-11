@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Search, MapPin, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { CustomSelect } from "./CustomSelect";
 import { getHomePageData, type Sublocation } from "@/lib/api";
 import { useLocationContext } from "@/contexts/LocationContext";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
@@ -196,42 +197,34 @@ export function PropertySearchFilters({
       <div className="px-5! pb-2! border-t! border-gray-100!">
 
         <Section title="Location" value={locationSummary} defaultOpen>
-          <div className="relative!">
-            <MapPin className="absolute! left-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! z-10!" />
-            <select
-              value={isAll ? "" : values.location.toLowerCase()}
-              onChange={(e) => {
-                 const newVal = e.target.value;
-                 onChange({ ...values, ...textFields, location: newVal || currentCity });
-              }}
-              style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className={`${fieldClass} pl-9! pr-8! cursor-pointer! ${isAll ? "text-gray-400!" : ""}`}
-            >
-              <option value="">All of {currentCity}</option>
-              {citySublocations.map(sub => (
-                <option key={sub.id} value={sub.sublocation.toLowerCase()}>{sub.sublocation}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
-          </div>
+          <CustomSelect
+            value={isAll ? "" : values.location.toLowerCase()}
+            options={[
+              { value: "", label: `All of ${currentCity}` },
+              ...citySublocations.map((sub) => ({
+                value: sub.sublocation.toLowerCase(),
+                label: sub.sublocation,
+              })),
+            ]}
+            onChange={(newVal) => {
+              onChange({ ...values, ...textFields, location: newVal || currentCity });
+            }}
+            ariaLabel="Location"
+            leadingIcon={<MapPin className="w-4! h-4! text-gray-400!" />}
+            buttonClassName={isAll ? "text-gray-400!" : ""}
+          />
         </Section>
 
         <Section title="Property Type" value={typeSummary}>
-          <div className="relative!">
-            <select
-              value={values.propertyType}
-              onChange={(e) => updateFilter("propertyType", e.target.value)}
-              style={{ appearance: 'none', WebkitAppearance: 'none' }}
-              className={`${fieldClass} pl-3! pr-8! cursor-pointer!`}
-            >
-              {Object.entries(PROPERTY_TYPES).map(([slug, data]) => (
-                <option key={slug} value={data.apiValue}>
-                  {data.apiValue === "" ? "All Types" : data.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
-          </div>
+          <CustomSelect
+            value={values.propertyType}
+            options={Object.entries(PROPERTY_TYPES).map(([slug, data]) => ({
+              value: data.apiValue,
+              label: data.apiValue === "" ? "All Types" : data.label,
+            }))}
+            onChange={(v) => updateFilter("propertyType", v)}
+            ariaLabel="Property Type"
+          />
         </Section>
 
         <Section title="Price Range" value={priceSummary}>
@@ -328,19 +321,12 @@ export function PropertySearchFilters({
             ).map((f) => (
               <div key={f.key}>
                 <div className="text-[11px]! font-light! text-gray-500! mb-1.5!">{f.label}</div>
-                <div className="relative!">
-                  <select
-                    value={f.value}
-                    onChange={(e) => updateFilter(f.key, e.target.value)}
-                    style={{ appearance: 'none', WebkitAppearance: 'none' }}
-                    className={`${fieldClass} pl-3! pr-8! cursor-pointer!`}
-                  >
-                    {f.options.map(([v, l]) => (
-                      <option key={v} value={v}>{l}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute! right-3! top-1/2! -translate-y-1/2! w-4! h-4! text-gray-400! pointer-events-none!" />
-                </div>
+                <CustomSelect
+                  value={f.value}
+                  options={f.options.map(([v, l]) => ({ value: v, label: l }))}
+                  onChange={(v) => updateFilter(f.key, v)}
+                  ariaLabel={f.label}
+                />
               </div>
             ))}
           </div>

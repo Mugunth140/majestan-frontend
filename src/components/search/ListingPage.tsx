@@ -13,6 +13,7 @@ import {
   Phone,
 } from "lucide-react";
 import { LocalityMap } from "./LocalityMap";
+import { CustomSelect } from "./CustomSelect";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { MobileFilterBar } from "./MobileFilterBar";
 import type { ListingAdapter, ListingPageData } from "./listing-adapter";
@@ -401,20 +402,20 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     )}
                   </p>
                 </div>
-                <div className="relative! shrink-0!">
-                  <select
+                <div className="relative! shrink-0! w-[180px]!">
+                  <CustomSelect
                     value={sort}
-                    onChange={(e) => handleSortChange(e.target.value)}
-                    style={{ appearance: "none", WebkitAppearance: "none" }}
-                    className="font-['Manrope',sans-serif]! block! bg-white! border! border-gray-300! rounded-xl! pl-4! pr-10! py-2.5! text-[13px]! font-semibold! text-[#27427f]! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/25! focus:bg-white! focus:border-[#27427f]/30! hover:bg-neutral-100! transition-all! cursor-pointer!"
-                  >
-                    {adapter.sortOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ArrowUpDown className="absolute! right-3.5! top-1/2! -translate-y-1/2! w-3.5! h-3.5! text-[#27427f]! pointer-events-none!" />
+                    options={adapter.sortOptions.map((opt) => ({
+                      value: opt.value,
+                      label: opt.label,
+                    }))}
+                    onChange={(v) => handleSortChange(v)}
+                    ariaLabel="Sort listings"
+                    trailingIcon={
+                      <ArrowUpDown className="w-3.5! h-3.5! text-[#27427f]!" />
+                    }
+                    buttonClassName="font-['Manrope',sans-serif]! bg-[#eef2f7]! border-transparent! rounded-full! pl-4! py-2.5! font-semibold! text-[#27427f]! hover:bg-[#dde5f0]! focus:bg-white! focus:border-[#27427f]/30!"
+                  />
                 </div>
               </div>
             </div>

@@ -74,7 +74,7 @@ function EnquireForm() {
       {/* <div className="text-[12px]! font-bold! font-['Manrope', sans-serif] tracking-widest! text-gray-800!">
         Enquire Now
       </div> */}
-      <h3 className="font-['Manrope',sans-serif]! text-xl! font-medium! text-gray-600! leading-snug! text-center! py-1!">
+      <h3 className="font-['Manrope',sans-serif]! text-xl! font-medium! text-gray-700! leading-snug! text-center! py-1!">
         Get Details via WhatsApp
       </h3>
       {sent ? (
@@ -139,10 +139,10 @@ function DefaultRightRail() {
         className="block! rounded-md! overflow-hidden! no-underline!"
       >
         <img
-          src="/assets/images/banners/banner_1.jpeg"
+          src="/assets/images/hero/hero_mobile.png"
           alt="Advertisement"
           loading="lazy"
-          className="w-full! h-[420px]! object-cover! object-center!"
+          className="w-full! aspect-[4/5]! object-cover! object-top!"
         />
       </a>
     </div>
@@ -426,7 +426,6 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
 
             {/* Cards + right rail side-by-side at 2xl */}
             <div className="flex! gap-6! items-start!">
-
               {/* ── Card feed ── */}
               <div ref={feedRef} className="flex-1! min-w-0! scroll-mt-[130px]!">
                 {/* ── Cards / states ── */}
@@ -572,7 +571,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
               </div>
 
               {/* ── Right rail (xl+) ── */}
-              <aside className="hidden! xl:block! w-[260px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-80px)]! overflow-y-auto!">
+              <aside className="hidden! xl:block! w-[260px]! shrink-0! self-start! sticky! top-[152px]! max-h-[calc(100vh-152px)]! overflow-y-auto! pb-6! z-10!">
                 {adapter.renderRightRail
                   ? adapter.renderRightRail(filters)
                   : <DefaultRightRail />}

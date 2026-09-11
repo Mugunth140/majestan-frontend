@@ -80,7 +80,7 @@ function EnquireForm() {
       </h3>
       {sent ? (
         <div className="flex! items-start! gap-2! p-1!">
-          <p className="text-[13px]! text-blue-950! font-medium! leading-relaxed!">
+          <p className="text-[12px]! text-blue-950! font-medium! leading-relaxed!">
             Thanks {name.split(" ")[0] || "there"}! Our staff will call you
             shortly.
           </p>
@@ -99,7 +99,7 @@ function EnquireForm() {
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
             required
-            className="w-full! h-2.5! p-5! text-base! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
+            className="w-full! h-2.5! p-5! text-sm! placeholder:text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
           />
           <input
             type="tel"
@@ -108,7 +108,7 @@ function EnquireForm() {
             placeholder="Phone number"
             required
             pattern="[0-9+ ]{10,15}"
-            className="w-full! h-2.5! p-5! text-base! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
+            className="w-full! h-2.5! p-5! text-sm! placeholder:text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
           />
           <button
             type="submit"
@@ -407,7 +407,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           <main className="flex-1! min-w-0! flex! flex-col! pt-6!">
 
             {/* Breadcrumbs */}
-            <div className="mb-3!">
+            <div className="">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
 
@@ -415,7 +415,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             <div className="sticky! top-[64px]! z-20! bg-[#f6f7f9]/95! backdrop-blur-sm! border-b! border-gray-200/60! py-3! mb-5! -mx-4! xl:mx-0! px-4! xl:px-0!">
               <div className="flex! flex-col! sm:flex-row! sm:items-center! sm:justify-between! gap-2!">
                 <div className="min-w-0!">
-                  <h1 className="font-['Lexend',sans-serif]! text-lg! sm:text-xl! font-bold! text-gray-900! leading-snug! capitalize! truncate!">
+                  <h1 className="font-['Manrope',sans-serif]! text-xl! sm:text-2xl! font-semibold! text-gray-900! leading-snug! capitalize! truncate!">
                     {pageTitle}
                   </h1>
                   <p className="text-sm! text-gray-500! mt-0.5!">
@@ -435,7 +435,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     value={sort}
                     onChange={(e) => handleSortChange(e.target.value)}
                     style={{ appearance: "none", WebkitAppearance: "none" }}
-                    className="block! bg-white! border! border-gray-200! rounded-xl! pl-4! pr-10! py-2! text-sm! font-semibold! text-gray-700! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer! shadow-sm!"
+                    className="font-['Manrope',sans-serif]! block! bg-[#eef2f7]! border! border-transparent! rounded-full! pl-4! pr-10! py-2.5! text-[13px]! font-semibold! text-[#27427f]! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/25! focus:bg-white! focus:border-[#27427f]/30! hover:bg-[#dde5f0]! transition-all! cursor-pointer!"
                   >
                     {adapter.sortOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -443,7 +443,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                       </option>
                     ))}
                   </select>
-                  <ArrowUpDown className="absolute! right-3.5! top-1/2! -translate-y-1/2! w-3.5! h-3.5! text-gray-400! pointer-events-none!" />
+                  <ArrowUpDown className="absolute! right-3.5! top-1/2! -translate-y-1/2! w-3.5! h-3.5! text-[#27427f]! pointer-events-none!" />
                 </div>
               </div>
             </div>

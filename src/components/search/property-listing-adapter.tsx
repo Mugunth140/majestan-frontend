@@ -461,9 +461,9 @@ export function createPropertyAdapter(init: {
 
     buildTitle: (filters) => {
       const propertyTypeLabel = Object.values(PROPERTY_TYPES).find(p => p.apiValue === filters.propertyType)?.label || filters.propertyType;
-      const listingTypeLabel = filters.listingType === "Rent" ? "For Rent" : "For Sale";
+      const listingTypeLabel = filters.listingType === "Rent" ? "Rent" : "Sale";
       const locationLabel = filters.location ? filters.location.replace(/-/g, ' ') : "Coimbatore";
-      return `${propertyTypeLabel} ${listingTypeLabel} in ${locationLabel}`;
+      return `${propertyTypeLabel} in ${locationLabel} for ${listingTypeLabel}`;
     },
 
     buildBreadcrumbs: (filters) => {

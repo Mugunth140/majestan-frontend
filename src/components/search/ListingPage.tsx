@@ -382,11 +382,11 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
       )}
 
       {/* ── Page body ── */}
-      <div className="max-w-[1440px]! mx-auto! px-4! xl:px-6! pt-0! lg:pt-6! pb-16!">
+      <div className="max-w-[1440px]! mx-auto! px-4! xl:px-6! pt-0! lg:pt-0! pb-16!">
         <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}
-          <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! sticky! top-[64px]! max-h-[calc(100vh-64px)]! overflow-y-auto! pt-6! pb-6! pr-1!">
+          <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! sticky! top-[62px]! max-h-[calc(100vh-62px)]! overflow-y-auto! pt-4! pb-6! pr-1!">
             {adapter.renderFilters({
               values: filters,
               onChange: handleFilterChange,
@@ -402,10 +402,10 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           </aside>
 
           {/* ── Main column ── */}
-          <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-6!">
+          <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-4!">
 
             {/* Breadcrumbs */}
-            <div className="">
+            <div className="-mb-0.5!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
 
@@ -413,20 +413,18 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             <div className="lg:sticky! lg:top-[64px]! z-20! bg-[#f6f7f9]! border-b! border-gray-200/60! py-3! mb-5! -mx-4! lg:mx-0! px-4! lg:px-0!">
               <div className="flex! flex-col! sm:flex-row! sm:items-center! sm:justify-between! gap-2!">
                 <div className="min-w-0!">
-                  <h1 className="font-['Manrope',sans-serif]! text-xl! sm:text-2xl! font-semibold! text-gray-900! leading-snug! capitalize! truncate!">
-                    {pageTitle}
-                  </h1>
-                  <p className="text-sm! text-gray-500! mt-0.5!">
-                    <span className="font-semibold! text-[#27427f]!">
-                      {data?.total ?? 0}
+                  <h1 className="font-['Manrope',sans-serif]! text-lg! sm:text-xl! font-medium! text-gray-900! leading-snug! capitalize! truncate!">
+                    <span className="text-gray-900! text-lg! font-['Manrope',sans-serif] font-normal!">
+                      {data?.total ?? 0} properties
                     </span>{" "}
-                    properties found
+                    <span className="font-light! text-gray-300!">|</span>{" "}
+                    {pageTitle}
                     {isFetching && !isLoading && (
                       <span className="ml-2! text-xs! text-gray-400! animate-pulse!">
                         Updating…
                       </span>
                     )}
-                  </p>
+                  </h1>
                 </div>
                 <div className="relative! shrink-0! w-[180px]! hidden! lg:block!">
                   <CustomSelect

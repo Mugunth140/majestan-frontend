@@ -10,7 +10,6 @@ import {
   ArrowUpDown,
   X,
   Phone,
-  Send,
   CheckCircle2,
 } from "lucide-react";
 import { MapPlaceholder } from "./MapPlaceholder";
@@ -72,17 +71,16 @@ function EnquireForm() {
 
   return (
     <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! p-5! flex! flex-col! gap-3!">
-      <div className="text-[11px]! font-bold! uppercase! tracking-widest! text-gray-400!">
+      {/* <div className="text-[12px]! font-bold! font-['Manrope', sans-serif] tracking-widest! text-gray-800!">
         Enquire Now
-      </div>
-      <h3 className="font-['Lexend',sans-serif]! text-base! font-bold! text-gray-900! leading-snug!">
-        Get full details on WhatsApp
+      </div> */}
+      <h3 className="font-['Manrope',sans-serif]! text-xl! font-medium! text-gray-600! leading-snug! text-center! py-1!">
+        Get Details via WhatsApp
       </h3>
       {sent ? (
-        <div className="flex! items-start! gap-2! bg-green-50! border! border-green-100! rounded-xl! p-3!">
-          <CheckCircle2 className="w-4! h-4! text-green-600! mt-0.5! shrink-0!" />
-          <p className="text-[13px]! text-green-800! font-medium! leading-relaxed!">
-            Thanks {name.split(" ")[0] || "there"}! Our advisor will call you
+        <div className="flex! items-start! gap-2! p-1!">
+          <p className="text-[13px]! text-blue-950! font-medium! leading-relaxed!">
+            Thanks {name.split(" ")[0] || "there"}! Our staff will call you
             shortly.
           </p>
         </div>
@@ -100,7 +98,7 @@ function EnquireForm() {
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
             required
-            className="w-full! text-sm! px-3! py-2! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
+            className="w-full! h-2.5! p-5! text-base! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
           />
           <input
             type="tel"
@@ -109,22 +107,21 @@ function EnquireForm() {
             placeholder="Phone number"
             required
             pattern="[0-9+ ]{10,15}"
-            className="w-full! text-sm! px-3! py-2! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
+            className="w-full! h-2.5! p-5! text-base! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
           />
           <button
             type="submit"
-            className="flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-bold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors!"
+            className="font-['Manrope',sans-serif]! flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-semibold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors! tracking-wide"
           >
-            <Send className="w-3.5! h-3.5!" />
             Request Callback
           </button>
         </form>
       )}
       <a
         href="tel:+914222345678"
-        className="flex! items-center! justify-center! gap-2! w-full! py-2.5! border! border-[#27427f]/25! text-[#27427f]! text-sm! font-bold! rounded-xl! no-underline! hover:bg-[#27427f]/5! transition-colors!"
+        className="font-['Manrope',sans-serif]! flex! items-center! justify-center! gap-2! w-full! py-2.5! border! border-[#27427f]/25! text-[#27427f]! text-sm! font-semibold! rounded-xl! no-underline! hover:bg-[#27427f]/5! transition-colors!"
       >
-        <Phone className="w-3.5! h-3.5!" />
+        <Phone className="w-3.5! h-3.5! fill-blue-800" />
         Call Now
       </a>
     </div>

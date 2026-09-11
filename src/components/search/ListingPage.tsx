@@ -406,7 +406,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     value={sort}
                     onChange={(e) => handleSortChange(e.target.value)}
                     style={{ appearance: "none", WebkitAppearance: "none" }}
-                    className="font-['Manrope',sans-serif]! block! bg-[#eef2f7]! border! border-transparent! rounded-full! pl-4! pr-10! py-2.5! text-[13px]! font-semibold! text-[#27427f]! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/25! focus:bg-white! focus:border-[#27427f]/30! hover:bg-[#dde5f0]! transition-all! cursor-pointer!"
+                    className="font-['Manrope',sans-serif]! block! bg-white! border! border-gray-300! rounded-xl! pl-4! pr-10! py-2.5! text-[13px]! font-semibold! text-[#27427f]! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/25! focus:bg-white! focus:border-[#27427f]/30! hover:bg-neutral-100! transition-all! cursor-pointer!"
                   >
                     {adapter.sortOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>

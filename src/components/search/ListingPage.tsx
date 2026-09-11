@@ -11,7 +11,6 @@ import {
   ArrowUpDown,
   X,
   Phone,
-  CheckCircle2,
 } from "lucide-react";
 import { MapPlaceholder } from "./MapPlaceholder";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
@@ -134,46 +133,37 @@ function DefaultRightRail() {
     <div className="flex! flex-col! gap-4!">
       <EnquireForm />
 
-      {/* Vertical marketing banner */}
-      <div className="relative! overflow-hidden! rounded-2xl! bg-gradient-to-b! from-[#27427f]! to-[#16294f]! p-5! text-white! flex! flex-col! gap-3! min-h-[320px]!">
-        <div
-          aria-hidden="true"
-          className="absolute! -top-10! -right-10! w-40! h-40! rounded-full! bg-[#ffc900]/20! blur-2xl!"
+      {/* Ad card — photo with overlay CTA */}
+      <a
+        href="tel:+914222345678"
+        className="relative! block! rounded-2xl! overflow-hidden! shadow-sm! border! border-gray-100! min-h-[380px]! no-underline! group/ad!"
+      >
+        <img
+          src="/assets/images/banners/banner_1.jpeg"
+          alt="Sell your property with Majestan Realty"
+          loading="lazy"
+          className="absolute! inset-0! w-full! h-full! object-cover! group-hover/ad:scale-105! transition-transform! duration-700! ease-out!"
         />
         <div
           aria-hidden="true"
-          className="absolute! -bottom-12! -left-12! w-44! h-44! rounded-full! bg-white/10! blur-2xl!"
+          className="absolute! inset-0! bg-gradient-to-t! from-[#16294f]! via-[#16294f]/45! to-transparent!"
         />
-        <div className="relative! text-[11px]! font-bold! uppercase! tracking-widest! text-[#ffc900]!">
-          Majestan Realty
+        <div className="relative! flex! flex-col! justify-end! min-h-[380px]! p-5!">
+          <div className="text-[11px]! font-bold! uppercase! tracking-widest! text-[#ffc900]!">
+            Majestan Realty
+          </div>
+          <div className="font-['Lexend',sans-serif]! text-xl! font-extrabold! text-white! leading-snug! mt-1!">
+            Selling your property?
+          </div>
+          <p className="text-[13px]! text-white/85! leading-relaxed! mt-1!">
+            List it free and reach thousands of genuine buyers in Coimbatore.
+          </p>
+          <span className="flex! items-center! justify-center! gap-2! mt-3! px-4! py-2.5! bg-[#ffc900]! text-[#27427f]! text-sm! font-extrabold! rounded-xl! group-hover/ad:bg-[#ffda4d]! transition-colors!">
+            <Phone className="w-4! h-4!" />
+            Post Property Free
+          </span>
         </div>
-        <h3 className="relative! font-['Lexend',sans-serif]! text-xl! font-extrabold! leading-snug!">
-          Selling your property?
-        </h3>
-        <p className="relative! text-sm! text-white/75! leading-relaxed!">
-          List it free and reach thousands of genuine buyers in Coimbatore.
-        </p>
-        <ul className="relative! flex! flex-col! gap-2! mt-1!">
-          {["Free listing", "Verified buyer leads", "Zero hidden charges"].map(
-            (point) => (
-              <li
-                key={point}
-                className="flex! items-center! gap-2! text-[13px]! font-medium! text-white/90!"
-              >
-                <CheckCircle2 className="w-4! h-4! text-[#ffc900]! shrink-0!" />
-                {point}
-              </li>
-            )
-          )}
-        </ul>
-        <a
-          href="tel:+914222345678"
-          className="relative! flex! items-center! justify-center! gap-2! mt-auto! px-4! py-2.5! bg-[#ffc900]! text-[#27427f]! text-sm! font-extrabold! rounded-xl! no-underline! hover:bg-[#ffda4d]! transition-colors!"
-        >
-          <Phone className="w-4! h-4!" />
-          Post Property Free
-        </a>
-      </div>
+      </a>
     </div>
   );
 }

@@ -402,29 +402,13 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           </aside>
 
           {/* ── Main column ── */}
-          <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-4!">
+          <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-3!">
 
-            {/* Breadcrumbs */}
-            <div className="-mb-0.5!">
-              <Breadcrumbs items={breadcrumbItems} jsonLd />
-            </div>
-
-            {/* Sticky sub-header */}
-            <div className="lg:sticky! lg:top-[64px]! z-20! bg-[#f6f7f9]! border-b! border-gray-200/60! py-3! mb-5! -mx-4! lg:mx-0! px-4! lg:px-0!">
-              <div className="flex! flex-col! sm:flex-row! sm:items-center! sm:justify-between! gap-2!">
-                <div className="min-w-0!">
-                  <h1 className="font-['Manrope',sans-serif]! text-lg! sm:text-xl! font-medium! text-gray-900! leading-snug! capitalize! truncate!">
-                    <span className="text-gray-900! text-lg! font-['Manrope',sans-serif] font-normal!">
-                      {data?.total ?? 0} properties
-                    </span>{" "}
-                    <span className="font-light! text-gray-300!">|</span>{" "}
-                    {pageTitle}
-                    {isFetching && !isLoading && (
-                      <span className="ml-2! text-xs! text-gray-400! animate-pulse!">
-                        Updating…
-                      </span>
-                    )}
-                  </h1>
+            {/* Sticky row: breadcrumbs + sort only */}
+            <div className="lg:sticky! lg:top-[64px]! z-20! bg-[#f6f7f9]! border-b! border-gray-200/60! py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
+              <div className="flex! flex-row! items-center! justify-between! gap-3!">
+                <div className="flex-1! min-w-0!">
+                  <Breadcrumbs items={breadcrumbItems} jsonLd />
                 </div>
                 <div className="relative! shrink-0! w-[180px]! hidden! lg:block!">
                   <CustomSelect
@@ -442,6 +426,22 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Title (scrolls away) */}
+            <div className="min-w-0! mt-0! mb-4!">
+              <h1 className="font-['Manrope',sans-serif]! text-lg! sm:text-2xl! font-medium! text-gray-900! leading-snug! capitalize! truncate!">
+                <span className="text-gray-900! text-lg! font-['Manrope',sans-serif] font-normal!">
+                  {data?.total ?? 0} properties
+                </span>{" "}
+                <span className="font-light! text-gray-300!">|</span>{" "}
+                {pageTitle}
+                {isFetching && !isLoading && (
+                  <span className="ml-2! text-xs! text-gray-400! animate-pulse!">
+                    Updating…
+                  </span>
+                )}
+              </h1>
             </div>
 
             {/* Active chips on mobile */}

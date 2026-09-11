@@ -177,11 +177,26 @@ function isReraVerified(item: PropertySearchItem): boolean {
   return t !== "" && t !== "not applicable" && t !== "n/a" && t !== "na" && t !== "none" && t !== "-";
 }
 
+function capFirst(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 function getLocationLabel(item: PropertySearchItem): string {
-  const sub = (item.sublocation || "").trim();
+  const sub = capFirst((item.sublocation || "").trim());
   const city = ((item as any).city || "").trim();
   if (sub && city && sub.toLowerCase() !== city.toLowerCase()) return `${sub}, ${city}`;
   return sub || city || item.address || "";
+}
+
+function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string | null {
+  if (priceDisplay.includes("-")) return null;
+  const rawPrice = item.posttype === "Sell" ? (item as any).expectedsaleprice : (item as any).monthly_rent;
+  const price = nzNum(rawPrice);
+  if (price == null) return null;
+  const d = getDetails(item);
+  const area = nzNum(d.superBuiltUpArea) ?? nzNum(d.areaSqft) ?? nzNum(d.carpetArea);
+  if (area == null) return null;
+  return `₹${Math.round(price / area).toLocaleString("en-IN")}/sq.ft`;
 }
 
 function PropertyListingCard({ item }: { item: PropertySearchItem }) {
@@ -250,16 +265,6 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   if (areaCell) specCells.push({ label: "Built-Up Area", value: areaCell.value });
   if (facing) specCells.push({ label: "Facing", value: facing });
   if (possession) specCells.push({ label: "Possession", value: possession });
-  if (reraVerified)
-    specCells.push({
-      label: "RERA",
-      value: (
-        <span className="inline-flex! items-center! gap-1! text-[#1d9bf0]!">
-          <BadgeCheck className="w-3.5! h-3.5!" />
-          Verified
-        </span>
-      ),
-    });
 
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! xl:flex-row! overflow-hidden! min-w-0! group!">
@@ -276,16 +281,13 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             />
           </div>
         </Link>
-        {/* Wishlist heart — outline only, pink on hover/wishlisted */}
-        <button
-          onClick={() => setWished((w) => !w)}
-          aria-label="Save to wishlist"
-          className="absolute! top-3! right-3! z-10! p-1.5! cursor-pointer! transition-transform! hover:scale-110!"
-        >
-          <Heart
-            className={`w-5! h-5! drop-shadow-md! transition-colors! ${wished ? "text-pink-500! fill-pink-500!" : "text-white! fill-transparent! hover:text-pink-400! hover:fill-pink-400!"}`}
-          />
-        </button>
+        {/* RERA verified badge — top-right over image */}
+        {reraVerified && (
+          <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white! text-[#1d9bf0]! text-[11px]! font-medium! px-2! py-0.5! rounded-full! shadow!">
+          <BadgeCheck className="w-4! h-4! fill-blue-400! text-white! stroke-1.5!"/>
+            RERA
+          </span>
+        )}
       </div>
       <div className="p-5! flex! flex-col! flex-1! min-w-0!">
 
@@ -302,6 +304,15 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
               <span className="truncate!">{locationLabel}</span>
             </p>
           </div>
+          <button
+            onClick={() => setWished((w) => !w)}
+            aria-label="Save to wishlist"
+            className="p-2! rounded-full! hover:bg-gray-100! transition-colors! cursor-pointer! shrink-0!"
+          >
+            <Heart
+              className={`w-4! h-4! transition-colors! ${wished ? "text-pink-500! fill-pink-500!" : "text-gray-400! fill-transparent! hover:text-pink-400! hover:fill-pink-400!"}`}
+            />
+          </button>
           <button
             onClick={handleShare}
             aria-label="Share this property"
@@ -324,12 +335,18 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         )}
 
         {/* Price */}
-        <div className="mt-3.5! text-[20px]! font-medium! text-[#27427f]! leading-none!">
-          {priceDisplay}
+        <div className="mt-3.5! flex! items-end! gap-3! leading-none!">
+          <span className="text-[20px]! font-medium! text-[#27427f]!">{priceDisplay}</span>
+          {(() => {
+            const perSqft = getPricePerSqft(item, priceDisplay);
+            return perSqft ? (
+              <span className="text-[12px]! font-normal! text-gray-400!">{perSqft}</span>
+            ) : null;
+          })()}
         </div>
 
         {/* Section links */}
-        <div className="flex! flex-wrap! items-center! gap-x-5! gap-y-2! mt-3.5! pt-3.5! border-t! border-gray-100!">
+        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3.5! pt-3.5! border-t! border-gray-100!">
           {sectionLinks.map((link) => (
             <Link
               key={link.href}

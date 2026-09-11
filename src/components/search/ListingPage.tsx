@@ -168,20 +168,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   const queryClient = useQueryClient();
   const [showDrawer, setShowDrawer] = useState(false);
 
-  // Track the fixed header height live so the mobile bar sits flush with zero gap.
-  const [headerH, setHeaderH] = useState(64);
-  useEffect(() => {
-    const el = document.querySelector("header");
-    if (!el) return;
-    const measure = () => {
-      const h = el.getBoundingClientRect().height;
-      if (h) setHeaderH((prev) => (prev === Math.round(h) ? prev : Math.round(h)));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  // The site header is exactly 64px tall on mobile (py-2.5 + min-h-11 = 10+44+10=64).
+  // We use this for the sticky offset and spacer so it sits flush.
 
   const page = Number(searchParams.get("page")) || 1;
   const sort = searchParams.get("sort") || "";
@@ -299,8 +287,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
 
   return (
     <div className="min-h-screen! bg-[#f6f7f9]!">
-      {/* Header spacer — measured from the fixed header */}
-      <div style={{ height: headerH }} aria-hidden="true" />
+      {/* Header spacer */}
+      <div className="h-[54px]!" aria-hidden="true" />
 
       {/* ── Mobile filter bar ── */}
       <MobileFilterBar
@@ -312,7 +300,6 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
         onOpenDrawer={() => setShowDrawer(true)}
         sort={sort}
         sortOptions={adapter.sortOptions}
-        topOffset={headerH}
       />
 
       {/* ── Mobile drawer ── */}

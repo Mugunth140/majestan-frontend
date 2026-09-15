@@ -75,6 +75,11 @@ export default async function ForRentListingPageRoute({ params, searchParams }: 
   const localitySlug = parsed.locality ? toLocationSlug(parsed.locality) : '';
   const citySlug = toLocationSlug(parsed.city);
 
+  // Query-string filters must reach the SSR fetch too: after a client-side
+  // navigation the remounted shell is seeded with initialData, so the server
+  // has to return data matching the URL or the list never updates.
+  const qp = (key: string) => typeof sp[key] === "string" && sp[key] ? (sp[key] as string) : undefined;
+
   let initialData = null;
   try {
     initialData = await searchProperties(
@@ -82,7 +87,15 @@ export default async function ForRentListingPageRoute({ params, searchParams }: 
         listingType: parsed.apiListingType,
         propertyType: parsed.apiPropertyType,
         location: parsed.locality,
-        bedrooms: parsed.bedrooms ? String(parsed.bedrooms) : undefined,
+        propertyName: qp("keyword"),
+        minPrice: qp("minPrice"),
+        maxPrice: qp("maxPrice"),
+        minArea: qp("minArea"),
+        maxArea: qp("maxArea"),
+        bedrooms: qp("bedrooms") ?? (parsed.bedrooms ? String(parsed.bedrooms) : undefined),
+        facing: qp("facing"),
+        furnishing: qp("furnishing"),
+        propertyAge: qp("propertyAge"),
         page,
         sort,
         limit: 12,

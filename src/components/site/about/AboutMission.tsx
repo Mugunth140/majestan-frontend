@@ -36,9 +36,9 @@ export function AboutMission() {
             
             <div className="pt-4! flex! items-center! gap-6!">
               <div className="flex! -space-x-4!">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={`w-12! h-12! rounded-full! border-2! border-white! bg-gray-200! flex! items-center! justify-center! overflow-hidden! z-${10-i}`}>
-                    <img src={`/assets/images/avatar/avt-${i}.jpg`} alt="Agent" className="w-full! h-full! object-cover!" />
+                {[19, 20, 21].map((n, idx) => (
+                  <div key={n} style={{ zIndex: 10 - idx }} className="w-12! h-12! rounded-full! border-2! border-white! bg-gray-200! flex! items-center! justify-center! overflow-hidden!">
+                    <img src={`/assets/images/avatar/avt-png${n}.png`} alt="Agent" className="w-full! h-full! object-cover!" />
                   </div>
                 ))}
               </div>

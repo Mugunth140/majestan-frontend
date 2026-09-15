@@ -88,9 +88,10 @@ export type ProjectListParams = {
 
 type ApiEnvelope<T> = { success: boolean; data: T };
 
+const isAbsoluteUrl = (u: string | undefined) => !!u && /^https?:\/\//i.test(u);
 const SERVER_API_BASE =
-  process.env.API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (isAbsoluteUrl(process.env.API_BASE_URL) && process.env.API_BASE_URL as string) ||
+  (isAbsoluteUrl(process.env.NEXT_PUBLIC_API_BASE_URL) && process.env.NEXT_PUBLIC_API_BASE_URL as string) ||
   "http://localhost:5000/api/v1";
 
 // Browsers must go through the same-origin /site-api rewrite (see next.config.ts):

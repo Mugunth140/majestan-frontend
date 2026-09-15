@@ -16,7 +16,8 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-const API_BASE = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api/v1";
+const _abs = (u: string | undefined) => (!!u && /^https?:\/\//i.test(u) ? u : undefined);
+const API_BASE = _abs(process.env.API_BASE_URL) || _abs(process.env.NEXT_PUBLIC_API_BASE_URL) || "http://localhost:5000/api/v1";
 
 async function getListingPageSeo(path: string) {
   try {

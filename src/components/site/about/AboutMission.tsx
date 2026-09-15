@@ -10,7 +10,7 @@ export function AboutMission() {
           <div className="w-full! lg:w-1/2! relative!">
             <div className="relative! h-[400px]! md:h-[500px]! w-full! rounded-2xl! overflow-hidden! shadow-2xl!">
               <Image 
-                src="/assets/images/home/apartment-rent.png" 
+                src="/assets/images/home/apartment-buy.png" 
                 alt="Our Mission" 
                 fill 
                 className="object-cover!"

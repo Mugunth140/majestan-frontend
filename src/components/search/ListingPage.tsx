@@ -179,6 +179,22 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
     ...(adapter.filtersFromParams(searchParams) as TFilters),
   });
 
+  // Snapshot the mount-time key once. initialData/initialDataUpdatedAt must
+  // only seed the query for that exact key: passing them on every render
+  // (with Date.now()) re-seeds EVERY new filter key with stale mount data
+  // marked fresh, which silently suppresses all client-side refetches.
+  const [mountSnapshot] = useState(() => ({
+    key: JSON.stringify([
+      pathname,
+      { ...initialFilters, ...(adapter.filtersFromParams(searchParams) as TFilters) },
+      searchParams.get("sort") || "",
+      Number(searchParams.get("page")) || 1,
+    ]),
+    time: Date.now(),
+  }));
+  const isSeedKey =
+    JSON.stringify([pathname, filters, sort, page]) === mountSnapshot.key;
+
   const queryKey = ["listings", pathname, filters, sort, page] as const;
   const {
     data,
@@ -189,8 +205,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   } = useQuery({
     queryKey,
     queryFn: () => adapter.fetchItems({ filters, sort, page }),
-    initialData: initialData ?? undefined,
-    initialDataUpdatedAt: initialData ? Date.now() : undefined,
+    initialData: isSeedKey ? (initialData ?? undefined) : undefined,
+    initialDataUpdatedAt: isSeedKey && initialData ? mountSnapshot.time : undefined,
     placeholderData: keepPreviousData,
     staleTime: 60 * 1000,
   });

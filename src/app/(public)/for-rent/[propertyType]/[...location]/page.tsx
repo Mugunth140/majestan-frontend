@@ -6,7 +6,7 @@ import { searchProperties } from "@/lib/api";
 import { parseListingUrl, toLocationSlug } from "@/lib/seo-urls";
 import type { Metadata } from "next";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 type Props = {
   params: Promise<{

@@ -70,37 +70,38 @@ export function PropertyNavigation({
   };
 
   return (
-    <div className="bg-white! sticky! top-[64px]! z-40! border-b! border-gray-100! shadow-sm!">
+    <div className="bg-white/95! backdrop-blur-md! sticky! top-[64px]! z-40! border-b! border-gray-200/80! shadow-xs! transition-all! duration-300!">
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <nav
-          className="mx-4! px-4! md:mx-0! md:px-0!"
+          className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar!"
           aria-label="Property sections"
         >
-          <div className="flex! items-center! gap-2! overflow-x-auto! hide-scrollbar! py-2!">
-            {links.map((link) => {
-              const isActive = getIsActive(link);
+          {links.map((link) => {
+            const isActive = getIsActive(link);
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative! flex! items-center! gap-2! whitespace-nowrap! rounded-full! px-5! py-3! text-[13px]! font-semibold! transition-all! duration-300! no-underline! shrink-0! ${
-                    isActive
-                      ? "bg-[#27427f]! text-white! shadow-md! shadow-[#27427f]/20!"
-                      : "bg-transparent! text-gray-600! hover:text-[#27427f]! hover:bg-[#27427f]/10!"
-                  }`}
-                  aria-current={isActive ? "page" : undefined}
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`group! relative! flex! items-center! gap-2! whitespace-nowrap! py-3.5! text-[14px]! font-medium! transition-colors! duration-300! no-underline! shrink-0! ${
+                  isActive
+                    ? "text-[#27427f]!"
+                    : "text-gray-500! hover:text-gray-900!"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <span
+                  className={`transition-colors! duration-300! ${isActive ? "text-[#27427f]!" : "text-gray-400! group-hover:text-gray-500!"}`}
                 >
-                  <span
-                    className={`transition-colors! ${isActive ? "text-white/90!" : "text-gray-400!  group-hover:text-[#27427f]!"}`}
-                  >
-                    {link.icon}
-                  </span>
-                  {link.label}
-                </Link>
-              );
-            })}
-          </div>
+                  {link.icon}
+                </span>
+                {link.label}
+                {isActive && (
+                  <div className="absolute! bottom-0! left-0! right-0! h-0.5! bg-[#27427f]! rounded-t-full!" />
+                )}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </div>

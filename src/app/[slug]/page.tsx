@@ -380,8 +380,8 @@ export default async function SlugPage({
           activeSection=""
         />
         <div className="bg-[#f8f9fa]! min-h-screen!">
-          <div className="container! mx-auto! px-4! max-w-7xl! pt-8! pb-24!">
-            <div className="mb-2!">
+          <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">
+            <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
             <PropertyDetailsView property={property} />
@@ -415,9 +415,9 @@ export default async function SlugPage({
             {/* Spacer matching fixed header height (64px) */}
             <div className="h-[64px]!" aria-hidden="true" />
             <ProjectNavigation />
-            <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-8! pb-24! scroll-smooth!">
-              <div className="flex! flex-col! gap-6!">
-                <div className="mb-2!">
+            <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-5! pb-24! scroll-smooth!">
+              <div className="flex! flex-col! gap-5!">
+                <div className="mb-0!">
                   <Breadcrumbs items={breadcrumbItems} jsonLd />
                 </div>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({

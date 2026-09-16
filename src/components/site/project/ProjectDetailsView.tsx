@@ -118,8 +118,8 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
   };
 
   return (
-    <div className="flex! flex-col! gap-12!">
-      <div className="flex! flex-col! sm:flex-row! justify-between! items-start! sm:items-center! gap-4! mb-2!">
+    <div className="flex! flex-col! gap-5!">
+      <div className="flex! flex-col! sm:flex-row! justify-between! items-start! sm:items-center! gap-4!">
         <Link
           href="/projects"
           className="inline-flex! items-center! gap-2! text-sm! font-medium! text-gray-500! hover:text-gray-900! transition-colors! no-underline!"

@@ -268,13 +268,14 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
 
         <div className="grid! grid-cols-1! lg:grid-cols-3! gap-12!">
           {/* Main Content (Left Column) */}
-          <div className="lg:col-span-2! space-y-12!">
+          <div className="lg:col-span-2! space-y-4!">
             
             {/* Header Info */}
-            <div className="border-b! border-gray-200! pb-10!">
+            <div className="border-b! border-gray-100! pb-4!">
               <div className="flex! items-center! gap-2! text-gray-500! mb-4!">
                 <MapPin className="w-4! h-4!" />
                 <span className="text-sm! font-normal! tracking-wide!">
+                  {((property as any).sublocation || (property as any).locality) && `${((property as any).sublocation || (property as any).locality)}, `}
                   {property.city}
                   {property.state ? `, ${property.state}` : ""}
                 </span>
@@ -288,6 +289,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                     {formatPrice(property.price)}
                   </p>
                   {property.details?.areaSqft &&
+                    parseFloat(property.details.areaSqft) > 0 &&
                     !isNaN(parseFloat(property.price)) && (
                       <p className="text-sm! font-normal! text-gray-500! mt-2!">
                         ₹{" "}
@@ -302,7 +304,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
               </div>
 
               {/* Meta info */}
-              <div className="flex! flex-wrap! items-center! gap-4! mt-8! text-sm! font-light! text-gray-500!">
+              <div className="flex! flex-wrap! items-center! gap-4! mt-4! text-sm! font-light! text-gray-500!">
                 <div className="flex! items-center! gap-2!">
                   <Calendar className="w-4! h-4!" />
                   Listed {formatDate(property.createdAt)}
@@ -327,7 +329,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             {/* Quick Facts */}
             {quickStats.length > 0 && (
               <div>
-                <h2 className="text-lg! font-semibold! text-gray-900! mb-6!">Overview</h2>
+                <h2 className="text-lg! font-semibold! text-gray-900! mb-4!">Overview</h2>
                 <div className="grid! grid-cols-2! sm:grid-cols-4! gap-6!">
                   {quickStats.map((stat, i) => (
                     <div key={i} className="flex! flex-col! gap-2!">
@@ -349,8 +351,8 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             )}
 
             {/* Description */}
-            <div className="pt-10! border-t! border-gray-200!">
-              <h2 className="text-lg! font-semibold! text-gray-900! mb-6!">About this Property</h2>
+            <div className="pt-4! border-t! border-gray-100!">
+              <h2 className="text-lg! font-semibold! text-gray-900! mb-4!">About this Property</h2>
               {property.description ? (
                 <div
                   className="prose! max-w-none! text-gray-600! font-light! leading-loose! [&_p]:mb-6! [&_h3]:text-xl! [&_h3]:font-semibold! [&_h3]:text-gray-900! [&_h3]:mt-10! [&_h3]:mb-4! [&_ul]:list-disc! [&_ul]:pl-5! [&_li]:mb-2! [&_strong]:font-medium! [&_strong]:text-gray-900!"
@@ -364,8 +366,8 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             </div>
 
             {/* Amenities Preview */}
-            <div className="pt-10! border-t! border-gray-200!">
-              <div className="flex! items-center! justify-between! mb-8!">
+            <div className="pt-4! border-t! border-gray-100!">
+              <div className="flex! items-center! justify-between! mb-6!">
                 <h2 className="text-lg! font-semibold! text-gray-900!">Key Amenities</h2>
                 <Link
                   href={`/${property.canonicalSlug}/amenities`}

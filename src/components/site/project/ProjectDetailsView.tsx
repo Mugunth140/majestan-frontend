@@ -193,7 +193,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
         <div className="flex! items-center! gap-4!">
           <button
             onClick={handleShare}
-            className="inline-flex! items-center! gap-2! px-5! py-2! rounded-full! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-gray-300! hover:text-gray-900! transition-all! shadow-sm! cursor-pointer!"
+            className="inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-gray-300! hover:text-gray-900! transition-all! shadow-sm! cursor-pointer!"
           >
             {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
             {copied ? "Copied" : "Share"}
@@ -218,11 +218,11 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
 
             {/* Overlay badges */}
             <div className="absolute! top-4! right-4! flex! gap-2!">
-              <span className="inline-flex! items-center! gap-1.5! px-4! py-2! rounded-full! bg-gray-900/85! backdrop-blur-md! text-white! text-xs! font-semibold!">
+              <span className="inline-flex! items-center! gap-1.5! px-4! py-2! rounded-xl! bg-gray-900/85! backdrop-blur-md! text-white! text-xs! font-semibold!">
                 <Sparkles className="w-3.5! h-3.5!" />
                 {titleCase(project.possessionStatus)}
               </span>
-              <span className="inline-flex! items-center! px-4! py-2! rounded-full! bg-white/95! backdrop-blur-md! text-gray-900! text-xs! font-semibold! shadow-sm!">
+              <span className="inline-flex! items-center! px-4! py-2! rounded-xl! bg-white/95! backdrop-blur-md! text-gray-900! text-xs! font-semibold! shadow-sm!">
                 {typeLabel}
               </span>
             </div>
@@ -256,7 +256,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
               )}
               <button
                 onClick={() => scrollTo("photos")}
-                className="inline-flex! items-center! gap-2! px-4! py-2! bg-white/95! backdrop-blur-md! rounded-full! text-gray-900! text-xs! font-semibold! hover:bg-white! transition-all! shadow-sm! cursor-pointer!"
+                className="inline-flex! items-center! gap-2! px-4! py-2! bg-white/95! backdrop-blur-md! rounded-xl! text-gray-900! text-xs! font-semibold! hover:bg-white! transition-all! shadow-sm! cursor-pointer!"
               >
                 <Images className="w-4! h-4!" />
                 {allImages.length} Photos
@@ -266,14 +266,14 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
 
           {/* Overview card */}
           <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-semibold! text-gray-900!">
-              Project Overview of {project.name} {project.city}
+            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+              Project Overview of {project.name}
             </h2>
             {overviewStats.length > 0 && (
               <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! sm:grid-cols-3! gap-x-4! gap-y-7!">
                 {overviewStats.map((stat, i) => (
-                  <div key={i} className="flex! items-start! gap-3! min-w-0!">
-                    <div className="w-10! h-10! rounded-xl! border! border-gray-200! bg-gray-50/60! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
+                  <div key={i} className="flex! items-start! gap-1.5! min-w-0!">
+                    <div className="w-12! h-12! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
                       {stat.icon}
                     </div>
                     <div className="min-w-0!">
@@ -292,9 +292,9 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
 
           {/* About card */}
           <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-semibold! text-gray-900!">About {project.name}</h2>
+            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">About {project.name}</h2>
             {project.description ? (
-              <div className="mt-4! prose! max-w-none! text-gray-600! font-light! leading-loose! whitespace-pre-line!">
+              <div className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! whitespace-pre-line!">
                 {project.description}
               </div>
             ) : (
@@ -316,7 +316,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
           {/* Configurations card */}
           {project.units.length > 0 && (
             <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-              <h2 className="text-lg! md:text-xl! font-semibold! text-gray-900!">Configurations & Pricing</h2>
+              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Configurations & Pricing</h2>
               <div className="mt-4! overflow-x-auto!">
                 <table className="w-full! text-sm! text-left!">
                   <thead>
@@ -353,7 +353,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
 
           {/* Explore more */}
           <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-semibold! text-gray-900!">Explore More</h2>
+            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Explore More</h2>
             <div className="mt-5! grid! grid-cols-1! sm:grid-cols-2! gap-4!">
               {sectionLinks.map((section) => (
                 <button
@@ -362,11 +362,11 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                   className="group! flex! items-center! justify-between! p-5! border! border-gray-200! bg-gray-50/60! rounded-2xl! hover:border-gray-300! hover:bg-white! hover:shadow-sm! transition-all! w-full! text-left! cursor-pointer!"
                 >
                   <div className="flex! items-center! gap-4!">
-                    <div className="w-11! h-11! rounded-full! bg-white! border! border-gray-100! flex! items-center! justify-center! text-gray-600! transition-all!">
+                    <div className="w-11! h-11! flex! items-center! justify-center! text-gray-600! transition-all!">
                       {section.icon}
                     </div>
                     <div>
-                      <p className="text-[15px]! font-semibold! text-gray-900!">
+                      <p className="text-[15px]! font-medium! text-gray-900!">
                         {section.label}
                       </p>
                       <p className="text-[13px]! font-light! text-gray-500! mt-0.5!">
@@ -374,7 +374,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                       </p>
                     </div>
                   </div>
-                  <ChevronRight className="w-5! h-5! text-gray-300! group-hover:text-gray-900! group-hover:translate-x-0.5! transition-all!" />
+                  <ChevronRight className="w-5! h-5! text-gray-400! group-hover:text-gray-900! group-hover:translate-x-0.5! transition-all!" />
                 </button>
               ))}
             </div>
@@ -393,8 +393,8 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
               </div>
 
               {locationLine ? (
-                <p className="mt-3! flex! items-start! gap-2! text-[13px]! text-gray-500! leading-relaxed!">
-                  <MapPin className="w-4! h-4! shrink-0! mt-0.5! text-gray-400!" />
+                <p className="mt-2! flex! items-start! gap-2! text-[13px]! text-gray-500! leading-relaxed!">
+                  <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
                   {project.address ? `${project.address}, ${locationLine}` : locationLine}
                 </p>
               ) : null}
@@ -460,7 +460,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
               )}
 
               {project.projectCode && (
-                <p className="mt-4! flex! items-center! justify-center! gap-2! text-[12px]! text-gray-400!">
+                <p className="mt-2! flex! items-center! justify-center! gap-2! text-[12px]! text-gray-400!">
                   <Info className="w-3.5! h-3.5!" />
                   ID: {project.projectCode}
                 </p>

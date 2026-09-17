@@ -1,7 +1,10 @@
 import type { ProjectDetail } from "@/lib/api/projects";
-import { MapPlaceholder } from "@/components/search/MapPlaceholder";
+import { LocalityInteractiveMap } from "@/components/site/locality/LocalityInteractiveMap";
 
 export function ProjectLocalitySection({ project }: { project: ProjectDetail }) {
+  const query = [project.sublocation, project.city].filter(Boolean).join(", ");
+  const label = [project.sublocation, project.city].filter(Boolean).join(", ") || project.name;
+
   return (
     <section id="locality" className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! p-6! md:p-8! scroll-mt-40!">
       <h2 className="text-xl! md:text-2xl! font-bold! text-gray-900! font-['Lexend',sans-serif]! mb-5!">
@@ -13,8 +16,8 @@ export function ProjectLocalitySection({ project }: { project: ProjectDetail }) 
           <span key={tag as string} className="text-xs! font-bold! text-gray-600! bg-gray-100! rounded-lg! px-3! py-1.5!">{tag}</span>
         ))}
       </div>
-      <div className="h-[320px]! rounded-xl! overflow-hidden! border! border-gray-100!">
-        <MapPlaceholder city={project.city} locality={project.sublocation || undefined} />
+      <div className="rounded-xl! overflow-hidden! border! border-gray-100!">
+        <LocalityInteractiveMap query={query} label={label} height={320} />
       </div>
     </section>
   );

@@ -11,7 +11,7 @@ export interface ListingAdapter<TFilters extends Record<string, string>, TItem> 
   renderFilters: (props: { values: TFilters; onChange: (v: TFilters) => void; onReset: () => void }) => ReactNode;
   renderActiveChips: (filters: TFilters, onChange: (v: TFilters) => void) => ReactNode | null;
   /** Optional right-rail content rendered beside the card feed on wide screens */
-  renderRightRail?: (filters: TFilters) => ReactNode;
+  renderRightRail?: (filters: TFilters, items?: TItem[]) => ReactNode;
   buildTitle: (filters: TFilters) => string;
   buildBreadcrumbs: (filters: TFilters) => { label: string; href?: string }[];
   mapCity: (filters: TFilters) => string;

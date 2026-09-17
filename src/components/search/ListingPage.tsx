@@ -614,7 +614,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
               {/* ── Right rail (xl+) ── */}
               <aside className="hidden! xl:block! w-[260px]! shrink-0! self-start! sticky! top-[152px]! max-h-[calc(100vh-152px)]! overflow-y-auto! pb-6! z-10!">
                 {adapter.renderRightRail
-                  ? adapter.renderRightRail(filters)
+                  ? adapter.renderRightRail(filters, data?.items as any)
                   : <DefaultRightRail />}
               </aside>
 

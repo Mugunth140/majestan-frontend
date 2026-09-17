@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { listProjects, type ProjectListItem } from "@/lib/api/projects";
 import { ProjectFilterPanel, EMPTY_PROJECT_FILTERS, type ProjectFilterValues } from "./ProjectFilterPanel";
 import { ProjectListingCard } from "./ProjectListingCard";
+import { ProjectsMap } from "./ProjectsMap";
 import type { ListingAdapter } from "../search/listing-adapter";
 
 const SORT_OPTIONS = [
@@ -78,6 +79,10 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
         </div>
       );
     },
+
+    renderRightRail: (filters, items) => (
+      <ProjectsMap items={items ?? []} city={filters.city || "Coimbatore"} />
+    ),
 
     buildTitle: (filters) => `New Villa & Apartment Projects in ${filters.city}`,
 

@@ -379,7 +379,7 @@ export default async function SlugPage({
           slug={property.canonicalSlug}
           activeSection=""
         />
-        <div className="bg-[#f8f9fa]! min-h-screen! font-['Manrope',sans-serif]!">
+        <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
           <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">
             <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
@@ -411,7 +411,7 @@ export default async function SlugPage({
       return (
         <>
           <SiteHeader />
-          <div className="min-h-screen! bg-gray-50! font-['Manrope',sans-serif]!">
+          <div className="min-h-screen! bg-gray-50! font-manrope">
             {/* Spacer matching fixed header height (64px) */}
             <div className="h-[64px]!" aria-hidden="true" />
             <ProjectNavigation />

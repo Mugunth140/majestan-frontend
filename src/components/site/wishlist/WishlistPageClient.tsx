@@ -14,7 +14,7 @@ function formatINR(value: unknown): string {
   const num = Number(value);
   if (!Number.isFinite(num) || num === 0) return "Price on Request";
   if (num >= 10000000) return `₹ ${(num / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
-  if (num >= 100000) return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lac`;
+  if (num >= 100000) return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lakh`;
   return `₹ ${num.toLocaleString("en-IN")}`;
 }
 
@@ -86,7 +86,7 @@ export function WishlistPageClient() {
     <>
       <SiteHeader />
       <div className="h-[64px]!" aria-hidden="true" />
-      <div className="bg-[#f8f9fa]! min-h-screen! font-['Manrope',sans-serif]!">
+      <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
         <div className="mx-auto! max-w-7xl! px-4! pt-5! pb-24!">
           <Breadcrumbs items={[{ label: "Wishlist" }]} jsonLd />
 

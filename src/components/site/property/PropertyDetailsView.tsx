@@ -39,7 +39,7 @@ function formatPrice(price: string): string {
   if (num >= 10000000)
     return `₹ ${(num / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
   if (num >= 100000)
-    return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lac`;
+    return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lakh`;
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -95,8 +95,19 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     )?.[0] || property.propertyType;
 
   const locData = property.locations?.[0]?.localityData;
-  const subLoc = (property as any).sublocation || (property as any).locality || locData?.subLocation || locData?.locality;
-  const subLocationLabel = subLoc ? `${subLoc}, ` : "";
+  const locRow = property.locations?.[0] as unknown as
+    | { address?: string | null; landmark?: string | null }
+    | undefined;
+  const addrPart = (locRow?.address || locRow?.landmark || "").split(",")[0].trim();
+  const rawSub =
+    (property as any).sublocation ||
+    (property as any).locality ||
+    (locData as any)?.subLocation ||
+    (locData as any)?.locality ||
+    addrPart;
+  const capFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  const subLocationLabel =
+    rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? `${capFirst(rawSub)}, ` : "";
 
   // Quick stat cards data
   const quickStats = [

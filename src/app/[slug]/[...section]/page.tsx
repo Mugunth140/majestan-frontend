@@ -109,7 +109,7 @@ function formatPrice(price: string): string {
   if (isNaN(num)) return price;
   if (num === 0) return "Price on Request";
   if (num >= 10000000) return `₹ ${(num / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
-  if (num >= 100000) return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lac`;
+  if (num >= 100000)     return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lakh`;
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -446,7 +446,7 @@ export default async function PropertySectionPage({
           slug={property.canonicalSlug}
           activeSection={sectionKey}
         />
-        <div className="bg-[#f2f5f9]! min-h-screen!">
+        <div className="bg-[#f2f5f9]! min-h-screen! font-manrope">
           <div className="container! mx-auto! px-4! sm:px-6! py-6! max-w-7xl!">
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
 

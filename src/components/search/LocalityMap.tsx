@@ -12,7 +12,8 @@ export function LocalityMap({ city, locality }: { city: string; locality?: strin
         src={src}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
-        className="absolute! inset-0! w-full! h-full! border-0! pointer-events-none!"
+        allowFullScreen
+        className="absolute! inset-0! w-full! h-full! border-0!"
       />
     </div>
   );

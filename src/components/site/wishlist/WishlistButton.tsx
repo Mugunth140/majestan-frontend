@@ -60,7 +60,7 @@ export function WishlistButton({ propertyId, propertyType, variant = "icon", cla
           aria-pressed={wished}
           aria-busy={busy}
           title={error ?? (wished ? "Saved to wishlist" : "Save to wishlist")}
-          className={`inline-flex! items-center! gap-2! px-5! py-2! rounded-full! border! text-sm! font-medium! transition-all! shadow-sm! cursor-pointer! ${
+          className={`inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! text-sm! font-medium! transition-all! shadow-sm! cursor-pointer! ${
             wished
               ? "border-red-200! bg-red-50! text-red-600!"
               : "border-gray-200! bg-white! text-gray-600! hover:border-red-200! hover:text-red-600! hover:bg-red-50!"

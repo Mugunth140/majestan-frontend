@@ -6,6 +6,7 @@ import { useLocationContext } from "@/contexts/LocationContext";
 import { FeatureCarousel } from "./property-carousel";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
 import { HeroSection } from "./hero-section";
+import { LocalityOverviewSection } from "./locality-overview-section";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { HomePageData } from "@/lib/api";
@@ -163,6 +164,16 @@ export function HomePage({ data }: { data: HomePageData }) {
           properties={filteredVillas} 
           title="Featured Villa Projects" 
           subtitle={`Explore premium villas for sale in ${location}`} 
+        />
+
+        <LocalityOverviewSection
+          items={(() => {
+            const withCopy = data.filters.sublocations.filter(
+              (s) => s.description && s.description.trim().length > 0
+            );
+            const local = withCopy.filter((s) => s.city === location);
+            return (local.length > 0 ? local : withCopy).slice(0, 3);
+          })()}
         />
 {/* 
         <section className="pt-0 section-categories-neighborhoods tf-spacing-7">

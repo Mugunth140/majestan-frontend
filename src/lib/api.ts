@@ -5,6 +5,7 @@ export type Sublocation = {
   city: string;
   state: string;
   postalCode: string | null;
+  description?: string | null;
 };
 
 export type City = {

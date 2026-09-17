@@ -19,6 +19,7 @@ export default function AdminEditSublocationPage() {
     city_id: "",
     locality_name: "",
     postal_code: "",
+    description: "",
     is_active: 1
   });
 
@@ -49,6 +50,7 @@ export default function AdminEditSublocationPage() {
               city_id: sub.city_id ? sub.city_id.toString() : "",
               locality_name: sub.locality_name || "",
               postal_code: sub.postal_code || "",
+              description: sub.description || "",
               is_active: sub.is_active !== undefined ? sub.is_active : 1
             });
           }
@@ -166,6 +168,18 @@ export default function AdminEditSublocationPage() {
                 className="!w-full !px-4 !py-2.5 !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !text-[14px] !text-gray-800 dark:!text-white focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !transition-all"
                 placeholder="e.g., 600042"
               />
+            </div>
+
+            <div className="!space-y-2 md:!col-span-2">
+              <label className="!text-[14px] !font-medium !text-gray-800 dark:!text-white">Overview Description</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                rows={4}
+                className="!w-full !px-4 !py-2.5 !bg-[#fbfbfc] dark:!bg-[#0f1015] !border !border-gray-100 dark:!border-[#262730] !rounded-xl !text-[14px] !text-gray-800 dark:!text-white focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 dark:focus:!ring-blue-500/20 focus:!border-blue-500 dark:focus:!border-blue-500 !shadow-sm !transition-all"
+                placeholder="e.g., Saravanampatti is a fast-growing residential hub in Coimbatore, known for its IT parks, schools and easy Sathy Road connectivity. Shown on the homepage as 'Overview of Saravanampatti'."
+              />
+              <p className="!text-[12px] !text-gray-400">Shown on the homepage and property pages as “Overview of {formData.locality_name || "this locality"}”.</p>
             </div>
 
             <div className="!space-y-2">

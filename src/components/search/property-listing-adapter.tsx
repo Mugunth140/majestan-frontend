@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Heart, Share2, Check, BadgeCheck } from "lucide-react";
+import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
+import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { PROPERTY_TYPES, buildListingUrl } from "@/lib/seo-urls";
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
 import type { ListingAdapter } from "./listing-adapter";
@@ -242,7 +243,6 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     return null;
   })();
 
-  const [wished, setWished] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
@@ -304,15 +304,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
               <span className="truncate!">{locationLabel}</span>
             </p>
           </div>
-          <button
-            onClick={() => setWished((w) => !w)}
-            aria-label="Save to wishlist"
-            className="p-2! rounded-full! hover:bg-gray-100! transition-colors! cursor-pointer! shrink-0!"
-          >
-            <Heart
-              className={`w-4! h-4! transition-colors! ${wished ? "text-pink-500! fill-pink-500!" : "text-gray-400! fill-transparent! hover:text-pink-400! hover:fill-pink-400!"}`}
-            />
-          </button>
+          <WishlistButton propertyId={item.id} propertyType={item.propertyType} />
           <button
             onClick={handleShare}
             aria-label="Share this property"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, Phone } from "lucide-react";
 import { useUserAuthStore } from "@/store/userAuthStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { LogOut } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
@@ -39,9 +40,10 @@ export function SiteHeader(): React.JSX.Element {
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { isAuthenticated, user, logout } = useUserAuthStore();
+  const wishlistCount = useWishlistStore((s) => s.count);
+  const syncWishlist = useWishlistStore((s) => s.sync);
   const [hoveredCategory, setHoveredCategory] = useState<Category>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [wishlistCount, setWishlistCount] = useState(0);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
@@ -85,24 +87,14 @@ export function SiteHeader(): React.JSX.Element {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
-
-    const controller = new AbortController();
-    const updateCount = async () => {
-      try {
-        const res = await fetch('/Apartment/get_wishlist_count', { signal: controller.signal });
-        const data = await res.json();
-        if (data.success) setWishlistCount(data.cart_count);
-      } catch (err) {
-        if ((err as Error)?.name === "AbortError") return;
-      }
-    };
-    updateCount();
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      controller.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) void syncWishlist();
+  }, [isAuthenticated, user?.id, syncWishlist]);
 
 
   const handleProtectedRoute = (e: React.MouseEvent, path: string) => {
@@ -196,10 +188,10 @@ export function SiteHeader(): React.JSX.Element {
             {/* Right Actions */}
             <div className="flex! shrink-0 items-center! justify-end! gap-3 max-[1180px]:gap-2.5 max-[1024px]:gap-2">
               {/* Wishlist */}
-              <Link href="/wishlist" className="inline-flex! relative text-[#27427f] transition-transform hover:scale-110" aria-label="Wishlist" onClick={(e) => handleProtectedRoute(e, "/wishlist")}>
-                <Heart size={23} className={wishlistCount > 0 ? "fill-[#27427f]" : ""} />
+              <Link href="/wishlist" className="inline-flex! relative text-gray-400 transition-all hover:scale-110 hover:text-pink-500" aria-label="Wishlist" onClick={(e) => handleProtectedRoute(e, "/wishlist")}>
+                <Heart size={23} className={wishlistCount > 0 ? "fill-pink-500! text-pink-500!" : ""} />
                 {wishlistCount > 0 && (
-                  <span className="absolute! -right-2 -top-2 flex! h-4 w-4 items-center! justify-center! rounded-full border border-white bg-[#ffc900] text-[9px]! font-black leading-none text-[#27427f]">
+                  <span className="absolute! -right-2 -top-2 flex! h-4 w-4 items-center! justify-center! rounded-full border border-white bg-pink-500 text-[9px]! font-black leading-none text-white">
                     {wishlistCount}
                   </span>
                 )}

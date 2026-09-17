@@ -3,12 +3,12 @@
 import Link from "next/link";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { formatINR } from "@/lib/api/projects";
+import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import {
   MapPin,
   BedDouble,
   Phone,
   Share2,
-  Heart,
   ChevronLeft,
   Building2,
   Calendar,
@@ -133,10 +133,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
               <Share2 className="w-4! h-4!" />
               Share
             </button>
-            <button className="inline-flex! items-center! gap-2! px-5! py-2! rounded-full! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-red-200! hover:text-red-600! hover:bg-red-50! transition-all! shadow-sm!">
-              <Heart className="w-4! h-4!" />
-              Save
-            </button>
+            <WishlistButton propertyId={project.id} propertyType="project" variant="pill" />
           </div>
         </div>
 

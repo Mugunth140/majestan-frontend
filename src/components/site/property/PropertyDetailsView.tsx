@@ -9,7 +9,6 @@ import {
   Car,
   Phone,
   Share2,
-  Heart,
   ChevronLeft,
   Building2,
   Calendar,
@@ -27,6 +26,7 @@ import {
 } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
+import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 
 type PropertyDetailsViewProps = {
   property: SeoProperty;
@@ -93,6 +93,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     Object.entries(PROPERTY_TYPES).find(
       ([, data]) => data.apiValue === property.propertyType
     )?.[0] || property.propertyType;
+
+  const locData = property.locations?.[0]?.localityData;
+  const subLoc = (property as any).sublocation || (property as any).locality || locData?.subLocation || locData?.locality;
+  const subLocationLabel = subLoc ? `${subLoc}, ` : "";
 
   // Quick stat cards data
   const quickStats = [
@@ -194,10 +198,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
               <Share2 className="w-4! h-4!" />
               Share
             </button>
-            <button className="inline-flex! items-center! gap-2! px-5! py-2! rounded-full! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-red-200! hover:text-red-600! hover:bg-red-50! transition-all! shadow-sm!">
-              <Heart className="w-4! h-4!" />
-              Save
-            </button>
+            <WishlistButton propertyId={property.id} propertyType={property.propertyType} variant="pill" />
           </div>
         </div>
 
@@ -275,7 +276,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
               <div className="flex! items-center! gap-2! text-gray-500! mb-4!">
                 <MapPin className="w-4! h-4!" />
                 <span className="text-sm! font-normal! tracking-wide!">
-                  {((property as any).sublocation || (property as any).locality) && `${((property as any).sublocation || (property as any).locality)}, `}
+                  {subLocationLabel}
                   {property.city}
                   {property.state ? `, ${property.state}` : ""}
                 </span>
@@ -392,8 +393,8 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             </div>
 
             {/* Explore More Sections */}
-            <div className="pt-10! border-t! border-gray-200!">
-              <h2 className="text-lg! font-semibold! text-gray-900! mb-6!">Explore More</h2>
+            <div className="pt-4! border-t! border-gray-100!">
+              <h2 className="text-lg! font-semibold! text-gray-900! mb-4!">Explore More</h2>
               <div className="grid! grid-cols-1! sm:grid-cols-2! gap-4!">
                 {sectionLinks.map((section) => (
                   <Link

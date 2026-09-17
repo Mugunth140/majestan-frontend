@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MapPin, Phone, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images, Heart, Share2, Check, BadgeCheck } from "lucide-react";
+import { MapPin, Phone, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck } from "lucide-react";
 import { formatINR, type ProjectListItem } from "@/lib/api/projects";
+import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 
 function trimNum(n: number): string {
   return String(parseFloat(n.toFixed(2)));
@@ -44,7 +45,6 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     { hash: "photos", label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
   ];
   const showImg = Boolean(item.coverImageUrl) && imgOk;
-  const [wished, setWished] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
@@ -122,16 +122,13 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
             )}
           </div>
         </Link>
-        {/* Wishlist heart — outline only, pink on hover/wishlisted */}
-        <button
-          onClick={() => setWished((w) => !w)}
-          aria-label="Save to wishlist"
-          className="absolute! top-3! right-3! z-10! p-1.5! cursor-pointer! transition-transform! hover:scale-110!"
-        >
-          <Heart
-            className={`w-5! h-5! drop-shadow-md! transition-colors! ${wished ? "text-pink-500! fill-pink-500!" : "text-white! fill-transparent! hover:text-pink-400! hover:fill-pink-400!"}`}
-          />
-        </button>
+        {/* Wishlist heart — auth-gated, synced to /wishlist */}
+        <WishlistButton
+          propertyId={item.id}
+          propertyType="project"
+          tone="onImage"
+          className="absolute! top-3! right-3! z-10!"
+        />
       </div>
 
       {/* Content */}

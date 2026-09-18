@@ -11,6 +11,7 @@ import {
   ArrowUpDown,
   X,
   Phone,
+  MessageCircle,
 } from "lucide-react";
 import { LocalityMap } from "./LocalityMap";
 import { CustomSelect } from "./CustomSelect";
@@ -65,90 +66,105 @@ function getTypeLabel(filters: Record<string, string>): string {
 
 // ─── default right rail ─────────────────────────────────────────────────────
 
-function EnquireForm() {
+// ─── floating whatsapp enquiry popup ────────────────────────────────────────
+
+function WhatsAppPopup() {
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [sent, setSent] = useState(false);
 
   return (
-    <div className="bg-white! rounded-2xl! border! border-gray-100! shadow-sm! p-5! flex! flex-col! gap-3!">
-      {/* <div className="text-[12px]! font-bold! font-['Manrope', sans-serif] tracking-widest! text-gray-800!">
-        Enquire Now
-      </div> */}
-      <h3 className="font-['Manrope',sans-serif]! text-xl! font-medium! text-gray-700! leading-snug! text-center! py-1!">
-        Get Details via WhatsApp
-      </h3>
-      {sent ? (
-        <div className="flex! items-start! gap-2! p-1!">
-          <p className="text-[12px]! text-blue-950! font-medium! leading-relaxed!">
-            Thanks {name.split(" ")[0] || "there"}! Our staff will call you
-            shortly.
-          </p>
+    <div className="fixed! bottom-6! right-5! z-[9999]! flex! flex-col! items-end! gap-3!">
+      {/* Expanded card */}
+      {open && (
+        <div className="w-[300px]! bg-white! rounded-2xl! shadow-[0_8px_40px_rgba(0,0,0,0.18)]! border! border-gray-100! overflow-hidden! animate-in! fade-in! slide-in-from-bottom-4! duration-200!">
+          {/* Header */}
+          <div className="flex! items-center! justify-between! px-4! py-3! bg-[#27427f]!">
+            <div className="flex! items-center! gap-2!">
+              <MessageCircle className="w-4! h-4! text-white!" />
+              <span className="text-[13px]! font-semibold! text-white! font-['Manrope',sans-serif]!">
+                Get Details via WhatsApp
+              </span>
+            </div>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className="text-white/70! hover:text-white! transition-colors! cursor-pointer!"
+            >
+              <X className="w-4! h-4!" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="p-4! flex! flex-col! gap-3!">
+            {sent ? (
+              <p className="text-[13px]! text-blue-950! font-medium! leading-relaxed! py-2! font-['Manrope',sans-serif]!">
+                Thanks {name.split(" ")[0] || "there"}! Our team will reach out to you shortly.
+              </p>
+            ) : (
+              <form
+                className="flex! flex-col! gap-2.5!"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (name.trim() && phone.trim()) setSent(true);
+                }}
+              >
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  required
+                  className="w-full! p-3! text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400! font-['Manrope',sans-serif]!"
+                />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Phone number"
+                  required
+                  pattern="[0-9+ ]{10,15}"
+                  className="w-full! p-3! text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400! font-['Manrope',sans-serif]!"
+                />
+                <button
+                  type="submit"
+                  className="flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-semibold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors! font-['Manrope',sans-serif]!"
+                >
+                  Request Callback
+                </button>
+              </form>
+            )}
+            <a
+              href="tel:+914222345678"
+              className="flex! items-center! justify-center! gap-2! w-full! py-2.5! border! border-[#27427f]/25! text-[#27427f]! text-sm! font-semibold! rounded-xl! no-underline! hover:bg-[#27427f]/5! transition-colors! font-['Manrope',sans-serif]!"
+            >
+              <Phone className="w-3.5! h-3.5! fill-[#27427f]!" />
+              Call Now
+            </a>
+          </div>
         </div>
-      ) : (
-        <form
-          className="flex! flex-col! gap-2.5!"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (name.trim() && phone.trim()) setSent(true);
-          }}
-        >
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            required
-            className="w-full! h-2.5! p-5! text-sm! placeholder:text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
-          />
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Phone number"
-            required
-            pattern="[0-9+ ]{10,15}"
-            className="w-full! h-2.5! p-5! text-sm! placeholder:text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400!"
-          />
-          <button
-            type="submit"
-            className="font-['Manrope',sans-serif]! flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-semibold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors! tracking-wide"
-          >
-            Request Callback
-          </button>
-        </form>
       )}
-      <a
-        href="tel:+914222345678"
-        className="font-['Manrope',sans-serif]! flex! items-center! justify-center! gap-2! w-full! py-2.5! border! border-[#27427f]/25! text-[#27427f]! text-sm! font-semibold! rounded-xl! no-underline! hover:bg-[#27427f]/5! transition-colors!"
-      >
-        <Phone className="w-3.5! h-3.5! fill-blue-800" />
-        Call Now
-      </a>
+
+      {/* Trigger pill — only visible when popup is closed */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Get Details via WhatsApp"
+          className="flex! items-center! gap-2! px-4! py-3! bg-[#27427f]! text-white! text-[13px]! font-semibold! rounded-full! shadow-lg! hover:bg-[#1a2d59]! transition-all! duration-200! cursor-pointer! font-['Manrope',sans-serif]! whitespace-nowrap!"
+        >
+          <MessageCircle className="w-4! h-4! shrink-0!" />
+          Get Details via WhatsApp
+        </button>
+      )}
     </div>
   );
 }
 
 function DefaultRightRail() {
-  return (
-    <div className="flex! flex-col! gap-4!">
-      <EnquireForm />
-
-      {/* Ad image */}
-      <a
-        href="tel:+914222345678"
-        className="block! rounded-md! overflow-hidden! no-underline!"
-      >
-        <img
-          src="/assets/images/hero/hero_mobile.png"
-          alt="Advertisement"
-          loading="lazy"
-          className="w-full! aspect-[4/5]! object-cover! object-top!"
-        />
-      </a>
-    </div>
-  );
+  return null;
 }
+
 
 // ─── shell ──────────────────────────────────────────────────────────────────
 
@@ -398,7 +414,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
       )}
 
       {/* ── Page body ── */}
-      <div className="max-w-[1440px]! mx-auto! px-4! xl:px-6! pt-0! lg:pt-0! pb-16!">
+      <div className="max-w-[1400px]! mx-auto! px-3! sm:px-4! pt-0! pb-16!">
         <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}
@@ -475,9 +491,9 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     {[1, 2, 3, 4].map((i) => (
                       <div
                         key={i}
-                        className="bg-white! rounded-2xl! border! border-gray-100! overflow-hidden! flex! flex-col! md:flex-row! animate-pulse!"
+                        className="bg-white! rounded-2xl! border! border-gray-100! overflow-hidden! flex! flex-row! animate-pulse!"
                       >
-                        <div className="w-full! md:w-[240px]! shrink-0! aspect-[16/10]! md:aspect-auto! md:min-h-[230px]! bg-gray-200!" />
+                        <div className="w-[200px]! shrink-0! aspect-square! bg-gray-200!" />
                         <div className="p-4! flex! flex-col! gap-2! flex-1!">
                           <div className="h-4! bg-gray-200! rounded! w-3/4!" />
                           <div className="h-3! bg-gray-200! rounded! w-1/2!" />
@@ -611,17 +627,18 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                 )}
               </div>
 
-              {/* ── Right rail (xl+) ── */}
-              <aside className="hidden! xl:block! w-[260px]! shrink-0! self-start! sticky! top-[152px]! max-h-[calc(100vh-152px)]! overflow-y-auto! pb-6! z-10!">
-                {adapter.renderRightRail
-                  ? adapter.renderRightRail(filters, data?.items as any)
-                  : <DefaultRightRail />}
-              </aside>
+              {/* ── Right rail (xl+) — reserved for adapter overrides ── */}
+              {adapter.renderRightRail && (
+                <aside className="hidden! xl:block! w-[260px]! shrink-0! self-start! sticky! top-[152px]! max-h-[calc(100vh-152px)]! overflow-y-auto! pb-6! z-10!">
+                  {adapter.renderRightRail(filters, data?.items as any)}
+                </aside>
+              )}
 
             </div>
           </main>
         </div>
       </div>
+      <WhatsAppPopup />
     </div>
   );
 }

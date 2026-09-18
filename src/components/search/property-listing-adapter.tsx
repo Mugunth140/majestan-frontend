@@ -5,7 +5,12 @@ import { useState } from "react";
 import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
-import { PROPERTY_TYPES, buildListingUrl } from "@/lib/seo-urls";
+import {
+  PROPERTY_TYPES,
+  buildPseoSlug,
+  BEDROOM_PROPERTY_TYPE_SLUGS,
+  type PropertyTypeSlug,
+} from "@/lib/seo-urls";
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
 import type { ListingAdapter } from "./listing-adapter";
 
@@ -459,14 +464,31 @@ export function createPropertyAdapter(init: {
     },
 
     buildBreadcrumbs: (filters) => {
-      const propertyTypeLabel = Object.values(PROPERTY_TYPES).find(p => p.apiValue === filters.propertyType)?.label || filters.propertyType;
+      const propertyTypeLabel =
+        Object.values(PROPERTY_TYPES).find((p) => p.apiValue === filters.propertyType)?.label ||
+        filters.propertyType;
       const listingTypeLabel = filters.listingType === "Rent" ? "For Rent" : "For Sale";
-      const listingTypeSlug = filters.listingType === "Rent" ? "for-rent" : "for-sale";
-      const locationLabel = filters.location ? filters.location.replace(/-/g, ' ') : "Coimbatore";
+      const locationLabel = filters.location
+        ? filters.location.replace(/-/g, " ")
+        : init.initialCity;
+
+      // Find the URL slug for the property type (e.g. "apartment" → "apartments")
+      const ptSlug =
+        (Object.entries(PROPERTY_TYPES).find(
+          ([, data]) => data.apiValue === filters.propertyType
+        )?.[0] as PropertyTypeSlug | undefined) || "apartments";
+
+      // Parent breadcrumb points to the city-level PSEO page
+      const parentSlug = buildPseoSlug(
+        filters.listingType as "Sell" | "Rent",
+        ptSlug,
+        init.initialCity
+      );
+
       return [
-        { label: listingTypeLabel, href: `/${listingTypeSlug}/${filters.propertyType}/${init.initialCity}` },
-        { label: propertyTypeLabel, href: `/${listingTypeSlug}/${filters.propertyType}/${init.initialCity}` },
-        { label: locationLabel }
+        { label: listingTypeLabel, href: `/${parentSlug}` },
+        { label: propertyTypeLabel, href: `/${parentSlug}` },
+        { label: locationLabel },
       ];
     },
 
@@ -486,30 +508,50 @@ export function createPropertyAdapter(init: {
       if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
       if (filters.minArea) params.set("minArea", filters.minArea);
       if (filters.maxArea) params.set("maxArea", filters.maxArea);
-      if (filters.bedrooms) params.set("bedrooms", filters.bedrooms);
       if (filters.facing) params.set("facing", filters.facing);
       if (filters.furnishing) params.set("furnishing", filters.furnishing);
       if (filters.propertyAge) params.set("propertyAge", filters.propertyAge);
       if (sort) params.set("sort", sort);
 
-      // Check if listingType, propertyType, or location changed requiring a URL route change
+      // Check if any PSEO-defining axis changed (listingType, propertyType, or
+      // location). If so, navigate to the new canonical PSEO URL.
+      const currentLocality = init.initialLocality || "";
+      const filterLocationIsLocality = filters.location && filters.location !== init.initialCity;
+
       if (
         filters.listingType !== init.initialListingType ||
         filters.propertyType !== init.initialPropertyType ||
         filters.location !== (init.initialLocality || init.initialCity)
       ) {
-        // Determine city and locality correctly for URL builder
-        const urlCity = filters.location ? filters.location : init.initialCity;
+        // Find the URL slug for the property type
+        const ptSlug =
+          (Object.entries(PROPERTY_TYPES).find(
+            ([, data]) => data.apiValue === filters.propertyType
+          )?.[0] as PropertyTypeSlug | undefined) || "apartments";
 
-        const url = buildListingUrl(
-          filters.listingType as any,
-          filters.propertyType,
-          urlCity
-        );
+        const newLocality = filterLocationIsLocality ? filters.location : undefined;
+
+        // Only include bedrooms in the URL if this is a BHK-supporting type
+        // and bedrooms is set. Bedrooms as a user filter appends as a query param.
+        const url =
+          "/" +
+          buildPseoSlug(
+            filters.listingType as "Sell" | "Rent",
+            ptSlug,
+            init.initialCity,
+            newLocality || undefined
+          );
+
+        // If the user also has a bedrooms filter set, keep it as a query param
+        // (not in the PSEO slug) since it wasn't part of the base PSEO definition.
+        if (filters.bedrooms) params.set("bedrooms", filters.bedrooms);
 
         const queryString = params.toString();
         return queryString ? `${url}?${queryString}` : url;
       } else {
+        // Only location/listingType/propertyType unchanged — keep current pathname,
+        // append bedrooms as query param if set (it's a user filter here)
+        if (filters.bedrooms) params.set("bedrooms", filters.bedrooms);
         const queryString = params.toString();
         return queryString ? `${pathname}?${queryString}` : pathname;
       }

@@ -4,7 +4,23 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { Sublocation, UnitType } from "@/lib/api";
 import { MapPin, ChevronDown, Search, Home } from "lucide-react";
-import { buildListingUrl } from "@/lib/seo-urls";
+import {
+  buildPseoSlug,
+  PROPERTY_TYPES,
+  type PropertyTypeSlug,
+} from "@/lib/seo-urls";
+
+// Map home-search form property type values (API/form slugs) to PSEO URL slugs
+const HOME_SEARCH_PROPERTY_TYPE_MAP: Record<string, PropertyTypeSlug> = {
+  apartment:        "apartments",
+  villa:            "villas",
+  independenthouse: "independent-houses",
+  plot:             "plots",
+  commercialspace:  "commercial-spaces",
+  industrialspace:  "industrial-spaces",
+  farmlands:        "farmlands",
+  coworking:        "coworking",
+};
 import { useLocationContext } from "@/contexts/LocationContext";
 
 const propertyTypeOptions = [
@@ -73,15 +89,16 @@ export function HomeSearch({
     event.preventDefault();
     setError("");
 
-    // Case 1: Property type selected — build URL directly from Row 1 filters
+    // Case 1: Property type selected — build canonical PSEO URL from Row 1 filters
     if (propertyType) {
-      const url = buildListingUrl(
+      const ptSlug = HOME_SEARCH_PROPERTY_TYPE_MAP[propertyType] || "apartments";
+      const pseoSlug = buildPseoSlug(
         listingType,
-        propertyType,
-        selectedCity,
-        locality || undefined,
+        ptSlug,
+        selectedCity.toLowerCase(),
+        locality || undefined
       );
-      router.push(url);
+      router.push(`/${pseoSlug}`);
       return;
     }
 
@@ -110,9 +127,9 @@ export function HomeSearch({
       } finally {
         setIsSearching(false);
       }
-      // Fallback: go to generic listing page with keyword
-      const fallbackListingType = listingType === "Sell" ? "for-sale" : "for-rent";
-      router.push(`/${fallbackListingType}/properties/coimbatore?keyword=${encodeURIComponent(searchQuery)}`);
+      // Fallback: go to generic listing page with keyword (city-level PSEO URL)
+      const fallbackSlug = buildPseoSlug("Sell", "apartments", selectedCity.toLowerCase() || "coimbatore");
+      router.push(`/${fallbackSlug}?keyword=${encodeURIComponent(searchQuery)}`);
       return;
     }
 

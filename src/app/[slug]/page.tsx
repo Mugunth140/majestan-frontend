@@ -6,39 +6,97 @@ import { PropertyDetailsView } from "@/components/site/property/PropertyDetailsV
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { getPropertyBySeoSlug } from "@/lib/api/property-by-slug";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
-import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import {
+  PROPERTY_TYPES,
+  parsePseoSlug,
+  buildPseoSlug,
+  PSEO_BEDROOM_OPTIONS,
+  BEDROOM_PROPERTY_TYPE_SLUGS,
+  type PropertyTypeSlug,
+} from "@/lib/seo-urls";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { parsePseoSlug } from "@/lib/seo/pseo-parser";
 import { PropertyListingShell } from "@/components/search/PropertyListingShell";
 import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
-import { getProjectBySlugUrl, getAllProjectSlugs, formatINR as formatProjectINR } from "@/lib/api/projects";
+import {
+  getProjectBySlugUrl,
+  getAllProjectSlugs,
+  formatINR as formatProjectINR,
+} from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
 import { ProjectDetailsView } from "@/components/site/project/ProjectDetailsView";
 import { ProjectFloorPlanSection } from "@/components/site/project/sections/ProjectFloorPlanSection";
 import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
 import { ProjectAmenitiesSection } from "@/components/site/project/sections/ProjectAmenitiesSection";
 import { ProjectLocalitySection } from "@/components/site/project/sections/ProjectLocalitySection";
+import { batchHasPseoInventory, type PseoCheckParams } from "@/lib/pseo-inventory";
 
 export const dynamicParams = true;
 // Bound the ISR full-route cache: crawler/scanner garbage URLs must not
 // accumulate rendered pages in .next/cache indefinitely.
 export const revalidate = 300;
 
+const _abs = (u: string | undefined) =>
+  !!u && /^https?:\/\//i.test(u) ? u : undefined;
+const API_BASE =
+  _abs(process.env.API_BASE_URL) ||
+  _abs(process.env.NEXT_PUBLIC_API_BASE_URL) ||
+  "http://localhost:5000/api/v1";
+
+// Known cities for PSEO generation — keep in sync with sitemap.ts
+const PSEO_CITIES = ["coimbatore"];
+
+/**
+ * Resolve a lowercase sublocation slug (as returned by parsePseoSlug) back to
+ * the canonical display name stored in the backend (e.g. "saravanampatti" →
+ * "Saravanampatti").  Falls back to the slug itself if lookup fails.
+ */
+async function resolveSublocName(slug: string | undefined, city: string): Promise<string | undefined> {
+  if (!slug) return undefined;
+  try {
+    const res = await fetch(`${API_BASE}/metadata/sublocations`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return slug;
+    const data = await res.json();
+    const list: Array<{ sublocation: string; city: string }> =
+      Array.isArray(data) ? data : data.data || data.items || [];
+    const match = list.find(
+      (s) =>
+        s.city.toLowerCase() === city.toLowerCase() &&
+        s.sublocation.toLowerCase() === slug.toLowerCase()
+    );
+    return match?.sublocation ?? slug;
+  } catch {
+    return slug;
+  }
+}
+
+// Property type slugs that generate PSEO pages (exclude "properties" catch-all)
+const PSEO_PROPERTY_TYPE_SLUGS = Object.keys(PROPERTY_TYPES).filter(
+  (k) => k !== "properties" && PROPERTY_TYPES[k as PropertyTypeSlug].apiValue !== ""
+) as PropertyTypeSlug[];
+
 export async function generateStaticParams() {
   const out: { slug: string }[] = [];
+
+  // ── Property slugs ────────────────────────────────────────────────────────
   try {
     const { API_BASE_URL } = await import("@/lib/api");
     const res = await fetch(`${API_BASE_URL}/properties/all-slugs`);
     if (res.ok) {
       const data = await res.json();
-      const slugs: string[] = Array.isArray(data) ? data : (data.data || data.items || []);
+      const slugs: string[] = Array.isArray(data)
+        ? data
+        : data.data || data.items || [];
       for (const slug of slugs) out.push({ slug });
     }
   } catch (error) {
-    console.error("Failed to fetch slugs for static generation:", error);
+    console.error("Failed to fetch property slugs for static generation:", error);
   }
+
+  // ── Project slugs ─────────────────────────────────────────────────────────
   try {
     const projectSlugs = await getAllProjectSlugs();
     for (const full of projectSlugs) {
@@ -48,6 +106,80 @@ export async function generateStaticParams() {
   } catch (error) {
     console.error("Failed to fetch project slugs for static generation:", error);
   }
+
+  // ── PSEO slugs (inventory-gated) ──────────────────────────────────────────
+  try {
+    const subRes = await fetch(`${API_BASE}/metadata/sublocations`, {
+      next: { revalidate: 3600 },
+    });
+    const subData = subRes.ok ? await subRes.json() : [];
+    const sublocations: Array<{ sublocation: string; city: string }> =
+      Array.isArray(subData) ? subData : subData.data || subData.items || [];
+
+    const listingTypes: Array<"Sell" | "Rent"> = ["Sell", "Rent"];
+
+    const inventoryChecks: Array<{
+      slug: string;
+      params: PseoCheckParams;
+    }> = [];
+
+    for (const city of PSEO_CITIES) {
+      const citySublocations = sublocations.filter(
+        (s) => s.city.toLowerCase() === city.toLowerCase()
+      );
+
+      for (const lt of listingTypes) {
+        for (const ptSlug of PSEO_PROPERTY_TYPE_SLUGS) {
+          // City-level page (no sublocation)
+          inventoryChecks.push({
+            slug: buildPseoSlug(lt, ptSlug, city),
+            params: { listingType: lt, propertyTypeSlug: ptSlug, city },
+          });
+
+          // Sublocation-level pages
+          for (const sub of citySublocations) {
+            inventoryChecks.push({
+              slug: buildPseoSlug(lt, ptSlug, city, sub.sublocation),
+              params: {
+                listingType: lt,
+                propertyTypeSlug: ptSlug,
+                city,
+                sublocation: sub.sublocation,
+              },
+            });
+
+            // BHK-segmented pages — residential types only, 2/3/4 BHK (1 excluded)
+            if (BEDROOM_PROPERTY_TYPE_SLUGS.includes(ptSlug)) {
+              for (const bhk of PSEO_BEDROOM_OPTIONS) {
+                inventoryChecks.push({
+                  slug: buildPseoSlug(lt, ptSlug, city, sub.sublocation, bhk),
+                  params: {
+                    listingType: lt,
+                    propertyTypeSlug: ptSlug,
+                    city,
+                    sublocation: sub.sublocation,
+                    bedrooms: bhk,
+                  },
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Run inventory checks in small sequential batches to avoid 429s
+    const allParams = inventoryChecks.map((c) => c.params);
+    const allResults = await batchHasPseoInventory(allParams);
+    for (let j = 0; j < inventoryChecks.length; j++) {
+      if (allResults[j]) {
+        out.push({ slug: inventoryChecks[j].slug });
+      }
+    }
+  } catch (error) {
+    console.error("Failed to generate PSEO static params:", error);
+  }
+
   return out;
 }
 
@@ -116,7 +248,6 @@ export async function generateMetadata({
 
   if (property) {
     const canonicalPath = `/${property.canonicalSlug}`;
-
     const seoPage = property.seo?.seoData?.overview;
 
     const typeLabel =
@@ -153,8 +284,8 @@ export async function generateMetadata({
           },
         ]
       : (property.images || [])
-          .filter((img) => img.imageUrl)
-          .map((img) => ({
+          .filter((img: any) => img.imageUrl)
+          .map((img: any) => ({
             url: img.imageUrl,
             width: 1200,
             height: 630,
@@ -165,9 +296,7 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: {
-        canonical: canonicalPath,
-      },
+      alternates: { canonical: canonicalPath },
       openGraph: {
         title: ogTitle,
         description: ogDescription,
@@ -182,8 +311,8 @@ export async function generateMetadata({
         images: seoPage?.og_image
           ? [seoPage.og_image]
           : (property.images || [])
-              .filter((img) => img.imageUrl)
-              .map((img) => img.imageUrl)
+              .filter((img: any) => img.imageUrl)
+              .map((img: any) => img.imageUrl)
               .slice(0, 1),
       },
       robots: {
@@ -204,49 +333,84 @@ export async function generateMetadata({
       const canonicalPath = `/${project.canonicalSlug}`;
       const seo = project.seo?.seoData?.overview;
       const typeLabel = project.projectType === "villa" ? "Villa" : "Apartment";
-      const bhkLabel = project.ranges.bhk.length ? `${project.ranges.bhk.join(", ")} BHK ` : "";
-      const priceLabel = project.ranges.minPrice != null ? ` ${formatProjectINR(project.ranges.minPrice)}${project.ranges.maxPrice && project.ranges.maxPrice !== project.ranges.minPrice ? ` - ${formatProjectINR(project.ranges.maxPrice)}` : ""}` : "";
-      const title = seo?.title || `${project.name} - ${bhkLabel}${typeLabel} in ${project.city} | Majestan Realty`;
-      const description = seo?.description || `${project.name}, ${bhkLabel}${typeLabel.toLowerCase()} project in ${project.city}.${priceLabel ? ` Price${priceLabel}.` : ""} View configurations, floor plans, photos and locality details.`;
+      const bhkLabel = project.ranges.bhk.length
+        ? `${project.ranges.bhk.join(", ")} BHK `
+        : "";
+      const priceLabel =
+        project.ranges.minPrice != null
+          ? ` ${formatProjectINR(project.ranges.minPrice)}${
+              project.ranges.maxPrice &&
+              project.ranges.maxPrice !== project.ranges.minPrice
+                ? ` - ${formatProjectINR(project.ranges.maxPrice)}`
+                : ""
+            }`
+          : "";
+      const title =
+        seo?.title ||
+        `${project.name} - ${bhkLabel}${typeLabel} in ${project.city} | Majestan Realty`;
+      const description =
+        seo?.description ||
+        `${project.name}, ${bhkLabel}${typeLabel.toLowerCase()} project in ${project.city}.${
+          priceLabel ? ` Price${priceLabel}.` : ""
+        } View configurations, floor plans, photos and locality details.`;
       const ogImage = seo?.og_image || project.coverImageUrl || undefined;
       return {
-        title, description,
+        title,
+        description,
         alternates: { canonical: canonicalPath },
         openGraph: {
-          title: seo?.og_title || title, description: seo?.og_description || description,
-          url: canonicalPath, type: "article",
-          ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630, alt: project.name }] } : {}),
+          title: seo?.og_title || title,
+          description: seo?.og_description || description,
+          url: canonicalPath,
+          type: "article",
+          ...(ogImage
+            ? { images: [{ url: ogImage, width: 1200, height: 630, alt: project.name }] }
+            : {}),
         },
         twitter: {
-          card: "summary_large_image", title: seo?.og_title || title, description: seo?.og_description || description,
+          card: "summary_large_image",
+          title: seo?.og_title || title,
+          description: seo?.og_description || description,
           ...(ogImage ? { images: [ogImage] } : {}),
         },
       };
     }
-  } catch { /* fall through to static/PSEO/404 */ }
+  } catch {
+    /* fall through to static/PSEO/404 */
+  }
 
   const pathname = `/${slug}`;
   const viewName = resolveViewForPath(pathname);
   if (viewName) {
-    return {
-      alternates: { canonical: pathname },
-    };
+    return { alternates: { canonical: pathname } };
   }
 
-  // PSEO Parsing — doorway pages: noindex until they have unique copy + listings
-  const parsedPseo = parsePseoSlug(slug);
-  if (parsedPseo) {
-    const loc = parsedPseo.location ? `${parsedPseo.location}, ` : "";
-    const type = parsedPseo.propertyType 
-      ? Object.values(PROPERTY_TYPES).find(p => p.apiValue === parsedPseo.propertyType)?.label || parsedPseo.propertyType 
-      : "Properties";
-    const cityText = parsedPseo.city || "Coimbatore";
-    
+  // PSEO metadata — now uses canonical parsePseoSlug from seo-urls.ts
+  const pseo = parsePseoSlug(slug);
+  if (pseo) {
+    const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
+    const locPart = canonicalSubloc
+      ? `${canonicalSubloc}, `
+      : "";
+    const cityText = pseo.city
+      ? pseo.city.charAt(0).toUpperCase() + pseo.city.slice(1)
+      : "Coimbatore";
+    const bhkPart = pseo.bedrooms ? `${pseo.bedrooms} BHK ` : "";
+    const listingWord = pseo.listingType === "Rent" ? "for Rent" : "for Sale";
+    const canonicalUrl = `https://www.majestanrealty.com/${slug}`;
+
     return {
-      title: `${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} ${parsedPseo.listingType === 'Rent' ? 'for Rent' : 'for Sale'} in ${loc}${cityText} | Majestan Realty`,
-      description: `Explore top ${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} in ${loc}${cityText}. Find your dream property today with Majestan Realty.`,
-      alternates: { canonical: pathname },
-      robots: { index: false, follow: true },
+      title: `${bhkPart}${pseo.propertyLabel} ${listingWord} in ${locPart}${cityText} | Majestan Realty`,
+      description: `Explore top ${bhkPart.toLowerCase()}${pseo.propertyLabel.toLowerCase()} ${listingWord.toLowerCase()} in ${locPart}${cityText}. Find your dream property today with Majestan Realty.`,
+      alternates: { canonical: canonicalUrl },
+      // Index PSEO pages — they are inventory-gated so they have real listings
+      robots: { index: true, follow: true },
+      openGraph: {
+        title: `${bhkPart}${pseo.propertyLabel} ${listingWord} in ${locPart}${cityText} | Majestan Realty`,
+        description: `Explore top ${bhkPart.toLowerCase()}${pseo.propertyLabel.toLowerCase()} ${listingWord.toLowerCase()} in ${locPart}${cityText}.`,
+        url: canonicalUrl,
+        type: "website",
+      },
     };
   }
 
@@ -256,8 +420,9 @@ export async function generateMetadata({
   };
 }
 
-function buildPropertyStructuredData(property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>) {
-  const isSale = !property.status.toLowerCase().includes("rent");
+function buildPropertyStructuredData(
+  property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>
+) {
   const typeLabel =
     Object.values(PROPERTY_TYPES).find(
       (p) => p.apiValue === property.propertyType
@@ -273,7 +438,7 @@ function buildPropertyStructuredData(property: NonNullable<Awaited<ReturnType<ty
       property.propertyType
     ),
     url: `https://www.majestanrealty.com/${property.canonicalSlug}`,
-    image: property.images?.map((image) => image.imageUrl) || [],
+    image: property.images?.map((image: any) => image.imageUrl) || [],
     datePosted: property.createdAt,
     dateModified: property.updatedAt,
     offers: {
@@ -305,34 +470,31 @@ function buildPropertyStructuredData(property: NonNullable<Awaited<ReturnType<ty
   };
 }
 
-function buildBreadcrumbItems(property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>) {
+function buildBreadcrumbItems(
+  property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>
+) {
   const isSale = !property.status.toLowerCase().includes("rent");
-  const listingType = isSale ? "for-sale" : "for-rent";
+  const listingType = isSale ? ("Sell" as const) : ("Rent" as const);
   const listingLabel = isSale ? "For Sale" : "For Rent";
-  const typeLabel =
-    Object.values(PROPERTY_TYPES).find(
-      (p) => p.apiValue === property.propertyType
-    )?.label || property.propertyType;
 
   // Find the property type slug
-  const propertyTypeSlug =
-    Object.entries(PROPERTY_TYPES).find(
-      ([, data]) => data.apiValue === property.propertyType
-    )?.[0] || property.propertyType;
+  const ptEntry = Object.entries(PROPERTY_TYPES).find(
+    ([, data]) => data.apiValue === property.propertyType
+  );
+  const ptSlug = (ptEntry?.[0] || "apartments") as PropertyTypeSlug;
+  const typeLabel = ptEntry?.[1].label || property.propertyType;
+
+  // Build canonical PSEO URL for the parent breadcrumb
+  const parentSlug = buildPseoSlug(
+    listingType,
+    ptSlug,
+    property.city.toLowerCase()
+  );
 
   return [
-    {
-      label: listingLabel,
-      href: `/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`,
-    },
-    {
-      label: typeLabel,
-      href: `/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`,
-    },
-    {
-      label: property.city,
-      href: `/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`,
-    },
+    { label: listingLabel, href: `/${parentSlug}` },
+    { label: typeLabel, href: `/${parentSlug}` },
+    { label: property.city, href: `/${parentSlug}` },
     { label: property.title },
   ];
 }
@@ -356,7 +518,10 @@ export default async function SlugPage({
       <div className="!min-h-[60vh] !flex !items-center !justify-center">
         <div className="!text-center !p-8 !bg-red-50 !rounded-2xl !max-w-md">
           <h2 className="!text-xl !font-bold !text-red-600 !mb-2">Service Unavailable</h2>
-          <p className="!text-gray-600">The backend server could not be reached. Please make sure the backend is running on port 5000.</p>
+          <p className="!text-gray-600">
+            The backend server could not be reached. Please make sure the backend
+            is running on port 5000.
+          </p>
         </div>
       </div>
     );
@@ -375,10 +540,7 @@ export default async function SlugPage({
         <SiteHeader />
         {/* Spacer matching fixed header height (64px constant across breakpoints) */}
         <div className="h-[64px]!" aria-hidden="true" />
-        <PropertyNavigation
-          slug={property.canonicalSlug}
-          activeSection=""
-        />
+        <PropertyNavigation slug={property.canonicalSlug} activeSection="" />
         <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
           <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">
             <div className="mb-0!">
@@ -388,9 +550,7 @@ export default async function SlugPage({
           </div>
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(structuredData),
-            }}
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
           />
         </div>
         <SiteFooter />
@@ -406,8 +566,10 @@ export default async function SlugPage({
         { label: project.city, href: "/projects" },
         { label: project.name },
       ];
-      const units = project.units.filter((u) => u.status === "available");
-      const prices = units.map((u) => Number(u.price)).filter((n) => Number.isFinite(n) && n > 0);
+      const units = project.units.filter((u: any) => u.status === "available");
+      const prices = units
+        .map((u: any) => Number(u.price))
+        .filter((n: number) => Number.isFinite(n) && n > 0);
       return (
         <>
           <SiteHeader />
@@ -420,12 +582,33 @@ export default async function SlugPage({
                 <div className="mb-0!">
                   <Breadcrumbs items={breadcrumbItems} jsonLd />
                 </div>
-                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-                  "@context": "https://schema.org", "@type": "ApartmentComplex",
-                  name: project.name, url: `https://www.majestanrealty.com/${project.canonicalSlug}`,
-                  address: { "@type": "PostalAddress", addressLocality: project.sublocation || project.city, addressRegion: project.city },
-                  ...(prices.length ? { offers: { "@type": "AggregateOffer", lowPrice: Math.min(...prices), highPrice: Math.max(...prices), priceCurrency: "INR", offerCount: units.length } } : {}),
-                }) }} />
+                <script
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "ApartmentComplex",
+                      name: project.name,
+                      url: `https://www.majestanrealty.com/${project.canonicalSlug}`,
+                      address: {
+                        "@type": "PostalAddress",
+                        addressLocality: project.sublocation || project.city,
+                        addressRegion: project.city,
+                      },
+                      ...(prices.length
+                        ? {
+                            offers: {
+                              "@type": "AggregateOffer",
+                              lowPrice: Math.min(...prices),
+                              highPrice: Math.max(...prices),
+                              priceCurrency: "INR",
+                              offerCount: units.length,
+                            },
+                          }
+                        : {}),
+                    }),
+                  }}
+                />
                 <div id="overview" className="scroll-mt-40!">
                   <ProjectDetailsView project={project} />
                 </div>
@@ -440,7 +623,9 @@ export default async function SlugPage({
         </>
       );
     }
-  } catch { /* fall through to static/PSEO/404 */ }
+  } catch {
+    /* fall through to static/PSEO/404 */
+  }
 
   const pathname = `/${slug}`;
   const viewName = resolveViewForPath(pathname);
@@ -456,56 +641,62 @@ export default async function SlugPage({
     );
   }
 
-  // Handle PSEO URL
-  const parsedPseo = parsePseoSlug(slug);
-  if (parsedPseo) {
+  // ── PSEO page handler ─────────────────────────────────────────────────────
+  const pseo = parsePseoSlug(slug);
+  if (pseo) {
+    // Resolve the sublocation slug ("saravanampatti") → canonical name
+    // ("Saravanampatti") so the filter dropdown and syncUrl comparisons match.
+    const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
+
     let initialData = null;
     try {
       initialData = await searchProperties({
-        listingType: parsedPseo.listingType,
-        propertyType: parsedPseo.propertyType,
-        location: parsedPseo.location,
-        city: parsedPseo.city,
-        bedrooms: parsedPseo.bedrooms,
+        listingType: pseo.listingType,
+        propertyType: pseo.propertyType,
+        location: canonicalSubloc,
+        city: pseo.city,
+        bedrooms: pseo.bedrooms != null ? String(pseo.bedrooms) : undefined,
         page: 1,
         limit: 12,
       });
+      // Note: no ISR tags here — Next.js fetch deduplication with tags can
+      // cause 429 errors to escape try/catch in some versions. The client-side
+      // ListingShell re-fetches independently anyway, so empty initialData is fine.
     } catch (error) {
-      console.error("Failed to fetch initial properties", error);
+      console.error("Failed to fetch initial PSEO properties:", error);
     }
 
-    const type = parsedPseo.propertyType 
-      ? Object.values(PROPERTY_TYPES).find(p => p.apiValue === parsedPseo.propertyType)?.label || parsedPseo.propertyType 
-      : "Properties";
-    const loc = parsedPseo.location ? `${parsedPseo.location}, ` : "";
-    const cityText = parsedPseo.city || "Coimbatore";
-    
+    const cityLabel = pseo.city
+      ? pseo.city.charAt(0).toUpperCase() + pseo.city.slice(1)
+      : "Coimbatore";
+    const subLabel = canonicalSubloc
+      ? canonicalSubloc.replace(/-/g, " ")
+      : undefined;
+    const listingWord = pseo.listingType === "Rent" ? "for Rent" : "for Sale";
+    const bhkPart = pseo.bedrooms ? `${pseo.bedrooms} BHK ` : "";
+
     const itemListJsonLd = {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      "name": `${parsedPseo.bedrooms ? parsedPseo.bedrooms + ' BHK ' : ''}${type} ${parsedPseo.listingType === 'Rent' ? 'for Rent' : 'for Sale'} in ${loc}${cityText}`,
-      "itemListElement": (initialData?.items || []).map((item: any, index: number) => ({
+      name: `${bhkPart}${pseo.propertyLabel} ${listingWord} in ${subLabel ? subLabel + ", " : ""}${cityLabel}`,
+      url: `https://www.majestanrealty.com/${slug}`,
+      itemListElement: (initialData?.items || []).map((item: any, index: number) => ({
         "@type": "ListItem",
-        "position": index + 1,
-        "url": `https://www.majestanrealty.com/${item.canonicalSlug}`
-      }))
+        position: index + 1,
+        url: `https://www.majestanrealty.com/${item.canonicalSlug || item.slug_url || item.slug || ""}`,
+      })),
     };
-
-    const pseoListingType = ((parsedPseo.listingType as "Sell" | "Rent") || "Sell");
-    const pseoPropertyType = parsedPseo.propertyType || "apartment";
-    const pseoCity = parsedPseo.city || "";
-    const pseoLocation = parsedPseo.location || "";
 
     const pseoInitialFilters: FilterValues = {
       keyword: "",
-      propertyType: pseoPropertyType,
-      listingType: pseoListingType,
-      location: pseoLocation,
+      propertyType: pseo.propertyType,
+      listingType: pseo.listingType,
+      location: canonicalSubloc || "",
       minPrice: "",
       maxPrice: "",
       minArea: "",
       maxArea: "",
-      bedrooms: "",
+      bedrooms: pseo.bedrooms != null ? String(pseo.bedrooms) : "",
       facing: "",
       furnishing: "",
       propertyAge: "",
@@ -516,19 +707,18 @@ export default async function SlugPage({
         <SiteHeader />
         <PropertyListingShell
           adapterInit={{
-            initialListingType: pseoListingType,
-            initialPropertyType: pseoPropertyType,
-            initialCity: pseoCity,
-            initialLocality: parsedPseo.location,
+            initialListingType: pseo.listingType,
+            initialPropertyType: pseo.propertyType,
+            initialCity: pseo.city || "coimbatore",
+            initialLocality: canonicalSubloc,
+            initialBedrooms: pseo.bedrooms,
           }}
           initialFilters={pseoInitialFilters}
           initialData={initialData}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(itemListJsonLd),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
         <SiteFooter />
       </>

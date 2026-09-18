@@ -76,6 +76,7 @@ export const API_BASE_URL =
 async function fetchApi<T>(
   path: string,
   init?: RequestInit,
+  _retryCount = 0,
 ): Promise<T> {
   let controller: AbortController | undefined;
   let timeoutId: NodeJS.Timeout | undefined;
@@ -104,6 +105,18 @@ async function fetchApi<T>(
         window.location.href = "/login";
       }
       throw new Error("Session expired");
+    }
+
+    // 429 Too Many Requests — back off and retry once (server-side only).
+    // On the client the user can simply refetch; a 1-second delay in the
+    // browser would block the UI thread and is not worth the complexity.
+    if (response.status === 429 && _retryCount === 0 && typeof window === "undefined") {
+      const retryAfterHeader = response.headers.get("Retry-After");
+      const delayMs = retryAfterHeader
+        ? Math.min(parseInt(retryAfterHeader, 10) * 1000, 5000)
+        : 1000;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return fetchApi<T>(path, init, 1);
     }
 
     if (!response.ok) {

@@ -198,11 +198,11 @@ export function PropertySearchFilters({
 
         <Section title="Location" value={locationSummary} defaultOpen>
           <CustomSelect
-            value={isAll ? "" : values.location.toLowerCase()}
+            value={isAll ? "" : (citySublocations.find(s => s.sublocation.toLowerCase() === values.location.toLowerCase())?.sublocation ?? values.location)}
             options={[
               { value: "", label: `All of ${currentCity}` },
               ...citySublocations.map((sub) => ({
-                value: sub.sublocation.toLowerCase(),
+                value: sub.sublocation,
                 label: sub.sublocation,
               })),
             ]}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Heart } from "lucide-react";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { useWishlistStore } from "@/store/wishlistStore";
@@ -23,12 +23,19 @@ type Props = {
  */
 export function WishlistButton({ propertyId, propertyType, variant = "icon", className, label = "Save", tone = "default" }: Props) {
   const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
-  const wished = useWishlistStore((s) => s.isWished(propertyType, propertyId));
+  const wishedFromStore = useWishlistStore((s) => s.isWished(propertyType, propertyId));
   const toggle = useWishlistStore((s) => s.toggle);
   const [authOpen, setAuthOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busyRef = useRef(false);
+
+  // Defer wishlist state to after hydration — the server always renders
+  // wished=false (store starts empty); reading the real value before mount
+  // causes a hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const wished = mounted && wishedFromStore;
 
   const onClick = async (e: React.MouseEvent) => {
     e.preventDefault();

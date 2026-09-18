@@ -274,17 +274,15 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-row! overflow-hidden! min-w-0! group!">
 
-      {/* Image — square, fixed width on the left */}
-      <div className="relative! w-[200px]! shrink-0! overflow-hidden! bg-gray-100!">
-        <Link href={detailPath} className="block! w-full! h-full!">
-          <div className="aspect-square! w-full!">
-            <img
-              src={getPhotoUrl(item)}
-              alt={item.propertyname || "Property"}
-              className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
-              loading="lazy"
-            />
-          </div>
+      {/* Image — true square: width = height = 200px */}
+      <div className="relative! w-[200px]! h-[200px]! shrink-0! overflow-hidden! bg-gray-100!">
+        <Link href={detailPath} className="absolute! inset-0!">
+          <img
+            src={getPhotoUrl(item)}
+            alt={item.propertyname || "Property"}
+            className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+            loading="lazy"
+          />
         </Link>
         {/* RERA verified badge — top-right over image */}
         {reraVerified && (

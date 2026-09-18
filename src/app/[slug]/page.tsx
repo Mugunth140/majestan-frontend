@@ -16,6 +16,7 @@ import {
 } from "@/lib/seo-urls";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
+import { Suspense } from "react";
 import { PropertyListingShell } from "@/components/search/PropertyListingShell";
 import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
@@ -650,18 +651,19 @@ export default async function SlugPage({
 
     let initialData = null;
     try {
-      initialData = await searchProperties({
-        listingType: pseo.listingType,
-        propertyType: pseo.propertyType,
-        location: canonicalSubloc,
-        city: pseo.city,
-        bedrooms: pseo.bedrooms != null ? String(pseo.bedrooms) : undefined,
-        page: 1,
-        limit: 12,
-      });
-      // Note: no ISR tags here — Next.js fetch deduplication with tags can
-      // cause 429 errors to escape try/catch in some versions. The client-side
-      // ListingShell re-fetches independently anyway, so empty initialData is fine.
+      initialData = await searchProperties(
+        {
+          listingType: pseo.listingType,
+          propertyType: pseo.propertyType,
+          location: canonicalSubloc,
+          city: pseo.city,
+          bedrooms: pseo.bedrooms != null ? String(pseo.bedrooms) : undefined,
+          page: 1,
+          limit: 12,
+        },
+        undefined,   // no ISR tags (avoids 429 via fetch deduplication)
+        300,         // time-based ISR: revalidate every 5 min (matches page revalidate)
+      );
     } catch (error) {
       console.error("Failed to fetch initial PSEO properties:", error);
     }
@@ -705,17 +707,19 @@ export default async function SlugPage({
     return (
       <>
         <SiteHeader />
-        <PropertyListingShell
-          adapterInit={{
-            initialListingType: pseo.listingType,
-            initialPropertyType: pseo.propertyType,
-            initialCity: pseo.city || "coimbatore",
-            initialLocality: canonicalSubloc,
-            initialBedrooms: pseo.bedrooms,
-          }}
-          initialFilters={pseoInitialFilters}
-          initialData={initialData}
-        />
+        <Suspense>
+          <PropertyListingShell
+            adapterInit={{
+              initialListingType: pseo.listingType,
+              initialPropertyType: pseo.propertyType,
+              initialCity: pseo.city || "coimbatore",
+              initialLocality: canonicalSubloc,
+              initialBedrooms: pseo.bedrooms,
+            }}
+            initialFilters={pseoInitialFilters}
+            initialData={initialData}
+          />
+        </Suspense>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}

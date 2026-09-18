@@ -257,6 +257,9 @@ const PROPERTY_TYPE_MAP: Record<string, string> = {
 export async function searchProperties(
   params: PropertySearchParams,
   isrTags?: string[],
+  /** Time-based ISR revalidate in seconds (no tags). Use for SSR seed fetches that
+   *  must not be dynamic. Ignored when isrTags is set. */
+  revalidateSeconds?: number,
 ): Promise<PropertySearchResponse> {
   const query = new URLSearchParams();
 
@@ -282,9 +285,19 @@ export async function searchProperties(
 
   // No ISR caching here: every unique query-string permutation would create a
   // separate cache entry in .next/cache (unbounded growth from crawlers/filters).
-  const fetchOptions: RequestInit = isrTags && isrTags.length > 0
-    ? { next: { tags: isrTags, revalidate: 3600 } } as any
-    : { cache: "no-store" };
+  let fetchOptions: RequestInit;
+  if (isrTags && isrTags.length > 0) {
+    // Tag-based ISR — used for property detail pages where granular revalidation matters.
+    // NOTE: ISR tag deduplication can cause 429 errors to escape try/catch in some
+    // Next.js versions; avoid on high-volume PSEO render paths.
+    fetchOptions = { next: { tags: isrTags, revalidate: 3600 } } as any;
+  } else if (revalidateSeconds !== undefined) {
+    // Time-based ISR with no tags — safe for PSEO SSR seed fetches.
+    fetchOptions = { next: { revalidate: revalidateSeconds } } as any;
+  } else {
+    // Default: fully dynamic, no cache.
+    fetchOptions = { cache: "no-store" };
+  }
 
   const res = await fetchApi<PropertySearchResponse>(`/properties?${query.toString()}`, fetchOptions);
 

@@ -414,7 +414,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
       )}
 
       {/* ── Page body ── */}
-      <div className="max-w-[1400px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!">
+      <div className="max-w-[1250px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!">
         <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}
@@ -493,8 +493,10 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                         key={i}
                         className="bg-white! rounded-2xl! border! border-gray-100! overflow-hidden! flex! flex-row! animate-pulse!"
                       >
-                        <div className="w-[200px]! h-[200px]! shrink-0! bg-gray-200!" />
-                        <div className="p-4! flex! flex-col! gap-2! flex-1!">
+                        <div className="p-4! shrink-0! flex! items-center! justify-center!">
+                          <div className="w-[220px]! h-[220px]! rounded-xl! bg-gray-200!" />
+                        </div>
+                        <div className="p-5! pl-1! flex! flex-col! gap-2! flex-1! justify-center!">
                           <div className="h-4! bg-gray-200! rounded! w-3/4!" />
                           <div className="h-3! bg-gray-200! rounded! w-1/2!" />
                           <div className="h-6! bg-gray-200! rounded! w-1/3! mt-1!" />

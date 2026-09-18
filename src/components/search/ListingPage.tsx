@@ -66,6 +66,168 @@ function getTypeLabel(filters: Record<string, string>): string {
 
 // ─── default right rail ─────────────────────────────────────────────────────
 
+// ─── skeletons (SSR-safe: no hooks, so they prerender for Suspense fallback) ─
+
+// ─── skeletons (SSR-safe: no hooks, so they prerender for Suspense fallback) ─
+// Every block mirrors the real component's geometry 1:1 (same paddings,
+// sizes, gaps) with a `.shimmer` sweep — so the swap to real content is
+// invisible and causes zero layout shift.
+
+const SHIMMER_DELAYS = ["", "shimmer-d1", "shimmer-d2"];
+
+function CardSkeleton({ index = 0 }: { index?: number }) {
+  const d = SHIMMER_DELAYS[index % SHIMMER_DELAYS.length];
+  return (
+    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0!">
+      {/* Photo — same 300px square geometry as the real image */}
+      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-[300px]! shrink-0! overflow-hidden! bg-gray-100!">
+        <div className={`absolute! inset-0! bg-gray-200! shimmer! ${d}`} />
+      </div>
+      <div className="p-5! flex! flex-col! flex-1! min-w-0! justify-center!">
+        {/* Title + wishlist/share */}
+        <div className="flex! items-start! gap-2! min-w-0!">
+          <div className="min-w-0! flex-1!">
+            <div className={`h-[22px]! rounded-md! bg-gray-200! w-3/5! shimmer! ${d}`} />
+            <div className="flex! items-center! gap-1.5! mt-1!">
+              <div className="w-3.5! h-3.5! rounded-full! bg-gray-200! shrink-0!" />
+              <div className={`h-[18px]! rounded-md! bg-gray-100! w-1/2! shimmer! ${d}`} />
+            </div>
+          </div>
+          <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
+          <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
+        </div>
+        {/* Spec table */}
+        <div className="mt-3! border-y! border-dashed! border-gray-200! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="min-w-0!">
+              <div className="h-[15px]! rounded! bg-gray-100! w-2/3!" />
+              <div className={`h-[18px]! rounded! bg-gray-200! w-4/5! mt-0.5! shimmer! ${d}`} />
+            </div>
+          ))}
+        </div>
+        {/* Price */}
+        <div className="mt-3! flex! items-end! gap-3! leading-none!">
+          <div className={`h-[26px]! rounded-md! bg-gray-200! w-32! shimmer! ${d}`} />
+          <div className="h-[16px]! rounded! bg-gray-100! w-20!" />
+        </div>
+        {/* Section links */}
+        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3! pt-3! border-t! border-gray-100!">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-[18px]! rounded! bg-gray-100! w-20!" />
+          ))}
+        </div>
+        {/* Actions */}
+        <div className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!">
+          <div className={`h-[42px]! rounded-xl! bg-gray-100! flex-1! shimmer! ${d}`} />
+          <div className={`h-[42px]! rounded-xl! bg-gray-200! flex-1! shimmer! ${d}`} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Full page-shape placeholder used as the Suspense fallback while the
+ * client-side listing shell (useSearchParams) boots. It mirrors the real
+ * layout (sidebar + sticky row + title + cards + pagination) so the
+ * header/footer don't jump when the real content hydrates in — no layout
+ * shift on refresh.
+ */
+export function ListingShellSkeleton() {
+  return (
+    <div className="max-w-[1120px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!" aria-hidden="true">
+      <div className="flex! gap-6! items-start!">
+        {/* ── Sidebar — mirrors PropertySearchFilters + map ── */}
+        <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! pt-4! pb-6! pr-1!">
+          <div className="bg-white! rounded-xl! border! border-gray-200/70! shadow-sm! w-full!">
+            {/* Header: title + reset */}
+            <div className="px-5! py-4! border-b! border-gray-100! flex! items-center! justify-between!">
+              <div className="h-[18px]! rounded-md! bg-gray-200! w-24! shimmer!" />
+              <div className="h-[28px]! rounded-lg! bg-gray-100! w-14!" />
+            </div>
+            {/* Search + Buy/Rent toggle */}
+            <div className="px-5! py-4!">
+              <div className="h-[42px]! rounded-lg! bg-gray-100! shimmer!" />
+              <div className="flex! bg-gray-100! p-1! rounded-lg! gap-1! mt-3!">
+                <div className="flex-1! h-[36px]! rounded-md! bg-white! shadow-sm!" />
+                <div className="flex-1! h-[36px]! rounded-md!" />
+              </div>
+            </div>
+            {/* Accordion sections — Location open, rest collapsed */}
+            <div className="px-5! pb-2! border-t! border-gray-100!">
+              <div className="border-b! border-gray-100!">
+                <div className="py-3.5! flex! items-center! justify-between!">
+                  <div>
+                    <div className="h-[16px]! rounded! bg-gray-200! w-20! shimmer!" />
+                    <div className="h-[13px]! rounded! bg-gray-100! w-28! mt-1!" />
+                  </div>
+                  <div className="w-4! h-4! rounded-full! bg-gray-200! shrink-0!" />
+                </div>
+                <div className="pb-4!">
+                  <div className="h-[42px]! rounded-lg! bg-gray-100! border! border-gray-200! shimmer! shimmer-d1!" />
+                </div>
+              </div>
+              {["Property Type", "Price Range", "Bedrooms", "More Filters"].map((label) => (
+                <div key={label} className="border-b! border-gray-100! last:border-b-0!">
+                  <div className="py-3.5! flex! items-center! justify-between!">
+                    <div className="h-[16px]! rounded! bg-gray-100! w-24!" />
+                    <div className="w-4! h-4! rounded-full! bg-gray-100! shrink-0!" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Map */}
+          <div className="h-[240px]! rounded-2xl! overflow-hidden! border! border-gray-100! bg-gray-200! shimmer! shrink-0!" />
+        </aside>
+        {/* ── Main column ── */}
+        <main className="flex-1! min-w-0! flex! flex-col! pt-3!">
+          {/* Sticky row: breadcrumbs + sort */}
+          <div className="py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
+            <div className="flex! flex-row! items-center! justify-between! gap-3!">
+              <div className="flex! items-center! gap-2! flex-1! min-w-0!">
+                <div className="w-4! h-4! rounded-full! bg-gray-200! shrink-0!" />
+                <div className="h-3.5! rounded! bg-gray-200! w-16! shimmer!" />
+                <div className="h-3.5! rounded! bg-gray-200! w-20! shimmer! shimmer-d1!" />
+                <div className="h-3.5! rounded! bg-gray-200! w-24! hidden! sm:block! shimmer! shimmer-d2!" />
+              </div>
+              <div className="shrink-0! w-[180px]! hidden! lg:block!">
+                <div className="h-[42px]! rounded-full! bg-gray-100! shimmer!" />
+              </div>
+            </div>
+          </div>
+          {/* Title */}
+          <div className="min-w-0! mt-0! mb-4! flex! items-center! gap-3!">
+            <div className="h-[28px]! rounded-lg! bg-gray-200! w-40! shimmer!" />
+            <div className="h-[28px]! rounded-lg! bg-gray-100! w-64! hidden! sm:block!" />
+          </div>
+          {/* Mobile chips */}
+          <div className="lg:hidden! mb-4! flex! gap-2!">
+            <div className="h-8! rounded-full! bg-gray-100! w-20!" />
+            <div className="h-8! rounded-full! bg-gray-100! w-24!" />
+            <div className="h-8! rounded-full! bg-gray-100! w-16!" />
+          </div>
+          {/* Cards */}
+          <div className="flex! flex-col! gap-3!">
+            <CardSkeleton index={0} />
+            <CardSkeleton index={1} />
+            <CardSkeleton index={2} />
+          </div>
+          {/* Pagination */}
+          <div className="mt-8! pt-6! border-t! border-gray-200/60! flex! flex-col! items-center! gap-3.5!">
+            <div className="h-[18px]! rounded! bg-gray-100! w-48!" />
+            <div className="flex! flex-wrap! items-center! justify-center! gap-1!">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-9! h-9! rounded-lg! bg-gray-100!" />
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 // ─── floating whatsapp enquiry popup ────────────────────────────────────────
 
 function WhatsAppPopup() {
@@ -227,6 +389,10 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
     staleTime: 60 * 1000,
   });
   const loading = isLoading && !data;
+  // Background refetch with previous results on screen (filter/sort/page
+  // change): dim the stale cards and show a lightweight skeleton instead of
+  // swapping everything in suddenly.
+  const refreshing = isFetching && !isLoading && !!data?.items?.length;
   const error = queryError
     ? queryError instanceof Error
       ? queryError.message
@@ -468,11 +634,6 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                 </span>{" "}
                 <span className="font-light! text-gray-300!">|</span>{" "}
                 {pageTitle}
-                {isFetching && !isLoading && (
-                  <span className="ml-2! text-xs! text-gray-400! animate-pulse!">
-                    Updating…
-                  </span>
-                )}
               </h1>
             </div>
 
@@ -485,25 +646,29 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             <div className="flex! gap-6! items-start!">
               {/* ── Card feed ── */}
               <div ref={feedRef} className="flex-1! min-w-0! scroll-mt-[130px]!">
+                {/* ── Lightweight skeleton during background refetches ── */}
+                {refreshing && (
+                  <div className="mb-3! flex! flex-col! gap-2!" aria-hidden="true">
+                    {[0, 1].map((i) => (
+                      <div
+                        key={i}
+                        className="flex! items-center! gap-3! bg-white! rounded-xl! border! border-gray-100! p-3!"
+                      >
+                        <div className={`w-14! h-14! rounded-lg! bg-gray-200! shrink-0! shimmer! ${SHIMMER_DELAYS[i % SHIMMER_DELAYS.length]}`} />
+                        <div className="flex-1! min-w-0! flex! flex-col! gap-2!">
+                          <div className={`h-2.5! rounded! bg-gray-200! w-2/3! shimmer! ${SHIMMER_DELAYS[i % SHIMMER_DELAYS.length]}`} />
+                          <div className="h-2.5! rounded! bg-gray-100! w-1/3!" />
+                        </div>
+                        <div className="w-16! h-7! rounded-lg! bg-gray-100! shrink-0!" />
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {/* ── Cards / states ── */}
                 {loading ? (
                   <div className="flex! flex-col! gap-3!">
                     {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="bg-white! rounded-2xl! border! border-gray-100! overflow-hidden! flex! flex-col! lg:flex-row! animate-pulse!"
-                      >
-                        <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-[300px]! shrink-0! bg-gray-200!" />
-                        <div className="p-5! flex! flex-col! gap-2! flex-1! justify-center!">
-                          <div className="h-4! bg-gray-200! rounded! w-3/4!" />
-                          <div className="h-3! bg-gray-200! rounded! w-1/2!" />
-                          <div className="h-6! bg-gray-200! rounded! w-1/3! mt-1!" />
-                          <div className="flex! gap-2! pt-3! mt-auto! border-t! border-gray-100!">
-                            <div className="h-7! bg-gray-200! rounded-lg! w-20!" />
-                            <div className="h-7! bg-gray-200! rounded-lg! w-24!" />
-                          </div>
-                        </div>
-                      </div>
+                      <CardSkeleton key={i} index={i} />
                     ))}
                   </div>
                 ) : error ? (
@@ -536,7 +701,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                   </div>
                 ) : (
                   <>
-                    <div className="flex! flex-col! gap-3!">
+                    <div className={refreshing ? "flex! flex-col! gap-3! opacity-40! pointer-events-none! select-none! transition-opacity! duration-300!" : "flex! flex-col! gap-3! transition-opacity! duration-300!"}>
                       {data?.items.map((item) => adapter.renderCard(item))}
                     </div>
 

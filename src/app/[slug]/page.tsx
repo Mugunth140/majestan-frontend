@@ -18,6 +18,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 import { PropertyListingShell } from "@/components/search/PropertyListingShell";
+import { ListingShellSkeleton } from "@/components/search/ListingPage";
 import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
 import {
@@ -707,7 +708,7 @@ export default async function SlugPage({
     return (
       <>
         <SiteHeader />
-        <Suspense>
+        <Suspense fallback={<ListingShellSkeleton />}>
           <PropertyListingShell
             adapterInit={{
               initialListingType: pseo.listingType,

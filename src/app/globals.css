@@ -305,3 +305,54 @@ body {
   font-family: "Manrope", sans-serif;
 }
 
+/* Listing skeleton shimmer — a light sweep across placeholder blocks.
+   Apply `.shimmer` to any gray placeholder block (it must have a background
+   color and, for rounded blocks, overflow-hidden). Stagger the sweep with
+   `.shimmer-d1` … `.shimmer-d3` so rows don't pulse in lockstep. */
+@keyframes skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.65) 50%,
+    transparent 100%
+  );
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+.shimmer-d1::after {
+  animation-delay: 0.15s;
+}
+
+.shimmer-d2::after {
+  animation-delay: 0.3s;
+}
+
+.shimmer-d3::after {
+  animation-delay: 0.45s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    animation: none;
+  }
+}
+

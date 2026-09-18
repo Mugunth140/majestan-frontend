@@ -272,30 +272,30 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   if (possession) specCells.push({ label: "Possession", value: possession });
 
   return (
-    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-row! overflow-hidden! min-w-0! group!">
+    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
 
-      {/* Image — perfectly square thumbnail with padding so it never stretches */}
-      <div className="p-4! shrink-0! flex! items-center! justify-center!">
-        <div className="relative! w-[220px]! h-[220px]! rounded-xl! overflow-hidden! bg-gray-100! shadow-sm!">
-          <Link href={detailPath} className="absolute! inset-0!">
-            <img
-              src={getPhotoUrl(item)}
-              alt={item.propertyname || "Property"}
-              className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
-              loading="lazy"
-            />
-          </Link>
-          {/* RERA verified badge — top-right over image */}
-          {reraVerified && (
-            <span className="absolute! top-2.5! right-2.5! z-10! inline-flex! items-center! gap-1! bg-white/90! backdrop-blur-sm! text-[#1d9bf0]! text-[10px]! font-bold! px-2! py-1! rounded-lg! shadow-sm!">
-            <BadgeCheck className="w-3.5! h-3.5! fill-blue-400! text-white! stroke-1.5!"/>
-              RERA
-            </span>
-          )}
-        </div>
+      {/* Image — exact fixed square (300×300 on desktop, full-width square on
+          mobile/tablet), flush to the card edges with zero padding/gaps.
+          Fixed width AND height means it can never stretch or collapse. */}
+      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-[300px]! shrink-0! overflow-hidden! bg-gray-100!">
+        <Link href={detailPath} className="absolute! inset-0!">
+          <img
+            src={getPhotoUrl(item)}
+            alt={item.propertyname || "Property"}
+            className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+            loading="lazy"
+          />
+        </Link>
+        {/* RERA verified badge — top-right over image */}
+        {reraVerified && (
+          <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/90! backdrop-blur-sm! text-[#1d9bf0]! text-[10px]! font-bold! px-2! py-1! rounded-lg! shadow-sm!">
+          <BadgeCheck className="w-3.5! h-3.5! fill-blue-400! text-white! stroke-1.5!"/>
+            RERA
+          </span>
+        )}
       </div>
-      
-      <div className="p-5! pl-1! flex! flex-col! flex-1! min-w-0! justify-center!">
+
+      <div className="p-5! flex! flex-col! flex-1! min-w-0! justify-center!">
 
         {/* Title + share */}
         <div className="flex! items-start! gap-2! min-w-0!">
@@ -322,7 +322,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
 
         {/* Spec table */}
         {specCells.length > 0 && (
-          <div className="mt-4! border-y! border-dashed! border-gray-200! py-3.5! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
+          <div className="mt-3! border-y! border-dashed! border-gray-200! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
             {specCells.map((cell) => (
               <div key={cell.label} className="min-w-0!">
                 <div className="text-[11px]! text-gray-500! font-light!">{cell.label}</div>
@@ -333,7 +333,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         )}
 
         {/* Price */}
-        <div className="mt-3.5! flex! items-end! gap-3! leading-none!">
+        <div className="mt-3! flex! items-end! gap-3! leading-none!">
           <span className="text-[20px]! font-medium! text-[#27427f]!">{priceDisplay}</span>
           {(() => {
             const perSqft = getPricePerSqft(item, priceDisplay);
@@ -344,7 +344,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         </div>
 
         {/* Section links */}
-        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3.5! pt-3.5! border-t! border-gray-100!">
+        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3! pt-3! border-t! border-gray-100!">
           {sectionLinks.map((link) => (
             <Link
               key={link.href}
@@ -360,7 +360,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         </div>
 
         {/* Actions */}
-        <div className="mt-3.5! flex! flex-col! sm:flex-row! gap-2.5!">
+        <div className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!">
           <button className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-[#27427f]! bg-[#eef2f7]! hover:bg-[#dde5f0]! transition-colors! cursor-pointer!">
             <Phone className="w-4! h-4!" />
             Enquire

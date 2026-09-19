@@ -244,7 +244,7 @@ function WhatsAppPopup() {
           {/* Header */}
           <div className="flex! items-center! justify-between! px-4! py-3! bg-[#27427f]!">
             <div className="flex! items-center! gap-2!">
-              <MessageCircle className="w-4! h-4! text-white!" />
+              <MessageCircle className="w-4! h-4! text-white! fill-white!" />
               <span className="text-[13px]! font-semibold! text-white! font-['Manrope',sans-serif]!">
                 Get Details via WhatsApp
               </span>
@@ -313,10 +313,10 @@ function WhatsAppPopup() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Get Details via WhatsApp"
-          className="flex! items-center! gap-2! px-4! py-3! bg-[#27427f]! text-white! text-[13px]! font-semibold! rounded-full! shadow-lg! hover:bg-[#1a2d59]! transition-all! duration-200! cursor-pointer! font-['Manrope',sans-serif]! whitespace-nowrap!"
+          className="flex! items-center! gap-2! px-4! py-4! bg-[#27427f]! text-white! text-[13px]! font-semibold! rounded-full! shadow-lg! hover:bg-[#1a2d59]! transition-all! duration-200! cursor-pointer! font-['Manrope',sans-serif]! whitespace-nowrap!"
         >
-          <MessageCircle className="w-4! h-4! shrink-0!" />
-          Get Details via WhatsApp
+          <MessageCircle className="w-5! h-5! shrink-0! fill-white!" />
+          {/* Get Details via WhatsApp */}
         </button>
       )}
     </div>

@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Redirect-only route: never statically prerender. Prerendering a component
+// that unconditionally throws permanentRedirect breaks Next's render-timing
+// measurement ("...cannot have a negative time stamp" TypeError).
+export const dynamic = "force-dynamic";
+
 export default async function ForRentRedirect({ params }: Props) {
   const p = await params;
   const parsed = parseListingUrl("for-rent", p.propertyType, p.location);

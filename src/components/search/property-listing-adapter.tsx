@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
@@ -206,7 +207,9 @@ function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string
 }
 
 function PropertyListingCard({ item }: { item: PropertySearchItem }) {
+  const router = useRouter();
   const detailPath = getDetailPath(item);
+  const photosPath = `${detailPath}/photos`;
   const facing = getFacing(item);
   const possession = getPossession(item);
   const locationLabel = getLocationLabel(item);
@@ -250,7 +253,8 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
 
   const [copied, setCopied] = useState(false);
 
-  const handleShare = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     const url = `${window.location.origin}${detailPath}`;
     try {
       if (navigator.share) {
@@ -278,7 +282,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           mobile/tablet), flush to the card edges with zero padding/gaps.
           Fixed width AND height means it can never stretch or collapse. */}
       <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-[300px]! shrink-0! overflow-hidden! bg-gray-100!">
-        <Link href={detailPath} className="absolute! inset-0!">
+        <Link href={photosPath} aria-label={`View photos of ${item.propertyname || "property"}`} className="absolute! inset-0!">
           <img
             src={getPhotoUrl(item)}
             alt={item.propertyname || "Property"}
@@ -295,12 +299,25 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         )}
       </div>
 
-      <div className="p-5! flex! flex-col! flex-1! min-w-0! justify-center!">
+      {/* Content — clicking anywhere here goes to the overview page.
+          Interactive children (wishlist/share/links/actions) stop propagation. */}
+      <div
+        className="p-5! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
+        onClick={() => router.push(detailPath)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "A" && (e.target as HTMLElement).tagName !== "BUTTON") {
+            router.push(detailPath);
+          }
+        }}
+        role="link"
+        tabIndex={0}
+        aria-label={`View details of ${item.propertyname || "property"}`}
+      >
 
         {/* Title + share */}
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
-            <Link href={detailPath} className="no-underline!">
+            <Link href={detailPath} onClick={(e) => e.stopPropagation()} className="no-underline!">
               <h3 className="font-['Manrope',sans-serif]! text-[17px]! font-medium! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
                 {item.propertyname}
               </h3>
@@ -344,7 +361,10 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         </div>
 
         {/* Section links */}
-        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3! pt-3! border-t! border-gray-100!">
+        <div
+          className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3! pt-3! border-t! border-gray-100!"
+          onClick={(e) => e.stopPropagation()}
+        >
           {sectionLinks.map((link) => (
             <Link
               key={link.href}
@@ -360,7 +380,10 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         </div>
 
         {/* Actions */}
-        <div className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!">
+        <div
+          className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-[#27427f]! bg-[#eef2f7]! hover:bg-[#dde5f0]! transition-colors! cursor-pointer!">
             <Phone className="w-4! h-4!" />
             Enquire

@@ -278,10 +278,10 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
 
-      {/* Image — exact fixed square (300×300 on desktop, full-width square on
-          mobile/tablet), flush to the card edges with zero padding/gaps.
-          Fixed width AND height means it can never stretch or collapse. */}
-      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-[300px]! shrink-0! overflow-hidden! bg-gray-100!">
+      {/* Image — full-width square on mobile/tablet; on desktop a fixed
+          300px-wide column that stretches to the content height, so the card
+          hugs the content with no leftover top/bottom whitespace. */}
+      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
         <Link href={photosPath} aria-label={`View photos of ${item.propertyname || "property"}`} className="absolute! inset-0!">
           <img
             src={getPhotoUrl(item)}
@@ -302,7 +302,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
       {/* Content — clicking anywhere here goes to the overview page.
           Interactive children (wishlist/share/links/actions) stop propagation. */}
       <div
-        className="px-5! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
+        className="px-5! py-3! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
         onClick={() => router.push(detailPath)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "A" && (e.target as HTMLElement).tagName !== "BUTTON") {
@@ -318,7 +318,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
             <Link href={detailPath} onClick={(e) => e.stopPropagation()} className="no-underline!">
-              <h3 className="font-['Manrope',sans-serif]! text-[17px]! font-medium! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
+              <h3 className="font-['Manrope',sans-serif]! text-[17px]! font-semibold! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
                 {item.propertyname}
               </h3>
             </Link>
@@ -337,13 +337,13 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           </button>
         </div>
 
-        {/* Price — directly under title/location for prominence */}
-        <div className="mt-5! flex! items-end! gap-3! leading-none!">
-          <span className="text-[20px]! font-semibold! text-[#27427f]!">{priceDisplay}</span>
+        {/* Price — dotted divider above, directly under title/location for prominence */}
+        <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-end! gap-3! leading-none!">
+          <span className="text-[22px]! font-semibold! text-[#27427f]!">{priceDisplay}</span>
           {(() => {
             const perSqft = getPricePerSqft(item, priceDisplay);
             return perSqft ? (
-              <span className="text-[12px]! font-medium! text-gray-700!">{perSqft}</span>
+              <span className="text-[13px]! font-medium! text-gray-700!">{perSqft}</span>
             ) : null;
           })()}
         </div>
@@ -353,7 +353,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           <div className="mt-3! border-y! border-dashed! border-gray-200! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
             {specCells.map((cell) => (
               <div key={cell.label} className="min-w-0!">
-                <div className="text-[11px]! text-gray-500! font-light!">{cell.label}</div>
+                <div className="text-[11px]! text-gray-500! font-normal!">{cell.label}</div>
                 <div className="text-[13px]! font-medium! text-gray-800! truncate! mt-0.5!">{cell.value}</div>
               </div>
             ))}

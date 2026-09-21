@@ -79,11 +79,11 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
   const d = SHIMMER_DELAYS[index % SHIMMER_DELAYS.length];
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0!">
-      {/* Photo — same 300px square geometry as the real image */}
-      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-[300px]! shrink-0! overflow-hidden! bg-gray-100!">
+      {/* Photo — same geometry as the real image (stretch to content on desktop) */}
+      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
         <div className={`absolute! inset-0! bg-gray-200! shimmer! ${d}`} />
       </div>
-      <div className="p-5! flex! flex-col! flex-1! min-w-0! justify-center!">
+      <div className="px-5! py-3! flex! flex-col! flex-1! min-w-0! justify-center!">
         {/* Title + wishlist/share */}
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
@@ -96,8 +96,8 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
           <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
           <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
         </div>
-        {/* Price — mirrors real card order (above spec table) */}
-        <div className="mt-3! flex! items-end! gap-3! leading-none!">
+        {/* Price — mirrors real card (dotted divider above, above spec table) */}
+        <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-end! gap-3! leading-none!">
           <div className={`h-[26px]! rounded-md! bg-gray-200! w-32! shimmer! ${d}`} />
           <div className="h-[16px]! rounded! bg-gray-100! w-20!" />
         </div>

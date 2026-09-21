@@ -302,7 +302,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
       {/* Content — clicking anywhere here goes to the overview page.
           Interactive children (wishlist/share/links/actions) stop propagation. */}
       <div
-        className="p-5! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
+        className="px-5! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
         onClick={() => router.push(detailPath)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "A" && (e.target as HTMLElement).tagName !== "BUTTON") {
@@ -322,7 +322,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
                 {item.propertyname}
               </h3>
             </Link>
-            <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-500! mt-1! min-w-0!">
+            <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-500! min-w-0!">
               <MapPin className="w-3.5! h-3.5! text-gray-400! shrink-0!" />
               <span className="truncate!">{locationLabel}</span>
             </p>
@@ -338,7 +338,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         </div>
 
         {/* Price — directly under title/location for prominence */}
-        <div className="mt-3! flex! items-end! gap-3! leading-none!">
+        <div className="mt-5! flex! items-end! gap-3! leading-none!">
           <span className="text-[20px]! font-semibold! text-[#27427f]!">{priceDisplay}</span>
           {(() => {
             const perSqft = getPricePerSqft(item, priceDisplay);

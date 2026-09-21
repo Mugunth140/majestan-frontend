@@ -128,8 +128,10 @@ export function parsePseoSlug(slug: string): ParsedPseoSlug | null {
   }
 
   // 3. Validate property type slug against PROPERTY_TYPES
+  // "properties" (empty apiValue) is the valid All-Types slug — allow it so
+  // /properties-for-sale-in-<city> renders instead of 404ing.
   const ptEntry = PROPERTY_TYPES[ptSlug as PropertyTypeSlug];
-  if (!ptEntry || !ptEntry.apiValue) return null; // "properties" has empty apiValue — exclude it
+  if (!ptEntry) return null;
 
   // 4. Validate BHK only allowed for residential types
   if (bedrooms !== undefined && !BEDROOM_PROPERTY_TYPE_SLUGS.includes(ptSlug as PropertyTypeSlug)) {

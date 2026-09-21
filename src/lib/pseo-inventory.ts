@@ -40,6 +40,7 @@ const API_BASE =
 // import too, but keeping this self-contained avoids any edge-case bundling
 // issues in server-only inventory checks).
 const PSEO_API_TYPE_MAP: Record<string, string> = {
+  properties: "",
   apartments: "apartment",
   villas: "villa",
   "independent-houses": "individual_portion",
@@ -70,15 +71,16 @@ export interface PseoCheckParams {
  */
 export async function hasPseoInventory(params: PseoCheckParams): Promise<boolean> {
   try {
+    // "properties" is the All-Types slug (empty apiValue) — valid, query without a type filter.
+    if (!(params.propertyTypeSlug in PSEO_API_TYPE_MAP)) return false;
     const apiType = PSEO_API_TYPE_MAP[params.propertyTypeSlug];
-    if (!apiType) return false;
 
     const qs = new URLSearchParams({
       listingType: params.listingType,
-      propertyType: apiType,
       limit: "1",
       page: "1",
     });
+    if (apiType) qs.set("propertyType", apiType);
 
     if (params.city) qs.set("city", params.city);
     if (params.sublocation) qs.set("location", params.sublocation);

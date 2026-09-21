@@ -203,7 +203,7 @@ function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string
   const d = getDetails(item);
   const area = nzNum(d.superBuiltUpArea) ?? nzNum(d.areaSqft) ?? nzNum(d.carpetArea);
   if (area == null) return null;
-  return `₹${Math.round(price / area).toLocaleString("en-IN")}/sq.ft`;
+  return `₹ ${Math.round(price / area).toLocaleString("en-IN")}/sqft`;
 }
 
 function PropertyListingCard({ item }: { item: PropertySearchItem }) {
@@ -337,6 +337,17 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           </button>
         </div>
 
+        {/* Price — directly under title/location for prominence */}
+        <div className="mt-3! flex! items-end! gap-3! leading-none!">
+          <span className="text-[20px]! font-semibold! text-[#27427f]!">{priceDisplay}</span>
+          {(() => {
+            const perSqft = getPricePerSqft(item, priceDisplay);
+            return perSqft ? (
+              <span className="text-[12px]! font-medium! text-gray-700!">{perSqft}</span>
+            ) : null;
+          })()}
+        </div>
+
         {/* Spec table */}
         {specCells.length > 0 && (
           <div className="mt-3! border-y! border-dashed! border-gray-200! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
@@ -349,20 +360,9 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           </div>
         )}
 
-        {/* Price */}
-        <div className="mt-3! flex! items-end! gap-3! leading-none!">
-          <span className="text-[20px]! font-medium! text-[#27427f]!">{priceDisplay}</span>
-          {(() => {
-            const perSqft = getPricePerSqft(item, priceDisplay);
-            return perSqft ? (
-              <span className="text-[12px]! font-normal! text-gray-400!">{perSqft}</span>
-            ) : null;
-          })()}
-        </div>
-
-        {/* Section links */}
+        {/* Section links — separated by the spec table's bottom dotted line */}
         <div
-          className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3! pt-3! border-t! border-gray-100!"
+          className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
           {sectionLinks.map((link) => (

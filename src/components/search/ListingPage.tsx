@@ -96,6 +96,11 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
           <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
           <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
         </div>
+        {/* Price — mirrors real card order (above spec table) */}
+        <div className="mt-3! flex! items-end! gap-3! leading-none!">
+          <div className={`h-[26px]! rounded-md! bg-gray-200! w-32! shimmer! ${d}`} />
+          <div className="h-[16px]! rounded! bg-gray-100! w-20!" />
+        </div>
         {/* Spec table */}
         <div className="mt-3! border-y! border-dashed! border-gray-200! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
           {[0, 1, 2, 3].map((i) => (
@@ -105,13 +110,8 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
             </div>
           ))}
         </div>
-        {/* Price */}
-        <div className="mt-3! flex! items-end! gap-3! leading-none!">
-          <div className={`h-[26px]! rounded-md! bg-gray-200! w-32! shimmer! ${d}`} />
-          <div className="h-[16px]! rounded! bg-gray-100! w-20!" />
-        </div>
-        {/* Section links */}
-        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3! pt-3! border-t! border-gray-100!">
+        {/* Section links — separated by the spec table's bottom dotted line */}
+        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="h-[18px]! rounded! bg-gray-100! w-20!" />
           ))}

@@ -232,13 +232,24 @@ export function ListingShellSkeleton() {
 
 // ─── floating whatsapp enquiry popup ────────────────────────────────────────
 
-function WhatsAppPopup({ pageUrl }: { pageUrl: string }) {
+function WhatsAppPopup({
+  pageUrl,
+  listingType,
+  propertyType,
+  location,
+}: {
+  pageUrl: string;
+  listingType?: string;
+  propertyType?: string;
+  location?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const nameRef = useRef<HTMLInputElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) nameRef.current?.focus();
@@ -247,7 +258,27 @@ function WhatsAppPopup({ pageUrl }: { pageUrl: string }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab" || !cardRef.current) return;
+      const focusables = Array.from(
+        cardRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled])'
+        )
+      ).filter((el) => el.tabIndex !== -1);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === first || !cardRef.current.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -275,6 +306,9 @@ function WhatsAppPopup({ pageUrl }: { pageUrl: string }) {
         phone: normalized,
         source: "whatsapp_popup",
         pageUrl: pageUrl + window.location.search,
+        listingType,
+        propertyType,
+        location,
         whatsappOptIn: true,
       });
       setStatus("success");
@@ -296,7 +330,10 @@ function WhatsAppPopup({ pageUrl }: { pageUrl: string }) {
     <div className="fixed! bottom-6! right-5! z-[9999]! flex! flex-col! items-end! gap-3!">
       {/* Expanded card */}
       {open && (
-        <div className="w-[300px]! bg-white! rounded-2xl! shadow-[0_8px_40px_rgba(0,0,0,0.18)]! border! border-gray-100! overflow-hidden! animate-in! fade-in! slide-in-from-bottom-4! duration-200!">
+        <div
+          ref={cardRef}
+          className="w-[300px]! bg-white! rounded-2xl! shadow-[0_8px_40px_rgba(0,0,0,0.18)]! border! border-gray-100! overflow-hidden! animate-in! fade-in! slide-in-from-bottom-4! duration-200!"
+        >
           {/* Header */}
           <div className="flex! items-center! justify-between! px-4! py-3! bg-[#27427f]!">
             <div className="flex! items-center! gap-2!">
@@ -873,7 +910,12 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           </main>
         </div>
       </div>
-      <WhatsAppPopup pageUrl={pathname} />
+      <WhatsAppPopup
+        pageUrl={pathname}
+        listingType={(filters as Record<string, string>).listingType ?? ""}
+        propertyType={(filters as Record<string, string>).propertyType ?? ""}
+        location={(filters as Record<string, string>).location ?? ""}
+      />
     </div>
   );
 }

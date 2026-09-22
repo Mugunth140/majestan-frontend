@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { X, Phone, MessageCircle } from "lucide-react";
+import { X, MessageCircle } from "lucide-react";
 import { createEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { parsePseoSlug } from "@/lib/seo-urls";
@@ -179,13 +179,6 @@ export function WhatsAppPopup({
                 </p>
               </form>
             )}
-            <a
-              href="tel:+914222345678"
-              className="flex! items-center! justify-center! gap-2! w-full! py-2.5! border! border-[#27427f]/25! text-[#27427f]! text-sm! font-semibold! rounded-xl! no-underline! hover:bg-[#27427f]/5! transition-colors! font-['Manrope',sans-serif]!"
-            >
-              <Phone className="w-3.5! h-3.5! fill-[#27427f]!" />
-              Call Now
-            </a>
           </div>
         </div>
       )}

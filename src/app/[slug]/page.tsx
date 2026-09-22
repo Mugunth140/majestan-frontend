@@ -196,7 +196,13 @@ const RESERVED_SLUGS = new Set([
 
 type SlugPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+/** First string value of a query param (Next searchParams may be string[]). */
+function qsFirst(v: string | string[] | undefined): string {
+  return Array.isArray(v) ? (v[0] ?? "") : (v ?? "");
+}
 
 function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
   if (!robotsStr) return { index: true, follow: true };
@@ -503,8 +509,10 @@ function buildBreadcrumbItems(
 
 export default async function SlugPage({
   params,
+  searchParams,
 }: SlugPageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
+  const query = (await searchParams) ?? {};
 
   if (RESERVED_SLUGS.has(slug)) {
     notFound();
@@ -650,16 +658,37 @@ export default async function SlugPage({
     // ("Saravanampatti") so the filter dropdown and syncUrl comparisons match.
     const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
 
+    // Query-string filters must seed the same results the client will fetch
+    // for its mount key (filtersFromParams + sort + page). Otherwise the
+    // unfiltered seed is accepted as fresh and the first paint is wrong.
+    const qOrUndef = (v: string) => (v.trim() !== "" ? v : undefined);
+    const qBedrooms = qsFirst(query.bedrooms);
+    const qLocation = qsFirst(query.location);
+    const qSort = qsFirst(query.sort);
+    const qPage = Math.max(1, parseInt(qsFirst(query.page), 10) || 1);
+    const seedLocation = qLocation || canonicalSubloc;
+    const seedBedrooms =
+      qBedrooms || (pseo.bedrooms != null ? String(pseo.bedrooms) : "");
+
     let initialData = null;
     try {
       initialData = await searchProperties(
         {
           listingType: pseo.listingType,
           propertyType: pseo.propertyType,
-          location: canonicalSubloc,
+          location: seedLocation,
           city: pseo.city,
-          bedrooms: pseo.bedrooms != null ? String(pseo.bedrooms) : undefined,
-          page: 1,
+          propertyName: qOrUndef(qsFirst(query.keyword)),
+          minPrice: qOrUndef(qsFirst(query.minPrice)),
+          maxPrice: qOrUndef(qsFirst(query.maxPrice)),
+          minArea: qOrUndef(qsFirst(query.minArea)),
+          maxArea: qOrUndef(qsFirst(query.maxArea)),
+          bedrooms: seedBedrooms || undefined,
+          facing: qOrUndef(qsFirst(query.facing)),
+          furnishing: qOrUndef(qsFirst(query.furnishing)),
+          propertyAge: qOrUndef(qsFirst(query.propertyAge)),
+          sort: qSort || undefined,
+          page: qPage,
           limit: 12,
         },
         undefined,   // no ISR tags (avoids 429 via fetch deduplication)
@@ -691,18 +720,18 @@ export default async function SlugPage({
     };
 
     const pseoInitialFilters: FilterValues = {
-      keyword: "",
+      keyword: qsFirst(query.keyword),
       propertyType: pseo.propertyType,
       listingType: pseo.listingType,
-      location: canonicalSubloc || "",
-      minPrice: "",
-      maxPrice: "",
-      minArea: "",
-      maxArea: "",
-      bedrooms: pseo.bedrooms != null ? String(pseo.bedrooms) : "",
-      facing: "",
-      furnishing: "",
-      propertyAge: "",
+      location: seedLocation || "",
+      minPrice: qsFirst(query.minPrice),
+      maxPrice: qsFirst(query.maxPrice),
+      minArea: qsFirst(query.minArea),
+      maxArea: qsFirst(query.maxArea),
+      bedrooms: seedBedrooms,
+      facing: qsFirst(query.facing),
+      furnishing: qsFirst(query.furnishing),
+      propertyAge: qsFirst(query.propertyAge),
     };
 
     return (

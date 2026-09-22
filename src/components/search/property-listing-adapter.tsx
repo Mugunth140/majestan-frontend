@@ -452,7 +452,9 @@ export function createPropertyAdapter(init: {
     ),
 
     renderActiveChips: (filters, onChange) => {
-      if (!(filters.keyword || filters.minPrice || filters.maxPrice || filters.bedrooms)) return null;
+      const FURNISHING_LABELS: Record<string, string> = { furnished: "Furnished", semi: "Semi-Furnished", unfurnished: "Unfurnished" };
+      const AGE_LABELS: Record<string, string> = { new: "New", "1-5": "1–5 Years", "5-10": "5–10 Years", "10+": "10+ Years" };
+      if (!(filters.keyword || filters.minPrice || filters.maxPrice || filters.minArea || filters.maxArea || filters.bedrooms || filters.facing || filters.furnishing || filters.propertyAge)) return null;
       return (
         <div className="bg-white! rounded-2xl! shadow-sm! border! border-gray-200/60! p-5!">
           <h3 className="text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-2!">Active Filters</h3>
@@ -469,10 +471,34 @@ export function createPropertyAdapter(init: {
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({...filters, minPrice: "", maxPrice: ""})} />
               </span>
             )}
+            {(filters.minArea || filters.maxArea) && (
+              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+                Area: {filters.minArea || "0"} to {filters.maxArea || "Any"} sq.ft
+                <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({...filters, minArea: "", maxArea: ""})} />
+              </span>
+            )}
             {filters.bedrooms && (
               <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 {filters.bedrooms} BHK
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({...filters, bedrooms: ""})} />
+              </span>
+            )}
+            {filters.facing && (
+              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+                Facing: {filters.facing}
+                <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({...filters, facing: ""})} />
+              </span>
+            )}
+            {filters.furnishing && (
+              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+                {FURNISHING_LABELS[filters.furnishing] ?? filters.furnishing}
+                <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({...filters, furnishing: ""})} />
+              </span>
+            )}
+            {filters.propertyAge && (
+              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+                Age: {AGE_LABELS[filters.propertyAge] ?? filters.propertyAge}
+                <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({...filters, propertyAge: ""})} />
               </span>
             )}
           </div>
@@ -483,7 +509,12 @@ export function createPropertyAdapter(init: {
     buildTitle: (filters) => {
       const propertyTypeLabel = Object.values(PROPERTY_TYPES).find(p => p.apiValue === filters.propertyType)?.label || filters.propertyType;
       const listingTypeLabel = filters.listingType === "Rent" ? "Rent" : "Sale";
-      const locationLabel = filters.location ? filters.location.replace(/-/g, ' ') : "Coimbatore";
+      const rawLocation = filters.location ? filters.location.replace(/-/g, ' ') : "Coimbatore";
+      const locationLabel = rawLocation
+        .split(" ")
+        .filter(Boolean)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
       return `${propertyTypeLabel} in ${locationLabel} for ${listingTypeLabel}`;
     },
 

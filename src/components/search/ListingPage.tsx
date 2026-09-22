@@ -254,7 +254,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   // The site header is exactly 64px tall on mobile (py-2.5 + min-h-11 = 10+44+10=64).
   // We use this for the sticky offset and spacer so it sits flush.
 
-  const page = Number(searchParams.get("page")) || 1;
+  const rawPage = Number(searchParams.get("page")) || 1;
+  const page = Math.max(1, Math.floor(rawPage));
   const sort = searchParams.get("sort") || "";
 
   const [filters, setFilters] = useState<TFilters>({
@@ -270,8 +271,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
     key: JSON.stringify([
       pathname,
       { ...initialFilters, ...(adapter.filtersFromParams(searchParams) as TFilters) },
-      searchParams.get("sort") || "",
-      Number(searchParams.get("page")) || 1,
+      sort,
+      page,
     ]),
     time: Date.now(),
   }));

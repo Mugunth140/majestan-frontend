@@ -19,17 +19,22 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
     resetFilters: { ...EMPTY_PROJECT_FILTERS, city },
 
     fetchItems: async ({ filters, sort, page }) => {
+      // The /projects API has no keyword or sort params, so when either is
+      // active we fetch a wide window (backend max: 100) and do keyword
+      // filtering, sorting, and pagination client-side over the full set.
+      // Plain browsing stays server-paginated (limit 12).
+      const keyword = filters.keyword.trim().toLowerCase();
+      const wide = keyword !== "" || sort !== "";
       const res = await listProjects({
         city: filters.city || undefined,
         projectType: filters.projectType || undefined,
         bhk: filters.bhk ? Number(filters.bhk) : undefined,
         minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
         maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
-        page,
-        limit: 12,
+        page: wide ? 1 : page,
+        limit: wide ? 100 : 12,
       });
       let items = res.items;
-      const keyword = filters.keyword.trim().toLowerCase();
       if (keyword) {
         items = items.filter((item) =>
           [item.name, item.builderName, item.sublocation, item.city].some((field) =>
@@ -40,7 +45,10 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
       if (sort === "low_to_high") items = [...items].sort((a, b) => (a.ranges.minPrice ?? Infinity) - (b.ranges.minPrice ?? Infinity));
       if (sort === "high_to_low") items = [...items].sort((a, b) => (b.ranges.maxPrice ?? -Infinity) - (a.ranges.maxPrice ?? -Infinity));
       if (sort === "newest") items = [...items].sort((a, b) => b.id - a.id);
-      return { items, total: keyword ? items.length : res.total, limit: 12 };
+      if (!wide) return { items, total: res.total, limit: 12 };
+      const total = items.length;
+      const start = (page - 1) * 12;
+      return { items: items.slice(start, start + 12), total, limit: 12 };
     },
 
     getItemKey: (item) => item.id,
@@ -100,6 +108,9 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
       
       if (filters.keyword) params.set("keyword", filters.keyword);
       else params.delete("keyword");
+
+      if (filters.projectType) params.set("projectType", filters.projectType);
+      else params.delete("projectType");
       
       if (filters.minPrice) params.set("minPrice", filters.minPrice);
       else params.delete("minPrice");

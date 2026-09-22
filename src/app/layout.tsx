@@ -82,6 +82,7 @@ export const viewport: Viewport = {
 
 import { QueryProvider } from "@/providers/query-provider";
 import { LocationProvider } from "@/contexts/LocationContext";
+import { GlobalWhatsAppEnquiry } from "@/components/site/enquiry/whatsapp-enquiry-popup";
 
 
 export default function RootLayout({
@@ -164,6 +165,7 @@ export default function RootLayout({
         <QueryProvider>
           <LocationProvider>
             {children}
+            <GlobalWhatsAppEnquiry />
           </LocationProvider>
         </QueryProvider>
       </body>

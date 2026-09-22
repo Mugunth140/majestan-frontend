@@ -16,6 +16,8 @@ import {
 import { LocalityMap } from "./LocalityMap";
 import { CustomSelect } from "./CustomSelect";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
+import { createEnquiry } from "@/lib/api";
+import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { MobileFilterBar } from "./MobileFilterBar";
 import type { ListingAdapter, ListingPageData } from "./listing-adapter";
 
@@ -230,13 +232,67 @@ export function ListingShellSkeleton() {
 
 // ─── floating whatsapp enquiry popup ────────────────────────────────────────
 
-function WhatsAppPopup() {
+function WhatsAppPopup({ pageUrl }: { pageUrl: string }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) nameRef.current?.focus();
+  }, [open ]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open ]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (trimmed.length < 2) {
+      setErrorMsg("Please enter your name.");
+      setStatus("error");
+      return;
+    }
+    const normalized = normalizeIndianPhone(phone);
+    if (!normalized) {
+      setErrorMsg("Please enter a valid 10-digit mobile number.");
+      setStatus("error");
+      return;
+    }
+    setStatus("submitting");
+    setErrorMsg("");
+    try {
+      await createEnquiry({
+        name: trimmed,
+        phone: normalized,
+        source: "whatsapp_popup",
+        pageUrl: pageUrl + window.location.search,
+        whatsappOptIn: true,
+      });
+      setStatus("success");
+    } catch {
+      setErrorMsg("Something went wrong. Please try again.");
+      setStatus("error");
+    }
+  }
 
   return (
+    <>
+      {open && (
+        <button
+          aria-label="Close popup"
+          onClick={() => setOpen(false)}
+          className="fixed! inset-0! z-[9998]! cursor-default!"
+        />
+      )}
     <div className="fixed! bottom-6! right-5! z-[9999]! flex! flex-col! items-end! gap-3!">
       {/* Expanded card */}
       {open && (
@@ -260,19 +316,17 @@ function WhatsAppPopup() {
 
           {/* Body */}
           <div className="p-4! flex! flex-col! gap-3!">
-            {sent ? (
+            {status === "success" ? (
               <p className="text-[13px]! text-blue-950! font-medium! leading-relaxed! py-2! font-['Manrope',sans-serif]!">
-                Thanks {name.split(" ")[0] || "there"}! Our team will reach out to you shortly.
+                Thanks {name.trim().split(" ")[0] || "there"}! Our team will reach out to you shortly.
               </p>
             ) : (
               <form
                 className="flex! flex-col! gap-2.5!"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (name.trim() && phone.trim()) setSent(true);
-                }}
+                onSubmit={handleSubmit}
               >
                 <input
+                  ref={nameRef}
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -289,12 +343,27 @@ function WhatsAppPopup() {
                   pattern="[0-9+ ]{10,15}"
                   className="w-full! p-3! text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400! font-['Manrope',sans-serif]!"
                 />
+                {status === "error" && errorMsg && (
+                  <p className="text-[12px]! text-red-600! font-medium! font-['Manrope',sans-serif]!">
+                    {errorMsg}
+                  </p>
+                )}
                 <button
                   type="submit"
-                  className="flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-semibold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors! font-['Manrope',sans-serif]!"
+                  disabled={status === "submitting"}
+                  className="flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-semibold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors! disabled:opacity-60! disabled:cursor-not-allowed! font-['Manrope',sans-serif]!"
                 >
-                  Request Callback
+                  {status === "submitting" ? "Requesting..." : "Request Callback"}
                 </button>
+                <p className="text-[11px]! text-gray-500! text-center! leading-relaxed! font-['Manrope',sans-serif]!">
+                  By enquiring, you agree to our{" "}
+                  <Link
+                    href="/privacy-policy"
+                    className="text-[#27427f]! font-semibold! hover:underline!"
+                  >
+                    Terms &amp; Conditions.
+                  </Link>
+                </p>
               </form>
             )}
             <a
@@ -320,6 +389,7 @@ function WhatsAppPopup() {
         </button>
       )}
     </div>
+    </>
   );
 }
 
@@ -803,7 +873,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           </main>
         </div>
       </div>
-      <WhatsAppPopup />
+      <WhatsAppPopup pageUrl={pathname} />
     </div>
   );
 }

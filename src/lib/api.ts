@@ -155,6 +155,10 @@ export async function createEnquiry(payload: {
   propertyType?: string;
   listingType?: string;
   message?: string;
+  source?: string;
+  pageUrl?: string;
+  location?: string;
+  whatsappOptIn?: boolean;
 }) {
   return fetchApi<{ id: number; submitted: boolean }>("/leads/enquiry", {
     method: "POST",

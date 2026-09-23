@@ -512,7 +512,10 @@ export default async function SlugPage({
   searchParams,
 }: SlugPageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
-  const query = (await searchParams) ?? {};
+  // NOTE: searchParams must NOT be awaited here. Reading it at the top level
+  // of the page poisons static prerendering (DYNAMIC_SERVER_USAGE → 500 on
+  // every slug URL). It is awaited inside <PseoListingSection> below, which
+  // always renders inside a <Suspense> boundary.
 
   if (RESERVED_SLUGS.has(slug)) {
     notFound();
@@ -652,15 +655,41 @@ export default async function SlugPage({
   }
 
   // ── PSEO page handler ─────────────────────────────────────────────────────
+  // searchParams is read inside <PseoListingSection> (always under Suspense)
+  // so the page shell stays statically prerenderable.
   const pseo = parsePseoSlug(slug);
   if (pseo) {
+    return (
+      <Suspense fallback={<ListingShellSkeleton />}>
+        <PseoListingSection slug={slug} pseo={pseo} searchParams={searchParams} />
+      </Suspense>
+    );
+  }
+
+  notFound();
+}
+
+/**
+ * PSEO listing section. Awaits searchParams here (inside Suspense) so the
+ * query-string filters seed the same results the client will fetch for its
+ * mount key (filtersFromParams + sort + page). Otherwise the unfiltered seed
+ * is accepted as fresh and the first paint is wrong.
+ */
+async function PseoListingSection({
+  slug,
+  pseo,
+  searchParams,
+}: {
+  slug: string;
+  pseo: NonNullable<ReturnType<typeof parsePseoSlug>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<React.JSX.Element> {
+  const query = (await searchParams) ?? {};
+  {
     // Resolve the sublocation slug ("saravanampatti") → canonical name
     // ("Saravanampatti") so the filter dropdown and syncUrl comparisons match.
     const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
 
-    // Query-string filters must seed the same results the client will fetch
-    // for its mount key (filtersFromParams + sort + page). Otherwise the
-    // unfiltered seed is accepted as fresh and the first paint is wrong.
     const qOrUndef = (v: string) => (v.trim() !== "" ? v : undefined);
     const qBedrooms = qsFirst(query.bedrooms);
     const qLocation = qsFirst(query.location);
@@ -758,6 +787,4 @@ export default async function SlugPage({
       </>
     );
   }
-
-  notFound();
 }

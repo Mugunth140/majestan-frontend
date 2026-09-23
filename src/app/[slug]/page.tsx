@@ -39,6 +39,13 @@ export const dynamicParams = true;
 // accumulate rendered pages in .next/cache indefinitely.
 export const revalidate = 300;
 
+// Force per-request rendering: this route mixes property/project detail
+// branches with a query-driven PSEO listing branch (searchParams + client
+// useSearchParams). Any static-generation attempt of it bails out with
+// DYNAMIC_SERVER_USAGE → 500 on every slug URL (seen on staging). Same
+// precedent as the for-sale/for-rent redirect routes.
+export const dynamic = "force-dynamic";
+
 const _abs = (u: string | undefined) =>
   !!u && /^https?:\/\//i.test(u) ? u : undefined;
 const API_BASE =

@@ -22,6 +22,8 @@ import type { NextConfig } from "next";
 // ---------------------------------------------------------------------------
 
 const nextConfig: NextConfig = {
+  // Disable Strict Mode to prevent React DevTools crashes during HMR
+  reactStrictMode: false,
   // Produce .next/standalone with a minimal server.js — the Docker runner
   // executes this with Node instead of `next start` under Bun (memory retention).
   output: "standalone",

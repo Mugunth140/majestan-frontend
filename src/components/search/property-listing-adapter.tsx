@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck } from "lucide-react";
+import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Sprout } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import {
@@ -49,25 +49,39 @@ function getDetailPath(item: PropertySearchItem & { canonicalSlug?: string }): s
   return `/${item.propertyType}-${item.id}-${suffix}${item.id}`;
 }
 
-function getPhotoUrl(item: any): string {
+function getPhotoUrl(item: any): string | null {
+  // The legacy noproperty.* asset is an error-state illustration ("didn't go
+  // as planned") — never render it as a listing photo. Treat it as missing
+  // so cards fall back cleanly. Prefers the primary image, then the first
+  // usable one, so one poisoned entry doesn't hide real photos.
+  const isUsable = (url: unknown): url is string => {
+    if (typeof url !== "string") return false;
+    const t = url.trim();
+    return t !== "" && !/noproperty\.(png|webp)$/i.test(t);
+  };
+  const pickFrom = (images: any[]): string | null => {
+    const ordered = [...images].sort(
+      (a: any, b: any) => Number(b?.isPrimary ?? false) - Number(a?.isPrimary ?? false),
+    );
+    for (const img of ordered) {
+      if (isUsable(img?.imageUrl)) return (img.imageUrl as string).trim();
+    }
+    return null;
+  };
   // Support new unified schema
   if (item.images && item.images.length > 0) {
-    // Sort by isPrimary first, then return the first one
-    const primary = item.images.find((img: any) => img.isPrimary);
-    if (primary && primary.imageUrl) return primary.imageUrl;
-    if (item.images[0].imageUrl) return item.images[0].imageUrl;
+    const found = pickFrom(item.images);
+    if (found) return found;
   }
   if (item.propertyImages && item.propertyImages.length > 0) {
-    const primary = item.propertyImages.find((img: any) => img.isPrimary);
-    if (primary && primary.imageUrl) return primary.imageUrl;
-    if (item.propertyImages[0].imageUrl) return item.propertyImages[0].imageUrl;
+    const found = pickFrom(item.propertyImages);
+    if (found) return found;
   }
 
   // Support legacy
   const photo = item.photo1;
-  if (!photo) return "/assets/images/home/apartment-buy.png";
-  if (photo.startsWith("http")) return photo;
-  return photo;
+  if (!isUsable(photo)) return null;
+  return photo.trim();
 }
 
 function nzNum(v: unknown): number | null {
@@ -149,6 +163,11 @@ function getTypeLabel(item: PropertySearchItem): string | null {
 
 function getAreaCell(item: PropertySearchItem): { label: string; value: string } | null {
   const d = getDetails(item);
+  if (item.propertyType === "plot" || item.propertyType === "farmland") {
+    if (nzNum(d.plotArea) != null) return { label: item.propertyType === "farmland" ? "Farm Area" : "Plot Area", value: fmtArea(d.plotArea)! };
+    const cents = fmtTrimmedNum(d.plotSizeCents);
+    if (cents != null) return { label: item.propertyType === "farmland" ? "Farm Area" : "Plot Area", value: `${cents} cents` };
+  }
   if (nzNum(d.superBuiltUpArea) != null) return { label: "Built-Up Area", value: fmtArea(d.superBuiltUpArea)! };
   if (nzNum(d.areaSqft) != null) return { label: "Built-Up Area", value: fmtArea(d.areaSqft)! };
   if (nzNum(d.carpetArea) != null) return { label: "Carpet Area", value: fmtArea(d.carpetArea)! };
@@ -165,6 +184,31 @@ function getPossession(item: PropertySearchItem): string | null {
 
 function trimNum(n: number): string {
   return String(parseFloat(n.toFixed(2)));
+}
+
+// Display a DB decimal without trailing zeros: "4.0000" → "4", "3.50" → "3.5".
+function fmtTrimmedNum(v: unknown): string | null {
+  if (typeof v !== "string" && typeof v !== "number") return null;
+  const n = parseFloat(String(v));
+  if (isNaN(n)) return null;
+  return String(n);
+}
+
+function trimStr(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t === "" ? null : t;
+}
+
+// Plot dimensions: explicit "Dimension" field first, else L × W from the
+// plotLength / plotWidth numbers (stored unit-less, captured in feet).
+function getLandDimension(d: Record<string, any>): string | null {
+  const direct = trimStr(d.dimension);
+  if (direct) return direct;
+  const len = nzNum(d.plotLength);
+  const wid = nzNum(d.plotWidth);
+  if (len != null && wid != null) return `${trimNum(len)} × ${trimNum(wid)} ft`;
+  return null;
 }
 
 function formatPrice(value: string | number | undefined | null): string {
@@ -201,6 +245,15 @@ function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string
   const price = nzNum(rawPrice);
   if (price == null) return null;
   const d = getDetails(item);
+  if (item.propertyType === "plot" || item.propertyType === "farmland") {
+    // Land is priced per cent, never per sqft. plotSizeCents is authoritative;
+    // areaSqft counts only when explicitly stored in cents.
+    const cents =
+      nzNum(d.plotSizeCents) ??
+      (/cent/i.test(String(d.areaUnit ?? "")) ? nzNum(d.areaSqft) : null);
+    if (cents == null) return null;
+    return `₹ ${Math.round(price / cents).toLocaleString("en-IN")}/cent`;
+  }
   const area = nzNum(d.superBuiltUpArea) ?? nzNum(d.areaSqft) ?? nzNum(d.carpetArea);
   if (area == null) return null;
   return `₹ ${Math.round(price / area).toLocaleString("en-IN")}/sqft`;
@@ -222,6 +275,9 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     { href: `${detailPath}/locality`, label: "Locality", icon: <MapPinned className="w-3.5! h-3.5!" /> },
     { href: `${detailPath}/photos`, label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
   ];
+
+  // Land has no building and captures no amenity tags — Floor Plan and
+  // Amenities links would only ever lead to empty sections.
 
   const priceDisplay = (() => {
     if ((item as any).isProject && (item as any).ranges && (item as any).ranges.unitsCount >= 2) {
@@ -253,6 +309,18 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
 
   const [copied, setCopied] = useState(false);
 
+  // Land parcels often have no building photos — and the legacy
+  // noproperty.* asset reads as an error state. Photo-less plot/farmland
+  // cards render a designed placeholder instead; other types keep the
+  // previous apartment fallback untouched.
+  const isLandCard = item.propertyType === "plot" || item.propertyType === "farmland";
+  const [imgOk, setImgOk] = useState(true);
+  const photoUrl = getPhotoUrl(item);
+  const showLandPlaceholder = isLandCard && (!photoUrl || !imgOk);
+  const visibleLinks = isLandCard
+    ? sectionLinks.filter((link) => link.label !== "Floor Plan" && link.label !== "Amenities")
+    : sectionLinks;
+
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const url = `${window.location.origin}${detailPath}`;
@@ -270,10 +338,43 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   };
 
   const specCells: { label: string; value: React.ReactNode }[] = [];
-  if (unitSpec) specCells.push({ label: "BHK", value: unitSpec });
-  if (areaCell) specCells.push({ label: "Built-Up Area", value: areaCell.value });
-  if (facing) specCells.push({ label: "Facing", value: facing });
-  if (possession) specCells.push({ label: "Possession", value: possession });
+  const d = getDetails(item);
+
+  if (item.propertyType === "plot") {
+    // Plot buyers decide on size, orientation, dimensions, type and legal
+    // clarity — plus boundary/open-sides which signal development readiness.
+    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
+    if (facing) specCells.push({ label: "Facing", value: facing });
+    const dimension = getLandDimension(d);
+    if (dimension) specCells.push({ label: "Dimension", value: dimension });
+    const plotType = trimStr(d.plotType);
+    if (plotType) specCells.push({ label: "Plot Type", value: plotType });
+    const zoning = trimStr(d.zoning);
+    if (zoning) specCells.push({ label: "Zoning", value: zoning });
+    else if (d.approvals) specCells.push({ label: "Approvals", value: d.approvals });
+    else if (possession) specCells.push({ label: "Possession", value: possession });
+    if (d.boundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });
+    else {
+      const openSides = nzNum(d.openSides);
+      if (openSides != null) specCells.push({ label: "Open Sides", value: String(openSides) });
+    }
+  } else if (item.propertyType === "farmland") {
+    // Farmland carries richer agronomy data: soil, water and crop suitability
+    // take precedence; facing is the fallback when crop data is absent.
+    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
+    const soil = trimStr(d.soilType) ?? trimStr(d.landType);
+    if (soil) specCells.push({ label: trimStr(d.soilType) ? "Soil Type" : "Land Type", value: soil });
+    const water = trimStr(d.waterSources) ?? trimStr(d.irrigation);
+    if (water) specCells.push({ label: trimStr(d.waterSources) ? "Water Sources" : "Irrigation", value: water });
+    const crop = trimStr(d.cropSuitability);
+    if (crop) specCells.push({ label: "Crop Suitability", value: crop });
+    else if (facing) specCells.push({ label: "Facing", value: facing });
+  } else {
+    if (unitSpec) specCells.push({ label: "BHK", value: unitSpec });
+    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
+    if (facing) specCells.push({ label: "Facing", value: facing });
+    if (possession) specCells.push({ label: "Possession", value: possession });
+  }
 
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
@@ -282,14 +383,30 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           300px-wide column that stretches to the content height, so the card
           hugs the content with no leftover top/bottom whitespace. */}
       <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
-        <Link href={photosPath} aria-label={`View photos of ${item.propertyname || "property"}`} className="absolute! inset-0!">
-          <img
-            src={getPhotoUrl(item)}
-            alt={item.propertyname || "Property"}
-            className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
-            loading="lazy"
-          />
-        </Link>
+        {showLandPlaceholder ? (
+          <div className="absolute! inset-0! flex! flex-col! items-center! justify-center! gap-2.5! bg-gradient-to-br! from-[#eef2f7]! via-[#e6ecf5]! to-[#d8e1ef]!">
+            <span className="flex! h-14! w-14! items-center! justify-center! rounded-2xl! bg-white! shadow-sm!">
+              {item.propertyType === "farmland" ? (
+                <Sprout className="w-7! h-7! text-emerald-600!" />
+              ) : (
+                <MapPinned className="w-7! h-7! text-[#27427f]!" />
+              )}
+            </span>
+            <span className="text-[12px]! font-semibold! text-[#27427f]/70!">
+              {item.propertyType === "farmland" ? "Farm photos coming soon" : "Plot photos coming soon"}
+            </span>
+          </div>
+        ) : (
+          <Link href={photosPath} aria-label={`View photos of ${item.propertyname || "property"}`} className="absolute! inset-0!">
+            <img
+              src={photoUrl ?? "/assets/images/home/apartment-buy.png"}
+              alt={item.propertyname || "Property"}
+              className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+              loading="lazy"
+              onError={() => setImgOk(false)}
+            />
+          </Link>
+        )}
         {/* RERA verified badge — top-right over image */}
         {reraVerified && (
           <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/90! backdrop-blur-sm! text-[#1d9bf0]! text-[10px]! font-bold! px-2! py-1! rounded-lg! shadow-sm!">
@@ -365,7 +482,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
-          {sectionLinks.map((link) => (
+          {visibleLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}

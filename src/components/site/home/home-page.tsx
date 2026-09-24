@@ -10,6 +10,7 @@ import { LocalityOverviewSection } from "./locality-overview-section";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { HomePageData } from "@/lib/api";
+import type { AdHeroBanner } from "@/lib/ads";
 import Image from "next/image";
 import { toLocationSlug } from "@/lib/seo-urls";
 
@@ -17,7 +18,7 @@ import { toLocationSlug } from "@/lib/seo-urls";
 
 
 
-export function HomePage({ data }: { data: HomePageData }) {
+export function HomePage({ data, banners }: { data: HomePageData; banners: AdHeroBanner[] }) {
   const { location } = useLocationContext();
   const citySlug = toLocationSlug(location);
   
@@ -71,6 +72,7 @@ export function HomePage({ data }: { data: HomePageData }) {
         <HeroSection
           sublocations={data.filters.sublocations}
           unitTypes={data.filters.unitTypes}
+          banners={banners}
         />
 
         <section className="sale-in-cbe py-24 bg-white relative overflow-hidden">

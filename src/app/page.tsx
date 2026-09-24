@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { HomePage } from "@/components/site/home/home-page";
 import { getHomePageData, type HomePageData } from "@/lib/api";
+import { getAdsBanners } from "@/lib/ads";
 
 export const metadata: Metadata = {
   title: "Majestan Realty | Real Estate Experts in Coimbatore",
@@ -30,5 +31,7 @@ export default async function Page() {
     homeData = emptyHomeData;
   }
 
-  return <HomePage data={homeData} />;
+  const banners = await getAdsBanners("hero").catch(() => []);
+
+  return <HomePage data={homeData} banners={banners} />;
 }

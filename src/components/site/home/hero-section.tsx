@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { HomeSearch } from "./home-search";
+import { HeroCarousel } from "./hero-carousel";
+import type { AdHeroBanner } from "@/lib/ads";
 import type { Sublocation, UnitType } from "@/lib/api";
 import Image from "next/image";
 import { useLocationContext } from "@/contexts/LocationContext";
@@ -10,9 +12,10 @@ import { toLocationSlug } from "@/lib/seo-urls";
 interface HeroSectionProps {
   sublocations: Sublocation[];
   unitTypes: UnitType[];
+  banners?: AdHeroBanner[];
 }
 
-export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
+export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSectionProps) {
   const { location: city } = useLocationContext();
   const citySlug = toLocationSlug(city);
   const propertyCategories = [
@@ -30,16 +33,20 @@ export function HeroSection({ sublocations, unitTypes }: HeroSectionProps) {
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white">
 
       {/* ── Hero background image (responsive) ─────────────────── */}
-      <picture>
-        <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.png" />
-        <img
-          src="/assets/images/hero/hero_desktop.png"
-          alt="Majestan Realty — Properties"
-          className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
-          fetchPriority="high"
-          loading="eager"
-        />
-      </picture>
+      {banners.length > 0 ? (
+        <HeroCarousel banners={banners} citySlug={citySlug} />
+      ) : (
+        <picture>
+          <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.png" />
+          <img
+            src="/assets/images/hero/hero_desktop.png"
+            alt="Majestan Realty — Properties"
+            className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
+            fetchPriority="high"
+            loading="eager"
+          />
+        </picture>
+      )}
 
       {/* ── Gradient overlay — (bottom-to-top) ──────────── */}
       <div

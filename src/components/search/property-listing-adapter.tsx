@@ -136,6 +136,20 @@ function getAge(item: PropertySearchItem): string | null {
   return d.propertyAge ?? (item as any).property_age ?? (item as any).ageofproperty ?? (item as any).age_of_property ?? null;
 }
 
+// Pricing-row ribbon: only the canonical condition vocabulary gets a badge;
+// anything else stays unlabeled rather than printing junk on the card.
+function getConditionBadge(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  const raw =
+    trimStr(d.propertyCondition) ??
+    trimStr((item as any).propertyCondition) ??
+    trimStr((item as any).property_condition);
+  if (!raw) return null;
+  const low = raw.toLowerCase();
+  if (low === "resale" || low === "new" || low === "under construction") return raw.toUpperCase();
+  return null;
+}
+
 function getParking(item: PropertySearchItem): string | null {
   const d = getDetails(item);
   const n = nzNum(d.parking);
@@ -163,10 +177,21 @@ function getTypeLabel(item: PropertySearchItem): string | null {
 
 function getAreaCell(item: PropertySearchItem): { label: string; value: string } | null {
   const d = getDetails(item);
-  if (item.propertyType === "plot" || item.propertyType === "farmland") {
-    if (nzNum(d.plotArea) != null) return { label: item.propertyType === "farmland" ? "Farm Area" : "Plot Area", value: fmtArea(d.plotArea)! };
+  if (item.propertyType === "plot") {
+    if (nzNum(d.plotArea) != null) return { label: "Plot Area", value: fmtArea(d.plotArea)! };
     const cents = fmtTrimmedNum(d.plotSizeCents);
-    if (cents != null) return { label: item.propertyType === "farmland" ? "Farm Area" : "Plot Area", value: `${cents} cents` };
+    if (cents != null) return { label: "Plot Area", value: `${cents} cents` };
+  }
+  if (item.propertyType === "farmland") {
+    // Farm Area is always quoted in cents, never sq.ft. plotSizeCents is
+    // authoritative; otherwise Total Plot Area carries the cent figure
+    // (Acres honored when explicitly chosen as the area unit).
+    const cents = fmtTrimmedNum(d.plotSizeCents);
+    if (cents != null) return { label: "Farm Area", value: `${cents} cents` };
+    if (nzNum(d.plotArea) != null) {
+      if (/acre/i.test(String(d.areaUnit ?? ""))) return { label: "Farm Area", value: `${fmtTrimmedNum(d.plotArea)} acres` };
+      return { label: "Farm Area", value: `${fmtTrimmedNum(d.plotArea)} cents` };
+    }
   }
   if (nzNum(d.superBuiltUpArea) != null) return { label: "Built-Up Area", value: fmtArea(d.superBuiltUpArea)! };
   if (nzNum(d.areaSqft) != null) return { label: "Built-Up Area", value: fmtArea(d.areaSqft)! };
@@ -362,13 +387,14 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     // Farmland carries richer agronomy data: soil, water and crop suitability
     // take precedence; facing is the fallback when crop data is absent.
     if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
-    const soil = trimStr(d.soilType) ?? trimStr(d.landType);
-    if (soil) specCells.push({ label: trimStr(d.soilType) ? "Soil Type" : "Land Type", value: soil });
     const water = trimStr(d.waterSources) ?? trimStr(d.irrigation);
     if (water) specCells.push({ label: trimStr(d.waterSources) ? "Water Sources" : "Irrigation", value: water });
     const crop = trimStr(d.cropSuitability);
     if (crop) specCells.push({ label: "Crop Suitability", value: crop });
     else if (facing) specCells.push({ label: "Facing", value: facing });
+    if (d.boundaryWall) specCells.push({ label: "Fencing", value: "Yes" });
+    const age = getAge(item);
+    if (age) specCells.push({ label: "Property Age", value: age });
   } else {
     if (unitSpec) specCells.push({ label: "BHK", value: unitSpec });
     if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
@@ -439,8 +465,8 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
                 {item.propertyname}
               </h3>
             </Link>
-            <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-500! min-w-0!">
-              <MapPin className="w-3.5! h-3.5! text-gray-400! shrink-0!" />
+            <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-600! min-w-0!">
+              <MapPin className="w-3.5! h-3.5! text-gray-500! shrink-0!" />
               <span className="truncate!">{locationLabel}</span>
             </p>
           </div>
@@ -461,6 +487,18 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             const perSqft = getPricePerSqft(item, priceDisplay);
             return perSqft ? (
               <span className="text-[13px]! font-medium! text-gray-700!">{perSqft}</span>
+            ) : null;
+          })()}
+          {(() => {
+            // Condition ribbon pinned to the end of the pricing row.
+            const badge = getConditionBadge(item);
+            return badge ? (
+              <span
+                className="ml-auto! shrink-0! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"
+                style={{ clipPath: "polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%)" }}
+              >
+                {badge}
+              </span>
             ) : null;
           })()}
         </div>

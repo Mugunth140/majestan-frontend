@@ -166,6 +166,26 @@ function fmtShortDate(v: unknown): string | null {
   return `${String(dt.getDate()).padStart(2, "0")}-${mon}-${dt.getFullYear()}`;
 }
 
+// "2026-10-02" → "2nd Oct 2026" for the photo overlay.
+function fmtOrdinalDate(v: unknown): string | null {
+  if (typeof v !== "string" || !v.trim()) return null;
+  const dt = new Date(v);
+  if (isNaN(dt.getTime())) return null;
+  const day = dt.getDate();
+  const suffix =
+    day % 10 === 1 && day !== 11 ? "st"
+    : day % 10 === 2 && day !== 12 ? "nd"
+    : day % 10 === 3 && day !== 13 ? "rd"
+    : "th";
+  const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.getMonth()];
+  return `${day}${suffix} ${mon} ${dt.getFullYear()}`;
+}
+
+function getAvailableFromLabel(item: PropertySearchItem): string | null {
+  const d = getDetails(item);
+  return fmtOrdinalDate(d.availableFrom ?? (item as any).availableFrom ?? (item as any).available_from);
+}
+
 function getTypeLabel(item: PropertySearchItem): string | null {
   const raw = Object.values(PROPERTY_TYPES).find((p) => p.apiValue === item.propertyType)?.label
     ?? (typeof item.propertyType === "string" ? item.propertyType : "");
@@ -440,6 +460,20 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             RERA
           </span>
         )}
+        {/* Available-from strip — slim black-to-transparent gradient over the
+            bottom 10% of the photo so the date reads on any image. Photos
+            only; land placeholders keep their clean look. */}
+        {!showLandPlaceholder &&
+          (() => {
+            const availableFrom = getAvailableFromLabel(item);
+            return availableFrom ? (
+              <div className="absolute! inset-x-0! bottom-0! h-[10%]! min-h-[34px]! flex! items-end! justify-center! pb-1.5! bg-gradient-to-t! from-black/60! to-transparent! pointer-events-none!">
+                <span className="text-[11px]! font-semibold! tracking-wide! text-white!">
+                  Available from {availableFrom}
+                </span>
+              </div>
+            ) : null;
+          })()}
       </div>
 
       {/* Content — clicking anywhere here goes to the overview page.

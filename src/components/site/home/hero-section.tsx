@@ -30,7 +30,15 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
   ] as const;
 
   return (
-    <section className="relative overflow-hidden bg-white">
+    /*
+      min-h = one full screen (minus the fixed header, which main already pads
+      for) so the next section ("Properties for Sale in …") always starts below
+      the fold instead of crowding the bottom of the hero. `100svh` not `100vh`:
+      on mobile 100vh includes the URL-bar area, which would overflow. min-height
+      rather than height — when the search + category strip are taller than the
+      leftover space (small phones), the section grows instead of clipping.
+    */
+    <section className="relative overflow-hidden bg-white flex flex-col min-h-[calc(100svh-var(--site-header-h,65px))]!">
 
       {/* ── SEO-only heading (banner artwork carries the visible text) ── */}
       <h1 className="sr-only">Your Trusted Real Estate Partner in {city}</h1>
@@ -68,8 +76,15 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
         desktop and 21 - 21 = 0px on mobile: the 4:5 mobile creative has its
         headline baked into the bottom of the artwork, and dragging the card over
         it there would hide the ad copy.
+
+        flex-1! absorbs the leftover screen height (so the next section clears the
+        fold) but the group stays justify-start: the banner is locked to 32:9, so
+        on a 16:9 display there is always slack below it. Centring the group in
+        that slack would push the card ~110px clear of the banner and undo the
+        overlap; top-anchoring keeps the overlap and leaves the slack as clean
+        whitespace above the fold.
       */}
-      <div className="tf-container relative z-20 flex flex-col items-center justify-center text-center w-full px-4 -mt-6! md:-mt-16!">
+      <div className="tf-container relative z-20 flex flex-1! flex-col items-center justify-start text-center w-full px-4 -mt-6! md:-mt-16! pb-8! md:pb-10!">
         <div className="w-full">
           <HomeSearch
             key={city}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, Bolt, UserRound, Phone } from "lucide-react";
+import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, UserRound, Phone } from "lucide-react";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
@@ -28,6 +28,15 @@ const SERVICE_LINKS: MegaMenuLink[] = [
 
 type Category = "Buy" | "Rent" | "Services" | null;
 
+/**
+ * TODO(art): the mega-menu promo image has not been supplied yet. `null` means
+ * "no art", which renders the empty tinted panel and issues no request — setting
+ * it to a path (e.g. "/assets/images/mega-menu/buy.jpg") turns the image on.
+ * The art is rendered bare: no overlay copy, icon or button. Keep the artwork
+ * close to 6:5 (288x236) or `object-cover` will crop it.
+ */
+const MEGA_MENU_ART: string | null = null;
+
 export function SiteHeader(): React.JSX.Element {
   const {
     location,
@@ -47,7 +56,12 @@ export function SiteHeader(): React.JSX.Element {
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
-  const [hoveredLink, setHoveredLink] = useState<MegaMenuLink | null>(null);
+  /**
+   * Set when the mega-menu promo art fails to load. The final image has not been
+   * supplied yet, so without this the dropdown shows a broken-image glyph until
+   * the file lands; instead we fall back to the empty tinted panel.
+   */
+  const [artFailed, setArtFailed] = useState(false);
   const cityDropdownRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -189,7 +203,6 @@ export function SiteHeader(): React.JSX.Element {
                     key={cat}
                     onMouseEnter={() => {
                       setHoveredCategory(cat);
-                      setHoveredLink(null);
                     }}
                     className="relative"
                   >
@@ -340,54 +353,48 @@ export function SiteHeader(): React.JSX.Element {
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="absolute! top-full left-1/2 z-1005 w-[min(920px,88vw)] pt-2.5!"
             >
-              <div className="flex! gap-9 rounded-[28px] border border-[#e5e9f0]! bg-white! p-6! shadow-[0_24px_60px_rgba(22,30,45,0.18)]!">
-                <div className="flex-1">
-                  <div className="mb-4.5 border-b border-[#ffc900]/30 pb-3.5">
-                    <p className="m-0 mb-2 text-[18px]! font-semibold! leading-tight text-[#27427f]!">{getFeatured(hoveredCategory)?.title}</p>
-                  </div>
-                  <div className="grid! grid-cols-2 gap-1 transition-all duration-200">
+              {/* Matches the service-page language: Manrope, medium weights, one
+                  light surface, hairline rules. Not a dark promo card. */}
+              <div className="font-manrope-page flex! gap-8 rounded-[20px] border border-gray-200! bg-white! p-7! shadow-[0_18px_44px_-24px_rgba(22,30,45,0.32)]!">
+                <div className="flex-1 min-w-0">
+                  <h2 className="m-0 text-[19px]! font-medium! leading-[1.2]! tracking-[-0.018em]! text-[#161e2d]! pb-[14px]! mb-[14px]! border-b! border-gray-200!">
+                    {getFeatured(hoveredCategory)?.title}
+                  </h2>
+                  <div className="grid! grid-cols-2 gap-x-2 gap-y-0.5">
                     {getLinks(hoveredCategory).map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
-                        onMouseEnter={() => setHoveredLink(link)}
-                        className="flex! items-center! gap-3.5 rounded-xl p-3 text-[14px]! font-bold leading-tight text-[#27427f]/75 no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#27427f]"
+                        className="group flex! items-center! gap-3 rounded-[10px]! px-3! py-[9px]! text-[14px]! font-medium! leading-tight! text-gray-700! no-underline! transition-colors duration-150! hover:bg-[#f5f7fc]! hover:text-[#161e2d]!"
                       >
-                        <span className="inline-flex! shrink-0 text-[#27427f]">{link.icon}</span>
+                        <span className="inline-flex! shrink-0 text-[#27427f] opacity-60! transition-opacity duration-150! group-hover:opacity-100!">
+                          {link.icon}
+                        </span>
                         <span>{link.text}</span>
                       </Link>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex! w-[270px]! shrink-0 flex-col items-center! justify-center! rounded-2xl bg-[#27427f] p-7 text-center text-white relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-[linear-gradient(135deg,#27427f,rgba(39,66,127,0.85))] z-0 transition-all duration-300"></div>
-                  <div className="relative z-10 flex w-full h-full flex-col items-center justify-center p-2">
-                    <div className="mb-4 inline-flex items-center justify-center rounded-full p-4 text-[#ffc900] transition-transform duration-300 group-hover:scale-110">
-                      {hoveredLink
-                        ? React.cloneElement(
-                            hoveredLink.icon as React.ReactElement<{
-                              size?: number;
-                            }>,
-                            { size: 32 },
-                          )
-                        : <Bolt size={32} />}
-                    </div>
-                    <h4 className="mb-3 text-[16px]! font-black leading-tight text-white transition-all duration-300">
-                      {hoveredLink ? hoveredLink.text : getFeatured(hoveredCategory)?.title}
-                    </h4>
-                    <p className="mb-6 text-[12px]! font-medium leading-relaxed text-white/70">
-                      {hoveredLink
-                        ? `Explore the best options in ${hoveredLink.text.toLowerCase()} tailored just for you.`
-                        : "Discover top properties in the city."}
-                    </p>
-                    <Link
-                      href={hoveredLink ? hoveredLink.href : (getFeatured(hoveredCategory)?.href || "#")}
-                      className="w-full rounded-xl bg-[#ffc900] px-4! py-3.5! text-[12px]! font-black leading-none tracking-[0.08em] text-[#27427f] uppercase no-underline shadow-[0_10px_20px_rgba(39,66,127,0.3)] transition-transform hover:scale-[1.04] hover:shadow-[0_12px_24px_rgba(39,66,127,0.4)]"
-                    >
-                      {hoveredLink ? `View ${hoveredLink.text}` : getFeatured(hoveredCategory)?.btn}
-                    </Link>
-                  </div>
+                {/* Promotional art. The image alone — no overlay copy, no icon
+                    badge, no button — so the panel reads as navigation plus one
+                    picture rather than a promo card bolted onto a menu.
+
+                    `artFailed` covers the case where the path is set but the file
+                    is missing or fails to decode: the <img> is dropped and the
+                    tinted panel stands in, so a bad path degrades to an empty
+                    slot rather than a broken-image glyph. */}
+                <div className="relative! w-[288px]! shrink-0! self-stretch! min-h-[236px]! overflow-hidden! rounded-[14px]! border! border-gray-200/80! bg-[#f5f7fc]!">
+                  {MEGA_MENU_ART && !artFailed && (
+                    <Image
+                      src={MEGA_MENU_ART}
+                      alt=""
+                      fill
+                      sizes="288px"
+                      className="object-cover!"
+                      onError={() => setArtFailed(true)}
+                    />
+                  )}
                 </div>
               </div>
             </motion.div>

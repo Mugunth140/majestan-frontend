@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X, MessageCircle } from "lucide-react";
 import { createEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { parsePseoSlug } from "@/lib/seo-urls";
+
+/* ── Spring vocabulary ─────────────────────────────────────────────────────
+   One critically-damped spring for the trigger (response 0.32) and one
+   under-damped spring for the card (a touch of settle). Every transition
+   reads the live value, so re-tapping mid-flight reverses cleanly.        */
+const SPRING = { type: "spring", stiffness: 420, damping: 34, mass: 0.7 } as const;
+const SPRING_CARD = { type: "spring", stiffness: 380, damping: 30, mass: 0.9 } as const;
 
 export function WhatsAppPopup({
   pageUrl,
@@ -19,13 +27,26 @@ export function WhatsAppPopup({
   propertyType?: string;
   location?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  // The card belongs to the page it was opened on: a route change makes it
+  // stale by definition, so "open" is derived rather than reset in an effect.
+  const [openedOn, setOpenedOn] = useState<string | null>(null);
+  const open = openedOn === pageUrl;
+  const setOpen = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
+    setOpenedOn((prev) => {
+      const next = typeof v === "function" ? v(prev === pageUrl) : v;
+      return next ? pageUrl : null;
+    });
+  }, [pageUrl]);
+  const close = useCallback(() => setOpen(false), [setOpen]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [pressed, setPressed] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (open) nameRef.current?.focus();
@@ -58,7 +79,18 @@ export function WhatsAppPopup({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open ]);
+  }, [open, setOpen]);
+
+  useEffect(() => {
+    if (!open) return;
+    // Dismiss on a press that starts outside the widget — no full-page scrim,
+    // so the page underneath stays interactive while the card is open.
+    const onDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [open, setOpen]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -94,108 +126,162 @@ export function WhatsAppPopup({
     }
   }
 
+  // Reduced motion: cross-fade only, no scale, no travel.
+  const cardMotion = reduceMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+        initial: { opacity: 0, scale: 0.88, y: 12 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.94, y: 8 },
+      };
+
   return (
-    <>
-      {open && (
-        <button
-          aria-label="Close popup"
-          onClick={() => setOpen(false)}
-          className="fixed! inset-0! z-[9998]! cursor-default!"
-        />
-      )}
-    <div className="fixed! bottom-6! right-5! z-[9999]! flex! flex-col! items-end! gap-3!">
-      {/* Expanded card */}
-      {open && (
-        <div
-          ref={cardRef}
-          className="w-[300px]! bg-white! rounded-2xl! shadow-[0_8px_40px_rgba(0,0,0,0.18)]! border! border-gray-100! overflow-hidden! animate-in! fade-in! slide-in-from-bottom-4! duration-200!"
-        >
-          {/* Header */}
-          <div className="flex! items-center! justify-between! px-4! py-3! bg-[#27427f]!">
-            <div className="flex! items-center! gap-2!">
-              <MessageCircle className="w-4! h-4! text-white! fill-white!" />
-              <span className="text-[13px]! font-semibold! text-white! font-['Manrope',sans-serif]!">
-                Get Details via WhatsApp
+    <div
+      ref={rootRef}
+      className="fixed! z-[9999]! flex! flex-col! items-end! gap-3!
+                 right-4! sm:right-6!
+                 bottom-[calc(1.25rem+env(safe-area-inset-bottom))]! sm:bottom-6!"
+    >
+      {/* Card — grows out of the trigger, so its origin is the trigger itself. */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            ref={cardRef}
+            variants={cardMotion}
+            transition={reduceMotion ? { duration: 0.15 } : SPRING_CARD}
+            style={{ transformOrigin: "bottom right" }}
+            role="dialog"
+            aria-label="Enquire via WhatsApp"
+            className="w-[min(20rem,calc(100vw-2rem))]! overflow-hidden! rounded-3xl!
+                       border! border-white/60! bg-white/85!
+                       shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-8px_rgba(16,24,40,0.18)]!
+                       backdrop-blur-xl! backdrop-saturate-150!"
+          >
+            {/* Header */}
+            <div className="flex! items-center! gap-2.5! px-4! py-3.5!">
+              <span className="grid! h-7! w-7! place-items-center! rounded-full! bg-[#27427f]! text-white!">
+                <MessageCircle className="h-4! w-4! fill-white!" aria-hidden />
               </span>
-            </div>
-            <button
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-              className="text-white/70! hover:text-white! transition-colors! cursor-pointer!"
-            >
-              <X className="w-4! h-4!" />
-            </button>
-          </div>
-
-          {/* Body */}
-          <div className="p-4! flex! flex-col! gap-3!">
-            {status === "success" ? (
-              <p className="text-[13px]! text-blue-950! font-medium! leading-relaxed! py-2! font-['Manrope',sans-serif]!">
-                Thanks {name.trim().split(" ")[0] || "there"}! Our team will reach out to you shortly.
-              </p>
-            ) : (
-              <form
-                className="flex! flex-col! gap-2.5!"
-                onSubmit={handleSubmit}
-              >
-                <input
-                  ref={nameRef}
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
-                  required
-                  className="w-full! p-3! text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400! font-['Manrope',sans-serif]!"
-                />
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Phone number"
-                  required
-                  pattern="[0-9+ ]{10,15}"
-                  className="w-full! p-3! text-sm! border! border-gray-200! rounded-lg! outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-gray-400! font-['Manrope',sans-serif]!"
-                />
-                {status === "error" && errorMsg && (
-                  <p className="text-[12px]! text-red-600! font-medium! font-['Manrope',sans-serif]!">
-                    {errorMsg}
-                  </p>
-                )}
-                <button
-                  type="submit"
-                  disabled={status === "submitting"}
-                  className="flex! items-center! justify-center! gap-2! w-full! py-2.5! bg-[#27427f]! text-white! text-sm! font-semibold! rounded-xl! cursor-pointer! hover:bg-[#1a2d59]! transition-colors! disabled:opacity-60! disabled:cursor-not-allowed! font-['Manrope',sans-serif]!"
-                >
-                  {status === "submitting" ? "Requesting..." : "Request Callback"}
-                </button>
-                <p className="text-[11px]! text-gray-500! text-center! leading-relaxed! font-['Manrope',sans-serif]!">
-                  By enquiring, you agree to our{" "}
-                  <Link
-                    href="/privacy-policy"
-                    className="text-[#27427f]! font-semibold! hover:underline!"
-                  >
-                    Terms &amp; Conditions.
-                  </Link>
+              <div className="min-w-0!">
+                <p className="truncate! text-[13px]! font-semibold! leading-tight! tracking-[-0.01em]! text-slate-900! font-['Manrope',sans-serif]!">
+                  Get details on WhatsApp
                 </p>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+                <p className="text-[11px]! leading-tight! text-slate-500! font-['Manrope',sans-serif]!">
+                  We reply within a few hours
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Close"
+                className="ml-auto! -mr-1! grid! h-8! w-8! shrink-0! cursor-pointer! place-items-center!
+                           rounded-full! text-slate-500! transition-colors! hover:bg-slate-900/5! hover:text-slate-900!
+                           focus-visible:outline-2! focus-visible:outline-offset-2! focus-visible:outline-[#27427f]!"
+              >
+                <X className="h-4! w-4!" aria-hidden />
+              </button>
+            </div>
 
-      {/* Trigger pill — only visible when popup is closed */}
-      {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Get Details via WhatsApp"
-          className="flex! items-center! gap-2! px-4! py-4! bg-[#27427f]! text-white! text-[13px]! font-semibold! rounded-full! shadow-lg! hover:bg-[#1a2d59]! transition-all! duration-200! cursor-pointer! font-['Manrope',sans-serif]! whitespace-nowrap!"
+            {/* Body */}
+            <div className="border-t! border-slate-900/5! px-4! pb-4! pt-3.5! flex! flex-col! gap-3!">
+              {status === "success" ? (
+                <p className="text-[13px]! text-slate-700! font-medium! leading-relaxed! py-1! font-['Manrope',sans-serif]!">
+                  Thanks {name.trim().split(" ")[0] || "there"}! Our team will reach out to you shortly.
+                </p>
+              ) : (
+                <form className="flex! flex-col! gap-2!" onSubmit={handleSubmit}>
+                  <input
+                    ref={nameRef}
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    autoComplete="name"
+                    aria-label="Your name"
+                    required
+                    className="w-full! p-3! text-sm! border! border-slate-200! bg-white/70! rounded-xl! outline-none!
+                               focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-slate-400!
+                               font-['Manrope',sans-serif]!"
+                  />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Phone number"
+                    autoComplete="tel"
+                    inputMode="numeric"
+                    aria-label="Phone number"
+                    required
+                    pattern="[0-9+ ]{10,15}"
+                    className="w-full! p-3! text-sm! border! border-slate-200! bg-white/70! rounded-xl! outline-none!
+                               focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! placeholder:text-slate-400!
+                               font-['Manrope',sans-serif]!"
+                  />
+                  {status === "error" && errorMsg && (
+                    <p role="alert" className="text-[12px]! text-red-600! font-medium! font-['Manrope',sans-serif]!">
+                      {errorMsg}
+                    </p>
+                  )}
+                  <motion.button
+                    type="submit"
+                    disabled={status === "submitting"}
+                    whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+                    transition={SPRING}
+                    className="flex! items-center! justify-center! w-full! py-2.5! bg-[#27427f]! text-white! text-sm!
+                               font-semibold! rounded-xl! cursor-pointer! transition-colors! hover:bg-[#1a2d59]!
+                               disabled:opacity-60! disabled:cursor-not-allowed! font-['Manrope',sans-serif]!"
+                  >
+                    {status === "submitting" ? "Requesting…" : "Request callback"}
+                  </motion.button>
+                  <p className="text-[11px]! text-slate-500! leading-relaxed! font-['Manrope',sans-serif]!">
+                    By enquiring, you agree to our{" "}
+                    <Link href="/privacy-policy" className="text-[#27427f]! font-semibold! hover:underline!">
+                      Terms &amp; Conditions.
+                    </Link>
+                  </p>
+                </form>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Trigger — one 56pt target that owns the icon swap. */}
+      <motion.button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        onPointerDown={() => setPressed(true)}
+        onPointerUp={() => setPressed(false)}
+        onPointerCancel={() => setPressed(false)}
+        onPointerLeave={() => setPressed(false)}
+        animate={{ scale: pressed ? 0.93 : 1 }}
+        whileHover={reduceMotion ? undefined : { scale: pressed ? 0.93 : 1.04 }}
+        transition={SPRING}
+        aria-expanded={open}
+        aria-label={open ? "Close WhatsApp enquiry" : "Get details via WhatsApp"}
+        className="relative! grid! h-14! w-14! shrink-0! cursor-pointer! place-items-center! rounded-full!
+                   bg-[#27427f]! text-white!
+                   shadow-[0_1px_2px_rgba(16,24,40,0.16),0_8px_24px_-6px_rgba(39,66,127,0.45)]!
+                   focus-visible:outline-2! focus-visible:outline-offset-3! focus-visible:outline-[#27427f]!"
+      >
+        <motion.span
+          aria-hidden
+          animate={{ rotate: open ? 90 : 0, scale: open ? 0.6 : 1, opacity: open ? 0 : 1 }}
+          transition={reduceMotion ? { duration: 0.12 } : SPRING}
+          className="absolute! inset-0! grid! place-items-center!"
         >
-          <MessageCircle className="w-5! h-5! shrink-0! fill-white!" />
-          {/* Get Details via WhatsApp */}
-        </button>
-      )}
+          <MessageCircle className="h-6! w-6! fill-white!" />
+        </motion.span>
+        <motion.span
+          aria-hidden
+          animate={{ rotate: open ? 0 : -90, scale: open ? 1 : 0.6, opacity: open ? 1 : 0 }}
+          transition={reduceMotion ? { duration: 0.12 } : SPRING}
+          className="absolute! inset-0! grid! place-items-center!"
+        >
+          <X className="h-5! w-5!" />
+        </motion.span>
+      </motion.button>
     </div>
-    </>
   );
 }
 

@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CATEGORIES } from "./content";
-import { usePrefersReducedMotion } from "./use-prefers-reduced-motion";
+import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
 
 /* ── Apple physics ──────────────────────────────────────────────────────────
  * Both helpers are lifted from Apple's "Designing Fluid Interfaces" sample

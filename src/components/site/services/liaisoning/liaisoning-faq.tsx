@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { useId, useState } from "react";
 
 import { FAQ } from "./content";
-import { usePrefersReducedMotion } from "./use-prefers-reduced-motion";
+import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
 
 /**
  * Single-open accordion. A height spring rather than a fixed-duration tween, so

@@ -1,5 +1,5 @@
 import { GENERAL_LIAISONING } from "./content";
-import { Reveal } from "./reveal";
+import { Reveal } from "@/components/site/shared/reveal";
 
 /**
  * Real table markup, not divs pretending to be one: `Aspect` is the row header

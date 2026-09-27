@@ -1,5 +1,5 @@
 import { PROCESS } from "./content";
-import { Reveal, RevealItem } from "./reveal";
+import { Reveal, RevealItem } from "@/components/site/shared/reveal";
 
 /**
  * A ruled list, not a grid of cards.

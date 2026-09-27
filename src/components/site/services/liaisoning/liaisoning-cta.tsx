@@ -7,8 +7,8 @@ import { CheckCircle2, Loader2, MessageCircle, Phone, Send, TriangleAlert } from
 import { createEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { CTA } from "./content";
-import { usePrefersReducedMotion } from "./use-prefers-reduced-motion";
-import { Reveal } from "./reveal";
+import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
+import { Reveal } from "@/components/site/shared/reveal";
 
 type Status = "idle" | "submitting" | "success" | "error";
 

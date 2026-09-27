@@ -49,6 +49,26 @@ export function SiteHeader(): React.JSX.Element {
   const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<MegaMenuLink | null>(null);
   const cityDropdownRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // The header is `fixed`, so every page that renders a full-bleed hero at the
+  // very top needs to know how tall it actually is. It is not a constant: the
+  // logo shrinks at 1180/900/640px and the bar reflows, so the measured height
+  // ranges ~60px -> ~65px. Publishing it as --site-header-h keeps the offset
+  // exact at every breakpoint instead of hard-coding a px guess that goes stale
+  // the moment the bar's padding or logo size changes.
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const apply = () => {
+      const h = Math.round(el.getBoundingClientRect().height);
+      if (h > 0) document.documentElement.style.setProperty("--site-header-h", `${h}px`);
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (isMobileMenuOpen) return;
@@ -146,6 +166,7 @@ export function SiteHeader(): React.JSX.Element {
   return (
     <>
       <header
+        ref={headerRef}
         className="fixed! top-0! w-full! max-w-full! left-0 z-[1000] bg-white/95! backdrop-blur-xs! py-2.5! px-5! font-['Lexend',sans-serif] shadow-[0_4px_20px_rgba(22,30,45,0.06)]!"
         onMouseLeave={() => setHoveredCategory(null)}
       >

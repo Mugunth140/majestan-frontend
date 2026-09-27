@@ -68,7 +68,9 @@ export function HomePage({ data, banners }: { data: HomePageData; banners: AdHer
     <div id="wrapper" className="counter-scroll migrated-home">
       <SiteHeader />
 
-      <main>
+      {/* pt = the fixed header's measured height, otherwise the top of the
+          32:9 hero banner (and its baked-in headline) sits behind the navbar. */}
+      <main className="pt-[var(--site-header-h)]!">
         <HeroSection
           sublocations={data.filters.sublocations}
           unitTypes={data.filters.unitTypes}

@@ -7,6 +7,15 @@ body {
   padding: 0;
 }
 
+/*
+ * Fallback height of the fixed site header, used until (and if) the header's
+ * ResizeObserver publishes the measured value. Matches the desktop bar
+ * (logo h-10 + py-2.5 * 2 ≈ 60px + border/shadow rounding).
+ */
+:root {
+  --site-header-h: 65px;
+}
+
 .legacy-app-root,
 .majestan-app-root {
   background: #fff;

@@ -19,7 +19,15 @@ const API_BASE =
   _abs(process.env.NEXT_PUBLIC_API_BASE_URL) ||
   "http://localhost:5000/api/v1";
 
-const STATIC_ROUTES = ["", "/about-us", "/contact-us", "/post-property"];
+const STATIC_ROUTES = [
+  "",
+  "/about-us",
+  "/contact-us",
+  "/post-property",
+  // Redesigned out of the legacy view registry into its own static route, so it
+  // no longer resolves through [slug]/[...section] and has to be listed here.
+  "/services/liaisoning",
+];
 
 const CITIES = ["coimbatore"];
 

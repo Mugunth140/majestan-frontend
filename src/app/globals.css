@@ -365,3 +365,42 @@ body {
   }
 }
 
+/* ── /services/liaisoning — accessibility media queries ───────────────────
+   The other two signals the design system responds to. These are pure CSS
+   rather than JS: unlike prefers-reduced-motion they never change the DOM, so
+   they carry no hydration cost.
+
+   reduced-transparency: the CTA sits on a dark panel and uses one translucent
+   button over it. Without blur, that fill has to go fully opaque or the label
+   loses contrast against whatever sits behind it.
+
+   contrast: more — near-solid fills plus a defined border, because the tints
+   this page relies on for hierarchy (navy at 6-7% as a label colour, navy at
+   10% as a track fill) are exactly the kind of low-contrast signalling that
+   disappears. */
+@media (prefers-reduced-transparency: reduce) {
+  .liaisoning-translucent {
+    background: #1f2c47 !important;
+    backdrop-filter: none !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .liaisoning-eyebrow,
+  .liaisoning-meta-label {
+    background: #27427f !important;
+    color: #ffffff !important;
+  }
+
+  .liaisoning-segmented {
+    background: #ffffff !important;
+    border-color: #27427f !important;
+  }
+
+  .liaisoning-card,
+  .liaisoning-table-row {
+    border-color: #6b7280 !important;
+  }
+}
+

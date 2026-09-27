@@ -30,7 +30,6 @@ import { IndustrialDetailsView } from "@/components/site/views/IndustrialDetails
 import { IndustrialView } from "@/components/site/views/IndustrialView";
 import { Industrial1View } from "@/components/site/views/Industrial1View";
 import { LaxuryView } from "@/components/site/views/LaxuryView";
-import { LiaisoningView } from "@/components/site/views/LiaisoningView";
 import { NriView } from "@/components/site/views/NriView";
 import { PlotDetailsView } from "@/components/site/views/PlotDetailsView";
 import { PlotsView } from "@/components/site/views/PlotsView";
@@ -84,7 +83,6 @@ export const VIEW_COMPONENTS = {
   "industrial.php": IndustrialView,
   "industrial1.php": Industrial1View,
   "laxury.php": LaxuryView,
-  "liaisoning.php": LiaisoningView,
   "nri.php": NriView,
   "plot-details.php": PlotDetailsView,
   "plots.php": PlotsView,

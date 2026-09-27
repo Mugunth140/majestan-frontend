@@ -41,4 +41,11 @@ describe('HeroCarousel', () => {
     const { container } = render(<HeroCarousel banners={[]} citySlug="coimbatore" />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('keeps the exact ad aspect ratio instead of filling the viewport', () => {
+    render(<HeroCarousel banners={banners} citySlug="coimbatore" />);
+    const box = screen.getByTestId('swiper-mock').parentElement as HTMLElement;
+    expect(box.className).toContain('aspect-[4/5]');
+    expect(box.className).toContain('md:aspect-[32/9]');
+  });
 });

@@ -30,38 +30,31 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
   ] as const;
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white">
+    <section className="relative overflow-hidden bg-white">
 
       {/* ── SEO-only heading (banner artwork carries the visible text) ── */}
       <h1 className="sr-only">Your Trusted Real Estate Partner in {city}</h1>
 
-      {/* ── Hero background: ads banner carousel, static fallback ────── */}
+      {/* ── Banner carousel at the exact ad aspect ratio ─────────────── */}
       {banners.length > 0 ? (
         <HeroCarousel banners={banners} citySlug={citySlug} />
       ) : (
-        <picture>
-          <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.png" />
-          <img
-            src="/assets/images/hero/hero_desktop.png"
-            alt="Majestan Realty — Properties"
-            className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
-            fetchPriority="high"
-            loading="eager"
-          />
-        </picture>
+        <div className="relative w-full aspect-[4/5] md:aspect-[32/9] overflow-hidden bg-white">
+          <picture>
+            <source media="(max-width: 767px)" srcSet="/assets/images/hero/hero_mobile.png" />
+            <img
+              src="/assets/images/hero/hero_desktop.png"
+              alt="Majestan Realty — Properties"
+              className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
+              fetchPriority="high"
+              loading="eager"
+            />
+          </picture>
+        </div>
       )}
 
-      {/* ── Bottom fade into page background ─────────────────────────── */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-[25%] pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
-        }}
-      />
-
-      {/* ── Content: search bar + category strip ─────────────────────── */}
-      <div className="relative z-10 tf-container flex flex-col items-center justify-center text-center w-full px-4 mt-20 md:mt-12">
+      {/* ── Search bar + category strip ──────────────────────────────── */}
+      <div className="tf-container flex flex-col items-center justify-center text-center w-full px-4 py-8 md:py-10">
         <div className="w-full">
           <HomeSearch
             key={city}
@@ -71,7 +64,7 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
         </div>
 
         <div
-          className="grid grid-cols-4 sm:hidden md:flex justsm:flex-wrapify-center justify-around items-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl mx-auto mt-12!"
+          className="grid grid-cols-4 sm:hidden md:flex justsm:flex-wrapify-center justify-around items-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl mx-auto mt-8 md:mt-10"
         >
           {propertyCategories.map(([title, href, iconSource]) => (
             <Link

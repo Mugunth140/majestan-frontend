@@ -54,7 +54,22 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
       )}
 
       {/* ── Search bar + category strip ──────────────────────────────── */}
-      <div className="tf-container flex flex-col items-center justify-center text-center w-full px-4 py-8 md:py-10">
+      {/*
+        Pull the search card up so it slightly overlaps the bottom edge of the
+        banner. Two things about this app's CSS matter here:
+          1. `!` is mandatory. public/assets/css/styles.css + sib-styles.css are
+             loaded as unlayered <link> styles in layout.tsx, and unlayered rules
+             beat Tailwind's @layer utilities regardless of source order — without
+             `!` a margin utility here computes to 0px (the old py-8/md:py-10 on
+             this very element was dead for exactly that reason).
+          2. --spacing is 3.5px, not 4px, because styles.css:171 sets
+             body { font-size: 14px }. So mt-6! = 21px and mt-16! = 56px.
+        HomeSearch carries its own mt-6!, so the net overlap is 56 - 21 = 35px on
+        desktop and 21 - 21 = 0px on mobile: the 4:5 mobile creative has its
+        headline baked into the bottom of the artwork, and dragging the card over
+        it there would hide the ad copy.
+      */}
+      <div className="tf-container relative z-20 flex flex-col items-center justify-center text-center w-full px-4 -mt-6! md:-mt-16!">
         <div className="w-full">
           <HomeSearch
             key={city}

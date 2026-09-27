@@ -64,14 +64,17 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
       {/* ── Search bar + category strip ──────────────────────────────── */}
       {/*
         Pull the search card up so it slightly overlaps the bottom edge of the
-        banner. Two things about this app's CSS matter here:
-          1. `!` is mandatory. public/assets/css/styles.css + sib-styles.css are
-             loaded as unlayered <link> styles in layout.tsx, and unlayered rules
-             beat Tailwind's @layer utilities regardless of source order — without
-             `!` a margin utility here computes to 0px (the old py-8/md:py-10 on
-             this very element was dead for exactly that reason).
-          2. --spacing is 3.5px, not 4px, because styles.css:171 sets
-             body { font-size: 14px }. So mt-6! = 21px and mt-16! = 56px.
+        banner. CSS note, because it silently ate several utilities here:
+        public/assets/css/styles.css is loaded as an unlayered <link> in
+        layout.tsx, and an unlayered declaration beats Tailwind v4's
+        @layer utilities for the same property no matter the specificity. The
+        legacy sheet declares `margin`/`padding` (element reset at line 177) and
+        its own utility shorthands such as `.mx-auto { margin: 0 auto }` (879),
+        so margin/padding utilities here need `!`. Properties the legacy sheet
+        never touches (opacity, shadow, ring, display) are fine without it —
+        which is why `opacity-85` works but `mt-8` did not.
+        --spacing is 3.5px, not 4px, because styles.css:171 sets
+        body { font-size: 14px }. So mt-6! = 21px and mt-16! = 56px.
         HomeSearch carries its own mt-6!, so the net overlap is 56 - 21 = 35px on
         desktop and 21 - 21 = 0px on mobile: the 4:5 mobile creative has its
         headline baked into the bottom of the artwork, and dragging the card over
@@ -94,15 +97,17 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
         </div>
 
         <div
-          className="grid grid-cols-4 sm:hidden md:flex justsm:flex-wrapify-center justify-around items-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl mx-auto mt-8 md:mt-10"
+          className="grid grid-cols-4 sm:hidden md:flex justsm:flex-wrapify-center justify-around items-center gap-2! sm:gap-3! md:gap-4! w-full max-w-4xl mx-auto mt-8! md:mt-10!"
         >
           {propertyCategories.map(([title, href, iconSource]) => (
             <Link
               key={title}
               href={href}
-              className="group flex flex-col items-center justify-center bg-white rounded-xl p-1.5 size-23 aspect-square shadow-sm hover:shadow-md ring-1 ring-black/5 transition-all hover:bg-[#27427f]! hover:-translate-y-1"
+              className="group flex flex-col items-center justify-center bg-[#f5f7fc]! rounded-xl p-1.5 size-23 aspect-square shadow-[0_2px_10px_rgba(39,66,127,0.06)]! hover:shadow-[0_12px_28px_rgba(39,66,127,0.18)]! ring-1! ring-[#27427f]/10! transition-all hover:bg-[#27427f]! hover:ring-[#27427f]! hover:-translate-y-1"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 mb-1.5 sm:mb-2 opacity-85 group-hover:opacity-100 group-hover:scale-110 group-hover:text-white! transition-all flex items-center justify-center">
+              {/* The icons are dark line-art PNGs, so `group-hover:text-white!` on the
+                  label does nothing for them — they turn white via filter instead. */}
+              <div className="w-8 h-8 sm:w-9 sm:h-9 mb-1.5! sm:mb-2! opacity-85 group-hover:opacity-100 group-hover:scale-110 transition-all flex items-center justify-center group-hover:[filter:brightness(0)_invert(1)]!">
               <Image src={iconSource} alt={title} width={38} height={38} className="w-full h-full object-contain" />
               </div>
               <span className="text-center text-[#27427f] font-normal font-['Lexend',sans-serif] text-sm! leading-tight px-0.5 group-hover:text-white!">

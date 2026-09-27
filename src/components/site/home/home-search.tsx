@@ -141,7 +141,16 @@ export function HomeSearch({
     <div className="w-full! max-w-[960px]! mx-auto! mt-6! relative! z-20! px-4! text-left!">
       <form
         onSubmit={onSubmit}
-        className="w-full! bg-white! rounded-3xl! shadow-[0_24px_60px_rgba(22,30,45,0.08)]! border! border-gray-100! text-left!"
+        /*
+          Three-layer shadow instead of the old single 60px/8% blur, which was so
+          diffuse it vanished against a white page:
+            - contact  1px/2px, gives the card a crisp edge
+            - mid      navy-tinted lift, ties the card to the brand
+            - ambient  wide soft drop, separates it from the section below
+          The border moves off gray-100 (#f3f4f6, ~invisible on white) to a
+          12% navy so the outline reads on both the white hero and the banner.
+        */
+        className="w-full! bg-white! rounded-3xl! shadow-[0_1px_2px_rgba(22,30,45,0.06),0_10px_24px_-6px_rgba(39,66,127,0.18),0_28px_60px_-20px_rgba(22,30,45,0.20)]! border! border-[#27427f]/12! text-left!"
       >
         {/* ── ROW 1: Toggles & Dropdowns ────────────────────────── */}
         <div className="flex! flex-wrap! items-center! gap-3! px-4! py-4! md:px-6! border-b! border-gray-100!">

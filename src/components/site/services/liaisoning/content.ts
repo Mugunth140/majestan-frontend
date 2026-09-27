@@ -34,7 +34,6 @@ export const LIAISONING_SEO = {
 } as const;
 
 export const HERO = {
-  eyebrow: "Liaisoning",
   /** LEGACY — the page had no <h1>; this title shipped as an <h2>. */
   title: "Trusted and Reliable Liaisoning",
   /**

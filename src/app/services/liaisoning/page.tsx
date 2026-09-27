@@ -141,7 +141,7 @@ export default function LiaisoningRoute() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[var(--site-header-h)]! bg-[#f2f5f9]! font-manrope!">
+      <main className="font-manrope-page pt-[var(--site-header-h)]! bg-[#f2f5f9]!">
         <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-6!">
           <Breadcrumbs items={BREADCRUMBS} />
         </div>

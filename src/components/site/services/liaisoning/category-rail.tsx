@@ -300,23 +300,26 @@ const END_SLACK = 0.15;
   const tabListId = "liaisoning-category-tabs";
   const panelId = "liaisoning-category-panel";
 
+  /**
+   * One box, not three. This was a white card with a border and a shadow, padded
+   * so that it could hold a second tinted box, which held the image. The tint and
+   * a hairline are all the separation these cards need.
+   */
   const cardClass =
-    "shrink-0! w-[78%]! sm:w-[48%]! md:w-[31%]! lg:w-[24%]! " +
-    "liaisoning-card group! relative! overflow-hidden! rounded-[20px]! border! border-gray-200/80! " +
-    "bg-white! p-[10px]! shadow-[0_1px_2px_rgba(22,30,45,0.04)]!";
+    "liaisoning-card group! shrink-0! w-[78%]! sm:w-[48%]! md:w-[31%]! lg:w-[24%]!";
 
   return (
-    <section className="py-[56px]! md:py-[76px]!" aria-labelledby="liaisoning-categories-heading">
+    <section className="pt-[34px]! pb-[52px]! md:pt-[44px]! md:pb-[68px]!" aria-labelledby="liaisoning-categories-heading">
       <div className="relative! max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <div className="flex! flex-col! md:flex-row! md:items-end! justify-between! gap-5! mb-[26px]!">
           <div className="max-w-2xl!">
             <h2
               id="liaisoning-categories-heading"
-              className="text-[clamp(24px,3.2vw,34px)]! font-semibold! text-[#161e2d]! leading-[1.1]! tracking-[-0.02em]!"
+              className="text-[clamp(23px,2.6vw,30px)]! font-medium! text-[#161e2d]! leading-[1.15]! tracking-[-0.018em]!"
             >
               Asset classes we handle
             </h2>
-            <p className="mt-[10px]! text-[14px]! md:text-[15px]! font-normal! text-gray-500! leading-[1.6]!">
+            <p className="mt-[10px]! max-w-[52ch]! text-[14px]! md:text-[15px]! leading-[1.65]! text-gray-500!">
               The same approval discipline, applied to very different buildings. Pick a category
               to see what we cover.
             </p>
@@ -326,7 +329,7 @@ const END_SLACK = 0.15;
               a dead arrow on a non-scrollable set reads as a broken page. */}
           {canScroll && (
             <div className="flex! items-center! gap-3!">
-              <span className="text-[12px]! font-medium! text-gray-400! tabular-nums! whitespace-nowrap!">
+              <span className="text-[12px]! text-gray-400! tabular-nums! whitespace-nowrap!">
                 {visibleIndex + 1} / {active.items.length}
               </span>
               <div className="flex! items-center! gap-2!">
@@ -379,7 +382,7 @@ const END_SLACK = 0.15;
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => selectCategory(index)}
                 onKeyDown={(event) => onTabKeyDown(event, index)}
-                className={`relative! shrink-0! whitespace-nowrap! rounded-full! px-[16px]! py-[9px]! text-[13px]! font-semibold! transition-colors! duration-200! ${
+                className={`relative! shrink-0! whitespace-nowrap! rounded-full! px-[16px]! py-[9px]! text-[13px]! font-medium! transition-colors! duration-200! ${
                   isActive ? "text-[#27427f]!" : "text-gray-500! hover:text-gray-800!"
                 }`}
               >
@@ -541,8 +544,9 @@ function CategoryCard({
       {/* The renders ship as 600x380 PNGs with transparent backgrounds, so they
           composite onto the tint below with no white-box halo. `contain` keeps
           each one whole — these are diagrams, not photos, and cropping them
-          would cut the buildings in half. */}
-      <div className="relative! rounded-[14px]! bg-[#f5f7fc]! aspect-[4/3]! overflow-hidden! flex! items-center! justify-center!">
+          would cut the buildings in half. The hairline is what defines the
+          card; the outer wrapper is gone, so there is nothing nested. */}
+      <div className="relative! rounded-[14px]! border! border-gray-200/80! bg-[#f5f7fc]! aspect-[4/3]! overflow-hidden! flex! items-center! justify-center!">
         <Image
           src={image}
           alt={label}
@@ -550,10 +554,10 @@ function CategoryCard({
           height={380}
           loading="lazy"
           sizes="(max-width: 640px) 78vw, (max-width: 768px) 48vw, (max-width: 1024px) 31vw, 24vw"
-          className="w-full! h-full! object-contain! p-[10px]! transition-transform! duration-500! group-hover:scale-[1.045]!"
+          className="w-full! h-full! object-contain! p-[12px]! transition-transform! duration-500! group-hover:scale-[1.04]!"
         />
       </div>
-      <figcaption className="mt-[11px]! px-[2px]! text-[13px]! font-semibold! text-gray-800! leading-snug!">
+      <figcaption className="mt-[10px]! text-[13px]! font-medium! text-gray-700! leading-snug!">
         {label}
       </figcaption>
     </motion.figure>

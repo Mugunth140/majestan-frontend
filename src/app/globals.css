@@ -314,6 +314,46 @@ body {
   font-family: "Manrope", sans-serif;
 }
 
+/* Manrope for a whole surface, form controls included.
+
+   Two things make this necessary rather than just `font-manrope`:
+
+   1. `.font-manrope` (above) only re-asserts headings, so body copy inside a
+      `.font-manrope` element still inherits Lexend from styles.css:253
+      (`body, button, input, select, textarea { font-family: Lexend }`).
+   2. `font-manrope!` — the class actually used in markup — is a DEAD class.
+      Tailwind v4's important modifier is a *suffix*, so the DOM class is
+      `font-manrope!` with a literal `!`, which does not match the `.font-manrope`
+      selector and which Tailwind never emits a rule for. Every `font-manrope!`
+      usage in this repo has therefore been rendering in Lexend.
+
+   Deliberately unlayered (it sits outside any @layer) so it wins against
+   Tailwind's layered utilities, and (0,1,1) specificity so it wins against the
+   legacy element-level rules. Targets form controls explicitly because the
+   legacy `body, button, input, select, textarea` rule hits those at the
+   element level, where inheritance cannot help. */
+.font-manrope-page,
+.font-manrope-page :is(h1, h2, h3, h4, h5, h6),
+.font-manrope-page :is(
+  p,
+  span,
+  a,
+  li,
+  ul,
+  ol,
+  figcaption,
+  label,
+  button,
+  input,
+  textarea,
+  select,
+  th,
+  td,
+  legend
+) {
+  font-family: "Manrope", sans-serif;
+}
+
 /* Listing skeleton shimmer — a light sweep across placeholder blocks.
    Apply `.shimmer` to any gray placeholder block (it must have a background
    color and, for rounded blocks, overflow-hidden). Stagger the sweep with
@@ -370,27 +410,23 @@ body {
    rather than JS: unlike prefers-reduced-motion they never change the DOM, so
    they carry no hydration cost.
 
-   reduced-transparency: the CTA sits on a dark panel and uses one translucent
-   button over it. Without blur, that fill has to go fully opaque or the label
-   loses contrast against whatever sits behind it.
+   reduced-transparency: the page uses no translucent material layer, so there is
+   nothing to make opaque here — kept as an explicit no-op so the absence is
+   recorded rather than looking like an oversight.
 
-   contrast: more — near-solid fills plus a defined border, because the tints
-   this page relies on for hierarchy (navy at 6-7% as a label colour, navy at
-   10% as a track fill) are exactly the kind of low-contrast signalling that
-   disappears. */
+   contrast: more — near-solid fills plus a defined border, because the tint this
+   page uses for hierarchy (navy at 6-7% as a label colour, navy at 10% as a
+   track fill) is exactly the kind of low-contrast signalling that disappears. */
 @media (prefers-reduced-transparency: reduce) {
   .liaisoning-translucent {
-    background: #1f2c47 !important;
+    background: #ffffff !important;
     backdrop-filter: none !important;
-    border-color: rgba(255, 255, 255, 0.45) !important;
   }
 }
 
 @media (prefers-contrast: more) {
-  .liaisoning-eyebrow,
   .liaisoning-meta-label {
-    background: #27427f !important;
-    color: #ffffff !important;
+    color: #374151 !important;
   }
 
   .liaisoning-segmented {

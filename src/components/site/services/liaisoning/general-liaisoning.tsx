@@ -20,23 +20,20 @@ export function GeneralLiaisoning() {
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <Reveal>
           <div className="max-w-2xl! mb-[34px]!">
-            <span className="liaisoning-eyebrow inline-flex! items-center! gap-2! rounded-full! bg-[#27427f]/[0.07]! px-[13px]! py-[6px]! text-[11px]! font-bold! uppercase! tracking-[0.14em]! text-[#27427f]!">
-              Scope
-            </span>
             <h2
               id="general-liaisoning-heading"
-              className="mt-[14px]! text-[clamp(24px,3.2vw,34px)]! font-semibold! text-[#161e2d]! leading-[1.1]! tracking-[-0.02em]!"
+              className="text-[clamp(23px,2.6vw,30px)]! font-medium! text-[#161e2d]! leading-[1.15]! tracking-[-0.018em]!"
             >
               {GENERAL_LIAISONING.title}
             </h2>
-            <p className="mt-[10px]! text-[14px]! md:text-[15px]! font-normal! text-gray-500! leading-[1.6]!">
+            <p className="mt-[10px]! max-w-[52ch]! text-[14px]! md:text-[15px]! leading-[1.65]! text-gray-500!">
               {GENERAL_LIAISONING.description}
             </p>
           </div>
         </Reveal>
 
         <Reveal delay={0.08}>
-          <div className="overflow-hidden! rounded-[22px]! border! border-gray-200! bg-white! shadow-[0_1px_3px_rgba(22,30,45,0.04)]!">
+          <div className="border-t! border-gray-200!">
             <table className="w-full! border-collapse! text-left!">
               <caption className="sr-only">
                 Approvals Majestan Realty handles under liaisoning, the granting authority, and
@@ -48,7 +45,7 @@ export function GeneralLiaisoning() {
                     <th
                       key={column}
                       scope="col"
-                      className="px-[22px]! py-[15px]! text-[11px]! font-bold! uppercase! tracking-[0.09em]! text-gray-500!"
+                      className="px-[22px]! py-[14px]! text-[11px]! font-medium! uppercase! tracking-[0.09em]! text-gray-500!"
                     >
                       {column}
                     </th>
@@ -63,19 +60,19 @@ export function GeneralLiaisoning() {
                   >
                     <th
                       scope="row"
-                      className="block! md:table-cell! px-[22px]! pt-[18px]! md:py-[16px]! text-[14px]! font-semibold! text-[#161e2d]! text-left!"
+                      className="block! md:table-cell! px-[22px]! pt-[18px]! md:py-[15px]! text-[14px]! font-medium! text-[#161e2d]! text-left!"
                     >
                       {row.aspect}
                     </th>
                     <td className="block! md:table-cell! px-[22px]! mt-[6px]! md:mt-0! md:py-[16px]!">
-                      <span className="liaisoning-meta-label md:hidden! text-[10px]! font-bold! uppercase! tracking-[0.09em]! text-gray-400! block! mb-[3px]!">
+                      <span className="liaisoning-meta-label md:hidden! text-[10px]! font-medium! uppercase! tracking-[0.09em]! text-gray-400! block! mb-[3px]!">
                         {GENERAL_LIAISONING.columns[1]}
                       </span>
-                      <span className="inline-flex! items-center! rounded-full! bg-[#27427f]/[0.07]! px-[10px]! py-[4px]! text-[12px]! font-semibold! text-[#27427f]!">
+                      <span className="inline-flex! items-center! rounded-[6px]! bg-[#f5f7fc]! px-[9px]! py-[3px]! text-[12px]! text-gray-700!">
                         {row.authority}
                       </span>
                     </td>
-                    <td className="block! md:table-cell! px-[22px]! pb-[18px]! md:py-[16px]! text-[13px]! md:text-[14px]! font-normal! text-gray-600! leading-[1.6]!">
+                    <td className="block! md:table-cell! px-[22px]! pb-[18px]! md:py-[15px]! text-[13px]! md:text-[14px]! leading-[1.6]! text-gray-600!">
                       <span className="liaisoning-meta-label md:hidden! text-[10px]! font-bold! uppercase! tracking-[0.09em]! text-gray-400! block! mb-[3px]!">
                         {GENERAL_LIAISONING.columns[2]}
                       </span>

@@ -163,11 +163,12 @@ export function SiteFooter() {
         <div className="mx-auto! w-full! max-w-[1080px]! px-4! md:px-6! lg:px-8!">
           <div className="grid! grid-cols-1! lg:grid-cols-12! gap-10! lg:gap-8! pb-[34px]!">
             {/* Brand & contact — label over value, no icon discs.
-                text-center centres the block's own contents: the logo is an
+                Centred on mobile, left-aligned from lg up: the logo is an
                 inline-block so it follows text-align, while the blurb and the
-                contact rows are blocks/flex items that need their own centring
-                (mx-auto / items-center) to sit centred rather than flush left. */}
-            <div className="lg:col-span-4! text-center!">
+                contact rows are blocks/flex items that need their own alignment
+                (mx-auto / items-center on mobile, mx-0 / items-start on lg)
+                to sit with the text rather than flush to one side. */}
+            <div className="lg:col-span-4! text-center! lg:text-left!">
               <Link href="/" className="inline-block!" aria-label="Majestan Realty home">
                 <Image
                   src="/assets/images/logo/logo-white.png"
@@ -178,12 +179,12 @@ export function SiteFooter() {
                 />
               </Link>
 
-              <p className="mt-[16px]! mx-auto! max-w-[34ch]! text-[14px]! leading-[1.65]! text-white/70!">
+              <p className="mt-[16px]! mx-auto! lg:mx-0! max-w-[34ch]! text-[14px]! leading-[1.65]! text-white/70!">
                 Your trusted real estate partner for buying, renting, and selling properties in
                 Coimbatore. Excellence in every transaction.
               </p>
 
-              <div className="mt-6! flex! flex-col! items-center! gap-3!">
+              <div className="mt-6! flex! flex-col! items-center! lg:items-start! gap-3!">
                 <a
                   href="tel:+919092965556"
                   className="group inline-flex! items-center! gap-2.5! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"

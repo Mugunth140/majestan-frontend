@@ -86,13 +86,12 @@ export function SiteFooter() {
   return (
     <>
       {/* ── Popular Searches ────────────────────────────────────────────────
-          Reverted to the original pill-chip treatment at the client's request.
-          Do not restyle this without asking. */}
-      <section className="relative! z-10! w-full! bg-white! border-t! border-gray-100! py-14! font-['Lexend',sans-serif]!">
+          Pill-chip treatment styled with Manrope typography (normal to bold weights). */}
+      <section className="font-manrope-page relative! z-10! w-full! bg-white! border-t! border-gray-100! py-14!">
         <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
           {/* Heading */}
           <div className="flex! items-center! gap-3! mb-8!">
-            <p className="text-md! font-semibold! uppercase! text-[#27427f]!">Popular Searches</p>
+            <p className="text-[15px]! font-bold! tracking-wide! uppercase! text-[#27427f]!">Popular Searches</p>
           </div>
 
           <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-4! gap-6!">
@@ -100,8 +99,7 @@ export function SiteFooter() {
               <div key={category}>
                 {/* Category label */}
                 <p className="text-[13px]! font-bold! text-[#161e2d]! mb-3! pb-2! border-b! border-gray-100! tracking-wide! transition-all! duration-300!">
-                  {category}{" "}
-                  <span>in Coimbatore</span>
+                  {category} in Coimbatore
                 </p>
                 {/* Location pill tags */}
                 <div className="flex! flex-wrap! gap-2!">

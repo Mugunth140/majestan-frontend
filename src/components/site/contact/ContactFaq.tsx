@@ -67,7 +67,7 @@ export function ContactFaq() {
                     aria-controls={`contact-faq-panel-${index}`}
                     id={`contact-faq-btn-${index}`}
                     onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="flex! w-full! items-center! justify-between! gap-4! px-1! py-[18px]! text-left! transition-colors! duration-150! hover:bg-[#f7f9fc]!"
+                    className="flex! w-full! items-center! justify-between! gap-4! px-[20px]! md:px-[24px]! py-[18px]! text-left! transition-colors! duration-150! hover:bg-[#f7f9fc]!"
                   >
                     <span className="text-[14px]! md:text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
                       {item.q}
@@ -76,9 +76,9 @@ export function ContactFaq() {
                       aria-hidden="true"
                       animate={{ rotate: isOpen ? 45 : 0 }}
                       transition={reduceMotion ? { duration: 0 } : HEIGHT_SPRING}
-                      className="flex! shrink-0! items-center! justify-center! w-[28px]! h-[28px]! rounded-full! bg-[#27427f]/[0.07]! text-[#27427f]!"
+                      className="flex! shrink-0! items-center! justify-center! w-[32px]! h-[32px]! rounded-full! bg-[#27427f]/[0.07]! text-[#27427f]!"
                     >
-                      <Plus className="w-[15px]! h-[15px]!" />
+                      <Plus className="w-[16px]! h-[16px]!" />
                     </motion.span>
                   </button>
                 </h3>
@@ -98,7 +98,7 @@ export function ContactFaq() {
                       transition={reduceMotion ? { duration: 0 } : HEIGHT_SPRING}
                       className="overflow-hidden!"
                     >
-                      <p className="px-1! pb-[20px]! max-w-2xl! text-[14px]! leading-[1.7]! text-gray-600!">
+                      <p className="px-[20px]! md:px-[24px]! pb-[20px]! max-w-2xl! text-[14px]! leading-[1.7]! text-gray-600!">
                         {item.a}
                       </p>
                     </motion.div>

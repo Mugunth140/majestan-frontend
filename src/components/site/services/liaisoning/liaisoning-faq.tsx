@@ -69,9 +69,9 @@ export function LiaisoningFaq() {
                       aria-hidden="true"
                       animate={{ rotate: isOpen ? 45 : 0 }}
                       transition={reduceMotion ? { duration: 0 } : HEIGHT_SPRING}
-                      className="flex! shrink-0! items-center! justify-center! w-[28px]! h-[28px]! rounded-full! bg-[#27427f]/[0.07]! text-[#27427f]!"
+                      className="flex! shrink-0! items-center! justify-center! w-[32px]! h-[32px]! rounded-full! bg-[#27427f]/[0.07]! text-[#27427f]!"
                     >
-                      <Plus className="w-[15px]! h-[15px]!" />
+                      <Plus className="w-[16px]! h-[16px]!" />
                     </motion.span>
                   </button>
                 </h3>

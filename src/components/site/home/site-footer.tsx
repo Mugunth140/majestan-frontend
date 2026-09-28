@@ -149,12 +149,25 @@ export function SiteFooter() {
           Very dark navy. #27427f was too light; #161e2d is the near-black blue
           the footer originally used and is what was asked for. Text steps down
           in white opacity rather than grey, because grey-on-this-navy lands
-          around 3.9:1 while white/65 clears AA comfortably for the small type. */}
+          around 3.9:1 while white/65 clears AA comfortably for the small type.
+
+          Layout: the content is one centred column rather than a full-bleed
+          band. `container` resolved to 1152px from xl up, which at wide
+          viewports left the brand hard against the left gutter and flung the
+          social icons to the far right, so the footer read as two unrelated
+          halves. An explicit max-w keeps the whole footer — brand, link
+          columns and bottom bar — inside one narrower centred column, and the
+          bottom bar is then centred as a group rather than justified to
+          opposite edges. Both share this single wrapper so they cannot drift. */}
       <footer className="font-manrope-page relative! z-10! w-full! bg-[#161e2d]! pt-[40px]! pb-[26px]! text-white!">
-        <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
+        <div className="mx-auto! w-full! max-w-[1080px]! px-4! md:px-6! lg:px-8!">
           <div className="grid! grid-cols-1! lg:grid-cols-12! gap-10! lg:gap-8! pb-[34px]!">
-            {/* Brand & contact — label over value, no icon discs. */}
-            <div className="lg:col-span-4!">
+            {/* Brand & contact — label over value, no icon discs.
+                text-center centres the block's own contents: the logo is an
+                inline-block so it follows text-align, while the blurb and the
+                contact rows are blocks/flex items that need their own centring
+                (mx-auto / items-center) to sit centred rather than flush left. */}
+            <div className="lg:col-span-4! text-center!">
               <Link href="/" className="inline-block!" aria-label="Majestan Realty home">
                 <Image
                   src="/assets/images/logo/logo-white.png"
@@ -165,12 +178,12 @@ export function SiteFooter() {
                 />
               </Link>
 
-              <p className="mt-[16px]! max-w-[34ch]! text-[14px]! leading-[1.65]! text-white/70!">
+              <p className="mt-[16px]! mx-auto! max-w-[34ch]! text-[14px]! leading-[1.65]! text-white/70!">
                 Your trusted real estate partner for buying, renting, and selling properties in
                 Coimbatore. Excellence in every transaction.
               </p>
 
-              <div className="mt-6! flex! flex-col! gap-3!">
+              <div className="mt-6! flex! flex-col! items-center! gap-3!">
                 <a
                   href="tel:+919092965556"
                   className="group inline-flex! items-center! gap-2.5! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
@@ -239,9 +252,14 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Bottom bar */}
-          <div className="flex! flex-col! sm:flex-row! items-start! sm:items-center! justify-between! gap-4! border-t! border-white/12! pt-[20px]!">
-            <p className="text-[13px]! text-white/60!">
+          {/* Bottom bar — centred as one group.
+              Was justify-between, which pinned the copyright to the left gutter
+              and the social icons to the right edge. items-center (not
+              items-start) so the cross-axis centring holds in the stacked
+              mobile layout too, and the gap grows on sm to keep the pair from
+              crowding once they sit on one line. */}
+          <div className="flex! flex-col! sm:flex-row! items-center! justify-center! gap-3! sm:gap-8! border-t! border-white/12! pt-[20px]!">
+            <p className="text-[13px]! text-center! text-white/60! sm:text-left!">
               © {new Date().getFullYear()}{" "}
               <span className="font-medium! text-white!">Majestan Realty</span>. All rights
               reserved.

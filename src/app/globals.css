@@ -306,6 +306,28 @@ body {
   animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Hide the scrollbar on a horizontal scroller while keeping it scrollable.
+
+   Written out rather than pulled from a plugin: this is the only scrollbar
+   treatment in the app, and several components (property/project navigation,
+   breadcrumbs, the photo thumbnail strip) already reference `hide-scrollbar`
+   while nothing emitted a rule for it — so those rails have been showing a
+   visible scrollbar the whole time.
+
+   Unlayered, like `.font-manrope-page` below, so it wins against Tailwind's
+   layered utilities for the same property. Note the class is referenced
+   WITHOUT the `!` suffix: Tailwind v4's important modifier is a suffix, so a
+   DOM class of `hide-scrollbar!` (with the literal bang) matches neither this
+   selector nor any Tailwind-generated rule. */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Details/wishlist surfaces use Manrope. Legacy styles.css forces Lexend
    directly on h1-h6 element selectors, which beats inheritance — so
    re-assert Manrope on headings inside .font-manrope containers. Scoped to

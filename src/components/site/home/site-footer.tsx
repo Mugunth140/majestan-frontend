@@ -149,43 +149,29 @@ export function SiteFooter() {
                 Coimbatore. Excellence in every transaction.
               </p>
 
-              <dl className="mt-[22px]! border-t! border-white/12!">
-                <div className="grid! grid-cols-[7rem_1fr]! items-baseline! gap-x-3! py-[11px]! border-b! border-white/12!">
-                  <dt className="text-[11px]! uppercase! tracking-[0.1em]! text-white/55!">
-                    Call us
-                  </dt>
-                  <dd className="m-0!">
-                    <a
-                      href="tel:+919092965556"
-                      className="group inline-flex! items-center! gap-2! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
-                    >
-                      <Phone
-                        className="w-[14px]! h-[14px]! text-white/55! shrink-0! transition-colors! duration-150! group-hover:text-white!"
-                        aria-hidden="true"
-                      />
-                      +91 90929 65556
-                    </a>
-                  </dd>
-                </div>
+              <div className="mt-6! flex! flex-col! gap-3!">
+                <a
+                  href="tel:+919092965556"
+                  className="group inline-flex! items-center! gap-2.5! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
+                >
+                  <Phone
+                    className="w-4! h-4! text-white/55! shrink-0! transition-colors! duration-150! group-hover:text-white!"
+                    aria-hidden="true"
+                  />
+                  <span>+91 90929 65556</span>
+                </a>
 
-                <div className="grid! grid-cols-[7rem_1fr]! items-baseline! gap-x-3! py-[11px]! border-b! border-white/12!">
-                  <dt className="text-[11px]! uppercase! tracking-[0.1em]! text-white/55!">
-                    Email us
-                  </dt>
-                  <dd className="m-0!">
-                    <a
-                      href="mailto:info@majestanrealty.com"
-                      className="group inline-flex! items-center! gap-2! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
-                    >
-                      <Mail
-                        className="w-[14px]! h-[14px]! text-white/55! shrink-0! transition-colors! duration-150! group-hover:text-white!"
-                        aria-hidden="true"
-                      />
-                      info@majestanrealty.com
-                    </a>
-                  </dd>
-                </div>
-              </dl>
+                <a
+                  href="mailto:info@majestanrealty.com"
+                  className="group inline-flex! items-center! gap-2.5! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
+                >
+                  <Mail
+                    className="w-4! h-4! text-white/55! shrink-0! transition-colors! duration-150! group-hover:text-white!"
+                    aria-hidden="true"
+                  />
+                  <span>info@majestanrealty.com</span>
+                </a>
+              </div>
             </div>
 
             {/* Link columns */}

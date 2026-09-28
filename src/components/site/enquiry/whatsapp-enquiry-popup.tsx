@@ -233,7 +233,7 @@ export function WhatsAppPopup({
                   >
                     {status === "submitting" ? "Requesting…" : "Request callback"}
                   </motion.button>
-                  <p className="text-[11px]! text-slate-500! leading-relaxed! font-['Manrope',sans-serif]!">
+                  <p className="text-[11px]! text-slate-500! leading-relaxed! font-['Manrope',sans-serif]! text-center!">
                     By enquiring, you agree to our{" "}
                     <Link href="/privacy-policy" className="text-[#27427f]! font-semibold! hover:underline!">
                       Terms &amp; Conditions.

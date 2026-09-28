@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import Image from "next/image";
 
 const city = "coimbatore";
@@ -70,12 +70,24 @@ const quickLinks = [
     prefix: "for-rent/commercial-spaces",
     locations: ["Gandhipuram", "Peelamedu", "Ganapathy", "Sai Baba Colony", "Kalapatti"],
   },
-];
+] as const;
+
+const socials = [
+  { label: "Facebook", href: "https://www.facebook.com/share/1Bz4FQeYEu/", icon: "icon-fb text-sm!" },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/majestanrealty?igsh=cnJycTlqanR6Zmd6",
+    icon: "icon-ins text-sm!",
+  },
+  { label: "YouTube", href: "https://www.youtube.com/@MajestanRealty", icon: "i-yt text-sm!" },
+] as const;
 
 export function SiteFooter() {
   return (
     <>
-      {/* ── Popular Searches — Light Mode Section ── */}
+      {/* ── Popular Searches ────────────────────────────────────────────────
+          Reverted to the original pill-chip treatment at the client's request.
+          Do not restyle this without asking. */}
       <section className="relative! z-10! w-full! bg-white! border-t! border-gray-100! py-14! font-['Lexend',sans-serif]!">
         <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
           {/* Heading */}
@@ -89,7 +101,7 @@ export function SiteFooter() {
                 {/* Category label */}
                 <p className="text-[13px]! font-bold! text-[#161e2d]! mb-3! pb-2! border-b! border-gray-100! tracking-wide! transition-all! duration-300!">
                   {category}{" "}
-                  <span >in Coimbatore</span>
+                  <span>in Coimbatore</span>
                 </p>
                 {/* Location pill tags */}
                 <div className="flex! flex-wrap! gap-2!">
@@ -112,15 +124,17 @@ export function SiteFooter() {
         </div>
       </section>
 
-      {/* ── Dark Footer ── */}
-      <footer className="relative! z-10! w-full! bg-[#161e2d]! pt-16! pb-10! text-white! font-['Lexend',sans-serif]!">
+      {/* ── Footer ──────────────────────────────────────────────────────────
+          Very dark navy. #27427f was too light; #161e2d is the near-black blue
+          the footer originally used and is what was asked for. Text steps down
+          in white opacity rather than grey, because grey-on-this-navy lands
+          around 3.9:1 while white/65 clears AA comfortably for the small type. */}
+      <footer className="font-manrope-page relative! z-10! w-full! bg-[#161e2d]! pt-[40px]! pb-[26px]! text-white!">
         <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
-
-          <div className="grid! grid-cols-1! lg:grid-cols-12! gap-12! lg:gap-8! mb-14!">
-
-            {/* Brand & Contact */}
-            <div className="lg:col-span-4! space-y-8!">
-              <Link href="/" className="inline-block!">
+          <div className="grid! grid-cols-1! lg:grid-cols-12! gap-10! lg:gap-8! pb-[34px]!">
+            {/* Brand & contact — label over value, no icon discs. */}
+            <div className="lg:col-span-4!">
+              <Link href="/" className="inline-block!" aria-label="Majestan Realty home">
                 <Image
                   src="/assets/images/logo/logo-white.png"
                   alt="Majestan Realty"
@@ -130,57 +144,84 @@ export function SiteFooter() {
                 />
               </Link>
 
-              <p className="text-gray-400! text-sm! leading-relaxed! max-w-xs!">
-                Your trusted real estate partner for buying, renting, and selling properties in Coimbatore. Excellence in every transaction.
+              <p className="mt-[16px]! max-w-[34ch]! text-[14px]! leading-[1.65]! text-white/70!">
+                Your trusted real estate partner for buying, renting, and selling properties in
+                Coimbatore. Excellence in every transaction.
               </p>
 
-              <div className="space-y-4!">
-                <a href="tel:+919092965556" className="flex! items-center! gap-4! group!">
-                  <div className="w-11! h-11! rounded-full! bg-white/5! group-hover:bg-[#ffc900]! flex! items-center! justify-center! shrink-0! transition-colors!">
-                    <Phone className="w-4! h-4! text-[#ffc900]! group-hover:text-[#161e2d]!" />
-                  </div>
-                  <div>
-                    <p className="text-[11px]! text-gray-500! uppercase! tracking-widest! font-semibold! mb-0.5!">Call Us</p>
-                    <p className="font-bold! text-white! text-sm! group-hover:text-[#ffc900]! transition-colors!">+91 90929 65556</p>
-                  </div>
-                </a>
-
-                <a href="mailto:info@majestanrealty.com" className="flex! items-center! gap-4! group!">
-                  <div className="w-11! h-11! rounded-full! bg-white/5! group-hover:bg-[#ffc900]! flex! items-center! justify-center! shrink-0! transition-colors!">
-                    <Mail className="w-4! h-4! text-[#ffc900]! group-hover:text-[#161e2d]!" />
-                  </div>
-                  <div>
-                    <p className="text-[11px]! text-gray-500! uppercase! tracking-widest! font-semibold! mb-0.5!">Email Us</p>
-                    <p className="font-bold! text-white! text-sm! group-hover:text-[#ffc900]! transition-colors!">info@majestanrealty.com</p>
-                  </div>
-                </a>
-
-                <div className="flex! items-start! gap-4! group!">
-                  <div className="w-11! h-11! rounded-full! bg-white/5! flex! items-center! justify-center! shrink-0!">
-                    <MapPin className="w-4! h-4! text-[#ffc900]!" />
-                  </div>
-                  <div>
-                    <p className="text-[11px]! text-gray-500! uppercase! tracking-widest! font-semibold! mb-0.5!">Office</p>
-                    <p className="text-white! text-sm! leading-relaxed!">47/1 Aandal Street, Lakshmipuram Main Rd, Coimbatore, TN 641004</p>
-                  </div>
+              <dl className="mt-[22px]! border-t! border-white/12!">
+                <div className="grid! grid-cols-[7rem_1fr]! items-baseline! gap-x-3! py-[11px]! border-b! border-white/12!">
+                  <dt className="text-[11px]! uppercase! tracking-[0.1em]! text-white/55!">
+                    Call us
+                  </dt>
+                  <dd className="m-0!">
+                    <a
+                      href="tel:+919092965556"
+                      className="group inline-flex! items-center! gap-2! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
+                    >
+                      <Phone
+                        className="w-[14px]! h-[14px]! text-white/55! shrink-0! transition-colors! duration-150! group-hover:text-white!"
+                        aria-hidden="true"
+                      />
+                      +91 90929 65556
+                    </a>
+                  </dd>
                 </div>
-              </div>
+
+                <div className="grid! grid-cols-[7rem_1fr]! items-baseline! gap-x-3! py-[11px]! border-b! border-white/12!">
+                  <dt className="text-[11px]! uppercase! tracking-[0.1em]! text-white/55!">
+                    Email us
+                  </dt>
+                  <dd className="m-0!">
+                    <a
+                      href="mailto:info@majestanrealty.com"
+                      className="group inline-flex! items-center! gap-2! text-[14px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
+                    >
+                      <Mail
+                        className="w-[14px]! h-[14px]! text-white/55! shrink-0! transition-colors! duration-150! group-hover:text-white!"
+                        aria-hidden="true"
+                      />
+                      info@majestanrealty.com
+                    </a>
+                  </dd>
+                </div>
+              </dl>
             </div>
 
-            {/* Links Grid */}
+            {/* Link columns */}
             <div className="lg:col-span-8!">
-              <div className="grid! grid-cols-2! sm:grid-cols-4! gap-8!">
+              <div className="grid! grid-cols-2! sm:grid-cols-4! gap-x-6! gap-y-8!">
                 {footerColumns.map((column) => (
                   <div key={column.title}>
-                    <h5 className="text-white! font-bold! mb-5! text-[15px]! tracking-wide!">{column.title}</h5>
-                    <ul className="space-y-3.5!">
+                    <h3 className="text-[13px]! font-medium! text-white! mb-[14px]!">
+                      {column.title}
+                    </h3>
+                    <ul>
                       {column.links.map(([text, href]) => (
                         <li key={href}>
+                          {/*
+                            The rule wipes in from the left on hover rather than
+                            appearing via `hover:underline`, which is a discrete
+                            jump. Same intent, but it reads as deliberate rather
+                            than as the browser default.
+                          */}
                           <Link
                             href={href}
-                            className="text-gray-400! hover:text-[#ffc900]! text-[13px]! font-medium! transition-colors! inline-block! hover:translate-x-1! duration-200!"
+                            className="group relative! inline-block! py-[5px]! text-[13px]! text-white/70! no-underline! transition-colors! duration-150! hover:text-white!"
                           >
                             {text}
+                            {/*
+                              `transition-scale`, not `transition-transform`:
+                              Tailwind v4 emits scale utilities against the CSS
+                              `scale` property (`scale: var(--tw-scale-x) ...`),
+                              which is a different property from `transform`.
+                              Animating `transform` here left the rule snapping
+                              between 0 and 100% with no motion.
+                            */}
+                            <span
+                              aria-hidden="true"
+                              className="absolute! left-0! bottom-[3px]! h-px! w-full! origin-left! scale-x-0! bg-white! transition-scale! duration-200! ease-out! group-hover:scale-x-100!"
+                            />
                           </Link>
                         </li>
                       ))}
@@ -191,39 +232,35 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Footer Bottom Bar */}
-          <div className="pt-8! border-t! border-white/10! flex! flex-col! sm:flex-row! items-center! justify-between! gap-4!">
-            <p className="text-gray-500! text-base! font-medium!">
+          {/* Bottom bar */}
+          <div className="flex! flex-col! sm:flex-row! items-start! sm:items-center! justify-between! gap-4! border-t! border-white/12! pt-[20px]!">
+            <p className="text-[13px]! text-white/60!">
               © {new Date().getFullYear()}{" "}
-              <span className="text-white! font-bold!">Majestan Realty</span> All rights reserved
+              <span className="font-medium! text-white!">Majestan Realty</span>. All rights
+              reserved.
             </p>
 
             <div className="flex! items-center! gap-3!">
-              <span className="text-gray-600! text-sm! font-semibold! uppercase! tracking-wide! mr-1!">Follow us on</span>
-              <a
-                href="https://www.facebook.com/share/1Bz4FQeYEu/"
-                aria-label="Facebook"
-                className="w-9! h-9! rounded-full! bg-white/5! flex! items-center! justify-center! text-white! hover:bg-[#ffc900]! hover:text-[#161e2d]! transition-all! hover:-translate-y-0.5!"
-              >
-                <i className="icon-fb text-sm!" />
-              </a>
-              <a
-                href="https://www.instagram.com/majestanrealty?igsh=cnJycTlqanR6Zmd6"
-                aria-label="Instagram"
-                className="w-9! h-9! rounded-full! bg-white/5! flex! items-center! justify-center! text-white! hover:bg-[#ffc900]! hover:text-[#161e2d]! transition-all! hover:-translate-y-0.5!"
-              >
-                <i className="icon-ins text-sm!" />
-              </a>
-              <a
-                href="https://www.youtube.com/@MajestanRealty"
-                aria-label="YouTube"
-                className="w-9! h-9! rounded-full! bg-white/5! flex! items-center! justify-center! text-white! hover:bg-[#ffc900]! hover:text-[#161e2d]! transition-all! hover:-translate-y-0.5!"
-              >
-                <i className="i-yt text-sm!" />
-              </a>
+              <span className="text-[11px]! uppercase! tracking-[0.1em]! text-white/55!">
+                Follow us
+              </span>
+              <ul className="flex! items-center! gap-2!">
+                {socials.map((social) => (
+                  <li key={social.label}>
+                    <a
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label}
+                      className="flex! items-center! justify-center! w-[30px]! h-[30px]! rounded-full! border! border-white/20! text-white/70! transition-colors! duration-150! hover:border-white! hover:text-white!"
+                    >
+                      <i className={social.icon} aria-hidden="true" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-
         </div>
       </footer>
     </>

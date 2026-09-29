@@ -271,9 +271,9 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onContact(); }}
-            className="w-full! shrink-0! inline-flex! items-center! justify-center! gap-2! rounded-lg! bg-[#27427f]! px-3! py-3! text-sm! font-semibold! text-white! transition-all! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! hover:bg-[#1a2d59]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-offset-2! focus-visible:ring-[#27427f]!"
+            className="w-full! shrink-0! inline-flex! items-center! justify-center! gap-2! rounded-lg! border! border-[#27427f]! bg-transparent! px-3! py-3! text-sm! font-semibold! text-[#27427f]! transition-all! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! hover:bg-[#27427f]! hover:text-white! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-offset-2! focus-visible:ring-[#27427f]!"
           >
-            Enquire
+            Enquire Now
           </button>
         </div>
       </div>

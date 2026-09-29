@@ -71,6 +71,22 @@ describe("LuxuryCard redesigned rows", () => {
     expect(screen.queryByText("For sale")).toBeNull();
   });
 
+  it("renders price per sq.ft alongside the price", () => {
+    render(
+      <LuxuryFeaturedSection
+        properties={[{ ...baseProp, id: 11 }]}
+        title="Handpicked Properties"
+        subtitle="sub"
+      />,
+    );
+    const perSqft = screen.getByText("₹4,000/sq.ft");
+    expect(perSqft).toBeDefined();
+    // Same row as the amount, rendered inline after it (not on its own line).
+    const row = perSqft.parentElement!;
+    expect(row.className).toContain("items-baseline");
+    expect(row.textContent).toMatch(/50 L[\s\S]*₹4,000\/sq\.ft/);
+  });
+
   it("omits the ribbon for conditions outside the canonical vocabulary", () => {
     render(
       <LuxuryFeaturedSection

@@ -232,9 +232,9 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           <span className="truncate!">{property.sublocation || "Prime location"}</span>
         </p>
 
-        {/* Price row — full width */}
-        <div className="mt-4! flex! min-w-0! flex-col! items-start! justify-center! gap-1! border-t! border-gray-100! pt-3!">
-          <span className="inline-flex! flex-col! items-start! leading-none! text-gray-900!" title={price}>
+        {/* Price row — price with per-sq.ft alongside */}
+        <div className="mt-4! flex! min-w-0! flex-wrap! items-baseline! gap-x-2! gap-y-0.5! border-t! border-gray-100! pt-3!">
+          <span className="inline-flex! items-baseline! leading-none! text-gray-900!" title={price}>
             <span className="whitespace-nowrap!">
               {priceParts.prefix && (
                 <span className="mr-1! text-sm! font-semibold! text-gray-400!">{priceParts.prefix}</span>
@@ -244,10 +244,10 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
                 <span className="ml-1! text-2xl! font-bold!">{priceParts.rest}</span>
               )}
             </span>
-            {perSqft && (
-              <span className="whitespace-nowrap! text-xs! text-gray-400!">{perSqft}</span>
-            )}
           </span>
+          {perSqft && (
+            <span className="whitespace-nowrap! text-[13px]! font-medium! text-gray-500!">{perSqft}</span>
+          )}
         </div>
 
         {/* Specs row — BHK | Area | Facing */}

@@ -24,22 +24,33 @@ export function FacingArrow({ facing }: { facing: string | null | undefined }): 
 
   if (!fixed) {
     return (
-      <span title="Facing not specified" className="inline-flex! items-center! justify-center!">
-        <ArrowUp className="w-4! h-4! text-gray-300!" strokeWidth={2} aria-hidden="true" />
-        <span className="sr-only!">Facing not specified</span>
+      <span
+        role="img"
+        aria-label="Facing not specified"
+        title="Facing not specified"
+        data-testid="facing-compass"
+        className="inline-flex! h-6! w-6! shrink-0! items-center! justify-center! rounded-full! border! border-gray-200! bg-gray-50!"
+      >
+        <span className="h-1.5! w-1.5! rounded-full! bg-gray-300!" aria-hidden="true" />
       </span>
     );
   }
 
   return (
-    <span title={fixed.label} className="inline-flex! items-center! justify-center!">
+    <span
+      role="img"
+      aria-label={`${fixed.label} facing`}
+      title={fixed.label}
+      data-testid="facing-compass"
+      className="relative! inline-flex! h-6! w-6! shrink-0! items-center! justify-center! rounded-full! border! border-[#27427f]/25! bg-white!"
+    >
+      {/* Needle points from south to north, then rotates to the facing. */}
       <ArrowUp
-        className="w-4! h-4! text-gray-700!"
-        strokeWidth={2}
+        className="h-3.5! w-3.5! text-[#27427f]!"
+        strokeWidth={2.5}
         aria-hidden="true"
         style={{ transform: `rotate(${fixed.degrees}deg)` }}
       />
-      <span className="sr-only!">{fixed.label} facing</span>
     </span>
   );
 }

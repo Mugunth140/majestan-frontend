@@ -1,6 +1,27 @@
 // site/majestan-frontend/src/components/site/home/facing-arrow.test.tsx
-import { describe, expect, it } from 'vitest';
-import { normalizeFacing } from './facing-arrow';
+import { describe, expect, it, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { normalizeFacing, FacingArrow } from './facing-arrow';
+
+// This Vitest setup has no global cleanup, so renders would otherwise pile up
+// in document.body and make queries ambiguous.
+afterEach(cleanup);
+
+describe('FacingArrow', () => {
+  it('renders a compass dial with the needle rotated to the facing', () => {
+    const { container } = render(<FacingArrow facing="north_east" />);
+    const compass = screen.getByTestId('facing-compass');
+    expect(compass.getAttribute('aria-label')).toBe('North-East facing');
+    const needle = container.querySelector('svg');
+    expect(needle?.getAttribute('style')).toContain('rotate(45deg)');
+  });
+
+  it('renders a muted dial with no needle when facing is missing', () => {
+    const { container } = render(<FacingArrow facing={null} />);
+    expect(screen.getByTestId('facing-compass').getAttribute('aria-label')).toBe('Facing not specified');
+    expect(container.querySelector('svg')).toBeNull();
+  });
+});
 
 describe('normalizeFacing', () => {
   it('maps 8 compass directions to exact degrees', () => {

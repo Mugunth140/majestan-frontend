@@ -38,6 +38,9 @@ export type FeaturedProperty = {
   expectedSalePrice: string | number | null;
   monthlyRent: string | number | null;
   pricePerSqft: string | number | null;
+  bedrooms: number | null;
+  areaSqft: string | null;
+  possession: string | null;
 };
 
 export type HomePageData = {

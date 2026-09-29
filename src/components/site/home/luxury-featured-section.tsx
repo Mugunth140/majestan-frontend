@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import { A11y, Autoplay, Navigation, Pagination } from "swiper/modules";
 import { createEnquiry, type FeaturedProperty } from "@/lib/api";
-import { MapPin, ChevronLeft, ChevronRight, X, Phone, BedDouble, Ruler, Calendar, ArrowUpRight } from "lucide-react";
+import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
+import { MapPin, ChevronLeft, ChevronRight, X, BedDouble, Ruler } from "lucide-react";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -119,7 +120,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
             className="pb-16! pt-4!"
           >
             {(properties.length === 4 ? [...properties, ...properties] : properties).map((prop, i) => (
-              <SwiperSlide key={`${prop.id}-${i}`} className="flex! justify-center! items-center!">
+              <SwiperSlide key={`${prop.id}-${i}`} className="flex! justify-center! items-stretch! h-auto!">
                 {({ isActive }) => (
                   <LuxuryCard 
                     property={prop} 
@@ -164,110 +165,98 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
   );
 }
 
-function LuxuryCard({ property,  imgSrc, onContact }: { property: FeaturedProperty, isActive: boolean, imgSrc: string, onContact: () => void }) {
-  // Mock data for missing fields
-  const isSale = property.postType?.toLowerCase().includes("sale") || property.postType?.toLowerCase().includes("buy");
-  const badgeLabel = isSale ? "FOR SALE" : "FOR RENT";
-  
-  const idNum = property.id || 1;
-  const bhk = (idNum % 3) + 2;
-  const area = 1100 + (idNum * 150) % 1500;
-  const year = 2024 + (idNum % 3);
-  const months = ["Jan", "Mar", "Jun", "Sep", "Dec"];
-  const possession = `${months[idNum % 5]} ${year}`;
+function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedProperty, isActive: boolean, imgSrc: string, onContact: () => void }) {
+  const router = useRouter();
+  const badgeLabel = getBadgeLabel(property.postType);
+  const price = formatPrice(property);
+  const perSqft = formatPerSqftLabel(property.pricePerSqft);
+  const goToDetail = () => router.push(property.detailPath);
 
   return (
-    <div 
+    <article
+      role="link"
+      tabIndex={0}
+      aria-label={`View ${property.propertyName || "property"}, ${price}`}
+      onClick={goToDetail}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          if ((e.target as HTMLElement).closest("button")) return;
+          e.preventDefault();
+          goToDetail();
+        }
+      }}
       className={`
-        relative! w-full! max-w-100! h-140! rounded-4xl! overflow-hidden! cursor-pointer!
-        bg-white! border! border-gray-100! 
-        shadow-[0_8px_30px_rgba(0,0,0,0.06)]!
-        transition-all! duration-300! ease-out! group! mx-auto! hover:-translate-y-2! hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)]!
+        font-['Manrope',sans-serif]! group! w-full! max-w-80! h-full! mx-auto! flex! flex-col! cursor-pointer!
+        bg-white! rounded-2xl! border! border-gray-200! overflow-hidden!
+        transition-all! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]!
+        hover:border-[#27427f]/20! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]!
+        focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!
       `}
     >
-      <div className="relative! h-[50%]! w-full! overflow-hidden! shrink-0!">
-        <span className=" absolute! left-4! top-4! inline-flex! items-center! rounded-full! bg-gray-100! px-3! py-1! text-[11px]! font-semibold! tracking-wide! text-gray-800!">
-         For Sale
-        </span>
-        <img 
-          src={imgSrc} 
-          alt={property.propertyName || "Property"} 
-          className="w-full! h-full! object-cover! transition-transform! duration-700! group-hover:scale-105!"
+      {/* Photo — fixed 4:3, height comes from content below */}
+      <div className="relative! w-full! aspect-[4/3]! shrink-0! overflow-hidden! bg-gray-100!">
+        <img
+          src={imgSrc}
+          alt={property.propertyName || "Property"}
+          loading="lazy"
+          className="w-full! h-full! object-cover! transition-transform! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! group-hover:scale-105!"
         />
+        <span className="absolute! left-3! top-3! inline-flex! items-center! rounded-full! bg-white! px-3! py-1! text-xs! font-semibold! text-[#27427f]! shadow-sm!">
+          {badgeLabel}
+        </span>
+        <span className="absolute! right-2.5! top-2.5!">
+          <WishlistButton propertyId={property.id} propertyType={property.propertyType} tone="onImage" />
+        </span>
       </div>
 
-      {/* Card Body (bottom 55%) */}
-      <div className="absolute! bottom-0! w-full! h-[50%]! p-5! md:p-6! flex! flex-col! justify-between! bg-white!">
-        <span className="bg-gray-500/10! absolute! right-2! top-0! px-1! rounded-b-md inline-flex! text-[#27427f]! text-lg! font-semibold! tracking-relaxed!">
-              {formatPrice(property)}
-            </span>
-        <div>
-          {/* Location */}
-          <p className="flex! items-center! gap-1.5! text-[13px]! font-medium! tracking-wide! text-gray-400! mb-1.5!">
-            <MapPin size={14} className="text-[#27427f]!" strokeWidth={2.5} />
-            <span className="truncate!">{property.sublocation}</span>
-          </p>
-          
-          {/* Title */}
-          <h3 className="text-[#27427f]! font-['Lexend',sans-serif]! text-[22px]! font-semibold! leading-[1.2]! truncate! tracking-tight!">
-            {property.propertyName || "Luxury Property"}
-          </h3>
-          
-          {/* <div className="flex! items-center! gap-2.5! mt-2!">
-            <span className="inline-flex! text-lg! font-semibold! tracking-relaxed!">
-              {formatPrice(property)}
-            </span>
-          </div>  */}
+      {/* Body — fills remaining height, action pinned to the bottom */}
+      <div className="flex! flex-1! flex-col! bg-white! p-4!">
+        <h3 className="text-lg! font-medium! text-[#27427f]! text-balance! line-clamp-2! leading-snug! transition-colors! duration-300! group-hover:text-[#1a2d59]!">
+          {property.propertyName || "Luxury Property"}
+        </h3>
 
+        <p className="mt-2! flex! items-center! gap-1! text-sm! text-gray-500! min-w-0!">
+          <MapPin className="w-3! h-3! shrink-0!" strokeWidth={1.5} aria-hidden="true" />
+          <span className="truncate!">{property.sublocation || "Prime location"}</span>
+        </p>
+
+        {/* Price anchor with per-sqft suffix, then quiet BHK · Area */}
+        <div className="mt-4! flex! min-w-0! flex-wrap! items-baseline! gap-x-2!">
+          <span className="whitespace-nowrap! text-xl! font-semibold! leading-none! text-gray-900!" title={price}>{price}</span>
+          {perSqft && (
+            <span className="whitespace-nowrap! text-xs! text-medium! text-gray-900!">{perSqft}</span>
+          )}
+          {(typeof property.bedrooms === "number" && property.bedrooms > 0) || property.areaSqft?.trim() ? (
+            <span className="inline-flex! min-w-0! items-center! gap-1.5! text-sm! text-gray-500!">
+              <span className="select-none! text-gray-300!" aria-hidden="true">·</span>
+              {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
+                <span className="inline-flex! shrink-0! items-center! gap-1!" title={`${property.bedrooms} BHK`}>
+                  <BedDouble className="w-4! h-4! shrink-0! text-gray-400!" strokeWidth={2} aria-hidden="true" />
+                  <span className="whitespace-nowrap! text-base!">{property.bedrooms} BHK</span>
+                </span>
+              )}
+              {property.areaSqft?.trim() && (
+                <span className="inline-flex! min-w-0! items-center! gap-1!" title={formatArea(property.areaSqft)}>
+                  <Ruler className="w-4! h-4! shrink-0! text-gray-400!" strokeWidth={2} aria-hidden="true" />
+                  <span className="truncate! text-base!">{formatArea(property.areaSqft)}</span>
+                </span>
+              )}
+            </span>
+          ) : null}
         </div>
 
-        <div className="h-px! w-full! bg-gray-100/80! my-2.5!" />
-
-        {/* Stats Row */}
-        <div className="grid! grid-cols-3! divide-x! divide-gray-100/80! mb-1!">
-          <div className="flex! flex-col! items-center! justify-center! px-1!">
-            <div className="flex! items-center! gap-1.5! mb-1!">
-              <BedDouble size={16} className="text-[#27427f]!" strokeWidth={2} />
-              <span className="text-gray-900! text-[14px]! font-bold!">{bhk} BHK</span>
-            </div>
-            <span className="text-gray-400! text-[11px]! font-medium!">Unit Type</span>
-          </div>
-          
-          <div className="flex! flex-col! items-center! justify-center! px-1!">
-            <div className="flex! items-center! gap-1.5! mb-1!">
-              <Ruler size={16} className="text-[#27427f]!" strokeWidth={2} />
-              <span className="text-gray-900! text-[14px]! font-bold!">{area} sq.ft</span>
-            </div>
-            <span className="text-gray-400! text-[11px]! font-medium!">Area</span>
-          </div>
-          
-          <div className="flex! flex-col! items-center! justify-center! px-1!">
-            <div className="flex! items-center! gap-1.5! mb-1!">
-              <Calendar size={16} className="text-[#27427f]!" strokeWidth={2} />
-              <span className="text-gray-900! text-[14px]! font-bold!">{possession}</span>
-            </div>
-            <span className="text-gray-400! text-[11px]! font-medium!">Possession</span>
-          </div>
-        </div>
-
-        {/* Bottom Action Bar */}
-        <div className="flex! items-center! justify-between! gap-3! mt-5!">
-          <button 
+        {/* Single action — pinned to the bottom, card itself navigates to detail */}
+        <div className="mt-auto! pt-4!">
+          <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); onContact(); }}
-            className="flex-1! flex! items-center! justify-center! gap-2! border-2! border-[#27427f]! rounded-full! text-[#27427f]! bg-transparent! text-[14px]! font-semibold! px-4! py-3! transition-all! duration-300! hover:bg-[#27427f]! hover:text-white! group/btn!"
+            className="w-full! shrink-0! inline-flex! items-center! justify-center! gap-2! rounded-lg! bg-blue-900! px-3! py-3! text-sm! font-semibold! text-white! transition-all! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! hover:bg-[#1a2d59]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-offset-2! focus-visible:ring-[#27427f]!"
           >
-            <Phone size={16} className="fill-[#27427f]! group-hover/btn:fill-white! transition-colors!" /> Contact
+            Enquire
           </button>
-          
-          <Link 
-            href={property.detailPath}
-            className="flex-[1.2]! flex! items-center! justify-center! gap-2! rounded-full! bg-[#27427f]! text-white! px-4! py-[11px]! text-[14px]! font-semibold! shadow-md! transition-all! duration-300! hover:shadow-lg! hover:bg-[#1e3465]!"
-          >
-            <ArrowUpRight size={18} strokeWidth={2.5} /> View More
-          </Link>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -386,6 +375,33 @@ function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onCl
       </motion.div>
     </motion.div>
   );
+}
+
+function getBadgeLabel(postType: string | null): string {
+  const v = (postType || "").toLowerCase();
+  if (v.includes("rent") || v.includes("lease")) return "For rent";
+  if (v.includes("sale") || v.includes("sell") || v.includes("buy")) return "For sale";
+  return postType || "Featured";
+}
+
+function formatPerSqftLabel(raw: string | number | null | undefined): string | null {
+  const v = String(raw ?? "").trim();
+  if (!v) return null;
+  if (/₹/.test(v)) return v;
+  const n = Number(v.replace(/,/g, ""));
+  if (Number.isFinite(n) && n > 0) return `₹${n.toLocaleString("en-IN")}/sq.ft`;
+  return v;
+}
+
+function formatArea(raw: string | null | undefined): string {
+  const v = (raw || "").trim();
+  if (!v) return "—";
+  // `area_sqft` is a decimal column, so it arrives as e.g. "1250.00".
+  const num = Number(v.replace(/,/g, ""));
+  if (Number.isFinite(num) && num > 0) {
+    return `${Math.round(num).toLocaleString("en-IN")} sq.ft`;
+  }
+  return v;
 }
 
 function formatPrice(p: FeaturedProperty) {

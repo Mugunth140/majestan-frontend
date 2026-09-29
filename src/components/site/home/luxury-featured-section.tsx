@@ -209,7 +209,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           const badge = getConditionBadge(property.propertyCondition);
           return badge ? (
             <span
-              className="absolute! left-0! top-4! shrink-0! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! py-1.5! pl-3! pr-3.5! leading-none!"
+              className="absolute! left-0! top-4! shrink-0! bg-[#eef1f8]! text-[#27427f]! text-[11px]! font-bold! tracking-wider! py-1.5! pl-3! pr-3.5! leading-none!"
               style={{ clipPath: "polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%)" }}
             >
               {badge}

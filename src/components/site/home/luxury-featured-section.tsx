@@ -169,6 +169,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
   const router = useRouter();
   const badgeLabel = getBadgeLabel(property.postType);
   const price = formatPrice(property);
+  const priceParts = formatPriceParts(property);
   const perSqft = formatPerSqftLabel(property.pricePerSqft);
   const goToDetail = () => router.push(property.detailPath);
 
@@ -204,7 +205,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
         <span className="absolute! left-3! top-3! inline-flex! items-center! rounded-full! bg-white! px-3! py-1! text-xs! font-semibold! text-[#27427f]! shadow-sm!">
           {badgeLabel}
         </span>
-        <span className="absolute! right-2.5! top-2.5!">
+        <span className="absolute! right-2.5! top-2.5! rounded-full! bg-black/30! backdrop-blur-sm!">
           <WishlistButton propertyId={property.id} propertyType={property.propertyType} tone="onImage" />
         </span>
       </div>
@@ -220,29 +221,39 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           <span className="truncate!">{property.sublocation || "Prime location"}</span>
         </p>
 
-        {/* Price anchor with per-sqft suffix, then quiet BHK · Area */}
-        <div className="mt-4! flex! min-w-0! flex-wrap! items-baseline! gap-x-2!">
-          <span className="whitespace-nowrap! text-xl! font-semibold! leading-none! text-gray-900!" title={price}>{price}</span>
-          {perSqft && (
-            <span className="whitespace-nowrap! text-xs! text-medium! text-gray-900!">{perSqft}</span>
-          )}
-          {(typeof property.bedrooms === "number" && property.bedrooms > 0) || property.areaSqft?.trim() ? (
-            <span className="inline-flex! min-w-0! items-center! gap-1.5! text-sm! text-gray-500!">
-              <span className="select-none! text-gray-300!" aria-hidden="true">·</span>
-              {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
-                <span className="inline-flex! shrink-0! items-center! gap-1!" title={`${property.bedrooms} BHK`}>
-                  <BedDouble className="w-4! h-4! shrink-0! text-gray-400!" strokeWidth={2} aria-hidden="true" />
-                  <span className="whitespace-nowrap! text-base!">{property.bedrooms} BHK</span>
-                </span>
+        {/* Specs — BHK stacked over Area on the left, price on the right spanning both rows */}
+        <div className="mt-4! flex! min-w-0! items-center! gap-3!">
+          <div className="flex! min-w-0! flex-1! basis-1/2! flex-col! items-start! justify-center! gap-2! text-left! text-sm! font-medium! text-gray-900!">
+            {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
+              <span className="inline-flex! w-full! items-center! gap-1.5!" title={`${property.bedrooms} BHK`}>
+                <BedDouble className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
+                <span className="whitespace-nowrap! text-base!">{property.bedrooms} BHK</span>
+              </span>
+            )}
+            {property.areaSqft?.trim() && (
+              <span className="inline-flex! w-full! min-w-0! items-center! gap-1.5!" title={formatArea(property.areaSqft)}>
+                <Ruler className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
+                <span className="truncate! text-base!">{formatArea(property.areaSqft)}</span>
+              </span>
+            )}
+          </div>
+          <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
+          <div className="flex! min-w-0! flex-1! basis-1/2! flex-col! items-start! justify-center! gap-1!">
+            <span className="inline-flex! flex-col! items-end! leading-none! text-gray-900!" title={price}>
+              <span className="whitespace-nowrap!">
+                {priceParts.prefix && (
+                  <span className="mr-1! text-sm! font-semibold! text-gray-400!">{priceParts.prefix}</span>
+                )}
+                <span className="text-2xl! font-bold!">{priceParts.main}</span>
+              </span>
+              {priceParts.rest && (
+                <span className="whitespace-nowrap! text-sm! font-medium! text-gray-500!">{priceParts.rest}</span>
               )}
-              {property.areaSqft?.trim() && (
-                <span className="inline-flex! min-w-0! items-center! gap-1!" title={formatArea(property.areaSqft)}>
-                  <Ruler className="w-4! h-4! shrink-0! text-gray-400!" strokeWidth={2} aria-hidden="true" />
-                  <span className="truncate! text-base!">{formatArea(property.areaSqft)}</span>
-                </span>
+              {perSqft && (
+                <span className="whitespace-nowrap! text-xs! text-gray-400!">{perSqft}</span>
               )}
             </span>
-          ) : null}
+          </div>
         </div>
 
         {/* Single action — pinned to the bottom, card itself navigates to detail */}
@@ -250,7 +261,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onContact(); }}
-            className="w-full! shrink-0! inline-flex! items-center! justify-center! gap-2! rounded-lg! bg-blue-900! px-3! py-3! text-sm! font-semibold! text-white! transition-all! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! hover:bg-[#1a2d59]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-offset-2! focus-visible:ring-[#27427f]!"
+            className="w-full! shrink-0! inline-flex! items-center! justify-center! gap-2! rounded-lg! bg-[#27427f]! px-3! py-3! text-sm! font-semibold! text-white! transition-all! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! hover:bg-[#1a2d59]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-offset-2! focus-visible:ring-[#27427f]!"
           >
             Enquire
           </button>
@@ -382,6 +393,19 @@ function getBadgeLabel(postType: string | null): string {
   if (v.includes("rent") || v.includes("lease")) return "For rent";
   if (v.includes("sale") || v.includes("sell") || v.includes("buy")) return "For sale";
   return postType || "Featured";
+}
+
+function formatPriceParts(p: FeaturedProperty): { prefix: string | null; main: string; rest: string | null } {
+  const raw = p.postType === "Rent" ? p.monthlyRent : p.expectedSalePrice;
+  const val = Number(raw);
+  if (!Number.isFinite(val) || val <= 0) return { prefix: null, main: "Price on request", rest: null };
+  if (val >= 10_000_000) {
+    const cr = Math.floor(val / 10_000_000);
+    const lk = Math.floor((val % 10_000_000) / 100_000);
+    return { prefix: "Rs", main: `${cr} Cr`, rest: lk > 0 ? `${lk} L` : null };
+  }
+  if (val >= 100_000) return { prefix: "Rs", main: `${Math.floor(val / 100_000)} L`, rest: null };
+  return { prefix: "Rs", main: val.toLocaleString("en-IN"), rest: null };
 }
 
 function formatPerSqftLabel(raw: string | number | null | undefined): string | null {

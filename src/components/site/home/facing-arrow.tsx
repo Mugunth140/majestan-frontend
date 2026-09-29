@@ -33,7 +33,7 @@ export function FacingArrow({ facing }: { facing: string | null | undefined }): 
         data-testid="facing-indicator"
         className="inline-flex! items-center! gap-1! text-gray-300!"
       >
-        <ArrowUp className="h-4! w-4! shrink-0!" strokeWidth={2.5} aria-hidden="true" />
+        <ArrowUp className="h-4! w-4! shrink-0! text-gray-300!" strokeWidth={2} aria-hidden="true" />
       </span>
     );
   }
@@ -44,15 +44,15 @@ export function FacingArrow({ facing }: { facing: string | null | undefined }): 
       aria-label={`${fixed.label} facing`}
       title={fixed.label}
       data-testid="facing-indicator"
-      className="inline-flex! items-center! gap-1! whitespace-nowrap! text-[#27427f]!"
+      className="inline-flex! items-center! gap-1! whitespace-nowrap! text-gray-900!"
     >
       <ArrowUp
-        className="h-4! w-4! shrink-0!"
-        strokeWidth={2.5}
+        className="h-4! w-4! shrink-0! text-gray-700!"
+        strokeWidth={2}
         aria-hidden="true"
         style={{ transform: `rotate(${fixed.degrees}deg)` }}
       />
-      <span className="text-sm! font-semibold!">{fixed.abbr}</span>
+      <span className="text-base! font-medium!">{fixed.abbr}</span>
     </span>
   );
 }

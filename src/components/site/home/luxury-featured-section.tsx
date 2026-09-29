@@ -8,7 +8,7 @@ import { Swiper as SwiperType } from "swiper";
 import { A11y, Autoplay, Navigation, Pagination } from "swiper/modules";
 import { createEnquiry, type FeaturedProperty } from "@/lib/api";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
-import { MapPin, ChevronLeft, ChevronRight, X, BedDouble, Ruler } from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight, X, BedDouble, Ruler, CheckCircle2 } from "lucide-react";
 
 import { FacingArrow } from "./facing-arrow";
 
@@ -294,8 +294,17 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
 /* ══════════════════════════════════════════════════════════════════
    ENQUIRY DIALOG (Adapted for Light Mode)
 ══════════════════════════════════════════════════════════════════ */
+// Field and label styling mirror the site enquiry form
+// (ContactEnquiryForm.tsx) so both surfaces read identically.
+const ENQUIRY_FIELD_CLASS =
+  "w-full! px-[13px]! py-[10px]! rounded-[10px]! bg-white! border! border-gray-300! " +
+  "text-[14px]! text-[#161e2d]! outline-none! transition-colors! duration-150! " +
+  "placeholder:text-gray-400! focus:border-[#27427f]!";
+
+const ENQUIRY_LABEL_CLASS = "block! text-[12px]! text-gray-600! mb-[6px]!";
+
 function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onClose: () => void }) {
-  const [form,   setForm]   = useState({ name: "", email: "", phone: "", message: "" });
+  const [form,   setForm]   = useState({ name: "", email: "", phone: "" });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -306,10 +315,12 @@ function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onCl
         ...form,
         propertyType: property.propertyType,
         listingType:  property.postType ?? undefined,
-        message:      `${form.message}\nProperty: ${property.propertyName ?? ""}`,
+        // The form has no message field, so the property reference is the
+        // whole message — keeps the lead record traceable to the listing.
+        message:      `Property: ${property.propertyName ?? ""}`,
       });
       setStatus("success");
-      setForm({ name: "", email: "", phone: "", message: "" });
+      setForm({ name: "", email: "", phone: "" });
     } catch { setStatus("error"); }
   }
 
@@ -339,10 +350,10 @@ function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onCl
         </motion.button>
 
         <div className="mb-6!">
-          <span className="text-[9px]! font-black! uppercase! tracking-[0.18em]! text-[#27427f]! block! mb-1.5!">
+          <span className="block! mb-1.5! text-[10px]! font-semibold! uppercase! tracking-[0.14em]! text-[#27427f]!">
             {property.postType ?? "Enquiry"}
           </span>
-          <h4 id="enquiry-title" className="text-xl! font-bold! text-gray-900! leading-snug! tracking-tight! pr-8!">
+          <h4 id="enquiry-title" className="pr-8! text-[20px]! font-semibold! leading-snug! tracking-tight! text-[#161e2d]!">
             {property.propertyName ?? "this property"}
           </h4>
         </div>
@@ -354,49 +365,39 @@ function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onCl
               transition={{ type: "spring", stiffness: 200, damping: 22 }}
               className="py-10! text-center!"
             >
-              <div className="w-12! h-12! rounded-full! bg-[#27427f]/10! flex! items-center! justify-center! mx-auto! mb-4!">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#27427f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+              <div className="mx-auto! mb-4! flex! h-12! w-12! items-center! justify-center! rounded-full! bg-emerald-50!">
+                <CheckCircle2 className="h-6! w-6! text-emerald-600!" aria-hidden="true" />
               </div>
-              <p className="font-semibold! text-gray-900! text-base!">Enquiry submitted!</p>
-              <p className="text-sm! text-gray-500! mt-1!">We will contact you shortly.</p>
+              <p className="text-[15px]! font-medium! text-[#161e2d]!">Enquiry submitted!</p>
+              <p className="mt-[5px]! text-[14px]! leading-[1.6]! text-gray-600!">We will contact you shortly.</p>
             </motion.div>
           ) : (
-            <motion.form key="form" onSubmit={onSubmit} exit={{ opacity: 0 }} className="flex! flex-col! gap-4!">
+            <motion.form key="form" onSubmit={onSubmit} exit={{ opacity: 0 }} className="space-y-[15px]!">
               {([
                 { label: "Full Name", key: "name",  type: "text",  required: true,  ph: "e.g. Arjun Selvam" },
-                { label: "Email",     key: "email", type: "email", required: false, ph: "you@example.com" },
+                { label: "Email",     key: "email", type: "email", required: true,  ph: "you@example.com" },
                 { label: "Phone",     key: "phone", type: "tel",   required: true,  ph: "+91 98400 00000" },
               ] as const).map((f) => (
-                <div key={f.key} className="flex! flex-col! gap-1.5!">
-                  <label className="text-[10px]! font-black! uppercase! tracking-wider! text-gray-500!">
+                <div key={f.key}>
+                  <label className={ENQUIRY_LABEL_CLASS}>
                     {f.label}{f.required && <span className="text-[#27427f] ml-0.5">*</span>}
                   </label>
                   <input
                     type={f.type} required={f.required} placeholder={f.ph}
                     value={form[f.key]}
                     onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                    className="w-full! rounded-xl! border! border-gray-200! bg-gray-50! px-4! py-3! text-sm! text-gray-900! placeholder:text-gray-400! outline-none! focus:border-[#27427f]! transition-all! duration-200!"
+                    className={ENQUIRY_FIELD_CLASS}
                   />
                 </div>
               ))}
-              <div className="flex! flex-col! gap-1.5!">
-                <label className="text-[10px]! font-black! uppercase! tracking-wider! text-gray-500!">Message</label>
-                <textarea rows={3} placeholder="Any specific requirements..."
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full! rounded-xl! border! border-gray-200! bg-gray-50! px-4! py-3! text-sm! text-gray-900! placeholder:text-gray-400! outline-none! focus:border-[#27427f]! transition-all! duration-200! resize-none!"
-                />
-              </div>
               {status === "error" && (
-                <p className="text-xs! text-red-500! font-semibold!">Could not submit. Please try again.</p>
+                <p className="text-[13px]! text-red-600!">Could not submit. Please try again.</p>
               )}
               <motion.button
-                whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 transition={{ type: "spring", stiffness: 300, damping: 18 }}
                 type="submit" disabled={status === "submitting"}
-                className="mt-1! w-full! rounded-xl! bg-[#27427f]! py-3.5! text-sm! font-black! uppercase! tracking-wider! text-white! disabled:opacity-55! transition-all!"
+                className="inline-flex! w-full! items-center! justify-center! gap-2! rounded-[10px]! bg-[#27427f]! px-[20px]! py-[11px]! text-[13px]! font-medium! text-white! transition-colors! duration-150! hover:bg-[#1e3563]! active:scale-[0.99]! disabled:opacity-60! disabled:pointer-events-none!"
               >
                 {status === "submitting" ? "Sending..." : "Submit Enquiry"}
               </motion.button>

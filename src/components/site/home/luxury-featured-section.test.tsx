@@ -1,5 +1,6 @@
 // site/majestan-frontend/src/components/site/home/luxury-featured-section.test.tsx
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
 import type { FeaturedProperty } from "@/lib/api";
@@ -69,6 +70,23 @@ describe("LuxuryCard redesigned rows", () => {
     );
     expect(screen.getByText("RESALE")).toBeDefined();
     expect(screen.queryByText("For sale")).toBeNull();
+  });
+
+  it("opens an enquiry dialog without a message field", async () => {
+    const user = userEvent.setup();
+    render(
+      <LuxuryFeaturedSection properties={[baseProp]} title="Handpicked Properties" subtitle="sub" />,
+    );
+    await user.click(screen.getByRole("button", { name: /enquire now/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toBeDefined();
+    expect(within(dialog).getByPlaceholderText("e.g. Arjun Selvam")).toBeDefined();
+    expect(within(dialog).getByPlaceholderText("you@example.com")).toBeDefined();
+    expect(within(dialog).getByPlaceholderText("+91 98400 00000")).toBeDefined();
+    // Message field is intentionally omitted.
+    expect(within(dialog).queryByPlaceholderText(/specific requirements/i)).toBeNull();
+    expect(within(dialog).queryByText(/^message$/i)).toBeNull();
   });
 
   it("renders price per sq.ft alongside the price", () => {

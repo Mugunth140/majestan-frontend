@@ -250,10 +250,11 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           )}
         </div>
 
-        {/* Specs row — BHK | Area | Facing */}
-        <div className="mt-3! flex! min-w-0! items-center! gap-3! border-t! border-gray-100! pt-3! text-sm! font-medium! text-gray-900!">
+        {/* Specs row — BHK | Area | Facing. Slots carry horizontal padding so
+            longer values (e.g. "1,456 sq.ft") never touch a divider. */}
+        <div className="mt-3! flex! min-w-0! items-center! gap-1! border-t! border-gray-100! pt-3! text-sm! font-medium! text-gray-900!">
           {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
-            <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! gap-1.5!" title={`${property.bedrooms} BHK`}>
+            <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! gap-1.5! px-1!" title={`${property.bedrooms} BHK`}>
               <BedDouble className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
               <span className="whitespace-nowrap! text-base!">{property.bedrooms} BHK</span>
             </span>
@@ -262,7 +263,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
             <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
           )}
           {property.areaSqft?.trim() && (
-            <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! gap-1!" title={formatArea(property.areaSqft)}>
+            <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! gap-1! px-1!" title={formatArea(property.areaSqft)}>
               <Ruler className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
               <span className="whitespace-nowrap! text-base!">{formatArea(property.areaSqft)}</span>
             </span>
@@ -270,7 +271,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           {property.areaSqft?.trim() && (
             <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
           )}
-          <span className="inline-flex! min-w-0! flex-1! items-center! justify-center!">
+          <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! px-1!">
             <FacingArrow facing={property.facing} />
           </span>
         </div>

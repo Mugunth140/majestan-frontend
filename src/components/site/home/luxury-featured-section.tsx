@@ -204,7 +204,10 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           loading="lazy"
           className="w-full! h-full! object-cover! transition-transform! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! group-hover:scale-105!"
         />
-        <span className="absolute! left-3! top-3! inline-flex! items-center! rounded-full! bg-white! px-3! py-1! text-xs! font-semibold! text-[#27427f]! shadow-sm!">
+        {/* Ribbon badge — left flag notch, sits flush to the top-left edge */}
+        <span
+          className="absolute! left-0! top-4! inline-flex! items-center! bg-[#e2e4e9]! py-2! pl-7! pr-4! text-[11px]! font-bold! uppercase! tracking-[0.12em]! text-[#4a4d57]! [clip-path:polygon(14px_0,100%_0,100%_100%,14px_100%,0_50%)]!"
+        >
           {badgeLabel}
         </span>
         <span className="absolute! right-2.5! top-2.5! rounded-full! bg-black/30! backdrop-blur-sm!">

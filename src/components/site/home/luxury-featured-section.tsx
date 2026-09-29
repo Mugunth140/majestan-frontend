@@ -169,7 +169,6 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
 
 function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedProperty, isActive: boolean, imgSrc: string, onContact: () => void }) {
   const router = useRouter();
-  const badgeLabel = getBadgeLabel(property.postType);
   const price = formatPrice(property);
   const priceParts = formatPriceParts(property);
   const perSqft = formatPerSqftLabel(property.pricePerSqft);
@@ -204,12 +203,19 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           loading="lazy"
           className="w-full! h-full! object-cover! transition-transform! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! group-hover:scale-105!"
         />
-        {/* Ribbon badge — left flag notch, sits flush to the top-left edge */}
-        <span
-          className="absolute! left-0! top-4! inline-flex! items-center! bg-[#e2e4e9]! py-2! pl-7! pr-4! text-[11px]! font-bold! uppercase! tracking-[0.12em]! text-[#4a4d57]! [clip-path:polygon(14px_0,100%_0,100%_100%,14px_100%,0_50%)]!"
-        >
-          {badgeLabel}
-        </span>
+        {/* Condition ribbon — flat edge flush to the card, notch facing inward.
+            Vocabulary mirrors the listing-page card (property-listing-adapter.tsx). */}
+        {(() => {
+          const badge = getConditionBadge(property.propertyCondition);
+          return badge ? (
+            <span
+              className="absolute! left-0! top-4! shrink-0! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! py-1.5! pl-3! pr-3.5! leading-none!"
+              style={{ clipPath: "polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%)" }}
+            >
+              {badge}
+            </span>
+          ) : null;
+        })()}
         <span className="absolute! right-2.5! top-2.5! rounded-full! bg-black/30! backdrop-blur-sm!">
           <WishlistButton propertyId={property.id} propertyType={property.propertyType} tone="onImage" />
         </span>
@@ -401,11 +407,16 @@ function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onCl
   );
 }
 
-function getBadgeLabel(postType: string | null): string {
-  const v = (postType || "").toLowerCase();
-  if (v.includes("rent") || v.includes("lease")) return "For rent";
-  if (v.includes("sale") || v.includes("sell") || v.includes("buy")) return "For sale";
-  return postType || "Featured";
+// Only the canonical condition vocabulary gets a badge; anything else stays
+// unlabeled rather than printing junk on the card. Mirrors the listing-page
+// card's getConditionBadge (property-listing-adapter.tsx) so both surfaces
+// show identical labels.
+function getConditionBadge(raw: string | null | undefined): string | null {
+  const value = (raw ?? "").trim();
+  if (!value) return null;
+  const low = value.toLowerCase();
+  if (low === "resale" || low === "new" || low === "under construction") return value.toUpperCase();
+  return null;
 }
 
 function formatPriceParts(p: FeaturedProperty): { prefix: string | null; main: string; rest: string | null } {

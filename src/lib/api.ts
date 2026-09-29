@@ -41,6 +41,7 @@ export type FeaturedProperty = {
   bedrooms: number | null;
   areaSqft: string | null;
   facing: string | null;
+  propertyCondition: string | null;
   possession: string | null;
 };
 

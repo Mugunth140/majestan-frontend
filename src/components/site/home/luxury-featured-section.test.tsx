@@ -1,12 +1,16 @@
 // site/majestan-frontend/src/components/site/home/luxury-featured-section.test.tsx
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
 import type { FeaturedProperty } from "@/lib/api";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
+
+// This Vitest setup has no global cleanup, so renders would otherwise pile up
+// in document.body and make screen queries ambiguous.
+afterEach(cleanup);
 
 const baseProp: FeaturedProperty = {
   id: 7,
@@ -23,6 +27,7 @@ const baseProp: FeaturedProperty = {
   bedrooms: 3,
   areaSqft: "1250.00",
   facing: "north_east",
+  propertyCondition: "Resale",
   possession: null,
 };
 
@@ -52,5 +57,29 @@ describe("LuxuryCard redesigned rows", () => {
       />,
     );
     expect(screen.getByTitle("Facing not specified")).toBeDefined();
+  });
+
+  it("ribbon shows the condition label, not the sale type", () => {
+    render(
+      <LuxuryFeaturedSection
+        properties={[{ ...baseProp, id: 9, propertyCondition: "Resale" }]}
+        title="Handpicked Properties"
+        subtitle="sub"
+      />,
+    );
+    expect(screen.getByText("RESALE")).toBeDefined();
+    expect(screen.queryByText("For sale")).toBeNull();
+  });
+
+  it("omits the ribbon for conditions outside the canonical vocabulary", () => {
+    render(
+      <LuxuryFeaturedSection
+        properties={[{ ...baseProp, id: 10, propertyCondition: "Ready to Move" }]}
+        title="Handpicked Properties"
+        subtitle="sub"
+      />,
+    );
+    expect(screen.queryByText("RESALE")).toBeNull();
+    expect(screen.queryByText("READY TO MOVE")).toBeNull();
   });
 });

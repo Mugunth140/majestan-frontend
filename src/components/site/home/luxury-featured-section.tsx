@@ -249,7 +249,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
               <span className="whitespace-nowrap! text-base!">{property.bedrooms} BHK</span>
             </span>
           )}
-          {typeof property.bedrooms === "number" && property.bedrooms > 0 && (property.areaSqft?.trim() || property.facing !== undefined) && (
+          {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
             <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
           )}
           {property.areaSqft?.trim() && (
@@ -258,10 +258,10 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
               <span className="truncate! text-base!">{formatArea(property.areaSqft)}</span>
             </span>
           )}
-          {(property.areaSqft?.trim() || typeof property.bedrooms === "number") && (
+          {property.areaSqft?.trim() && (
             <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
           )}
-          <span className="inline-flex! min-w-0! flex-1! items-center! justify-center!" title={property.facing?.trim() ? undefined : "Facing not specified"}>
+          <span className="inline-flex! min-w-0! flex-1! items-center! justify-center!">
             <FacingArrow facing={property.facing} />
           </span>
         </div>

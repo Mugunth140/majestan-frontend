@@ -18,6 +18,7 @@ describe('normalizeFacing', () => {
     expect(normalizeFacing('North-East')).toEqual({ degrees: 45, label: 'North-East' });
     expect(normalizeFacing('NE')).toEqual({ degrees: 45, label: 'North-East' });
     expect(normalizeFacing('  south west  ')).toEqual({ degrees: 225, label: 'South-West' });
+    expect(normalizeFacing("South East")).toEqual({ degrees: 135, label: "South-East" });
   });
 
   it('returns null for missing or unknown values', () => {

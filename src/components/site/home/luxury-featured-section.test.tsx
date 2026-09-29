@@ -51,8 +51,6 @@ describe("LuxuryCard redesigned rows", () => {
         subtitle="sub"
       />,
     );
-    // Wrapper slot + FacingArrow placeholder both carry the title (nested),
-    // so assert presence via getAllByTitle rather than getByTitle.
-    expect(screen.getAllByTitle("Facing not specified").length).toBeGreaterThan(0);
+    expect(screen.getByTitle("Facing not specified")).toBeDefined();
   });
 });

@@ -1,5 +1,5 @@
 // site/majestan-frontend/src/components/site/home/facing-arrow.tsx
-import { ArrowUp } from "lucide-react";
+import { Navigation } from "lucide-react";
 
 const DIRECTIONS: Array<{ degrees: number; label: string; keys: string[] }> = [
   { degrees: 0, label: "North", keys: ["north", "n"] },
@@ -29,9 +29,9 @@ export function FacingArrow({ facing }: { facing: string | null | undefined }): 
         aria-label="Facing not specified"
         title="Facing not specified"
         data-testid="facing-compass"
-        className="inline-flex! h-6! w-6! shrink-0! items-center! justify-center! rounded-full! border! border-gray-200! bg-gray-50!"
+        className="inline-flex! h-7! w-7! shrink-0! items-center! justify-center! rounded-full! border! border-dashed! border-gray-300! bg-gray-50!"
       >
-        <span className="h-1.5! w-1.5! rounded-full! bg-gray-300!" aria-hidden="true" />
+        <span className="h-1! w-1! rounded-full! bg-gray-300!" aria-hidden="true" />
       </span>
     );
   }
@@ -42,12 +42,34 @@ export function FacingArrow({ facing }: { facing: string | null | undefined }): 
       aria-label={`${fixed.label} facing`}
       title={fixed.label}
       data-testid="facing-compass"
-      className="relative! inline-flex! h-6! w-6! shrink-0! items-center! justify-center! rounded-full! border! border-[#27427f]/25! bg-white!"
+      className="relative! inline-flex! h-7! w-7! shrink-0! items-center! justify-center! rounded-full! border! border-[#27427f]/30! bg-white!"
     >
-      {/* Needle points from south to north, then rotates to the facing. */}
-      <ArrowUp
-        className="h-3.5! w-3.5! text-[#27427f]!"
-        strokeWidth={2.5}
+      {/* Crosshair ticks */}
+      <span className="pointer-events-none! absolute! inset-0! flex! items-center! justify-center!" aria-hidden="true">
+        <span className="h-px! w-full! bg-[#27427f]/15!" />
+      </span>
+      <span className="pointer-events-none! absolute! inset-0! flex! items-center! justify-center!" aria-hidden="true">
+        <span className="h-full! w-px! bg-[#27427f]/15!" />
+      </span>
+
+      {/* Cardinal marks — N stays fixed while the needle turns */}
+      <span className="pointer-events-none! absolute! top-[1px]! text-[6px]! font-bold! leading-none! text-[#27427f]!" aria-hidden="true">
+        N
+      </span>
+      <span className="pointer-events-none! absolute! bottom-[1px]! text-[6px]! font-bold! leading-none! text-[#27427f]/40!" aria-hidden="true">
+        S
+      </span>
+      <span className="pointer-events-none! absolute! left-[2px]! text-[6px]! font-bold! leading-none! text-[#27427f]/40!" aria-hidden="true">
+        W
+      </span>
+      <span className="pointer-events-none! absolute! right-[2px]! text-[6px]! font-bold! leading-none! text-[#27427f]/40!" aria-hidden="true">
+        E
+      </span>
+
+      {/* Needle — points north, then rotates to the facing direction */}
+      <Navigation
+        className="relative! h-3! w-3! fill-[#27427f]! text-[#27427f]!"
+        strokeWidth={1.5}
         aria-hidden="true"
         style={{ transform: `rotate(${fixed.degrees}deg)` }}
       />

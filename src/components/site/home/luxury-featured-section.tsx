@@ -264,7 +264,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           {property.areaSqft?.trim() && (
             <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! gap-1!" title={formatArea(property.areaSqft)}>
               <Ruler className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
-              <span className="whitespace-nowrap! text-sm!">{formatArea(property.areaSqft)}</span>
+              <span className="whitespace-nowrap! text-base!">{formatArea(property.areaSqft)}</span>
             </span>
           )}
           {property.areaSqft?.trim() && (

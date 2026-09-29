@@ -231,10 +231,10 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
                 <span className="mr-1! text-sm! font-semibold! text-gray-400!">{priceParts.prefix}</span>
               )}
               <span className="text-2xl! font-bold!">{priceParts.main}</span>
+              {priceParts.rest && (
+                <span className="ml-1! text-2xl! font-bold!">{priceParts.rest}</span>
+              )}
             </span>
-            {priceParts.rest && (
-              <span className="whitespace-nowrap! text-sm! font-medium! text-gray-500!">{priceParts.rest}</span>
-            )}
             {perSqft && (
               <span className="whitespace-nowrap! text-xs! text-gray-400!">{perSqft}</span>
             )}

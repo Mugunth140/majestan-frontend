@@ -10,6 +10,8 @@ import { createEnquiry, type FeaturedProperty } from "@/lib/api";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { MapPin, ChevronLeft, ChevronRight, X, BedDouble, Ruler } from "lucide-react";
 
+import { FacingArrow } from "./facing-arrow";
+
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -221,39 +223,47 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
           <span className="truncate!">{property.sublocation || "Prime location"}</span>
         </p>
 
-        {/* Specs — BHK stacked over Area on the left, price on the right spanning both rows */}
-        <div className="mt-4! flex! min-w-0! items-center! gap-3!">
-          <div className="flex! min-w-0! flex-1! basis-1/2! flex-col! items-start! justify-center! gap-2! text-left! text-sm! font-medium! text-gray-900!">
-            {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
-              <span className="inline-flex! w-full! items-center! gap-1.5!" title={`${property.bedrooms} BHK`}>
-                <BedDouble className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
-                <span className="whitespace-nowrap! text-base!">{property.bedrooms} BHK</span>
-              </span>
-            )}
-            {property.areaSqft?.trim() && (
-              <span className="inline-flex! w-full! min-w-0! items-center! gap-1.5!" title={formatArea(property.areaSqft)}>
-                <Ruler className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
-                <span className="truncate! text-base!">{formatArea(property.areaSqft)}</span>
-              </span>
-            )}
-          </div>
-          <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
-          <div className="flex! min-w-0! flex-1! basis-1/2! flex-col! items-start! justify-center! gap-1!">
-            <span className="inline-flex! flex-col! items-end! leading-none! text-gray-900!" title={price}>
-              <span className="whitespace-nowrap!">
-                {priceParts.prefix && (
-                  <span className="mr-1! text-sm! font-semibold! text-gray-400!">{priceParts.prefix}</span>
-                )}
-                <span className="text-2xl! font-bold!">{priceParts.main}</span>
-              </span>
-              {priceParts.rest && (
-                <span className="whitespace-nowrap! text-sm! font-medium! text-gray-500!">{priceParts.rest}</span>
+        {/* Price row — full width */}
+        <div className="mt-4! flex! min-w-0! flex-col! items-start! justify-center! gap-1! border-t! border-gray-100! pt-3!">
+          <span className="inline-flex! flex-col! items-start! leading-none! text-gray-900!" title={price}>
+            <span className="whitespace-nowrap!">
+              {priceParts.prefix && (
+                <span className="mr-1! text-sm! font-semibold! text-gray-400!">{priceParts.prefix}</span>
               )}
-              {perSqft && (
-                <span className="whitespace-nowrap! text-xs! text-gray-400!">{perSqft}</span>
-              )}
+              <span className="text-2xl! font-bold!">{priceParts.main}</span>
             </span>
-          </div>
+            {priceParts.rest && (
+              <span className="whitespace-nowrap! text-sm! font-medium! text-gray-500!">{priceParts.rest}</span>
+            )}
+            {perSqft && (
+              <span className="whitespace-nowrap! text-xs! text-gray-400!">{perSqft}</span>
+            )}
+          </span>
+        </div>
+
+        {/* Specs row — BHK | Area | Facing */}
+        <div className="mt-3! flex! min-w-0! items-center! gap-3! border-t! border-gray-100! pt-3! text-sm! font-medium! text-gray-900!">
+          {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
+            <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! gap-1.5!" title={`${property.bedrooms} BHK`}>
+              <BedDouble className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
+              <span className="whitespace-nowrap! text-base!">{property.bedrooms} BHK</span>
+            </span>
+          )}
+          {typeof property.bedrooms === "number" && property.bedrooms > 0 && (property.areaSqft?.trim() || property.facing !== undefined) && (
+            <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
+          )}
+          {property.areaSqft?.trim() && (
+            <span className="inline-flex! min-w-0! flex-1! items-center! justify-center! gap-1.5!" title={formatArea(property.areaSqft)}>
+              <Ruler className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
+              <span className="truncate! text-base!">{formatArea(property.areaSqft)}</span>
+            </span>
+          )}
+          {(property.areaSqft?.trim() || typeof property.bedrooms === "number") && (
+            <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
+          )}
+          <span className="inline-flex! min-w-0! flex-1! items-center! justify-center!" title={property.facing?.trim() ? undefined : "Facing not specified"}>
+            <FacingArrow facing={property.facing} />
+          </span>
         </div>
 
         {/* Single action — pinned to the bottom, card itself navigates to detail */}

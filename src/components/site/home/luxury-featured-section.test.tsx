@@ -1,0 +1,58 @@
+// site/majestan-frontend/src/components/site/home/luxury-featured-section.test.tsx
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { LuxuryFeaturedSection } from "./luxury-featured-section";
+import type { FeaturedProperty } from "@/lib/api";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+const baseProp: FeaturedProperty = {
+  id: 7,
+  propertyType: "apartment",
+  detailPath: "/slug-ap71",
+  slugUrl: "slug",
+  propertyName: "Sunrise Apartments",
+  sublocation: "Townhall, Coimbatore",
+  photo: null,
+  postType: "Sell",
+  expectedSalePrice: 5000000,
+  monthlyRent: 5000000,
+  pricePerSqft: "4000",
+  bedrooms: 3,
+  areaSqft: "1250.00",
+  facing: "north_east",
+  possession: null,
+};
+
+describe("LuxuryCard redesigned rows", () => {
+  it("renders price row before the BHK/area/facing row", () => {
+    const { container } = render(
+      <LuxuryFeaturedSection properties={[baseProp]} title="Handpicked Properties" subtitle="sub" />,
+    );
+    const price = screen.getByText("50 L");
+    const bhk = screen.getByText("3 BHK");
+    const area = screen.getByText("1,250 sq.ft");
+    expect(price).toBeDefined();
+    expect(bhk).toBeDefined();
+    expect(area).toBeDefined();
+    const body = price.closest("div.flex.flex-1") ?? container;
+    // [\s\S]* instead of /s flag: tsconfig targets ES2017 (TS1501 otherwise).
+    expect(body.textContent).toMatch(/50 L[\s\S]*3 BHK[\s\S]*1,250 sq\.ft/);
+    expect(screen.getByTitle("North-East")).toBeDefined();
+  });
+
+  it("renders a muted placeholder when facing is missing", () => {
+    render(
+      <LuxuryFeaturedSection
+        properties={[{ ...baseProp, id: 8, facing: null }]}
+        title="Handpicked Properties"
+        subtitle="sub"
+      />,
+    );
+    // Wrapper slot + FacingArrow placeholder both carry the title (nested),
+    // so assert presence via getAllByTitle rather than getByTitle.
+    expect(screen.getAllByTitle("Facing not specified").length).toBeGreaterThan(0);
+  });
+});

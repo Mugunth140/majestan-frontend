@@ -40,6 +40,7 @@ export type FeaturedProperty = {
   pricePerSqft: string | number | null;
   bedrooms: number | null;
   areaSqft: string | null;
+  facing: string | null;
   possession: string | null;
 };
 

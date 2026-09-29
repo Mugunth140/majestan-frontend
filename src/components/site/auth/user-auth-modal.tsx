@@ -64,25 +64,32 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
     setResendIn(0);
   };
 
+  const validateStep1 = (): string | null => {
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      return "Please enter a valid phone number.";
+    }
+    if (mode === "register") {
+      if (!name.trim()) {
+        return "Please enter your name.";
+      }
+      if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
+        return "Please enter a valid email address.";
+      }
+    }
+    return null;
+  };
+
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const cleanPhone = phone.replace(/\D/g, "");
-    if (cleanPhone.length < 10) {
-      setError("Please enter a valid phone number.");
+    const step1Error = validateStep1();
+    if (step1Error) {
+      setError(step1Error);
       return;
     }
-    if (mode === "register") {
-      if (!name.trim()) {
-        setError("Please enter your name.");
-        return;
-      }
-      if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
-        setError("Please enter a valid email address.");
-        return;
-      }
-    }
+    const cleanPhone = phone.replace(/\D/g, "");
 
     setLoading(true);
     try {
@@ -153,6 +160,11 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
   const handleResend = async () => {
     if (resendIn > 0 || loading) return;
     setError(null);
+    const step1Error = validateStep1();
+    if (step1Error) {
+      setError(step1Error);
+      return;
+    }
     const cleanPhone = phone.replace(/\D/g, "");
     setLoading(true);
     try {

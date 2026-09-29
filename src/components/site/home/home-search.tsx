@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Sublocation, UnitType } from "@/lib/api";
 import { MapPin, ChevronDown, Search, Home } from "lucide-react";
 import {
@@ -66,16 +67,23 @@ export function HomeSearch({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement | null;
+
+      // The menus render in a portal, so they live outside both trigger refs.
+      // Without this guard the mousedown would close a menu before its own click
+      // handler ran, making options unselectable.
+      if (target?.closest?.("[data-search-menu]")) return;
+
       if (
         localityMenuRef.current &&
-        !localityMenuRef.current.contains(event.target as Node)
+        !localityMenuRef.current.contains(target as Node)
       ) {
         setIsLocalityMenuOpen(false);
       }
 
       if (
         propertyMenuRef.current &&
-        !propertyMenuRef.current.contains(event.target as Node)
+        !propertyMenuRef.current.contains(target as Node)
       ) {
         setIsPropertyMenuOpen(false);
       }
@@ -84,6 +92,46 @@ export function HomeSearch({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  /* Row 1 scrolls horizontally on mobile, and an overflow container clips
+     absolutely-positioned children — so the open menus used to be cut off and
+     slide under row 2. Both menus therefore render in a portal, positioned
+     against the trigger's viewport rect, and re-anchor on scroll/resize instead
+     of closing. */
+  function useAnchoredMenu(open: boolean, triggerRef: React.RefObject<HTMLElement | null>) {
+    const [rect, setRect] = useState<{ top: number; left: number; minWidth: number } | null>(null);
+
+    useEffect(() => {
+      if (!open) {
+        setRect(null);
+        return;
+      }
+
+      const update = () => {
+        const el = triggerRef.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        // Clamp to the viewport so a trigger near the right edge does not push
+        // the panel off-screen.
+        const width = Math.max(r.width, 224);
+        const left = Math.min(r.left, window.innerWidth - width - 12);
+        setRect({ top: r.bottom + 8, left: Math.max(12, left), minWidth: width });
+      };
+
+      update();
+      window.addEventListener("scroll", update, true);
+      window.addEventListener("resize", update);
+      return () => {
+        window.removeEventListener("scroll", update, true);
+        window.removeEventListener("resize", update);
+      };
+    }, [open, triggerRef]);
+
+    return rect;
+  }
+
+  const propertyAnchor = useAnchoredMenu(isPropertyMenuOpen, propertyMenuRef);
+  const localityAnchor = useAnchoredMenu(isLocalityMenuOpen, localityMenuRef);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -138,7 +186,9 @@ export function HomeSearch({
   }
 
   return (
-    <div className="w-full! max-w-[960px]! mx-auto! mt-6! relative! z-20! px-3! sm:px-4! text-left!">
+    /* Mobile: the card runs edge-to-edge (no gutters, square corners) so it uses
+       the whole screen width. Desktop keeps the inset, rounded card. */
+    <div className="w-full! max-w-[960px]! mx-auto! mt-6! relative! z-20! px-0! sm:px-4! text-left!">
       <form
         onSubmit={onSubmit}
         /*
@@ -150,7 +200,7 @@ export function HomeSearch({
           The border moves off gray-100 (#f3f4f6, ~invisible on white) to a
           12% navy so the outline reads on both the white hero and the banner.
         */
-        className="w-full! bg-white! rounded-3xl! shadow-[0_1px_2px_rgba(22,30,45,0.06),0_10px_24px_-6px_rgba(39,66,127,0.18),0_28px_60px_-20px_rgba(22,30,45,0.20)]! border! border-[#27427f]/12! text-left!"
+        className="w-full! bg-white! rounded-none! sm:rounded-3xl! shadow-[0_1px_2px_rgba(22,30,45,0.06),0_10px_24px_-6px_rgba(39,66,127,0.18),0_28px_60px_-20px_rgba(22,30,45,0.20)]! border-y! sm:border! border-[#27427f]/12! text-left!"
       >
         {/* ── ROW 1: Toggles & Dropdowns ──────────────────────────
             Mobile: the Buy/Rent toggle stays pinned and the dropdowns scroll
@@ -201,10 +251,12 @@ export function HomeSearch({
               <ChevronDown className={`text-gray-400! shrink-0! transition-transform! duration-200! ${isPropertyMenuOpen ? "rotate-180!" : ""}`} size={16} strokeWidth={2.5} />
             </button>
 
-            {isPropertyMenuOpen && (
+            {isPropertyMenuOpen && propertyAnchor && createPortal(
               <div
                 role="listbox"
-                className="absolute! left-0! top-[calc(100%+8px)]! z-50! w-56! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
+                data-search-menu
+                style={{ top: propertyAnchor.top, left: propertyAnchor.left, minWidth: propertyAnchor.minWidth }}
+                className="fixed! z-[60]! w-max! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
               >
                 {propertyTypeOptions.map(([value, label]) => (
                   <button
@@ -226,7 +278,8 @@ export function HomeSearch({
                     {label}
                   </button>
                 ))}
-              </div>
+              </div>,
+              document.body,
             )}
           </div>
 
@@ -249,10 +302,12 @@ export function HomeSearch({
               <ChevronDown className={`text-gray-400! shrink-0! transition-transform! ${isLocalityMenuOpen ? "rotate-180!" : ""}`} size={16} strokeWidth={2.5} />
             </button>
 
-            {isLocalityMenuOpen && (
+            {isLocalityMenuOpen && localityAnchor && createPortal(
               <div
                 role="listbox"
-                className="absolute! left-0! top-[calc(100%+8px)]! z-50! w-56! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
+                data-search-menu
+                style={{ top: localityAnchor.top, left: localityAnchor.left, minWidth: localityAnchor.minWidth }}
+                className="fixed! z-[60]! w-max! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
               >
                 {filteredSublocations.length > 0 ? (
                   filteredSublocations.map((item) => (
@@ -279,7 +334,8 @@ export function HomeSearch({
                     No matching locations
                   </p>
                 )}
-              </div>
+              </div>,
+              document.body,
             )}
           </div>
         </div>

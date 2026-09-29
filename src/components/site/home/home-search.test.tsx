@@ -66,6 +66,19 @@ describe("HomeSearch responsive search bar", () => {
     expect(within(trigger).getByText("Apartment")).toBeDefined();
   });
 
+  it("keeps a portaled menu open long enough to select an option", async () => {
+    // The menu renders outside the trigger's DOM subtree. If the outside-click
+    // handler closed it on mousedown, the option would unmount before its own
+    // click fired and selection would silently do nothing.
+    const user = userEvent.setup();
+    renderSearch();
+
+    await user.click(screen.getByRole("button", { name: /property type/i }));
+    await user.click(screen.getByRole("option", { name: "Apartment" }));
+
+    expect(screen.getByRole("button", { name: /apartment/i })).toBeDefined();
+  });
+
   it("keeps Buy/Rent toggle alongside the scrollable dropdown row", () => {
     renderSearch();
     expect(screen.getByRole("button", { name: "Buy" })).toBeDefined();

@@ -45,9 +45,11 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
 
   return (
     <section className="relative! w-full! py-15! bg-white! overflow-hidden!">
-      <div className="relative! w-full! max-w-[1400px]! mx-auto! px-4! sm:px-6! md:px-8! z-10!">
+      {/* Mobile: gutters live on the header only, so the carousel track runs
+          edge-to-edge and a single slide can use the full screen width. */}
+      <div className="relative! w-full! max-w-[1400px]! mx-auto! px-0! sm:px-6! md:px-8! z-10!">
         {/* Section Header */}
-        <div className="flex! flex-col! md:flex-row! justify-between! items-start! md:items-end! mb-12!">
+        <div className="flex! flex-col! md:flex-row! justify-between! items-start! md:items-end! mb-12! px-4! sm:px-0!">
           <div className="max-w-2xl!">
             {/* <span className="block! text-[#27427f]! text-xs! font-bold! uppercase! tracking-[0.2em]! mb-3!">
               FEATURED PROJECTS
@@ -82,9 +84,12 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
         </div>
 
         {/* Carousel — static centered grid for 1-3 items, infinite 4-in-row swiper for 4+ */}
-        <div className="relative! w-full! -mx-4! px-4! sm:mx-0! sm:px-0!">
+        {/* Carousel — static centered grid for 1-3 items, infinite 4-in-row swiper for 4+.
+            Mobile keeps a 16px inset so cards do not touch the screen edge, but no
+            max-width, so a single slide spans the full viewport. */}
+        <div className="relative! w-full! px-4! sm:px-0!">
           {properties.length <= 3 ? (
-            <div className={`grid! gap-6! pt-4! pb-4! place-items-center! ${properties.length === 1 ? 'grid-cols-1! max-w-[420px]! mx-auto!' : properties.length === 2 ? 'grid-cols-1! sm:grid-cols-2! max-w-[900px]! mx-auto!' : 'grid-cols-1! sm:grid-cols-2! lg:grid-cols-3!'}`}>
+            <div className={`grid! gap-6! pt-4! pb-4! place-items-center! ${properties.length === 1 ? 'grid-cols-1!' : properties.length === 2 ? 'grid-cols-1! sm:grid-cols-2! max-w-[900px]! mx-auto!' : 'grid-cols-1! sm:grid-cols-2! lg:grid-cols-3!'}`}>
               {properties.map((prop, i) => (
                 <LuxuryCard
                   key={`${prop.id}-${i}`}
@@ -103,7 +108,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
             onSwiper={setSwiperInstance}
             onSlideChange={(swiper) => setActiveIndex(swiper.realIndex % properties.length)}
             slidesPerView={1}
-            spaceBetween={20}
+            spaceBetween={12}
             centeredSlides={false}
             loop={true}
             watchOverflow={false}
@@ -188,7 +193,7 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
         }
       }}
       className={`
-        font-['Manrope',sans-serif]! group! w-full! max-w-80! h-full! mx-auto! flex! flex-col! cursor-pointer!
+        font-['Manrope',sans-serif]! group! w-full! max-w-none! sm:max-w-80! h-full! mx-auto! flex! flex-col! cursor-pointer!
         bg-white! rounded-2xl! border! border-gray-200! overflow-hidden!
         transition-all! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]!
         hover:border-[#27427f]/20! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]!

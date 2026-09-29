@@ -138,7 +138,7 @@ export function HomeSearch({
   }
 
   return (
-    <div className="w-full! max-w-[960px]! mx-auto! mt-6! relative! z-20! px-4! text-left!">
+    <div className="w-full! max-w-[960px]! mx-auto! mt-6! relative! z-20! px-3! sm:px-4! text-left!">
       <form
         onSubmit={onSubmit}
         /*
@@ -152,8 +152,11 @@ export function HomeSearch({
         */
         className="w-full! bg-white! rounded-3xl! shadow-[0_1px_2px_rgba(22,30,45,0.06),0_10px_24px_-6px_rgba(39,66,127,0.18),0_28px_60px_-20px_rgba(22,30,45,0.20)]! border! border-[#27427f]/12! text-left!"
       >
-        {/* ── ROW 1: Toggles & Dropdowns ────────────────────────── */}
-        <div className="flex! flex-wrap! items-center! gap-3! px-4! py-4! md:px-6! border-b! border-gray-100!">
+        {/* ── ROW 1: Toggles & Dropdowns ──────────────────────────
+            Mobile: the Buy/Rent toggle stays pinned and the dropdowns scroll
+            horizontally in a contained track, so the card keeps its full width
+            instead of wrapping. Desktop keeps the original wrap layout. */}
+        <div className="flex! flex-nowrap! md:flex-wrap! items-center! gap-3! px-4! py-4! md:px-6! border-b! border-gray-100! overflow-x-auto! md:overflow-visible! [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           
           {/* Buy / Rent */}
           <div className="flex! items-center! gap-2! shrink-0!">
@@ -191,10 +194,11 @@ export function HomeSearch({
               }}
             >
               <Home className="text-[#27427f]! shrink-0!" size={16} strokeWidth={2} />
-              <span className={`text-[14px]! font-medium! leading-none! ${propertyType ? "text-gray-700!" : "text-gray-500!"}`}>
+              <span className={`text-[14px]! font-medium! leading-none! whitespace-nowrap! ${propertyType ? "text-gray-700!" : "text-gray-500!"}`}>
                 {propertyType ? selectedPropertyLabel : "Property Type"}
               </span>
-              <ChevronDown className="text-gray-400! shrink-0!" size={16} strokeWidth={2.5} />
+              {/* Rotates with open state, matching the Locality trigger. */}
+              <ChevronDown className={`text-gray-400! shrink-0! transition-transform! duration-200! ${isPropertyMenuOpen ? "rotate-180!" : ""}`} size={16} strokeWidth={2.5} />
             </button>
 
             {isPropertyMenuOpen && (
@@ -239,7 +243,7 @@ export function HomeSearch({
               }}
             >
               <MapPin className="text-[#27427f]! shrink-0!" size={16} strokeWidth={2.5} />
-              <span className={`text-[14px]! font-medium! leading-none! ${locality ? "text-gray-700!" : "text-gray-500!"}`}>
+              <span className={`text-[14px]! font-medium! leading-none! whitespace-nowrap! ${locality ? "text-gray-700!" : "text-gray-500!"}`}>
                 {locality || "Locality"}
               </span>
               <ChevronDown className={`text-gray-400! shrink-0! transition-transform! ${isLocalityMenuOpen ? "rotate-180!" : ""}`} size={16} strokeWidth={2.5} />
@@ -280,26 +284,31 @@ export function HomeSearch({
           </div>
         </div>
 
-        {/* ── ROW 2: Search Bar ──────────────────────────────── */}
+        {/* ── ROW 2: Search Bar ──────────────────────────────────
+            Mobile drops the leading search glyph and collapses the submit
+            button to a square icon so the input keeps the full width.
+            Desktop is unchanged. */}
         <div className="flex! items-center! justify-between! p-2! md:p-3! md:pl-6! relative!">
-          <div className="flex-1! flex! items-center! gap-3! relative!">
-            <Search className="text-gray-400! shrink-0!" size={22} strokeWidth={2} />
+          <div className="flex-1! flex! items-center! gap-3! relative! min-w-0!">
+            <Search className="hidden! md:block! text-gray-400! shrink-0!" size={22} strokeWidth={2} />
             <input
               type="text"
               placeholder="Search by Project or Builder..."
-              className="w-full! outline-none! bg-transparent! text-gray-800! placeholder-gray-400! font-medium! text-[16px]! border-none! p-0! m-0! shadow-none! focus:ring-0! truncate!"
+              className="w-full! min-w-0! outline-none! bg-transparent! text-gray-800! placeholder-gray-400! font-medium! text-[16px]! border-none! p-0! m-0! shadow-none! focus:ring-0! truncate!"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <div className="shrink-0! ml-4!">
+          <div className="shrink-0! ml-2! md:ml-4!">
             <button
               type="submit"
               disabled={isSearching}
-              className="flex! items-center! justify-center! bg-[#27427f]! hover:bg-[#ffc900]! text-white! hover:text-[#27427f]! rounded-full! px-12! py-3.5! font-semibold! text-[15px]! transition-all! shadow-md! gap-2! h-[52px]! disabled:opacity-70!"
+              aria-label="Search"
+              className="flex! items-center! justify-center! bg-[#27427f]! hover:bg-[#ffc900]! text-white! hover:text-[#27427f]! rounded-full! font-semibold! transition-all! shadow-md! gap-2! h-[52px]! disabled:opacity-70! w-[52px]! md:w-auto! md:px-12! py-3.5! md:py-0! text-[15px]!"
             >
-              {isSearching ? "..." : "Search"}
+              <Search className="md:hidden! shrink-0!" size={20} strokeWidth={2.5} />
+              <span className="hidden! md:inline!">{isSearching ? "..." : "Search"}</span>
             </button>
           </div>
         </div>

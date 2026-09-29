@@ -101,7 +101,7 @@ export function HomePage({ data, banners }: { data: HomePageData; banners: AdHer
                 title={`Exclusive Offers and Highlights`}
                 text="Discover the latest premium updates, exclusive deals, and featured communities."
             />
-            <div className="mt-12! rounded-2xl! overflow-hidden! shadow-md! group!">
+            <div className="mt-12! group!">
               <FeatureCarousel
                 banners={[
                   { id: 1, image: "/assets/images/banners/banner_1.jpeg", href: "" },

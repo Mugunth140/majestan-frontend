@@ -200,7 +200,7 @@ export function HomeSearch({
           The border moves off gray-100 (#f3f4f6, ~invisible on white) to a
           12% navy so the outline reads on both the white hero and the banner.
         */
-        className="w-full! bg-white! rounded-none! sm:rounded-3xl! shadow-[0_1px_2px_rgba(22,30,45,0.06),0_10px_24px_-6px_rgba(39,66,127,0.18),0_28px_60px_-20px_rgba(22,30,45,0.20)]! border-y! sm:border! border-[#27427f]/12! text-left!"
+        className="w-full! bg-white! rounded-[18px]! sm:rounded-3xl! shadow-[0_1px_2px_rgba(22,30,45,0.06),0_10px_24px_-6px_rgba(39,66,127,0.18),0_28px_60px_-20px_rgba(22,30,45,0.20)]! border! border-[#27427f]/12! text-left!"
       >
         {/* ── ROW 1: Toggles & Dropdowns ──────────────────────────
             Mobile: the Buy/Rent toggle stays pinned and the dropdowns scroll

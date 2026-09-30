@@ -124,7 +124,7 @@ export function PropertySectionLinks({
           <Link
             key={link.href}
             href={link.href}
-            className="flex! items-center! gap-1.5! rounded-lg! bg-gray-50! border! border-gray-200/60! px-3! py-1.5! text-[11px]! font-bold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
+            className="flex! items-center! gap-1.5! rounded-lg! bg-gray-50! border! border-gray-200/60! px-3! py-1.5! text-[11px]! font-semibold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
           >
             <span className="text-gray-400! group-hover:text-white/90! transition-colors!">
               {link.icon}
@@ -142,7 +142,7 @@ export function PropertySectionLinks({
         <Link
           key={link.href}
           href={link.href}
-          className="flex! items-center! gap-2! rounded-xl! bg-gray-50! border! border-gray-200/60! px-4! py-2! text-[13px]! font-bold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
+          className="flex! items-center! gap-2! rounded-xl! bg-gray-50! border! border-gray-200/60! px-4! py-2! text-[13px]! font-semibold! text-gray-700! no-underline! transition-all! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-md! hover:shadow-[#27427f]/20! group!"
         >
           <span className="text-gray-400! group-hover:text-white/90! transition-colors!">
             {link.icon}

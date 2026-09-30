@@ -360,7 +360,7 @@ export default async function PropertySectionPage({
           <div className="container! mx-auto! px-4! sm:px-6! py-6! max-w-7xl!">
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
 
-            <div className="grid! grid-cols-1! lg:grid-cols-3! gap-8! pb-24!">
+            <div className="grid! grid-cols-1! lg:grid-cols-3! gap-8! pb-24! mt-6!">
               {/* Main Content */}
               <div className="lg:col-span-2!">
                 <SectionContent

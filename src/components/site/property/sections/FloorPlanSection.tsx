@@ -2,11 +2,8 @@ import { type SeoProperty, type SeoPropertyUnit } from "@/lib/api/property-by-sl
 import { getFloorPlanMeasurements } from "@/lib/floor-plan-measurements";
 import {
   Building2,
-  Ruler,
   Square,
-  Download,
   MessageSquare,
-  LayoutGrid,
   DoorOpen,
 } from "lucide-react";
 
@@ -54,16 +51,11 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
     <div className="space-y-8!">
       {/* Floor Plan Image Display */}
       <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-        <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
-            <LayoutGrid className="w-6! h-6! text-gray-600!" />
-          </div>
-          <div>
-            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-              Floor Plan
-            </h2>
-            <p className="text-sm! font-normal! text-gray-500! mt-1!">Layout and space configuration</p>
-          </div>
+        <div className="mb-8!">
+          <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
+            Floor Plan
+          </h2>
+          <p className="text-sm! font-normal! text-gray-500! mt-1!">Layout and space configuration</p>
         </div>
 
         {hasFloorPlanImages ? (
@@ -109,16 +101,11 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
 
       {/* Key Measurements */}
       <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-        <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
-            <Ruler className="w-6! h-6! text-gray-600!" />
-          </div>
-          <div>
-            <h3 className="text-2xl! font-semibold! text-gray-900!">
-              Key Measurements
-            </h3>
-            <p className="text-sm! font-normal! text-gray-500! mt-1!">Space specifications at a glance</p>
-          </div>
+        <div className="mb-8!">
+          <h3 className="text-2xl! font-semibold! text-gray-900!">
+            Key Measurements
+          </h3>
+          <p className="text-sm! font-normal! text-gray-500! mt-1!">Space specifications at a glance</p>
         </div>
 
         <div className="grid! grid-cols-2! md:grid-cols-4! gap-5!">
@@ -145,16 +132,11 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       {/* Room Dimensions */}
       {hasRoomDimensions && (
         <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-          <div className="flex! items-center! gap-4! mb-8!">
-            <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
-              <Ruler className="w-6! h-6! text-gray-600!" />
-            </div>
-            <div>
-              <h3 className="text-2xl! font-semibold! text-gray-900!">
-                Room Dimensions
-              </h3>
-              <p className="text-sm! font-normal! text-gray-500! mt-1!">Detailed dimensions of the property rooms</p>
-            </div>
+          <div className="mb-8!">
+            <h3 className="text-2xl! font-semibold! text-gray-900!">
+              Room Dimensions
+            </h3>
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">Detailed dimensions of the property rooms</p>
           </div>
 
           <div className="grid! grid-cols-1! sm:grid-cols-2! md:grid-cols-3! gap-4!">
@@ -230,18 +212,13 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       {/* Request Floor Plan CTA */}
       <div className="bg-gray-50! rounded-[24px]! p-8! md:p-10! border! border-gray-200!">
         <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
-          <div className="flex! items-start! gap-5!">
-            <div className="w-14! h-14! rounded-full! bg-white! flex! items-center! justify-center! shrink-0! border! border-gray-200!">
-              <Download className="w-6! h-6! text-gray-600!" />
-            </div>
-            <div>
-              <h3 className="text-xl! font-semibold! mb-2! text-gray-900!">
-                Need the detailed floor plan?
-              </h3>
-              <p className="text-gray-500! font-light! text-base! leading-relaxed!">
-                Request the complete floor plan with exact measurements and room layouts.
-              </p>
-            </div>
+          <div className="mb-8!">
+            <h3 className="text-xl! font-semibold! mb-2! text-gray-900!">
+              Need the detailed floor plan?
+            </h3>
+            <p className="text-gray-500! font-light! text-base! leading-relaxed!">
+              Request the complete floor plan with exact measurements and room layouts.
+            </p>
           </div>
           <button className="w-full! md:w-auto! px-8! py-3.5! bg-gray-900! text-white! font-medium! rounded-full! hover:bg-gray-800! transition-all! shrink-0! flex! items-center! justify-center! gap-2!">
             <MessageSquare className="w-4.5! h-4.5!" />

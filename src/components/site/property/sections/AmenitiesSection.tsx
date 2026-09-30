@@ -98,11 +98,11 @@ function AmenityCard({ amenity }: { amenity: Amenity }) {
   const Icon = amenity.icon;
 
   return (
-    <div className="group flex! items-center! gap-4! p-4! rounded-2xl! bg-white! border! border-gray-100! hover:border-[#27427f]/20! hover:shadow-[0_4px_20px_rgba(39,66,127,0.06)]! transition-all! duration-300!">
-      <div className="w-12! h-12! rounded-xl! bg-gray-50! group-hover:bg-[#27427f]/5! flex! items-center! justify-center! shrink-0! transition-colors! duration-300!">
-        <Icon className="w-5! h-5! text-gray-500! group-hover:text-[#27427f]! transition-colors! duration-300!" strokeWidth={1.5} />
+    <div className="group flex! items-center! gap-4! p-4! rounded-2xl! bg-white! border! border-gray-200/70! hover:border-[#27427f]/30! hover:shadow-[0_8px_24px_rgba(39,66,127,0.10)]! hover:-translate-y-0.5! transition-all! duration-300!">
+      <div className="w-12! h-12! rounded-xl! bg-[#27427f]/10! flex! items-center! justify-center! shrink-0!">
+        <Icon className="w-5! h-5! text-[#27427f]!" strokeWidth={1.75} />
       </div>
-      <span className="font-sans! font-medium! text-base! text-gray-900! flex-1!">
+      <span className="font-sans! font-semibold! text-base! text-gray-900! flex-1!">
         {amenity.name}
       </span>
     </div>

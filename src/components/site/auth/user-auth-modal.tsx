@@ -42,7 +42,7 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
-  const [expiresInSeconds, setExpiresInSeconds] = useState<number | null>(null);
+  const [expiresIn, setExpiresIn] = useState<number | null>(null);
   const [resendIn, setResendIn] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,12 +55,20 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
     return () => clearTimeout(t);
   }, [step, resendIn]);
 
+  // Reverse expiry countdown. Cosmetic only — the backend owns expiry, and it
+  // rejects an expired code regardless of what this shows.
+  useEffect(() => {
+    if (step !== 2 || expiresIn === null || expiresIn <= 0) return;
+    const t = setTimeout(() => setExpiresIn((s) => (s === null ? null : s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [step, expiresIn]);
+
   const resetForMode = (next: OtpMode) => {
     setMode(next);
     setStep(1);
     setOtp("");
     setError(null);
-    setExpiresInSeconds(null);
+    setExpiresIn(null);
     setResendIn(0);
   };
 
@@ -102,7 +110,7 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
               phone: cleanPhone,
             })
           : await requestLoginOtp({ countryCode, phone: cleanPhone });
-      setExpiresInSeconds(res.expiresInSeconds ?? null);
+      setExpiresIn(res.expiresInSeconds ?? null);
       setOtp("");
       setStep(2);
       setResendIn(RESEND_SECONDS);
@@ -177,7 +185,7 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
               phone: cleanPhone,
             })
           : await requestLoginOtp({ countryCode, phone: cleanPhone });
-      setExpiresInSeconds(res.expiresInSeconds ?? null);
+      setExpiresIn(res.expiresInSeconds ?? null);
       setOtp("");
       setResendIn(RESEND_SECONDS);
     } catch (err: any) {
@@ -206,7 +214,7 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 16 }}
             transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
-            className="!relative !w-full !max-w-[400px] !flex !flex-col !justify-center !p-8 !bg-white/95 !backdrop-blur-xl !rounded-[2rem] !shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] !border !border-white/50"
+            className="!relative !w-full !max-w-[400px] !flex !flex-col !justify-center !p-8 !font-['Manrope',sans-serif] !bg-white/95 !backdrop-blur-xl !rounded-[2rem] !shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] !border !border-white/50"
           >
             {/* Close button */}
             <button
@@ -218,27 +226,27 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
             </button>
 
             {/* Logo */}
-            <div className="!mb-6 !flex !items-center !justify-center">
+            <div className="!mb-7 !flex !items-center !justify-center">
               <Image
                 src="/assets/images/logo/logo.png"
                 alt="Majestan Realty"
-                width={120}
-                height={120}
-                className="!object-contain"
+                width={160}
+                height={160}
+                className="!h-auto !w-[160px] !object-contain"
                 priority
               />
             </div>
 
             {/* Heading */}
             <div className="!mb-7">
-              <h1 className="!mb-2 !text-2xl !font-bold !tracking-tight !text-gray-900 !text-center">
+              <h1 className="!mb-2.5 !font-['Manrope',sans-serif] !text-[26px] !font-semibold !leading-[1.2] !tracking-[-0.02em] !text-gray-900 !text-center">
                 {step === 2
                   ? "Enter OTP"
                   : mode === "register"
                     ? "Create account"
                     : "Welcome back"}
               </h1>
-              <p className="!text-[14px] !text-gray-500 !mt-2 !text-center !leading-relaxed">
+              <p className="!font-['Manrope',sans-serif] !text-[14px] !font-normal !leading-[1.6] !text-gray-500 !text-center">
                 {step === 2
                   ? `We sent a 6-digit code to ${countryCode} ${phone.replace(/\D/g, "")}.`
                   : mode === "register"
@@ -357,17 +365,8 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
               ) : (
                 <>
                   {/* OTP field */}
-                  <div className="!space-y-1.5 !relative !group">
-                    <label className="!text-xs !font-semibold !tracking-wide !text-gray-500 !ml-1">
-                      6-digit OTP
-                      {expiresInSeconds !== null && (
-                        <span className="!font-normal">
-                          {" "}
-                          · expires in {expiresInSeconds}s
-                        </span>
-                      )}
-                    </label>
-                    <div className="!relative !mt-1 !flex !items-stretch !rounded-xl !bg-gray-50 !border !border-gray-200 !overflow-hidden !transition-all hover:!bg-gray-100 focus-within:!bg-white focus-within:!ring-2 focus-within:!ring-[#27427f]/20 focus-within:!border-[#27427f]">
+                  <div className="!relative !group">
+                    <div className="!relative !flex !items-stretch !rounded-xl !bg-gray-50 !border !border-gray-200 !overflow-hidden !transition-all hover:!bg-gray-100 focus-within:!bg-white focus-within:!ring-2 focus-within:!ring-[#27427f]/20 focus-within:!border-[#27427f]">
                       <input
                         type="text"
                         inputMode="numeric"
@@ -384,19 +383,17 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
                     </div>
                   </div>
 
-                  {/* Resend + back */}
+                  {/* Expiry countdown + resend. The backend owns expiry; this
+                      countdown is cosmetic. */}
                   <div className="!flex !items-center !justify-between !text-[13px]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStep(1);
-                        setOtp("");
-                        setError(null);
-                      }}
-                      className="!font-semibold !text-[#27427f] hover:!underline !transition-colors"
+                    <span
+                      className="!font-medium !tabular-nums !text-gray-500"
+                      aria-live="polite"
                     >
-                      Change number
-                    </button>
+                      {expiresIn !== null && expiresIn > 0
+                        ? `Expires in ${expiresIn}s`
+                        : "Code expired"}
+                    </span>
                     <button
                       type="button"
                       onClick={handleResend}

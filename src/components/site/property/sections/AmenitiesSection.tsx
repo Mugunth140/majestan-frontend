@@ -160,23 +160,22 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
       )}
 
       {/* CTA Card */}
-      <div className="bg-[#27427f]! rounded-4xl! p-8! md:p-9! overflow-hidden! relative!">
-        <div className="absolute! top-0! right-0! w-64! h-64! bg-white/5! rounded-full! blur-3xl! -translate-y-1/2! translate-x-1/4!"></div>
-        <div className="relative! z-10! flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
-          <div className="flex! items-start! gap-5!">
-            <div className="w-14! h-14! rounded-2xl! bg-white/10! flex! items-center! justify-center! shrink-0! backdrop-blur-sm!">
-              <MessageCircle className="w-6! h-6! text-white!" strokeWidth={1.5} />
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+        <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-6!">
+          <div className="flex! items-start! gap-4!">
+            <div className="w-12! h-12! rounded-xl! bg-[#27427f]/5! flex! items-center! justify-center! shrink-0!">
+              <MessageCircle className="w-5! h-5! text-[#27427f]!" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-['Lexend',sans-serif]! text-xl! font-medium! mb-2! text-white! tracking-normal!">
+              <h3 className="text-lg! md:text-xl! font-normal! mb-2! text-gray-900! tracking-normal!">
                 Need more details?
               </h3>
-              <p className="text-blue-100! text-base! leading-normal!">
+              <p className="text-gray-500! text-base! font-normal! leading-relaxed!">
                 Get the complete list of amenities and confirm availability with the property owner.
               </p>
             </div>
           </div>
-          <button className="w-full! md:w-auto! px-8! py-3.5! bg-white! text-[#27427f]! font-medium! rounded-4xl! hover:bg-blue-50! transition-all! shrink-0! shadow-lg!">
+          <button className="w-full! md:w-auto! px-8! py-3! bg-[#27427f]! text-white! font-normal! text-base! rounded-xl! hover:bg-[#1e3366]! transition-all! shrink-0! cursor-pointer!">
             Contact Us
           </button>
         </div>

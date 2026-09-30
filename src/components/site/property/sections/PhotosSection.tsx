@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import {
-  Camera,
   X,
   ChevronLeft,
   ChevronRight,
@@ -71,28 +70,23 @@ export function PhotosSection({ property }: PhotosSectionProps) {
   if (allImages.length === 0) {
     return (
       <div className="space-y-8!">
-        <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-          <div className="flex! items-center! gap-4! mb-8!">
-            <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
-              <Camera className="w-6! h-6! text-gray-600!" />
-            </div>
-            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-              Photos
-            </h2>
-          </div>
-          <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-24! text-center! hover:bg-gray-50! transition-colors!">
+        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+          <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+            Photos
+          </h2>
+          <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-24! text-center! hover:bg-gray-50! transition-colors! mt-6!">
             <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-6!">
               <ImageOff className="w-8! h-8! text-gray-400!" />
             </div>
-          <h3 className="text-xl! font-medium! text-gray-900! mb-2!">
-            No photos available yet
-          </h3>
-          <p className="text-gray-500! text-base! font-light! max-w-md! leading-relaxed!">
-            Photos for this property are being uploaded. Check back soon or contact
-            the owner for a virtual tour.
-          </p>
+            <h3 className="text-xl! font-medium! text-gray-900! mb-2!">
+              No photos available yet
+            </h3>
+            <p className="text-gray-500! text-base! font-normal! max-w-md! leading-relaxed!">
+              Photos for this property are being uploaded. Check back soon or contact
+              the owner for a virtual tour.
+            </p>
+          </div>
         </div>
-      </div>
 
       {/* Shared contact call-to-action, identical on every page */}
       <NeedMoreDetails />
@@ -103,20 +97,15 @@ export function PhotosSection({ property }: PhotosSectionProps) {
   return (
     <div className="space-y-8!">
       {/* Header */}
-      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
         <div className="flex! flex-col! sm:flex-row! items-start! sm:items-center! justify-between! gap-4!">
-          <div className="flex! items-center! gap-4!">
-            <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
-              <Camera className="w-6! h-6! text-gray-600!" />
-            </div>
-            <div>
-              <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-                Photos
-              </h2>
-              <p className="text-sm! font-normal! text-gray-500! mt-1!">
-                Browse all photos of {property.title}
-              </p>
-            </div>
+          <div>
+            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+              Photos
+            </h2>
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">
+              Browse all photos of {property.title}
+            </p>
           </div>
           <span className="inline-flex! items-center! gap-2! px-4! py-2.5! bg-white! border! border-gray-200! rounded-full! text-sm! font-medium! text-gray-600!">
             <Images className="w-4.5! h-4.5!" />
@@ -127,7 +116,7 @@ export function PhotosSection({ property }: PhotosSectionProps) {
 
       {/* Primary Image */}
       {primaryImage && (
-        <div className="bg-white! rounded-[24px]! p-2! md:p-3! border! border-gray-200! shadow-sm!">
+        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-2! md:p-3! shadow-sm!">
           <div className="relative!">
             <span className="absolute! top-5! left-5! z-10! inline-flex! items-center! gap-1.5! px-3! py-1.5! bg-white/95! backdrop-blur-md! border! border-gray-200/50! rounded-full! text-xs! font-medium! uppercase! tracking-widest! text-gray-900! shadow-sm!">
               <Star className="w-3.5! h-3.5!" />
@@ -154,7 +143,7 @@ export function PhotosSection({ property }: PhotosSectionProps) {
 
       {/* Gallery Grid */}
       {galleryImages.length > 0 && (
-        <div className="bg-white! rounded-[24px]! p-2! md:p-3! border! border-gray-200! shadow-sm!">
+        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-2! md:p-3! shadow-sm!">
           <div className="grid! grid-cols-2! md:grid-cols-3! lg:grid-cols-4! gap-2! md:gap-3!">
             {galleryImages.map((img, idx) => {
               const imageIndex = primaryImage ? idx + 1 : idx;

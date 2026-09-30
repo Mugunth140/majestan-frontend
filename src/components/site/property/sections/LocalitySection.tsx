@@ -11,7 +11,6 @@ import {
   Globe,
   Train,
   Plane,
-  MapPinned,
 } from "lucide-react";
 import { LocalityGoogleMap } from './LocalityGoogleMap';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
@@ -141,25 +140,20 @@ export function LocalitySection({ property }: LocalitySectionProps) {
   return (
     <div className="space-y-8!">
       {/* Location Overview */}
-      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-        <div className="flex! items-start! gap-5!">
-          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
-            <MapPin className="w-6! h-6! text-gray-600!" />
-          </div>
-          <div>
-            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-3!">
-              Location &amp; Neighbourhood
-            </h2>
-            <p className="text-gray-500! font-light! leading-relaxed! text-base!">
-              <span className="font-medium! text-gray-900!">{property.title}</span> is located in{" "}
-              <span className="font-medium! text-gray-900!">
-                {property.city}
-                {property.state ? `, ${property.state}` : ""}
-              </span>
-              . The neighbourhood offers excellent connectivity to essential services, educational
-              institutions, healthcare facilities, and entertainment options.
-            </p>
-          </div>
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+        <div className="mb-4!">
+          <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+            Location &amp; Neighbourhood
+          </h2>
+          <p className="text-gray-500! font-normal! leading-relaxed! text-base! mt-2!">
+            <span className="font-medium! text-gray-900!">{property.title}</span> is located in{" "}
+            <span className="font-medium! text-gray-900!">
+              {property.city}
+              {property.state ? `, ${property.state}` : ""}
+            </span>
+            . The neighbourhood offers excellent connectivity to essential services, educational
+            institutions, healthcare facilities, and entertainment options.
+          </p>
         </div>
 
         {/* Location Tags */}
@@ -183,15 +177,15 @@ export function LocalitySection({ property }: LocalitySectionProps) {
           return (
             <div
               key={category.title}
-              className="bg-white! rounded-[20px]! p-6! md:p-8! border! border-gray-200! hover:shadow-sm! hover:border-gray-300! hover:-translate-y-0.5! transition-all! duration-300!"
+              className="bg-white! rounded-[20px]! p-6! md:p-8! border! border-gray-200/70! shadow-sm! hover:border-gray-300! hover:-translate-y-0.5! transition-all! duration-300!"
             >
               <div className="flex! items-center! gap-4! mb-6!">
                 <div
-                  className={`w-10! h-10! rounded-full! bg-gray-50! text-gray-600! flex! items-center! justify-center!`}
+                  className={`w-10! h-10! rounded-xl! bg-[#27427f]/10! text-[#27427f]! flex! items-center! justify-center!`}
                 >
                   <Icon className="w-5! h-5!" />
                 </div>
-                <h3 className="text-lg! font-semibold! text-gray-900!">
+                <h3 className="text-xl! font-semibold! text-gray-900!">
                   {category.title}
                 </h3>
               </div>
@@ -201,7 +195,7 @@ export function LocalitySection({ property }: LocalitySectionProps) {
                     key={idx}
                     className="flex! items-center! justify-between! gap-4! group!"
                   >
-                    <span className="text-sm! font-light! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>
+                    <span className="text-sm! font-normal! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>
                     <span className="text-xs! font-medium! text-gray-500! bg-gray-50! px-2! py-1! rounded-md! border! border-gray-200! whitespace-nowrap!">
                       {place.distance}
                     </span>
@@ -214,17 +208,12 @@ export function LocalitySection({ property }: LocalitySectionProps) {
       </div>
 
       {/* Connectivity Highlights */}
-      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-        <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
-            <Navigation className="w-6! h-6! text-gray-600!" />
-          </div>
-          <div>
-            <h3 className="text-2xl! font-semibold! text-gray-900!">
-              Connectivity Highlights
-            </h3>
-            <p className="text-sm! font-normal! text-gray-500! mt-1!">How well-connected is this location</p>
-          </div>
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+        <div className="mb-8!">
+          <h3 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+            Connectivity Highlights
+          </h3>
+          <p className="text-sm! font-normal! text-gray-500! mt-1!">How well-connected is this location</p>
         </div>
 
         <div className="grid! grid-cols-1! sm:grid-cols-2! gap-5!">
@@ -235,12 +224,12 @@ export function LocalitySection({ property }: LocalitySectionProps) {
                 key={item.label}
                 className="flex! items-start! gap-5! p-6! rounded-[20px]! bg-white! border! border-gray-200! hover:shadow-sm! transition-all! duration-300!"
               >
-                <div className="w-10! h-10! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
-                  <Icon className="w-5! h-5! text-gray-600!" />
+                <div className="w-10! h-10! rounded-xl! bg-[#27427f]/10! flex! items-center! justify-center! shrink-0!">
+                  <Icon className="w-5! h-5! text-[#27427f]!" />
                 </div>
                 <div>
                   <p className="font-medium! text-gray-900! text-sm!">{item.label}</p>
-                  <p className="text-gray-500! text-sm! font-light! mt-1! leading-relaxed!">{item.detail}</p>
+                  <p className="text-gray-500! text-sm! font-normal! mt-1! leading-relaxed!">{item.detail}</p>
                 </div>
               </div>
             );
@@ -249,19 +238,14 @@ export function LocalitySection({ property }: LocalitySectionProps) {
       </div>
 
       {/* Map Placeholder */}
-      <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
-        <div className="flex! items-center! gap-4! mb-8!">
-          <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center!">
-            <MapPinned className="w-6! h-6! text-gray-600!" />
-          </div>
-          <div>
-            <h3 className="text-2xl! font-semibold! text-gray-900!">
-              On the Map
-            </h3>
-            <p className="text-sm! font-normal! text-gray-500! mt-1!">
-              Approximate location in {property.city}
-            </p>
-          </div>
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+        <div className="mb-8!">
+          <h3 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+            On the Map
+          </h3>
+          <p className="text-sm! font-normal! text-gray-500! mt-1!">
+            Approximate location in {property.city}
+          </p>
         </div>
 
         <LocalityGoogleMap lat={lat} lng={lng} city={property.city} state={property.state} />

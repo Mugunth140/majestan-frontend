@@ -11,6 +11,9 @@ import {
   Globe,
   Train,
   Plane,
+  Stethoscope,
+  Film,
+  Landmark,
 } from "lucide-react";
 import { LocalityGoogleMap } from './LocalityGoogleMap';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
@@ -25,7 +28,29 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Navigation,
   Train,
   Plane,
+  Stethoscope,
+  Film,
+  Landmark,
 };
+
+/**
+ * Stored icon names are kebab-case ("shopping-bag"); older rows may carry
+ * PascalCase ("ShoppingBag"). Normalize before lookup so a miss never
+ * collapses every header to the fallback pin.
+ */
+export function resolveLocalityIcon(
+  name?: string | null,
+  fallback: React.ElementType = MapPin,
+): React.ElementType {
+  if (!name) return fallback;
+  const direct = ICON_MAP[name];
+  if (direct) return direct;
+  const needle = name.trim().toLowerCase().replace(/[-_\s]+/g, "");
+  const found = Object.entries(ICON_MAP).find(
+    ([key]) => key.toLowerCase() === needle,
+  );
+  return found ? found[1] : fallback;
+}
 
 type NearbyPlace = {
   name: string;
@@ -125,13 +150,13 @@ type LocalitySectionProps = {
 export function LocalitySection({ property }: LocalitySectionProps) {
   const localityData = property.locations?.[0]?.localityData;
   const customCategories = localityData?.categories || (property.seo?.seoData?.locality as any)?.categories;
-  const categories: LocalityCategory[] = customCategories && customCategories.length > 0 
-    ? customCategories.map((c: any) => ({ ...c, icon: ICON_MAP[c.icon] || MapPin })) 
+  const categories: LocalityCategory[] = customCategories && customCategories.length > 0
+    ? customCategories.map((c: any) => ({ ...c, icon: resolveLocalityIcon(c.icon) }))
     : getLocalityCategoriesForCity(property.city);
 
   const customConnectivity = localityData?.connectivity;
   const connectivityHighlights: ConnectivityHighlight[] = customConnectivity && customConnectivity.length > 0
-    ? customConnectivity.map((c: any) => ({ ...c, icon: ICON_MAP[c.icon] || Navigation }))
+    ? customConnectivity.map((c: any) => ({ ...c, icon: resolveLocalityIcon(c.icon, Navigation) }))
     : getConnectivityHighlights(property.city);
 
   const lat = property.locations?.[0]?.latitude ? Number(property.locations[0].latitude) : null;
@@ -179,12 +204,8 @@ export function LocalitySection({ property }: LocalitySectionProps) {
               key={category.title}
               className="bg-white! rounded-[20px]! p-6! md:p-8! border! border-gray-200/70! shadow-sm! hover:border-gray-300! hover:-translate-y-0.5! transition-all! duration-300!"
             >
-              <div className="flex! items-center! gap-4! mb-6!">
-                <div
-                  className={`w-10! h-10! rounded-xl! bg-[#27427f]/10! text-[#27427f]! flex! items-center! justify-center!`}
-                >
-                  <Icon className="w-5! h-5!" />
-                </div>
+              <div className="flex! items-center! gap-3! mb-6!">
+                <Icon className="w-6! h-6! text-[#27427f]! shrink-0!" />
                 <h3 className="text-xl! font-semibold! text-gray-900!">
                   {category.title}
                 </h3>
@@ -222,11 +243,9 @@ export function LocalitySection({ property }: LocalitySectionProps) {
             return (
               <div
                 key={item.label}
-                className="flex! items-start! gap-5! p-6! rounded-[20px]! bg-white! border! border-gray-200! hover:shadow-sm! transition-all! duration-300!"
+                className="flex! items-start! gap-4!"
               >
-                <div className="w-10! h-10! rounded-xl! bg-[#27427f]/10! flex! items-center! justify-center! shrink-0!">
-                  <Icon className="w-5! h-5! text-[#27427f]!" />
-                </div>
+                <Icon className="w-5! h-5! text-[#27427f]! shrink-0! mt-0.5!" />
                 <div>
                   <p className="font-medium! text-gray-900! text-sm!">{item.label}</p>
                   <p className="text-gray-500! text-sm! font-normal! mt-1! leading-relaxed!">{item.detail}</p>

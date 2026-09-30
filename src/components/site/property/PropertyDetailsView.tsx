@@ -30,6 +30,8 @@ import {
   Info,
   Ruler,
   Coins,
+  Sofa,
+  Compass,
 } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
@@ -127,6 +129,12 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
 
   const title = property.seo?.seoData?.overview?.h1 || property.title;
 
+  // The info card keeps one 2x2 grid for every type, but the bottom row is
+  // curated per property type. Apartments show Furnishing + Facing instead of
+  // the generic Listed + Property Type rows; types without a curation keep the
+  // generic rows until one is defined for them.
+  const isApartment = property.propertyType === "apartment";
+
   const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = [
     property.details?.bedrooms
       ? { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: `${property.details.bedrooms} BHK` }
@@ -134,8 +142,23 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     property.details?.areaSqft
       ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${property.details.areaSqft} Sq Ft` }
       : null,
-    { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Listed", value: formatDate(property.createdAt) },
-    { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: propertyTypeLabel },
+    ...(isApartment
+      ? [
+          property.details?.furnished != null
+            ? {
+                icon: <Sofa className="w-4.5! h-4.5!" />,
+                label: "Furnishing",
+                value: property.details.furnished ? "Furnished" : "Unfurnished",
+              }
+            : null,
+          property.details?.propertyFacing
+            ? { icon: <Compass className="w-4.5! h-4.5!" />, label: "Facing", value: property.details.propertyFacing }
+            : null,
+        ]
+      : [
+          { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Listed", value: formatDate(property.createdAt) },
+          { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: propertyTypeLabel },
+        ]),
   ].filter((s) => s && s.value) as { icon: React.ReactNode; label: string; value: string }[];
 
   const overviewStats: { icon: React.ReactNode; label: string; value: string }[] = [

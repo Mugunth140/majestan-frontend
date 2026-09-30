@@ -12,6 +12,9 @@ export type SeoPropertyDetails = {
   areaSqft: string;
   parking: number;
   furnished: boolean;
+  // propertyDetails.propertyFacing from the API (DB `property_facing`). Absent
+  // from older payloads, so optional — rows hide when it is missing.
+  propertyFacing?: string | null;
   roomDimensions?: { name: string; dimensions: string }[];
   floorPlanImages?: { title: string; imageUrl: string; imageKey: string }[];
 } | null;

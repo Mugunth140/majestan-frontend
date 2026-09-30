@@ -98,11 +98,11 @@ function AmenityCard({ amenity }: { amenity: Amenity }) {
   const Icon = amenity.icon;
 
   return (
-    <div className="group flex! items-center! gap-4! p-3! rounded-2xl! bg-white! border! border-gray-100! hover:border-[#27427f]/20! hover:shadow-[0_4px_20px_rgba(39,66,127,0.06)]! transition-all! duration-300!">
+    <div className="group flex! items-center! gap-4! p-4! rounded-2xl! bg-white! border! border-gray-100! hover:border-[#27427f]/20! hover:shadow-[0_4px_20px_rgba(39,66,127,0.06)]! transition-all! duration-300!">
       <div className="w-12! h-12! rounded-xl! bg-gray-50! group-hover:bg-[#27427f]/5! flex! items-center! justify-center! shrink-0! transition-colors! duration-300!">
         <Icon className="w-5! h-5! text-gray-500! group-hover:text-[#27427f]! transition-colors! duration-300!" strokeWidth={1.5} />
       </div>
-      <span className="font-sans! font-medium! text-base! text-gray-800! flex-1!">
+      <span className="font-sans! font-medium! text-base! text-gray-900! flex-1!">
         {amenity.name}
       </span>
     </div>
@@ -149,11 +149,11 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
             {categories.map((category) => (
               <div key={category.title} className="pt-6! border-t! border-gray-200! first:border-0! first:pt-0!">
                 <div className="mb-6!">
-                  <h3 className="font-sans! text-xl! font-semibold! text-gray-700! capitalize! tracking-relaxed!">
+                  <h3 className="font-sans! text-xl! font-semibold! text-gray-900! capitalize! tracking-relaxed!">
                     {category.title}
                   </h3>
                 </div>
-                <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-3! gap-4! md:gap-5!">
+                <div className="grid! grid-cols-2! lg:grid-cols-3! gap-4! md:gap-5!">
                   {category.amenities.map((amenity) => (
                     <AmenityCard key={amenity.name} amenity={amenity} />
                   ))}

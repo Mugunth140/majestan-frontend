@@ -1,9 +1,9 @@
 import { type SeoProperty, type SeoPropertyUnit } from "@/lib/api/property-by-slug";
 import { getFloorPlanMeasurements } from "@/lib/floor-plan-measurements";
+import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import {
   Building2,
   Square,
-  MessageSquare,
   DoorOpen,
 } from "lucide-react";
 
@@ -217,23 +217,8 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       </div>
       */}
 
-      {/* Request Floor Plan CTA */}
-      <div className="bg-gray-50! rounded-[24px]! p-8! md:p-10! border! border-gray-200!">
-        <div className="flex! flex-col! md:flex-row! items-start! md:items-center! justify-between! gap-8!">
-          <div className="mb-8!">
-            <h3 className="text-xl! font-semibold! mb-2! text-gray-900!">
-              Need the detailed floor plan?
-            </h3>
-            <p className="text-gray-500! font-light! text-base! leading-relaxed!">
-              Request the complete floor plan with exact measurements and room layouts.
-            </p>
-          </div>
-          <button className="w-full! md:w-auto! px-8! py-3.5! bg-gray-900! text-white! font-medium! rounded-full! hover:bg-gray-800! transition-all! shrink-0! flex! items-center! justify-center! gap-2!">
-            <MessageSquare className="w-4.5! h-4.5!" />
-            Request Floor Plan
-          </button>
-        </div>
-      </div>
+      {/* Shared contact call-to-action, identical on every page */}
+      <NeedMoreDetails />
     </div>
   );
 }

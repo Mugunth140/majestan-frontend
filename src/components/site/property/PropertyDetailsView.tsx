@@ -29,6 +29,7 @@ import { FloorPlanTeaser } from "@/components/site/property/FloorPlanTeaser";
 import { PhotosTeaser } from "@/components/site/property/PhotosTeaser";
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
 import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
+import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
 
 type PropertyDetailsViewProps = {
@@ -297,6 +298,9 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
 
           {/* FAQ Section (Overview only) */}
           <FaqSection faqs={(property.faqs || []).filter(f => f.section === 'overview')} />
+
+          {/* Shared contact call-to-action, identical on every page */}
+          <NeedMoreDetails />
         </div>
 
         {/* Right sidebar — the same card shown on every sub-page */}

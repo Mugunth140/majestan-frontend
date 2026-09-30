@@ -153,4 +153,11 @@ describe("PropertyDetailsView overview teasers", () => {
     const link = screen.getByRole("link", { name: "View all photos" });
     expect(link.getAttribute("href")).toBe(`/${slug}/photos`);
   });
+
+  it("closes the overview with the shared Need more details section", () => {
+    render(<PropertyDetailsView property={baseProperty} />);
+
+    expect(screen.getByText("Need more details?")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Contact Us" })).toBeDefined();
+  });
 });

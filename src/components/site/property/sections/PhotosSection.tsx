@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
+import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import {
   Camera,
   X,
@@ -83,17 +84,20 @@ export function PhotosSection({ property }: PhotosSectionProps) {
             <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-6!">
               <ImageOff className="w-8! h-8! text-gray-400!" />
             </div>
-            <h3 className="text-xl! font-medium! text-gray-900! mb-2!">
-              No photos available yet
-            </h3>
-            <p className="text-gray-500! text-base! font-light! max-w-md! leading-relaxed!">
-              Photos for this property are being uploaded. Check back soon or contact
-              the owner for a virtual tour.
-            </p>
-          </div>
+          <h3 className="text-xl! font-medium! text-gray-900! mb-2!">
+            No photos available yet
+          </h3>
+          <p className="text-gray-500! text-base! font-light! max-w-md! leading-relaxed!">
+            Photos for this property are being uploaded. Check back soon or contact
+            the owner for a virtual tour.
+          </p>
         </div>
       </div>
-    );
+
+      {/* Shared contact call-to-action, identical on every page */}
+      <NeedMoreDetails />
+    </div>
+  );
   }
 
   return (
@@ -259,6 +263,9 @@ export function PhotosSection({ property }: PhotosSectionProps) {
           )}
         </div>
       )}
+
+      {/* Shared contact call-to-action, identical on every page */}
+      <NeedMoreDetails />
     </div>
   );
 }

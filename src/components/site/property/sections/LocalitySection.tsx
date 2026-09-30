@@ -14,6 +14,7 @@ import {
   MapPinned,
 } from "lucide-react";
 import { LocalityGoogleMap } from './LocalityGoogleMap';
+import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   GraduationCap,
@@ -265,6 +266,9 @@ export function LocalitySection({ property }: LocalitySectionProps) {
 
         <LocalityGoogleMap lat={lat} lng={lng} city={property.city} state={property.state} />
       </div>
+
+      {/* Shared contact call-to-action, identical on every page */}
+      <NeedMoreDetails />
     </div>
   );
 }

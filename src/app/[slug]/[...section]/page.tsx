@@ -7,18 +7,10 @@ import { AmenitiesSection } from "@/components/site/property/sections/AmenitiesS
 import { FloorPlanSection } from "@/components/site/property/sections/FloorPlanSection";
 import { LocalitySection } from "@/components/site/property/sections/LocalitySection";
 import { PhotosSection } from "@/components/site/property/sections/PhotosSection";
+import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
 import { getPropertyBySeoSlug, type SeoProperty } from "@/lib/api/property-by-slug";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
-import {
-  MapPin,
-  Phone,
-  Calendar,
-  Building2,
-  Square,
-  Clock,
-  ShieldCheck,
-} from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
@@ -103,19 +95,6 @@ const SECTION_META: Record<
 };
 
 const VALID_SECTIONS = new Set(Object.keys(SECTION_META));
-
-function formatPrice(price: string): string {
-  const num = parseFloat(price);
-  if (isNaN(num)) return price;
-  if (num === 0) return "Price on Request";
-  if (num >= 10000000) return `₹ ${(num / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
-  if (num >= 100000)     return `₹ ${(num / 100000).toFixed(2).replace(/\.?0+$/, "")} Lakh`;
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(num);
-}
 
 function buildBreadcrumbItems(property: SeoProperty, sectionLabel: string) {
   const isSale = !property.status.toLowerCase().includes("rent");
@@ -298,75 +277,6 @@ function SectionContent({
   }
 }
 
-/** Sidebar with pricing and contact */
-function PropertySidebar({ property }: { property: SeoProperty }) {
-  const isSale = !property.status.toLowerCase().includes("rent");
-
-  return (
-    <div className="sticky! top-[140px]! space-y-6!">
-      
-      {/* Pricing & Contact Card */}
-      <div className="bg-white! rounded-[24px]! p-8! border! border-gray-200! shadow-[0_4px_20px_rgb(0,0,0,0.03)]!">
-        <div className="mb-8!">
-          <p className="text-gray-500! font-normal! text-sm! tracking-wide! uppercase! mb-2!">
-            {isSale ? "Asking Price" : "Monthly Rent"}
-          </p>
-          <div className="flex! items-baseline! gap-2!">
-            <h2 className="text-3xl! font-semibold! text-gray-900! tracking-tight!">
-              {formatPrice(property.price)}
-            </h2>
-            {!isSale && (
-              <span className="text-sm! font-light! text-gray-500!">
-                / mo
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-4!">
-          <button className="w-full! bg-gray-900! text-white! font-medium! text-base! py-3.5! rounded-full! hover:bg-gray-800! transition-all! flex! items-center! justify-center! gap-2!">
-            <Phone className="w-4.5! h-4.5!" />
-            Contact Owner
-          </button>
-
-          <button className="w-full! bg-white! text-gray-900! border! border-gray-300! hover:border-gray-900! hover:bg-gray-50! font-medium! text-base! py-3.5! rounded-full! transition-all! flex! items-center! justify-center! gap-2!">
-            <Calendar className="w-4.5! h-4.5!" />
-            Schedule Visit
-          </button>
-        </div>
-        
-        <div className="mt-6! pt-6! border-t! border-gray-100! flex! items-center! justify-center! gap-2! text-sm! font-normal! text-gray-500!">
-          <ShieldCheck className="w-4! h-4! text-emerald-500!" />
-          {(!property.brokerageType || property.brokerageType === 'no_brokerage')
-            ? 'No brokerage for this property'
-            : property.brokerageType === 'percentage'
-            ? `Brokerage: ${property.brokerageValue}%`
-            : `Brokerage: ${property.brokerageValue} Days Rent`}
-        </div>
-      </div>
-
-      {/* Agent/Owner Info */}
-      <div className="bg-white! rounded-[24px]! p-6! border! border-gray-200! flex! items-center! gap-4!">
-        <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
-          <Building2 className="w-6! h-6! text-gray-600!" />
-        </div>
-        <div>
-          <p className="text-xs! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
-            Listed By
-          </p>
-          <p className="font-medium! text-base! text-gray-900!">
-            Majestan Realty
-          </p>
-          <p className="text-xs! font-light! text-gray-500! mt-1! flex! items-center! gap-1.5!">
-            <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
-            Verified Partner
-          </p>
-        </div>
-      </div>
-      
-    </div>
-  );
-}
 
 export default async function PropertySectionPage({
   params,
@@ -467,9 +377,9 @@ export default async function PropertySectionPage({
                 )}
               </div>
 
-              {/* Sidebar */}
+              {/* Sidebar — the same info card as the overview */}
               <div className="lg:col-span-1!">
-                <PropertySidebar property={property} />
+                <PropertyInfoSidebar property={property} />
               </div>
             </div>
           </div>

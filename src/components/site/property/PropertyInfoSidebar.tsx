@@ -1,0 +1,188 @@
+// site/majestan-frontend/src/components/site/property/PropertyInfoSidebar.tsx
+import {
+  MapPin,
+  BedDouble,
+  Building2,
+  Calendar,
+  Phone,
+  ShieldCheck,
+  Ruler,
+  Coins,
+  Info,
+  Sofa,
+  Compass,
+} from "lucide-react";
+import { type SeoProperty } from "@/lib/api/property-by-slug";
+import { formatDate, formatPrice } from "@/lib/property-format";
+import { PROPERTY_TYPES } from "@/lib/seo-urls";
+
+type PropertyInfoSidebarProps = {
+  property: SeoProperty;
+};
+
+/**
+ * The right-hand info card column: title, location, curated spec grid, price,
+ * Enquire/Schedule actions, brokerage note, property ID and the Listed-By
+ * card. Shared verbatim by the overview and every sub-page so the sidebar is
+ * identical everywhere. The spec grid rows are curated per property type
+ * (apartments show Furnishing + Facing); other types keep the generic rows
+ * until curated.
+ */
+export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
+  const propertyTypeLabel =
+    Object.values(PROPERTY_TYPES).find(
+      (p) => p.apiValue === property.propertyType
+    )?.label ||
+    property.propertyType
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const isApartment = property.propertyType === "apartment";
+  const isSale = !property.status.toLowerCase().includes("rent");
+
+  const locData = property.locations?.[0]?.localityData;
+  const locRow = property.locations?.[0] as unknown as
+    | { address?: string | null; landmark?: string | null }
+    | undefined;
+  const addrPart = (locRow?.address || locRow?.landmark || "").split(",")[0].trim();
+  const rawSub =
+    (property as any).sublocation ||
+    (property as any).locality ||
+    (locData as any)?.subLocation ||
+    (locData as any)?.locality ||
+    addrPart;
+  const capFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
+  const locationLine = [subLocation, property.city, property.state].filter(Boolean).join(", ");
+
+  const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;
+  const priceNum = parseFloat(property.price);
+  const perSqft =
+    Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
+      ? `₹ ${Math.round(priceNum / areaNum).toLocaleString("en-IN")} / sq.ft`
+      : null;
+
+  const title = property.seo?.seoData?.overview?.h1 || property.title;
+
+  const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = [
+    property.details?.bedrooms
+      ? { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: `${property.details.bedrooms} BHK` }
+      : null,
+    property.details?.areaSqft
+      ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${property.details.areaSqft} Sq Ft` }
+      : null,
+    ...(isApartment
+      ? [
+          property.details?.furnished != null
+            ? {
+                icon: <Sofa className="w-4.5! h-4.5!" />,
+                label: "Furnishing",
+                value: property.details.furnished ? "Furnished" : "Unfurnished",
+              }
+            : null,
+          property.details?.propertyFacing
+            ? { icon: <Compass className="w-4.5! h-4.5!" />, label: "Facing", value: property.details.propertyFacing }
+            : null,
+        ]
+      : [
+          { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Listed", value: formatDate(property.createdAt) },
+          { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: propertyTypeLabel },
+        ]),
+  ].filter((s) => s && s.value) as { icon: React.ReactNode; label: string; value: string }[];
+
+  return (
+    <div className="lg:sticky! lg:top-[140px]! flex! flex-col! gap-5!">
+      {/* Info card */}
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm!">
+        <div className="flex! items-start! justify-between! gap-3!">
+          <h1 className="text-xl! font-normal! text-[#27427f]! leading-snug!">
+            {isApartment ? title : `${title} ${property.city}`}
+          </h1>
+        </div>
+
+        {locationLine ? (
+          <p className="mt-2! flex! items-start! gap-2! text-[13px]! text-gray-500! leading-relaxed!">
+            <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
+            {locationLine}
+          </p>
+        ) : null}
+
+        {sidebarSpecs.length > 0 && (
+          <div className="mt-5! pt-5! border-t! border-gray-100! grid! grid-cols-2! gap-x-3! gap-y-5!">
+            {sidebarSpecs.map((spec, i) => (
+              <div key={i} className="flex! items-start! gap-2.5! min-w-0!">
+                <span className="text-gray-400! shrink-0!">{spec.icon}</span>
+                <span className="min-w-0!">
+                  <span className="block! text-[12px]! text-gray-400! font-normal! leading-tight!">
+                    {spec.label}
+                  </span>
+                  <span className="block! text-base! font-semibold! text-gray-800! mt-1! leading-snug!">
+                    {spec.value}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-5! pt-5! border-t! border-gray-100!">
+          <p className="text-xl! font-medium! text-gray-900! tracking-tight!">
+            {formatPrice(property.price)}
+            {!isSale && (
+              <span className="text-sm! font-normal! text-gray-500!"> / mo</span>
+            )}
+          </p>
+          {perSqft && (
+            <p className="text-[13px]! font-normal! text-gray-500! mt-1!">{perSqft}</p>
+          )}
+        </div>
+
+        <div className="mt-4! flex! flex-col! gap-2.5!">
+          <button className="w-full! bg-[#27427f]! text-white! font-normal! text-base! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
+            <Phone className="w-4! h-4!" />
+            Enquire Now
+          </button>
+          <button className="w-full! bg-white! text-[#27427f]! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
+            <Calendar className="w-4! h-4!" />
+            Schedule Visit
+          </button>
+        </div>
+
+        <div className="mt-5! pt-3! border-t! border-gray-100! flex! items-center! justify-center! gap-1! text-[13px]! font-normal! text-gray-500! ">
+          <Coins className="w-4! h-4! text-yellow-500! shrink-0!" />
+          {!property.brokerageType || property.brokerageType === 'no_brokerage'
+            ? 'No brokerage for this property'
+            : property.brokerageType === 'percentage'
+              ? `Brokerage: Only ${property.brokerageValue}% on Sale Value`
+              : `Brokerage: Just ${property.brokerageValue} Days Rent`}
+        </div>
+
+        {property.propertyCode && (
+          <p className="mt-2! flex! items-center! justify-center! gap-2! text-[12px]! text-gray-400!">
+            <Info className="w-3.5! h-3.5!" />
+            ID: {property.propertyCode}
+          </p>
+        )}
+      </div>
+
+      {/* Listed-by card */}
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm! flex! items-center! gap-4!">
+        <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
+          <Building2 className="w-6! h-6! text-gray-600!" />
+        </div>
+        <div>
+          <p className="text-xs! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
+            Listed By
+          </p>
+          <p className="font-medium! text-base! text-gray-900!">
+            Majestan Realty
+          </p>
+          <p className="text-xs! font-light! text-gray-500! mt-1! flex! items-center! gap-1.5!">
+            <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
+            Verified
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

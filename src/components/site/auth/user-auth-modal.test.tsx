@@ -100,4 +100,32 @@ describe("UserAuthModal step 2", () => {
     expect(requestLoginOtp).toHaveBeenCalledTimes(2);
     expect(screen.getByText("Expires in 300s")).toBeDefined();
   });
+
+  it("sends only one OTP request when submitted twice while in flight", async () => {
+    // A submit that lands while `loading` is already true — a second click
+    // queued ahead of the disabling re-render, or a programmatic submit —
+    // must not fire a second request. Each request sends a real SMS.
+    let resolveRequest!: (value: unknown) => void;
+    requestLoginOtp.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveRequest = resolve; }),
+    );
+    render(<UserAuthModal isOpen onClose={() => {}} />);
+    fireEvent.change(screen.getByPlaceholderText("90929 65556"), {
+      target: { value: "9876543210" },
+    });
+
+    const sendButton = screen.getByRole("button", { name: /send otp/i });
+    fireEvent.click(sendButton);
+    // Bypass the (already-disabled) button and submit the form directly, so
+    // the assertion targets the handler rather than the button's disabled
+    // state in jsdom.
+    fireEvent.submit(sendButton.closest("form")!);
+
+    expect(requestLoginOtp).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveRequest({ otpSent: true, expiresInSeconds: 300 });
+    });
+    expect(screen.getByText("Enter OTP")).toBeDefined();
+  });
 });

@@ -90,6 +90,10 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    // A submit that lands while a request is already in flight — a second
+    // click queued ahead of the disabling re-render, or a programmatic
+    // submit — must not fire again. Each request sends a real SMS.
+    if (loading) return;
     setError(null);
 
     const step1Error = validateStep1();

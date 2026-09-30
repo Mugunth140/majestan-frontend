@@ -18,12 +18,20 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
   const legacyUnitsWithFloorPlans: SeoPropertyUnit[] = (property.units ?? []).filter(
     (u) => !!u.floorPlanImageUrl
   );
-  
+
   const newFloorPlanImages = property.details?.floorPlanImages || [];
-  
-  const floorPlansToDisplay = newFloorPlanImages.length > 0 
-    ? newFloorPlanImages 
-    : legacyUnitsWithFloorPlans.map(u => ({ title: u.title, imageUrl: u.floorPlanImageUrl, imageKey: u.floorPlanImageKey }));
+
+  // Every source shows, newest upload path first: CRM sidebar files, then the
+  // detail plan images, then legacy unit plans.
+  const floorPlansToDisplay = [
+    ...(property.floorPlanFiles ?? []).map((f) => ({
+      title: f.title,
+      imageUrl: f.imageUrl,
+      imageKey: f.imageKey,
+    })),
+    ...newFloorPlanImages,
+    ...legacyUnitsWithFloorPlans.map(u => ({ title: u.title, imageUrl: u.floorPlanImageUrl, imageKey: u.floorPlanImageKey })),
+  ];
 
   const hasFloorPlanImages = floorPlansToDisplay.length > 0;
   

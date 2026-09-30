@@ -56,6 +56,12 @@ export type SeoPropertyUnit = {
   floorPlanImageKey?: string | null;
 };
 
+export type SeoPropertyFloorPlanFile = {
+  title: string | null;
+  imageUrl: string;
+  imageKey: string;
+};
+
 export type SeoPropertyFaq = {
   id: number;
   question: string;
@@ -86,6 +92,8 @@ export type SeoProperty = {
   images: SeoPropertyImage[];
   amenities?: SeoPropertyAmenity[];
   units?: SeoPropertyUnit[];
+  /** Floor-plan uploads (CRM sidebar). Resolved URLs from the backend. */
+  floorPlanFiles?: SeoPropertyFloorPlanFile[];
   faqs?: SeoPropertyFaq[];
   locations?: { latitude?: string | number | null; longitude?: string | number | null; localityData?: any }[];
   requestedSlug: string;
@@ -162,6 +170,12 @@ export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(sl
       price: u.price ?? null,
       floorPlanImageUrl: u.floorPlanImageUrl ?? null,
       floorPlanImageKey: u.floorPlanImageKey ?? null,
+    }));
+    // Map CRM-uploaded floor-plan files (resolved URLs from the backend)
+    data.floorPlanFiles = (data.propertyFloorPlanFiles || data.__propertyFloorPlanFiles__ || []).map((f: any) => ({
+      title: f.title ?? null,
+      imageUrl: f.imageUrl,
+      imageKey: f.imageKey ?? null,
     }));
   }
 

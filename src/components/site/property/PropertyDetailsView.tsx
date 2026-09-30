@@ -458,7 +458,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm!">
               <div className="flex! items-start! justify-between! gap-3!">
                 <h1 className="text-xl! font-normal! text-[#27427f]! leading-snug!">
-                  {title} {property.city}
+                  {isApartment ? title : `${title} ${property.city}`}
                 </h1>
               </div>
 

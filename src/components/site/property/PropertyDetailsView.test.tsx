@@ -95,4 +95,20 @@ describe("PropertyDetailsView info card", () => {
     // The overview stat still says "Furnishing" — the info card must not.
     expect(screen.getAllByText("Furnishing")).toHaveLength(1);
   });
+
+  it("shows the bare title for apartments, without the city suffix", () => {
+    render(<PropertyDetailsView property={baseProperty} />);
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Navaneetha RR Raghavendra" }),
+    ).toBeDefined();
+  });
+
+  it("keeps the city-suffixed title for property types that are not curated yet", () => {
+    render(<PropertyDetailsView property={{ ...baseProperty, propertyType: "villa" }} />);
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Navaneetha RR Raghavendra Coimbatore" }),
+    ).toBeDefined();
+  });
 });

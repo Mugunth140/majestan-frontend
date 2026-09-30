@@ -354,7 +354,7 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="99999 99999"
+                        placeholder="90929 65556"
                         className="!flex-1 !min-w-0 !bg-transparent !h-12 !px-4 !text-[15px] !text-gray-900 !placeholder-gray-400 !outline-none"
                         required
                         autoFocus

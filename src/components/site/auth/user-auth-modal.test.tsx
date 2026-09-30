@@ -36,7 +36,7 @@ const tickSeconds = (seconds: number) => {
 async function gotoOtpStep() {
   render(<UserAuthModal isOpen onClose={() => {}} />);
 
-  const input = screen.getByPlaceholderText("99999 99999");
+  const input = screen.getByPlaceholderText("90929 65556");
   await act(async () => {
     fireEvent.change(input, { target: { value: "9876543210" } });
   });

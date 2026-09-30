@@ -71,7 +71,7 @@ export function PhotosSection({ property }: PhotosSectionProps) {
     return (
       <div className="space-y-8!">
         <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-          <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+          <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
             Photos
           </h2>
           <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-24! text-center! hover:bg-gray-50! transition-colors! mt-6!">
@@ -100,7 +100,7 @@ export function PhotosSection({ property }: PhotosSectionProps) {
       <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
         <div className="flex! flex-col! sm:flex-row! items-start! sm:items-center! justify-between! gap-4!">
           <div>
-            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
               Photos
             </h2>
             <p className="text-sm! font-normal! text-gray-500! mt-1!">

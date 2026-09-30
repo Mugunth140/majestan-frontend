@@ -142,7 +142,7 @@ export function LocalitySection({ property }: LocalitySectionProps) {
       {/* Location Overview */}
       <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
         <div className="mb-4!">
-          <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+          <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
             Location &amp; Neighbourhood
           </h2>
           <p className="text-gray-500! font-normal! leading-relaxed! text-base! mt-2!">

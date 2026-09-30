@@ -114,9 +114,9 @@ export function PhotosSection({ property }: PhotosSectionProps) {
         </div>
       </div>
 
-      {/* Primary Image */}
+      {/* Primary Image — full-bleed inside its card, like the map */}
       {primaryImage && (
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-2! md:p-3! shadow-sm!">
+        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden!">
           <div className="relative!">
             <span className="absolute! top-5! left-5! z-10! inline-flex! items-center! gap-1.5! px-3! py-1.5! bg-white/95! backdrop-blur-md! border! border-gray-200/50! rounded-full! text-xs! font-medium! uppercase! tracking-widest! text-gray-900! shadow-sm!">
               <Star className="w-3.5! h-3.5!" />
@@ -124,12 +124,12 @@ export function PhotosSection({ property }: PhotosSectionProps) {
             </span>
             <button
               onClick={() => openLightbox(0)}
-              className="w-full! block! relative! rounded-[20px]! overflow-hidden! group! cursor-pointer!"
+              className="w-full! block! relative! group! cursor-pointer!"
             >
               <img
                 src={primaryImage.imageUrl}
                 alt={`${property.title} - Primary`}
-                className="w-full! h-[350px]! md:h-[550px]! object-cover! transition-transform! duration-700! group-hover:scale-105!"
+                className="w-full! h-[350px]! md:h-[550px]! object-cover! transition-transform! duration-700! group-hover:scale-[1.02]!"
               />
               <div className="absolute! inset-0! bg-black/0! group-hover:bg-black/10! transition-colors! duration-300! flex! items-center! justify-center!">
                 <div className="opacity-0! group-hover:opacity-100! transition-all! duration-300! w-14! h-14! rounded-full! bg-white/95! backdrop-blur-md! flex! items-center! justify-center! shadow-lg! scale-50! group-hover:scale-100!">
@@ -160,7 +160,7 @@ export function PhotosSection({ property }: PhotosSectionProps) {
                   <img
                     src={img.imageUrl}
                     alt={`${property.title} - View ${idx + 2}`}
-                    className={`w-full! object-cover! transition-transform! duration-700! group-hover:scale-110! ${
+                    className={`w-full! object-cover! transition-transform! duration-700! group-hover:scale-105! ${
                       isLarge ? "h-[240px]! md:h-[400px]!" : "h-[180px]! md:h-[195px]!"
                     }`}
                   />

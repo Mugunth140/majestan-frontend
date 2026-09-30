@@ -131,18 +131,13 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
         </div>
       ) : (
         <div className="bg-white! rounded-4xl! p-8! md:p-10! border! border-gray-100! shadow-sm!">
-          <div className="flex! items-start! gap-4! mb-10!">
-            <div className="size-12! rounded-xl! bg-[#27427f]/5! flex! items-center! justify-center! shrink-0!">
-              <Sparkles className="size-6! text-[#27427f]!" strokeWidth={1.5} />
-            </div>
-            <div>
-              <h2 className="font-['Lexend',sans-serif]! text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-2! tracking-tight!">
-                Amenities &amp; Features
-              </h2>
-              <p className="text-gray-500! text-base! leading-relaxed!">
-                Explore the premium facilities available at <span className="font-medium! text-gray-800!">{property.title}</span>
-              </p>
-            </div>
+          <div className="mb-10!">
+            <h2 className="font-['Lexend',sans-serif]! text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-2! tracking-tight!">
+              Amenities &amp; Features
+            </h2>
+            <p className="text-gray-500! text-base! leading-relaxed!">
+              Explore the premium facilities available at <span className="font-medium! text-gray-800!">{property.title}</span>
+            </p>
           </div>
 
           <div className="space-y-10!">

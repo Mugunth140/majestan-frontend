@@ -237,9 +237,10 @@ export function LocalitySection({ property }: LocalitySectionProps) {
         </div>
       </div>
 
-      {/* Map Placeholder */}
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-        <div className="mb-8!">
+      {/* Map — full-bleed: the map fills the card to its edges instead of
+          sitting as a second rounded box inside it */}
+      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden!">
+        <div className="p-6! md:p-8! pb-0!">
           <h3 className="text-lg! md:text-xl! font-normal! text-gray-900!">
             On the Map
           </h3>
@@ -248,7 +249,9 @@ export function LocalitySection({ property }: LocalitySectionProps) {
           </p>
         </div>
 
-        <LocalityGoogleMap lat={lat} lng={lng} city={property.city} state={property.state} />
+        <div className="mt-6!">
+          <LocalityGoogleMap lat={lat} lng={lng} city={property.city} state={property.state} />
+        </div>
       </div>
 
       {/* Shared contact call-to-action, identical on every page */}

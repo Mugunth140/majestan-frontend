@@ -22,12 +22,12 @@ function InnerMap({ lat, lng, apiKey }: { lat: number, lng: number, apiKey: stri
   }
 
   if (!isLoaded) {
-    return <div className="!w-full !h-[400px] !bg-gray-100 dark:!bg-[#262730] !animate-pulse !rounded-[20px]" />;
+    return <div className="!w-full !h-[400px] !bg-gray-100 dark:!bg-[#262730] !animate-pulse" />;
   }
 
   return (
     <GoogleMap
-      mapContainerStyle={{ width: '100%', height: '400px', borderRadius: '20px' }}
+      mapContainerStyle={{ width: '100%', height: '400px', borderRadius: '0' }}
       center={{ lat, lng }}
       zoom={14}
       options={{ streetViewControl: false, mapTypeControl: false }}
@@ -43,7 +43,7 @@ export function LocalityGoogleMap({ lat, lng, city, state }: LocalityGoogleMapPr
 
   if (!hasValidMapKey || !lat || !lng) {
     return (
-      <div className="w-full h-[400px] rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! text-center! hover:bg-gray-50! transition-colors!">
+      <div className="w-full h-[400px] bg-gray-50/50! flex! flex-col! items-center! justify-center! text-center! hover:bg-gray-50! transition-colors!">
         <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-5!">
           <MapPin className="w-8! h-8! text-gray-400!" />
         </div>
@@ -51,7 +51,7 @@ export function LocalityGoogleMap({ lat, lng, city, state }: LocalityGoogleMapPr
           {city}
           {state ? `, ${state}` : ""}
         </h4>
-        <p className="text-gray-500! text-sm! font-light!">
+        <p className="text-gray-500! text-sm! font-normal!">
           {!hasValidMapKey ? "Map unavailable (Missing API Key)" : "Map will be available once exact coordinates are provided."}
         </p>
       </div>

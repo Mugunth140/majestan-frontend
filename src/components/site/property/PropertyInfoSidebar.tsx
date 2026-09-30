@@ -95,13 +95,13 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
       {/* Info card */}
       <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm!">
         <div className="flex! items-start! justify-between! gap-3!">
-          <h1 className="text-xl! font-normal! text-[#27427f]! leading-snug!">
+          <h1 className="text-xl! font-manrope! font-medium! text-[#27427f]! leading-snug!">
             {isApartment ? title : `${title} ${property.city}`}
           </h1>
         </div>
 
         {locationLine ? (
-          <p className="mt-2! flex! items-start! gap-2! text-[13px]! text-gray-500! leading-relaxed!">
+          <p className="mt-2! flex! items-start! gap-2! text-[13px]! font-manrope! text-gray-500! leading-relaxed!">
             <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
             {locationLine}
           </p>
@@ -113,10 +113,10 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
               <div key={i} className="flex! items-start! gap-2.5! min-w-0!">
                 <span className="text-gray-400! shrink-0!">{spec.icon}</span>
                 <span className="min-w-0!">
-                  <span className="block! text-[12px]! text-gray-400! font-normal! leading-tight!">
+                  <span className="block! text-[12px]! font-manrope! text-gray-400! font-normal! leading-tight!">
                     {spec.label}
                   </span>
-                  <span className="block! text-base! font-semibold! text-gray-800! mt-1! leading-snug!">
+                  <span className="block! text-base! font-manrope! font-semibold! text-gray-800! mt-1! leading-snug!">
                     {spec.value}
                   </span>
                 </span>
@@ -126,29 +126,29 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
         )}
 
         <div className="mt-5! pt-5! border-t! border-gray-100!">
-          <p className="text-xl! font-medium! text-gray-900! tracking-tight!">
+          <p className="text-xl! font-manrope! font-medium! text-gray-900! tracking-tight!">
             {formatPrice(property.price)}
             {!isSale && (
               <span className="text-sm! font-normal! text-gray-500!"> / mo</span>
             )}
           </p>
           {perSqft && (
-            <p className="text-[13px]! font-normal! text-gray-500! mt-1!">{perSqft}</p>
+            <p className="text-[13px]! font-manrope! font-normal! text-gray-500! mt-1!">{perSqft}</p>
           )}
         </div>
 
         <div className="mt-4! flex! flex-col! gap-2.5!">
-          <button className="w-full! bg-[#27427f]! text-white! font-normal! text-base! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
+          <button className="w-full! bg-[#27427f]! text-white! font-manrope! font-normal! text-base! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
             <Phone className="w-4! h-4!" />
             Enquire Now
           </button>
-          <button className="w-full! bg-white! text-[#27427f]! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
+          <button className="w-full! bg-white! text-[#27427f]! font-manrope! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
             <Calendar className="w-4! h-4!" />
             Schedule Visit
           </button>
         </div>
 
-        <div className="mt-5! pt-3! border-t! border-gray-100! flex! items-center! justify-center! gap-1! text-[13px]! font-normal! text-gray-500! ">
+        <div className="mt-5! pt-3! border-t! border-gray-100! flex! items-center! justify-center! gap-1! text-[13px]! font-manrope! font-normal! text-gray-500! ">
           <Coins className="w-4! h-4! text-yellow-500! shrink-0!" />
           {!property.brokerageType || property.brokerageType === 'no_brokerage'
             ? 'No brokerage for this property'
@@ -158,7 +158,7 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
         </div>
 
         {property.propertyCode && (
-          <p className="mt-2! flex! items-center! justify-center! gap-2! text-[12px]! text-gray-400!">
+          <p className="mt-2! flex! items-center! justify-center! gap-2! text-[12px]! font-manrope! text-gray-400!">
             <Info className="w-3.5! h-3.5!" />
             ID: {property.propertyCode}
           </p>
@@ -171,13 +171,13 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           <Building2 className="w-6! h-6! text-gray-600!" />
         </div>
         <div>
-          <p className="text-xs! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
+          <p className="text-xs! font-manrope! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
             Listed By
           </p>
-          <p className="font-medium! text-base! text-gray-900!">
+          <p className="font-manrope! font-medium! text-base! text-gray-900!">
             Majestan Realty
           </p>
-          <p className="text-xs! font-light! text-gray-500! mt-1! flex! items-center! gap-1.5!">
+          <p className="text-xs! font-manrope! font-normal! text-gray-500! mt-1! flex! items-center! gap-1.5!">
             <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
             Verified
           </p>

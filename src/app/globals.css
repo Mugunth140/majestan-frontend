@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  /* Registers the `font-manrope` / `font-manrope!` utilities. Without this
+     key Tailwind emits no rule for them and every usage silently renders in
+     the legacy Lexend stack. Manrope itself (200-800) loads from Google
+     Fonts via public/assets/css/styles.css. */
+  --font-manrope: "Manrope", sans-serif;
+}
+
 html,
 body {
   margin: 0;
@@ -343,11 +351,10 @@ body {
    1. `.font-manrope` (above) only re-asserts headings, so body copy inside a
       `.font-manrope` element still inherits Lexend from styles.css:253
       (`body, button, input, select, textarea { font-family: Lexend }`).
-   2. `font-manrope!` — the class actually used in markup — is a DEAD class.
-      Tailwind v4's important modifier is a *suffix*, so the DOM class is
-      `font-manrope!` with a literal `!`, which does not match the `.font-manrope`
-      selector and which Tailwind never emits a rule for. Every `font-manrope!`
-      usage in this repo has therefore been rendering in Lexend.
+    2. `font-manrope!` needs the `--font-manrope` theme key above: without it
+       Tailwind emits no rule and every usage silently falls back to Lexend.
+       With the key present the utility works (the `!` important flag beats
+       the legacy element-level rules).
 
    Deliberately unlayered (it sits outside any @layer) so it wins against
    Tailwind's layered utilities, and (0,1,1) specificity so it wins against the

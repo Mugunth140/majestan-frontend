@@ -1,17 +1,73 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
 import { MapPin } from 'lucide-react';
 
 interface LocalityGoogleMapProps {
-  lat: number | null;
-  lng: number | null;
+  lat: number | string | null;
+  lng: number | string | null;
   city: string;
   state?: string;
+  /** Locality name (e.g. "Rs puram") — geocoded when exact coords are missing. */
+  locality?: string | null;
 }
 
-function InnerMap({ lat, lng, apiKey }: { lat: number, lng: number, apiKey: string }) {
+/**
+ * Builds the address sent to the geocoder: finest known area first, so a
+ * listing without coordinates still lands on its locality rather than the
+ * city centre. Pure so the fallback order stays pinned by tests.
+ */
+export function buildGeocodeQuery(
+  locality: string | null | undefined,
+  city: string,
+  state?: string | null,
+): string {
+  const area = (locality ?? '').trim();
+  const statePart = (state ?? '').trim();
+  if (area) {
+    return [area, city, statePart].filter(Boolean).join(', ');
+  }
+  return [city, statePart].filter(Boolean).join(', ');
+}
+
+type LocationRow = {
+  address?: string | null;
+  landmark?: string | null;
+};
+
+/**
+ * Best-effort locality name from a listing's location rows: first chunk of
+ * the address, else the landmark. Null when there is nothing to go on.
+ */
+export function resolveListingLocality(
+  locations?: Array<LocationRow> | null,
+): string | null {
+  const row = locations?.[0];
+  const fromAddress = (row?.address || '').split(',')[0].trim();
+  if (fromAddress) return fromAddress;
+  const landmark = (row?.landmark || '').trim();
+  return landmark || null;
+}
+
+function MapUnavailable({ city, state, missingKey }: { city: string; state?: string; missingKey: boolean }) {
+  return (
+    <div className="w-full h-[400px] bg-gray-50/50! flex! flex-col! items-center! justify-center! text-center! hover:bg-gray-50! transition-colors!">
+      <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-5!">
+        <MapPin className="w-8! h-8! text-gray-400!" />
+      </div>
+      <h4 className="text-xl! font-medium! text-gray-900! mb-2!">
+        {city}
+        {state ? `, ${state}` : ""}
+      </h4>
+      <p className="text-gray-500! text-sm! font-normal!">
+        {!missingKey ? "Map will be available once exact coordinates are provided." : "Map unavailable (Missing API Key)"}
+      </p>
+    </div>
+  );
+}
+
+function InnerMap({ lat, lng, apiKey, zoom = 14, markerTitle }: { lat: number; lng: number; apiKey: string; zoom?: number; markerTitle?: string }) {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script-locality',
     googleMapsApiKey: apiKey,
@@ -29,34 +85,77 @@ function InnerMap({ lat, lng, apiKey }: { lat: number, lng: number, apiKey: stri
     <GoogleMap
       mapContainerStyle={{ width: '100%', height: '400px', borderRadius: '0' }}
       center={{ lat, lng }}
-      zoom={14}
+      zoom={zoom}
       options={{ streetViewControl: false, mapTypeControl: false }}
     >
-      <MarkerF position={{ lat, lng }} />
+      <MarkerF position={{ lat, lng }} title={markerTitle} />
     </GoogleMap>
   );
 }
 
-export function LocalityGoogleMap({ lat, lng, city, state }: LocalityGoogleMapProps) {
+/**
+ * No exact coordinates: geocode the locality and show that area instead of
+ * the unavailable message. Any failure (denied key, no match, unmounted)
+ * falls back to the message — the page never breaks on this path.
+ */
+function GeocodedMap({ query, city, state, apiKey }: { query: string; city: string; state?: string; apiKey: string }) {
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script-locality',
+    googleMapsApiKey: apiKey,
+  });
+  const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (typeof google === 'undefined' || !google.maps?.Geocoder) {
+      setFailed(true);
+      return;
+    }
+    let cancelled = false;
+    new google.maps.Geocoder().geocode({ address: query }, (results, status) => {
+      if (cancelled) return;
+      const location = results?.[0]?.geometry?.location;
+      if (status === 'OK' && location) {
+        setCenter({ lat: location.lat(), lng: location.lng() });
+      } else {
+        setFailed(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, query]);
+
+  if (loadError || failed) {
+    return <MapUnavailable city={city} state={state} missingKey={false} />;
+  }
+
+  if (!isLoaded || !center) {
+    return <div className="!w-full !h-[400px] !bg-gray-100 dark:!bg-[#262730] !animate-pulse" />;
+  }
+
+  return <InnerMap lat={center.lat} lng={center.lng} apiKey={apiKey} zoom={13} markerTitle="Approximate location" />;
+}
+
+export function LocalityGoogleMap({ lat, lng, city, state, locality }: LocalityGoogleMapProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
   const hasValidMapKey = apiKey.length > 5;
 
-  if (!hasValidMapKey || !lat || !lng) {
-    return (
-      <div className="w-full h-[400px] bg-gray-50/50! flex! flex-col! items-center! justify-center! text-center! hover:bg-gray-50! transition-colors!">
-        <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-5!">
-          <MapPin className="w-8! h-8! text-gray-400!" />
-        </div>
-        <h4 className="text-xl! font-medium! text-gray-900! mb-2!">
-          {city}
-          {state ? `, ${state}` : ""}
-        </h4>
-        <p className="text-gray-500! text-sm! font-normal!">
-          {!hasValidMapKey ? "Map unavailable (Missing API Key)" : "Map will be available once exact coordinates are provided."}
-        </p>
-      </div>
-    );
+  if (lat && lng) {
+    return <InnerMap lat={Number(lat)} lng={Number(lng)} apiKey={apiKey} />;
   }
 
-  return <InnerMap lat={lat} lng={lng} apiKey={apiKey} />;
+  if (!hasValidMapKey) {
+    return <MapUnavailable city={city} state={state} missingKey />;
+  }
+
+  return (
+    <GeocodedMap
+      query={buildGeocodeQuery(locality, city, state)}
+      city={city}
+      state={state}
+      apiKey={apiKey}
+    />
+  );
 }

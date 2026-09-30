@@ -15,7 +15,7 @@ import {
   Film,
   Landmark,
 } from "lucide-react";
-import { LocalityGoogleMap } from './LocalityGoogleMap';
+import { LocalityGoogleMap, resolveListingLocality } from './LocalityGoogleMap';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -269,7 +269,13 @@ export function LocalitySection({ property }: LocalitySectionProps) {
         </div>
 
         <div className="mt-6!">
-          <LocalityGoogleMap lat={lat} lng={lng} city={property.city} state={property.state} />
+          <LocalityGoogleMap
+            lat={lat}
+            lng={lng}
+            city={property.city}
+            state={property.state}
+            locality={resolveListingLocality(property.locations as any)}
+          />
         </div>
       </div>
 

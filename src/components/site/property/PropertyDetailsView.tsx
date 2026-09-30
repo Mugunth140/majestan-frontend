@@ -21,9 +21,6 @@ import {
   Zap,
   Droplets,
   ShieldCheck,
-  Sparkles,
-  Grid3X3,
-  MapPinned,
   Images,
   ArrowRight,
   Tag,
@@ -35,6 +32,8 @@ import {
 } from "lucide-react";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
+import { FloorPlanTeaser } from "@/components/site/property/FloorPlanTeaser";
+import { PhotosTeaser } from "@/components/site/property/PhotosTeaser";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
 
@@ -208,34 +207,6 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
           },
         ]
       : []),
-  ];
-
-  // Section quick links
-  const sectionLinks = [
-    {
-      href: `/${property.canonicalSlug}/amenities`,
-      label: "Amenities",
-      icon: <Sparkles className="w-5! h-5!" />,
-      desc: "View all facilities",
-    },
-    {
-      href: `/${property.canonicalSlug}/floor-plan`,
-      label: "Floor Plan",
-      icon: <Grid3X3 className="w-5! h-5!" />,
-      desc: "Layout & configs",
-    },
-    {
-      href: `/${property.canonicalSlug}/locality`,
-      label: "Locality",
-      icon: <MapPinned className="w-5! h-5!" />,
-      desc: "Nearby places",
-    },
-    {
-      href: `/${property.canonicalSlug}/photos`,
-      label: "Photos",
-      icon: <Images className="w-5! h-5!" />,
-      desc: `${images.length} available`,
-    },
   ];
 
   const handleShare = async () => {
@@ -418,34 +389,18 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             </div>
           </div>
 
-          {/* Explore more card */}
-          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Explore More</h2>
-            <div className="mt-5! grid! grid-cols-1! sm:grid-cols-2! gap-4!">
-              {sectionLinks.map((section) => (
-                <Link
-                  key={section.href}
-                  href={section.href}
-                  className="group! flex! items-center! justify-between! p-5! border! border-gray-200! bg-gray-50/60! rounded-2xl! hover:border-gray-300! hover:bg-white! hover:shadow-sm! transition-all! no-underline!"
-                >
-                  <div className="flex! items-center! gap-4!">
-                    <div className="w-11! h-11! flex! items-center! justify-center! text-gray-600! transition-all!">
-                      {section.icon}
-                    </div>
-                    <div>
-                      <p className="text-[15px]! font-medium! text-gray-900!">
-                        {section.label}
-                      </p>
-                      <p className="text-[13px]! font-light! text-gray-500! mt-0.5!">
-                        {section.desc}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5! h-5! text-gray-400! group-hover:text-gray-900! group-hover:translate-x-0.5! transition-all!" />
-                </Link>
-              ))}
-            </div>
-          </div>
+          {/* Floor plan teaser: key measurements only, linking to the sub-page */}
+          <FloorPlanTeaser
+            details={property.details}
+            floorPlanHref={`/${property.canonicalSlug}/floor-plan`}
+          />
+
+          {/* Photos teaser: primary-first strip with overflow count, hidden when empty */}
+          <PhotosTeaser
+            images={property.images ?? []}
+            title={property.title}
+            photosHref={`/${property.canonicalSlug}/photos`}
+          />
 
           {/* FAQ Section (Overview only) */}
           <FaqSection faqs={(property.faqs || []).filter(f => f.section === 'overview')} />

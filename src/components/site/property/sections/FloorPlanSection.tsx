@@ -1,15 +1,12 @@
 import { type SeoProperty, type SeoPropertyUnit } from "@/lib/api/property-by-slug";
+import { getFloorPlanMeasurements } from "@/lib/floor-plan-measurements";
 import {
   Building2,
-  BedDouble,
-  Bath,
-  Car,
   Ruler,
   Square,
   Download,
   MessageSquare,
   LayoutGrid,
-  Maximize2,
   DoorOpen,
 } from "lucide-react";
 
@@ -36,12 +33,9 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
   const roomDimensions = property.details?.roomDimensions || [];
   const hasRoomDimensions = roomDimensions.length > 0;
 
-  const formatArea = (area: string | null | undefined) => {
-    if (!area) return "—";
-    const num = parseFloat(area);
-    if (isNaN(num)) return area;
-    return num.toLocaleString("en-IN");
-  };
+  // Shared with the overview teaser — one definition, so the teaser can never
+  // drift from the page it links to.
+  const measurements = getFloorPlanMeasurements(property.details);
 
   const formatPrice = (price: string | null | undefined) => {
     if (!price) return null;
@@ -55,29 +49,6 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
   const propertyTypeLabel = property.propertyType
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
-
-  const measurements = [
-    {
-      label: "Total Area",
-      value: details?.areaSqft ? `${formatArea(details.areaSqft)} sq.ft` : "—",
-      icon: Maximize2,
-    },
-    {
-      label: "Bedrooms",
-      value: details?.bedrooms ? `${details.bedrooms} BHK` : "—",
-      icon: BedDouble,
-    },
-    {
-      label: "Bathrooms",
-      value: details?.bathrooms ? `${details.bathrooms} Bath` : "—",
-      icon: Bath,
-    },
-    {
-      label: "Parking",
-      value: details?.parking ? `${details.parking} Covered` : "—",
-      icon: Car,
-    },
-  ];
 
   return (
     <div className="space-y-8!">

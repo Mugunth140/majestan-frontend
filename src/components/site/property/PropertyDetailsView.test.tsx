@@ -112,3 +112,45 @@ describe("PropertyDetailsView info card", () => {
     ).toBeDefined();
   });
 });
+
+describe("PropertyDetailsView overview teasers", () => {
+  const slug = baseProperty.canonicalSlug;
+
+  it("replaces Explore More with floor-plan and photos teasers linking to the sub-pages", () => {
+    render(<PropertyDetailsView property={baseProperty} />);
+
+    expect(screen.queryByText("Explore More")).toBeNull();
+
+    const viewAllLinks = screen.getAllByRole("link", { name: "View All" });
+    const hrefs = viewAllLinks.map((a) => a.getAttribute("href")).sort();
+    // Key Amenities + Floor Plan. The photos teaser hides: this listing has
+    // no real photos (the hero falls back to a default image instead).
+    expect(hrefs).toEqual([`/${slug}/amenities`, `/${slug}/floor-plan`].sort());
+
+    // The teaser carries the floor-plan page's measurements, not its imagery.
+    expect(screen.getByText("1,456 sq.ft")).toBeDefined();
+    expect(
+      screen.queryByRole("heading", { level: 2, name: "Photos" }),
+    ).toBeNull();
+  });
+
+  it("shows the photos teaser once the listing has real photos", () => {
+    render(
+      <PropertyDetailsView
+        property={{
+          ...baseProperty,
+          images: [
+            { id: 1, imageUrl: "/p1.jpg", imageKey: "p1", isPrimary: true, createdAt: "" },
+            { id: 2, imageUrl: "/p2.jpg", imageKey: "p2", isPrimary: false, createdAt: "" },
+          ],
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Photos" }),
+    ).toBeDefined();
+    const link = screen.getByRole("link", { name: "View all photos" });
+    expect(link.getAttribute("href")).toBe(`/${slug}/photos`);
+  });
+});

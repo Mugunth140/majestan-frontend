@@ -10,8 +10,6 @@ import {
   Bath,
   Square,
   Car,
-  Share2,
-  Check,
   ChevronLeft,
   ChevronRight,
   Building2,
@@ -30,7 +28,7 @@ import { FaqSection } from "@/components/site/property/sections/FaqSection";
 import { FloorPlanTeaser } from "@/components/site/property/FloorPlanTeaser";
 import { PhotosTeaser } from "@/components/site/property/PhotosTeaser";
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
-import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
+import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
 
 type PropertyDetailsViewProps = {
@@ -52,7 +50,6 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
         ];
 
   const [activeImg, setActiveImg] = useState(0);
-  const [copied, setCopied] = useState(false);
   const currentImage = images[Math.min(activeImg, images.length - 1)];
 
   const propertyTypeLabel =
@@ -67,11 +64,6 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     ? "for-rent"
     : "for-sale";
   const isSale = listingType === "for-sale";
-
-  const propertyTypeSlug =
-    Object.entries(PROPERTY_TYPES).find(
-      ([, data]) => data.apiValue === property.propertyType
-    )?.[0] || property.propertyType;
 
   const locData = property.locations?.[0]?.localityData;
   const locRow = property.locations?.[0] as unknown as
@@ -145,47 +137,12 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       : []),
   ];
 
-  const handleShare = async () => {
-    const url = `${window.location.origin}/${property.canonicalSlug}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      /* user dismissed */
-    }
-  };
-
   const prevImg = () => setActiveImg((i) => (i - 1 + images.length) % images.length);
   const nextImg = () => setActiveImg((i) => (i + 1) % images.length);
 
   return (
     <div className="flex! flex-col! gap-5!">
-      {/* Top Actions Bar */}
-      <div className="flex! flex-col! sm:flex-row! justify-between! items-start! sm:items-center! gap-4!">
-        <Link
-          href={`/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`}
-          className="inline-flex! items-center! gap-2! text-sm! font-medium! text-gray-500! hover:text-gray-900! transition-colors! no-underline!"
-        >
-          <ChevronLeft className="w-4! h-4!" />
-          Back to listings
-        </Link>
-
-        <div className="flex! items-center! gap-4!">
-          <button
-            onClick={handleShare}
-            className="inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-gray-300! hover:text-gray-900! transition-all! shadow-sm! cursor-pointer!"
-          >
-            {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
-            {copied ? "Copied" : "Share"}
-          </button>
-          <WishlistButton propertyId={property.id} propertyType={property.propertyType} variant="pill" />
-        </div>
-      </div>
+      <PropertyTopActions property={property} />
 
       <div className="grid! grid-cols-1! lg:grid-cols-3! gap-5!">
         {/* Left column */}

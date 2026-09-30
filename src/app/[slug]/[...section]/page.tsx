@@ -8,6 +8,7 @@ import { FloorPlanSection } from "@/components/site/property/sections/FloorPlanS
 import { LocalitySection } from "@/components/site/property/sections/LocalitySection";
 import { PhotosSection } from "@/components/site/property/sections/PhotosSection";
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
+import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
 import { getPropertyBySeoSlug, type SeoProperty } from "@/lib/api/property-by-slug";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
@@ -359,6 +360,7 @@ export default async function PropertySectionPage({
         <div className="bg-[#f2f5f9]! min-h-screen! font-manrope">
           <div className="container! mx-auto! px-4! sm:px-6! py-6! max-w-7xl!">
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
+            <PropertyTopActions property={property} />
 
             <div className="grid! grid-cols-1! lg:grid-cols-3! gap-8! pb-24! mt-6!">
               {/* Main Content */}

@@ -15,7 +15,8 @@ import {
   Film,
   Landmark,
 } from "lucide-react";
-import { LocalityGoogleMap, resolveListingLocality } from './LocalityGoogleMap';
+import { LocalityGoogleMap } from './LocalityGoogleMap';
+import { resolveListingLocality } from '@/lib/locality-geo';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 
 const ICON_MAP: Record<string, React.ElementType> = {

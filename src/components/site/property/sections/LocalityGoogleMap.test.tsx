@@ -4,9 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import {
   LocalityGoogleMap,
+} from "./LocalityGoogleMap";
+import {
   buildGeocodeQuery,
   resolveListingLocality,
-} from "./LocalityGoogleMap";
+} from "../../../../lib/locality-geo";
 
 afterEach(cleanup);
 

@@ -214,7 +214,7 @@ export function LocalitySection({ property }: LocalitySectionProps) {
           return (
             <div
               key={category.title}
-              className="bg-white! rounded-[20px]! p-6! md:p-8! border! border-gray-200/70! shadow-sm! hover:border-gray-300! hover:-translate-y-0.5! transition-all! duration-300!"
+              className="bg-white! rounded-[20px]! p-6! md:p-8! border! border-gray-200/70! shadow-sm! hover:border-[#27427f]/25! hover:shadow-[0_16px_40px_rgba(39,66,127,0.12)]! hover:-translate-y-1.5! transition-all! duration-300!"
             >
               <div className="flex! items-center! gap-3! mb-6!">
                 <Icon className="w-6! h-6! text-[#27427f]! shrink-0!" />

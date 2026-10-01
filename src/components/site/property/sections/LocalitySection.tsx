@@ -16,6 +16,7 @@ import {
   Landmark,
 } from "lucide-react";
 import { LocalityGoogleMap } from './LocalityGoogleMap';
+import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
 import { resolveListingLocality } from '@/lib/locality-geo';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import { PlaceDistanceSearch } from "@/components/site/property/PlaceDistanceSearch";
@@ -283,6 +284,12 @@ export function LocalitySection({ property }: LocalitySectionProps) {
           })}
         </div>
       </div>
+
+      {/* Locality description from the sublocations table. Renders only
+          when that locality has an overview; no self-link — this IS the page. */}
+      {localityName && (
+        <LocalityTeaser locality={localityName} city={property.city} full />
+      )}
 
       {/* Map — full-bleed: the map fills the card to its edges instead of
           sitting as a second rounded box inside it */}

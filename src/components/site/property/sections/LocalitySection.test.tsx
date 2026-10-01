@@ -101,6 +101,41 @@ describe("LocalitySection with the ap088 production payload", () => {
     expect(screen.getByText("Enquire Now")).toBeDefined();
   });
 
+  it("shows the sublocality description block when the locality has one", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [
+          {
+            id: 3,
+            sublocation: "Saravanampatti",
+            cityId: 2,
+            city: "Coimbatore",
+            description: "Saravanampatti is one of Coimbatore's fastest-growing corridors.",
+          },
+        ],
+      }),
+    );
+    try {
+      render(
+        <LocalitySection
+          property={{
+            ...ap088,
+            locations: [{ address: "saravanampatti main", latitude: null, longitude: null }] as any,
+          }}
+        />,
+      );
+
+      expect(await screen.findByText("About Saravanampatti")).toBeDefined();
+      expect(screen.getByText(/fastest-growing corridors/)).toBeDefined();
+      // On its own page the block carries no self-link.
+      expect(screen.queryByRole("link", { name: "View locality guide" })).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("opens an upward popup with the full place info on hover", () => {
     const longName = "KGiSL Institute of Technology And Research Campus";
     render(

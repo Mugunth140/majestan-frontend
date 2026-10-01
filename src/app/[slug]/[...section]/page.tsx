@@ -10,6 +10,7 @@ import { PhotosSection } from "@/components/site/property/sections/PhotosSection
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
 import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
 import { getPropertyBySeoSlug, type SeoProperty } from "@/lib/api/property-by-slug";
+import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import type { Metadata } from "next";
@@ -348,6 +349,12 @@ export default async function PropertySectionPage({
       },
     };
 
+    // Only FAQs visible on this page are marked up.
+    const faqJsonLd = buildFaqPageJsonLd(
+      (property.faqs || []).filter((f) => f.section === sectionKey),
+      `https://www.majestanrealty.com/${property.canonicalSlug}/${sectionKey}`,
+    );
+
     return (
       <>
         <SiteHeader />
@@ -391,6 +398,12 @@ export default async function PropertySectionPage({
               __html: JSON.stringify(structuredData),
             }}
           />
+          {faqJsonLd && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+            />
+          )}
         </div>
         <SiteFooter />
       </>

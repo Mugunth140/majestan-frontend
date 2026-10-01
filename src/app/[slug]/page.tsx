@@ -5,6 +5,7 @@ import { PropertyNavigation } from "@/components/site/property/property-navigati
 import { PropertyDetailsView } from "@/components/site/property/PropertyDetailsView";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { getPropertyBySeoSlug } from "@/lib/api/property-by-slug";
+import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import {
   PROPERTY_TYPES,
@@ -554,6 +555,11 @@ export default async function SlugPage({
 
     const structuredData = buildPropertyStructuredData(property);
     const breadcrumbItems = buildBreadcrumbItems(property);
+    // Only FAQs visible on this page are marked up.
+    const faqJsonLd = buildFaqPageJsonLd(
+      (property.faqs || []).filter((f) => f.section === "overview"),
+      `https://www.majestanrealty.com/${property.canonicalSlug}`,
+    );
 
     return (
       <>
@@ -572,6 +578,12 @@ export default async function SlugPage({
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
           />
+          {faqJsonLd && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+            />
+          )}
         </div>
         <SiteFooter />
       </>

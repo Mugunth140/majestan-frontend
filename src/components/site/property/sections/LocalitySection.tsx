@@ -226,7 +226,7 @@ export function LocalitySection({ property }: LocalitySectionProps) {
                 {category.places.map((place, idx) => (
                   <li
                     key={idx}
-                    className="flex! items-center! justify-between! gap-4! group!"
+                    className="flex! items-center! justify-between! gap-4! group"
                   >
                     <span className="relative! min-w-0!">
                       <span className="block! text-sm! font-normal! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>

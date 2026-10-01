@@ -124,7 +124,7 @@ export function PhotosSection({ property }: PhotosSectionProps) {
             </span>
             <button
               onClick={() => openLightbox(0)}
-              className="w-full! block! relative! group! cursor-pointer!"
+              className="w-full! block! relative! group cursor-pointer!"
             >
               <img
                 src={primaryImage.imageUrl}
@@ -153,7 +153,7 @@ export function PhotosSection({ property }: PhotosSectionProps) {
                 <button
                   key={img.id}
                   onClick={() => openLightbox(imageIndex)}
-                  className={`relative! rounded-[16px]! overflow-hidden! group! cursor-pointer! ${
+                  className={`relative! rounded-[16px]! overflow-hidden! group cursor-pointer! ${
                     isLarge ? "md:col-span-2! md:row-span-2!" : ""
                   }`}
                 >

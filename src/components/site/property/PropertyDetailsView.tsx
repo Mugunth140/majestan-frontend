@@ -158,7 +158,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
         {/* Left column */}
         <div className="lg:col-span-2! flex! flex-col! gap-5! min-w-0!">
           {/* Hero gallery */}
-          <div className="relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery!">
+          <div className="relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery">
             <img
               key={currentImage.imageUrl}
               src={currentImage.imageUrl}

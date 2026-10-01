@@ -18,6 +18,7 @@ import {
 import { LocalityGoogleMap } from './LocalityGoogleMap';
 import { resolveListingLocality } from '@/lib/locality-geo';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
+import { PlaceDistanceSearch } from "@/components/site/property/PlaceDistanceSearch";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   GraduationCap,
@@ -162,6 +163,7 @@ export function LocalitySection({ property }: LocalitySectionProps) {
 
   const lat = property.locations?.[0]?.latitude ? Number(property.locations[0].latitude) : null;
   const lng = property.locations?.[0]?.longitude ? Number(property.locations[0].longitude) : null;
+  const localityName = resolveListingLocality(property.locations as any);
 
   return (
     <div className="space-y-8!">
@@ -196,6 +198,15 @@ export function LocalitySection({ property }: LocalitySectionProps) {
         </div>
       </div>
 
+      {/* Distance search: origin is the exact coords, else the locality */}
+      <PlaceDistanceSearch
+        lat={lat}
+        lng={lng}
+        locality={localityName}
+        city={property.city}
+        state={property.state}
+      />
+
       {/* Nearby Places */}
       <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-5!">
         {categories.map((category) => {
@@ -217,7 +228,23 @@ export function LocalitySection({ property }: LocalitySectionProps) {
                     key={idx}
                     className="flex! items-center! justify-between! gap-4! group!"
                   >
-                    <span className="text-sm! font-normal! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>
+                    <span className="relative! min-w-0!">
+                      <span className="block! text-sm! font-normal! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>
+                      {/* Full info on hover: the row truncates, so the popup
+                          opens upward with the complete name and distance
+                          without moving any layout. */}
+                      <span
+                        role="tooltip"
+                        className="pointer-events-none! absolute! bottom-full! left-0! mb-2! z-10! hidden! group-hover:block! max-w-[min(240px,60vw)]! rounded-xl! border! border-gray-200! bg-white! px-3! py-2! shadow-lg!"
+                      >
+                        <span className="block! text-sm! font-medium! text-gray-900! whitespace-normal!">
+                          {place.name}
+                        </span>
+                        <span className="block! text-xs! text-gray-500! mt-0.5!">
+                          {place.distance} away
+                        </span>
+                      </span>
+                    </span>
                     <span className="text-xs! font-medium! text-gray-500! bg-gray-50! px-2! py-1! rounded-md! border! border-gray-200! whitespace-nowrap!">
                       {place.distance}
                     </span>

@@ -100,4 +100,35 @@ describe("LocalitySection with the ap088 production payload", () => {
 
     expect(screen.getByText("Enquire Now")).toBeDefined();
   });
+
+  it("opens an upward popup with the full place info on hover", () => {
+    const longName = "KGiSL Institute of Technology And Research Campus";
+    render(
+      <LocalitySection
+        property={{
+          ...ap088,
+          locations: [
+            {
+              latitude: "11.08",
+              longitude: 77.0,
+              localityData: {
+                categories: [
+                  {
+                    title: "Education",
+                    icon: "graduation-cap",
+                    places: [{ name: longName, distance: "0.2 km" }],
+                  },
+                ],
+              },
+            },
+          ],
+        }}
+      />,
+    );
+
+    // The row truncates; the hover popup carries the complete name.
+    const popup = screen.getByRole("tooltip", { name: new RegExp(longName) });
+    expect(popup.textContent).toContain(longName);
+    expect(popup.textContent).toContain("0.2 km");
+  });
 });

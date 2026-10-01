@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { ChevronDown, HelpCircle } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { type SeoPropertyFaq } from '@/lib/api/property-by-slug';
 
 export function FaqSection({ faqs }: { faqs: SeoPropertyFaq[] }) {
@@ -11,15 +11,10 @@ export function FaqSection({ faqs }: { faqs: SeoPropertyFaq[] }) {
   const sorted = [...faqs].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
-    <div className="pt-10! border-t! border-gray-200!">
-      <div className="flex! items-center! gap-3! mb-8!">
-        <div className="w-9! h-9! rounded-full! border! border-gray-200! flex! items-center! justify-center! text-gray-600!">
-          <HelpCircle className="w-4.5! h-4.5!" />
-        </div>
-        <h2 className="text-lg! font-semibold! text-gray-900!">
-          Frequently Asked Questions
-        </h2>
-      </div>
+    <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+      <h2 className="text-lg! md:text-xl! font-normal! text-gray-900! mb-6!">
+        Frequently Asked Questions
+      </h2>
 
       <div className="space-y-3!">
         {sorted.map((faq, i) => {
@@ -43,7 +38,7 @@ export function FaqSection({ faqs }: { faqs: SeoPropertyFaq[] }) {
               </button>
               {isOpen && (
                 <div className="px-6! pb-5! border-t! border-gray-100!">
-                  <p className="text-sm! font-light! text-gray-600! leading-relaxed! pt-4!">
+                  <p className="text-sm! font-normal! text-gray-600! leading-relaxed! pt-4!">
                     {faq.answer}
                   </p>
                 </div>

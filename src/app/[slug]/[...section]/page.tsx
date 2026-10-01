@@ -372,7 +372,7 @@ export default async function PropertySectionPage({
                 
                 {/* Per-Section FAQs */}
                 {(property.faqs || []).filter(f => f.section === sectionKey).length > 0 && (
-                  <div className="mt-8! bg-white! rounded-[24px]! p-8! border! border-gray-200! shadow-sm!">
+                  <div className="mt-8!">
                     <FaqSection faqs={(property.faqs || []).filter(f => f.section === sectionKey)} />
                   </div>
                 )}

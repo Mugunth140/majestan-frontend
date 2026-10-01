@@ -161,3 +161,46 @@ describe("PropertyDetailsView overview teasers", () => {
     expect(screen.getByRole("button", { name: "Contact Us" })).toBeDefined();
   });
 });
+
+describe("PropertyDetailsView floor item", () => {
+  const withFloors = (over: Record<string, unknown> = {}) => ({
+    ...baseProperty,
+    details: {
+      ...baseProperty.details!,
+      floorNumber: "4",
+      totalFloors: 12,
+      ...over,
+    },
+  });
+
+  it("shows floor over total for apartments when both are stored", () => {
+    render(<PropertyDetailsView property={withFloors()} />);
+
+    expect(screen.getByText("Floor No")).toBeDefined();
+    expect(screen.getByText("4 / 12")).toBeDefined();
+  });
+
+  it("hides the item completely unless both halves are stored", () => {
+    for (const details of [
+      { floorNumber: "4", totalFloors: null },
+      { floorNumber: null, totalFloors: 12 },
+      { floorNumber: null, totalFloors: null },
+    ]) {
+      const { unmount } = render(
+        <PropertyDetailsView property={withFloors(details)} />,
+      );
+      expect(screen.queryByText("Floor No")).toBeNull();
+      unmount();
+    }
+  });
+
+  it("hides the item for non-apartments even with complete data", () => {
+    render(
+      <PropertyDetailsView
+        property={{ ...withFloors(), propertyType: "villa" }}
+      />,
+    );
+
+    expect(screen.queryByText("Floor No")).toBeNull();
+  });
+});

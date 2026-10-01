@@ -10,6 +10,7 @@ import {
   Bath,
   Square,
   Car,
+  Layers,
   ChevronLeft,
   ChevronRight,
   Building2,
@@ -95,6 +96,14 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       : []),
     ...(property.details?.bathrooms
       ? [{ icon: <Bath className="w-5! h-5!" />, label: "Bathrooms", value: `${property.details.bathrooms}` }]
+      : []),
+    // Apartment-only: floor over total, shown only when both are stored.
+    // A zero/empty half means "not stored", never rendered as-is.
+    ...(property.propertyType === "apartment" &&
+    property.details?.floorNumber != null &&
+    property.details.floorNumber !== "" &&
+    Number(property.details?.totalFloors) > 0
+      ? [{ icon: <Layers className="w-5! h-5!" />, label: "Floor No", value: `${property.details.floorNumber} / ${property.details.totalFloors}` }]
       : []),
     ...(property.details?.areaSqft
       ? [{ icon: <Square className="w-5! h-5!" />, label: "Area", value: `${property.details.areaSqft} sq.ft` }]

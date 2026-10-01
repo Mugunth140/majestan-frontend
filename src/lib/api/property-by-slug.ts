@@ -12,6 +12,10 @@ export type SeoPropertyDetails = {
   areaSqft: string;
   parking: number;
   furnished: boolean;
+  // property_details.floor_number/total_floors, already carried by the
+  // payload. Optional: rows predate the fields.
+  floorNumber?: string | null;
+  totalFloors?: number | null;
   // propertyDetails.propertyFacing from the API (DB `property_facing`). Absent
   // from older payloads, so optional — rows hide when it is missing.
   propertyFacing?: string | null;

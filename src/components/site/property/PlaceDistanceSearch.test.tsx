@@ -53,6 +53,9 @@ describe("PlaceDistanceSearch", () => {
   it("measures from the exact coordinates to the searched place", async () => {
     render(<PlaceDistanceSearch {...exactProps} />);
 
+    expect(
+      screen.getByText("Search your favourite place from this property"),
+    ).toBeDefined();
     fireEvent.change(screen.getByPlaceholderText(/search a place/i), {
       target: { value: "Brookefields Mall" },
     });
@@ -60,8 +63,9 @@ describe("PlaceDistanceSearch", () => {
       fireEvent.click(screen.getByRole("button", { name: /check distance/i }));
     });
 
-    // (11.08, 77.0) -> (11.09, 77.01) is about 1.6 km.
-    expect(screen.getByText(/1\.6 km from this property/i)).toBeDefined();
+    // (11.08, 77.0) -> (11.09, 77.01) is about 1.6 km, shown as a badge.
+    expect(screen.getByText("Brookefields Mall")).toBeDefined();
+    expect(screen.getByText("~1.6 km")).toBeDefined();
   });
 
   it("says so when the place cannot be found", async () => {

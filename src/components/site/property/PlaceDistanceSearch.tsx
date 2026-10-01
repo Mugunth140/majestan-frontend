@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
-import { Search } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import {
   formatDistanceKm,
   geocodeAddress,
@@ -75,7 +75,7 @@ export function PlaceDistanceSearch({ lat, lng, locality, city, state }: PlaceDi
   return (
     <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
       <h3 className="font-manrope! text-lg! md:text-xl! font-medium! text-gray-900!">
-        Check distance from here
+        Search your favourite place from this property
       </h3>
       <form onSubmit={runSearch} className="mt-4! flex! flex-col! sm:flex-row! gap-3!">
         <div className="relative! flex-1!">
@@ -98,16 +98,22 @@ export function PlaceDistanceSearch({ lat, lng, locality, city, state }: PlaceDi
         </button>
       </form>
       {search.status === "done" && (
-        <p className="mt-4! text-[15px]! text-gray-700!">
-          <span className="font-manrope! font-semibold! text-gray-900!">{search.place}</span>
-          {" "}is{" "}
-          <span className="font-manrope! font-semibold! text-[#27427f]!">
-            {formatDistanceKm(search.km)} from this property
+        <div className="mt-4! flex! items-center! justify-between! gap-4! rounded-xl! bg-[#27427f]/5! border! border-[#27427f]/15! px-4! py-3!">
+          <div className="flex! items-center! gap-3! min-w-0!">
+            <MapPin className="w-5! h-5! text-[#27427f]! shrink-0!" />
+            <div className="min-w-0!">
+              <p className="font-manrope! font-semibold! text-[15px]! text-gray-900! truncate!">
+                {search.place}
+              </p>
+              <p className="text-xs! text-gray-500! font-normal! mt-0.5!">
+                {search.approximate ? "from the locality centre" : "from this property"}
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex! items-center! px-3! py-1.5! rounded-full! bg-[#27427f]! text-white! text-sm! font-manrope! font-semibold! whitespace-nowrap! shrink-0!">
+            {formatDistanceKm(search.km)}
           </span>
-          {search.approximate && (
-            <span className="text-gray-500!"> · measured from the locality centre</span>
-          )}
-        </p>
+        </div>
       )}
       {search.status === "error" && (
         <p className="mt-4! text-[15px]! text-red-600!">{search.message}</p>

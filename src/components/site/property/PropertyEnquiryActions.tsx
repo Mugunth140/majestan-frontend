@@ -83,6 +83,8 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
       setDialog(pendingIntent);
       setPendingIntent(null);
     }
+    // intentional: re-seed only when auth state or pending intent changes,
+    // not on every profile update (seedFormFromUser reads auth store imperatively)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, pendingIntent]);
 

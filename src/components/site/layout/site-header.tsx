@@ -246,7 +246,13 @@ export function SiteHeader(): React.JSX.Element {
                     <div className="p-2!">
                       <div className="px-3! py-2.5! mb-1! border-b! border-gray-100!">
                         <p className="text-[11px]! font-bold! text-gray-400! uppercase! tracking-wider! mb-0.5!">Signed in as</p>
-                        <p className="text-[13px]! font-semibold! text-[#27427f]! truncate!">{user?.phone || user?.email}</p>
+                        {user?.name && user.name !== "Majestan User" && (
+                          <p className="text-[13px]! font-semibold! text-[#161e2d]! truncate! leading-snug!">{user.name}</p>
+                        )}
+                        <p className="text-[12px]! font-medium! text-[#27427f]! truncate! mt-0.5!">{user?.phone}</p>
+                        {user?.email && !user.email.endsWith("@user.majestan.local") && !user.email.endsWith("@majestan.local") && (
+                          <p className="text-[11px]! text-gray-400! truncate! mt-0.5!">{user.email}</p>
+                        )}
                       </div>
                       <button onClick={() => logout()} className="flex! w-full! items-center! gap-3! rounded-xl! px-3! py-2.5! text-[13px]! font-medium! text-rose-600! hover:bg-rose-50! transition-colors!">
                         <LogOut size={16} />

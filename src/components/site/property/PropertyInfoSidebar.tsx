@@ -4,7 +4,6 @@ import {
   BedDouble,
   Building2,
   Calendar,
-  Phone,
   ShieldCheck,
   Ruler,
   Coins,
@@ -15,6 +14,7 @@ import {
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import { formatDate, formatPrice } from "@/lib/property-format";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
 
 type PropertyInfoSidebarProps = {
   property: SeoProperty;
@@ -137,16 +137,17 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           )}
         </div>
 
-        <div className="mt-4! flex! flex-col! gap-2.5!">
-          <button className="w-full! bg-[#27427f]! text-white! font-manrope! font-normal! text-base! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
-            <Phone className="w-4! h-4!" />
-            Enquire Now
-          </button>
-          <button className="w-full! bg-white! text-[#27427f]! font-manrope! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
-            <Calendar className="w-4! h-4!" />
-            Schedule Visit
-          </button>
-        </div>
+        <PropertyEnquiryActions
+          property={{
+            id: property.id,
+            propertyCode: property.propertyCode,
+            slug: property.slug,
+            title: property.title,
+            propertyType: property.propertyType,
+            listingType: property.listingType,
+            city: property.city,
+          }}
+        />
 
         <div className="mt-5! pt-3! border-t! border-gray-100! flex! items-center! justify-center! gap-1! text-[13px]! font-manrope! font-normal! text-gray-500! ">
           <Coins className="w-4! h-4! text-yellow-500! shrink-0!" />

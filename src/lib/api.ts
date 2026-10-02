@@ -347,3 +347,28 @@ export async function getPropertyBySlug(slug: string): Promise<any> {
     next: { revalidate: 3600 },
   });
 }
+
+export async function createPropertyEnquiry(
+  payload: {
+    propertyId: number;
+    propertyCode?: string | null;
+    slug?: string | null;
+    name: string;
+    email?: string;
+    phone: string;
+    message?: string;
+    intent: "enquiry" | "site_visit";
+    visitDate?: string;
+    visitSlot?: string;
+  },
+  token: string,
+) {
+  // fetchApi's 401 handling (redirect to /login) is the desired behavior
+  // here: this endpoint requires a live session.
+  return fetchApi<{ id: number; submitted: boolean }>("/leads/property-enquiry", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+}

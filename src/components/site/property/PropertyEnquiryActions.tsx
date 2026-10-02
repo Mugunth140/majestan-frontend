@@ -33,6 +33,13 @@ function isRealName(name: string | undefined | null): boolean {
   return !!name && name.trim().length > 0 && name.trim() !== PLACEHOLDER_NAME;
 }
 
+/** The backend synthesises fake emails for OTP-only users; don't display those. */
+function isRealEmail(email: string | undefined | null): boolean {
+  if (!email || !email.includes("@")) return false;
+  const lower = email.toLowerCase();
+  return !lower.endsWith("@user.majestan.local") && !lower.endsWith("@majestan.local");
+}
+
 export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps) {
   const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
   const authedUser = useUserAuthStore((s) => s.user);
@@ -246,6 +253,16 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
             </span>
           </div>
         </div>
+
+        {/* Email row — only when a real email was registered */}
+        {isRealEmail(authedUser?.email) && (
+          <div>
+            <p className={labelClass}>Email</p>
+            <span className="text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
+              {authedUser!.email}
+            </span>
+          </div>
+        )}
       </div>
     );
   }

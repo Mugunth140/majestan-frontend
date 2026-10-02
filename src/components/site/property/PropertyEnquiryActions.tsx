@@ -22,10 +22,6 @@ export type EnquiryPropertyRef = {
 type Intent = "enquire" | "visit";
 type Status = "idle" | "submitting" | "success" | "error";
 
-interface PropertyEnquiryActionsProps {
-  property: EnquiryPropertyRef;
-}
-
 /** The backend sets this placeholder for OTP-login users who skipped name entry. */
 const PLACEHOLDER_NAME = "Majestan User";
 
@@ -38,6 +34,230 @@ function isRealEmail(email: string | undefined | null): boolean {
   if (!email || !email.includes("@")) return false;
   const lower = email.toLowerCase();
   return !lower.endsWith("@user.majestan.local") && !lower.endsWith("@majestan.local");
+}
+
+const inputClass =
+  "w-full! px-[13px]! py-[10px]! rounded-[10px]! bg-white! border! border-gray-300! " +
+  "text-[14px]! text-[#161e2d]! outline-none! transition-colors! duration-150! " +
+  "placeholder:text-gray-400! focus:border-[#27427f]!";
+
+const labelClass = "block! text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400! mb-[4px]!";
+
+// ─── Contact card ───────────────────────────────────────────────────────────
+// NOTE: module scope, NOT nested inside PropertyEnquiryActions. A nested
+// component definition creates a new function identity on every parent render,
+// which makes React unmount and remount the whole subtree on each keystroke —
+// the input loses focus, and a Backspace with focus lost triggers browser-back.
+function ContactCard({
+  name,
+  setName,
+  editingName,
+  setEditingName,
+  nameInputRef,
+  displayPhone,
+  email,
+}: {
+  name: string;
+  setName: (v: string) => void;
+  editingName: boolean;
+  setEditingName: (v: boolean) => void;
+  nameInputRef: React.RefObject<HTMLInputElement | null>;
+  displayPhone: string;
+  email: string | undefined | null;
+}) {
+  return (
+    <div className="rounded-[14px]! bg-gray-50! border! border-gray-100! p-4! space-y-3! mb-5!">
+      <p className="text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400!">
+        Your contact details
+      </p>
+
+      {/* Name row */}
+      <div>
+        <p className={labelClass}>Name</p>
+        {editingName ? (
+          <div className="flex! items-center! gap-2!">
+            <input
+              ref={nameInputRef}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              className={inputClass + " flex-1!"}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && name.trim().length >= 2) setEditingName(false);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (name.trim().length >= 2) setEditingName(false);
+              }}
+              disabled={name.trim().length < 2}
+              className="shrink-0! w-8! h-8! rounded-lg! bg-[#27427f]! text-white! flex! items-center! justify-center! disabled:opacity-40! transition-opacity!"
+              aria-label="Save name"
+            >
+              <Check size={14} />
+            </button>
+          </div>
+        ) : (
+          <div className="flex! items-center! justify-between! gap-2!">
+            <span className="text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
+              {name || <span className="text-gray-400 italic">Not provided</span>}
+            </span>
+            <button
+              type="button"
+              onClick={() => setEditingName(true)}
+              className="shrink-0! flex! items-center! gap-1! text-[12px]! text-[#27427f]! hover:underline! transition-colors!"
+              aria-label="Edit name"
+            >
+              <Pencil size={12} />
+              Edit
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Phone row — always locked */}
+      <div>
+        <p className={labelClass}>Mobile</p>
+        <div className="flex! items-center! gap-2!">
+          <span className="text-[15px]! font-medium! text-[#161e2d]! flex-1! leading-snug!">
+            {displayPhone}
+          </span>
+          <span className="flex! items-center! gap-1! text-[11px]! text-gray-400!">
+            <Lock size={11} />
+            Verified
+          </span>
+        </div>
+      </div>
+
+      {/* Email row — only when a real email was registered */}
+      {isRealEmail(email) && (
+        <div>
+          <p className={labelClass}>Email</p>
+          <span className="text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
+            {email}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Dialog shell ────────────────────────────────────────────────────────────
+function DialogShell({
+  id,
+  eyebrow,
+  title,
+  onClose,
+  children,
+}: {
+  id: string;
+  eyebrow: string;
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <motion.div
+      key={`${id}-backdrop`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.22 }}
+      role="presentation"
+      onClick={onClose}
+      className="fixed! inset-0! z-50! flex! items-end! sm:items-center! justify-center! bg-gray-900/40! backdrop-blur-sm! p-4!"
+    >
+      <motion.div
+        key={`${id}-card`}
+        initial={{ opacity: 0, y: 52, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 36, scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 220, damping: 28 }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`${id}-title`}
+        onClick={(e) => e.stopPropagation()}
+        className="relative! w-full! max-w-md! rounded-[2rem]! bg-white! border! border-gray-100! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
+      >
+        <motion.button
+          whileHover={{ scale: 1.1, rotate: 90 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 300, damping: 18 }}
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute! top-5! right-5! w-8! h-8! rounded-full! bg-gray-100! flex! items-center! justify-center! text-gray-500! hover:bg-gray-200! hover:text-gray-900! transition-colors!"
+        >
+          <X size={15} strokeWidth={2.5} />
+        </motion.button>
+
+        <div className="mb-5!">
+          <span className="block! mb-1.5! text-[10px]! font-semibold! uppercase! tracking-[0.14em]! text-[#27427f]!">
+            {eyebrow}
+          </span>
+          <h4
+            id={`${id}-title`}
+            className="pr-8! text-[20px]! font-semibold! leading-snug! tracking-tight! text-[#161e2d]!"
+          >
+            {title}
+          </h4>
+        </div>
+
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Success state ───────────────────────────────────────────────────────────
+function SuccessState({ name, message }: { name: string; message: string }) {
+  return (
+    <motion.div
+      key="ok"
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 200, damping: 22 }}
+      className="py-10! text-center!"
+    >
+      <div className="mx-auto! mb-4! flex! h-12! w-12! items-center! justify-center! rounded-full! bg-emerald-50!">
+        <CheckCircle2 className="h-6! w-6! text-emerald-600!" aria-hidden="true" />
+      </div>
+      <p className="text-[15px]! font-medium! text-[#161e2d]!">
+        Thank you, {name.trim() || ""}!
+      </p>
+      <p className="mt-[5px]! text-[14px]! leading-[1.6]! text-gray-600!">{message}</p>
+    </motion.div>
+  );
+}
+
+// ─── Submit button ───────────────────────────────────────────────────────────
+function SubmitBtn({
+  label,
+  onClick,
+  submitting,
+}: {
+  label: string;
+  onClick: () => void;
+  submitting: boolean;
+}) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 300, damping: 18 }}
+      type="button"
+      disabled={submitting}
+      onClick={onClick}
+      className="w-full! bg-[#27427f]! text-white! font-manrope! font-semibold! text-[15px]! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! disabled:opacity-70! disabled:cursor-not-allowed!"
+    >
+      {submitting ? <Loader2 size={20} className="animate-spin!" /> : label}
+    </motion.button>
+  );
+}
+
+interface PropertyEnquiryActionsProps {
+  property: EnquiryPropertyRef;
 }
 
 export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps) {
@@ -178,194 +398,17 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
     }
   }
 
-  // ─── Shared styles ────────────────────────────────────────────────────────
-  const inputClass =
-    "w-full! px-[13px]! py-[10px]! rounded-[10px]! bg-white! border! border-gray-300! " +
-    "text-[14px]! text-[#161e2d]! outline-none! transition-colors! duration-150! " +
-    "placeholder:text-gray-400! focus:border-[#27427f]!";
-
-  const labelClass = "block! text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400! mb-[4px]!";
-
-  // ─── Contact card (shared between both dialogs) ────────────────────────────
-  function ContactCard() {
-    return (
-      <div className="rounded-[14px]! bg-gray-50! border! border-gray-100! p-4! space-y-3! mb-5!">
-        <p className="text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400!">
-          Your contact details
-        </p>
-
-        {/* Name row */}
-        <div>
-          <p className={labelClass}>Name</p>
-          {editingName ? (
-            <div className="flex! items-center! gap-2!">
-              <input
-                ref={nameInputRef}
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your full name"
-                className={inputClass + " flex-1!"}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && name.trim().length >= 2) setEditingName(false);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (name.trim().length >= 2) setEditingName(false);
-                }}
-                disabled={name.trim().length < 2}
-                className="shrink-0! w-8! h-8! rounded-lg! bg-[#27427f]! text-white! flex! items-center! justify-center! disabled:opacity-40! transition-opacity!"
-                aria-label="Save name"
-              >
-                <Check size={14} />
-              </button>
-            </div>
-          ) : (
-            <div className="flex! items-center! justify-between! gap-2!">
-              <span className="text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
-                {name || <span className="text-gray-400 italic">Not provided</span>}
-              </span>
-              <button
-                type="button"
-                onClick={() => setEditingName(true)}
-                className="shrink-0! flex! items-center! gap-1! text-[12px]! text-[#27427f]! hover:underline! transition-colors!"
-                aria-label="Edit name"
-              >
-                <Pencil size={12} />
-                Edit
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Phone row — always locked */}
-        <div>
-          <p className={labelClass}>Mobile</p>
-          <div className="flex! items-center! gap-2!">
-            <span className="text-[15px]! font-medium! text-[#161e2d]! flex-1! leading-snug!">
-              {displayPhone()}
-            </span>
-            <span className="flex! items-center! gap-1! text-[11px]! text-gray-400!">
-              <Lock size={11} />
-              Verified
-            </span>
-          </div>
-        </div>
-
-        {/* Email row — only when a real email was registered */}
-        {isRealEmail(authedUser?.email) && (
-          <div>
-            <p className={labelClass}>Email</p>
-            <span className="text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
-              {authedUser!.email}
-            </span>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // ─── Dialog shell ──────────────────────────────────────────────────────────
-  function DialogShell({
-    id,
-    eyebrow,
-    children,
-  }: {
-    id: string;
-    eyebrow: string;
-    children: React.ReactNode;
-  }) {
-    return (
-      <motion.div
-        key={`${id}-backdrop`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.22 }}
-        role="presentation"
-        onClick={closeDialog}
-        className="fixed! inset-0! z-50! flex! items-end! sm:items-center! justify-center! bg-gray-900/40! backdrop-blur-sm! p-4!"
-      >
-        <motion.div
-          key={`${id}-card`}
-          initial={{ opacity: 0, y: 52, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 36, scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 220, damping: 28 }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={`${id}-title`}
-          onClick={(e) => e.stopPropagation()}
-          className="relative! w-full! max-w-md! rounded-[2rem]! bg-white! border! border-gray-100! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
-        >
-          <motion.button
-            whileHover={{ scale: 1.1, rotate: 90 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 300, damping: 18 }}
-            type="button"
-            onClick={closeDialog}
-            aria-label="Close"
-            className="absolute! top-5! right-5! w-8! h-8! rounded-full! bg-gray-100! flex! items-center! justify-center! text-gray-500! hover:bg-gray-200! hover:text-gray-900! transition-colors!"
-          >
-            <X size={15} strokeWidth={2.5} />
-          </motion.button>
-
-          <div className="mb-5!">
-            <span className="block! mb-1.5! text-[10px]! font-semibold! uppercase! tracking-[0.14em]! text-[#27427f]!">
-              {eyebrow}
-            </span>
-            <h4
-              id={`${id}-title`}
-              className="pr-8! text-[20px]! font-semibold! leading-snug! tracking-tight! text-[#161e2d]!"
-            >
-              {property.title}
-            </h4>
-          </div>
-
-          {children}
-        </motion.div>
-      </motion.div>
-    );
-  }
-
-  // ─── Success state ─────────────────────────────────────────────────────────
-  function SuccessState({ message }: { message: string }) {
-    return (
-      <motion.div
-        key="ok"
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 22 }}
-        className="py-10! text-center!"
-      >
-        <div className="mx-auto! mb-4! flex! h-12! w-12! items-center! justify-center! rounded-full! bg-emerald-50!">
-          <CheckCircle2 className="h-6! w-6! text-emerald-600!" aria-hidden="true" />
-        </div>
-        <p className="text-[15px]! font-medium! text-[#161e2d]!">
-          Thank you, {name.trim() || ""}!
-        </p>
-        <p className="mt-[5px]! text-[14px]! leading-[1.6]! text-gray-600!">{message}</p>
-      </motion.div>
-    );
-  }
-
-  // ─── Submit button ─────────────────────────────────────────────────────────
-  function SubmitBtn({ label, onClick }: { label: string; onClick: () => void }) {
-    return (
-      <motion.button
-        whileTap={{ scale: 0.99 }}
-        transition={{ type: "spring", stiffness: 300, damping: 18 }}
-        type="button"
-        disabled={status === "submitting"}
-        onClick={onClick}
-        className="w-full! bg-[#27427f]! text-white! font-manrope! font-semibold! text-[15px]! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! disabled:opacity-70! disabled:cursor-not-allowed!"
-      >
-        {status === "submitting" ? <Loader2 size={20} className="animate-spin!" /> : label}
-      </motion.button>
-    );
-  }
+  const contactCard = (
+    <ContactCard
+      name={name}
+      setName={setName}
+      editingName={editingName}
+      setEditingName={setEditingName}
+      nameInputRef={nameInputRef}
+      displayPhone={displayPhone()}
+      email={authedUser?.email}
+    />
+  );
 
   return (
     <>
@@ -393,19 +436,19 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
       {/* ── Enquiry dialog ── */}
       <AnimatePresence>
         {dialog === "enquire" && (
-          <DialogShell id="enquire" eyebrow="Property Enquiry">
+          <DialogShell id="enquire" eyebrow="Property Enquiry" title={property.title} onClose={closeDialog}>
             <AnimatePresence mode="wait">
               {status === "success" ? (
-                <SuccessState message="We will contact you shortly." />
+                <SuccessState name={name} message="We will contact you shortly." />
               ) : (
                 <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
-                  <ContactCard />
+                  {contactCard}
 
                   {status === "error" && errorMsg && (
                     <p className="text-[13px]! text-red-600!">{errorMsg}</p>
                   )}
 
-                  <SubmitBtn label="Submit Enquiry" onClick={() => handleSubmit("enquiry")} />
+                  <SubmitBtn label="Submit Enquiry" onClick={() => handleSubmit("enquiry")} submitting={status === "submitting"} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -416,13 +459,13 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
       {/* ── Visit dialog ── */}
       <AnimatePresence>
         {dialog === "visit" && (
-          <DialogShell id="visit" eyebrow="Schedule a Site Visit">
+          <DialogShell id="visit" eyebrow="Schedule a Site Visit" title={property.title} onClose={closeDialog}>
             <AnimatePresence mode="wait">
               {status === "success" ? (
-                <SuccessState message="Your site visit is booked. We will confirm shortly." />
+                <SuccessState name={name} message="Your site visit is booked. We will confirm shortly." />
               ) : (
                 <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
-                  <ContactCard />
+                  {contactCard}
 
                   {/* Date */}
                   <div>
@@ -462,7 +505,7 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
                     <p className="text-[13px]! text-red-600!">{errorMsg}</p>
                   )}
 
-                  <SubmitBtn label="Book Visit" onClick={() => handleSubmit("site_visit")} />
+                  <SubmitBtn label="Book Visit" onClick={() => handleSubmit("site_visit")} submitting={status === "submitting"} />
                 </motion.div>
               )}
             </AnimatePresence>

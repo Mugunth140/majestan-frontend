@@ -467,8 +467,8 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           (() => {
             const availableFrom = getAvailableFromLabel(item);
             return availableFrom ? (
-              <div className="absolute! inset-x-0! bottom-0! h-[10%]! min-h-[34px]! flex! items-end! justify-center! pb-1.5! bg-gradient-to-t! from-black/60! to-transparent! pointer-events-none!">
-                <span className="text-[11px]! font-semibold! tracking-wide! text-white!">
+              <div className="absolute! inset-x-0! bottom-0! h-[10%]! min-h-[34px]! flex! items-end! justify-center! pb-1.5! bg-gradient-to-t! from-black/85! via-black/40! to-transparent! pointer-events-none!">
+                <span className="text-[11px]! font-semibold! tracking-wide! text-white! drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]!">
                   Available from {availableFrom}
                 </span>
               </div>

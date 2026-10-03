@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
-import { formatDate } from "@/lib/property-format";
+import { formatDate, formatFurnishing } from "@/lib/property-format";
 import {
   BedDouble,
   Bath,
@@ -111,8 +111,8 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     ...(property.details?.parking
       ? [{ icon: <Car className="w-5! h-5!" />, label: "Parking", value: `${property.details.parking} Covered` }]
       : []),
-    ...(property.details?.furnished != null
-      ? [{ icon: <ShieldCheck className="w-5! h-5!" />, label: "Furnishing", value: property.details.furnished ? "Furnished" : "Unfurnished" }]
+    ...(formatFurnishing(property.details)
+      ? [{ icon: <ShieldCheck className="w-5! h-5!" />, label: "Furnishing", value: formatFurnishing(property.details) as string }]
       : []),
     ...(perSqft
       ? [{ icon: <Tag className="w-5! h-5!" />, label: "Price / Sq.Ft", value: perSqft }]

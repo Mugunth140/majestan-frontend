@@ -12,6 +12,10 @@ export type SeoPropertyDetails = {
   areaSqft: string;
   parking: number;
   furnished: boolean;
+  // propertyDetails.furnishingStatus from the API (DB `furnishing_status`):
+  // BARESHELL / SEMI FURNISHED / FULLY FURNISHED / UNFURNISHED. Absent from
+  // older payloads, so optional — display falls back to the `furnished` flag.
+  furnishingStatus?: string | null;
   // property_details.floor_number/total_floors, already carried by the
   // payload. Optional: rows predate the fields.
   floorNumber?: string | null;

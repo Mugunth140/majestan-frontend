@@ -86,6 +86,21 @@ describe("PropertyDetailsView info card", () => {
     },
   );
 
+  it("shows the CRM furnishing status instead of the furnished flag when stored", () => {
+    render(
+      <PropertyDetailsView
+        property={{
+          ...baseProperty,
+          details: { ...baseProperty.details!, furnishingStatus: "SEMI FURNISHED" },
+        }}
+      />,
+    );
+
+    // Sidebar row + overview stat each.
+    expect(screen.getAllByText("Semi Furnished")).toHaveLength(2);
+    expect(screen.queryByText("Furnished")).toBeNull();
+  });
+
   it("hides the Facing row when the listing has no facing stored", () => {
     render(
       <PropertyDetailsView

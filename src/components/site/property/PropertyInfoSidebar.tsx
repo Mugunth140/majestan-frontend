@@ -12,7 +12,7 @@ import {
   Compass,
 } from "lucide-react";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
-import { formatDate, formatPrice } from "@/lib/property-format";
+import { formatDate, formatFurnishing, formatPrice } from "@/lib/property-format";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
 
@@ -79,11 +79,11 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
       : null,
     ...(isHomeType
       ? [
-          property.details?.furnished != null
+          formatFurnishing(property.details)
             ? {
                 icon: <Sofa className="w-4.5! h-4.5!" />,
                 label: "Furnishing",
-                value: property.details.furnished ? "Furnished" : "Unfurnished",
+                value: formatFurnishing(property.details) as string,
               }
             : null,
           property.details?.propertyFacing

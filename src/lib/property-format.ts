@@ -28,3 +28,25 @@ export function formatDate(dateStr: string): string {
     return dateStr;
   }
 }
+
+/**
+ * Display value for the Furnishing row. Prefers the CRM's furnishing-status
+ * dropdown value (SEMI FURNISHED, FULLY FURNISHED, BARESHELL, UNFURNISHED),
+ * falling back to the legacy `furnished` checkbox flag. Null when neither is
+ * stored, so the row hides instead of showing a blank.
+ */
+export function formatFurnishing(details: {
+  furnished?: boolean | null;
+  furnishingStatus?: string | null;
+} | null | undefined): string | null {
+  const status = details?.furnishingStatus?.trim();
+  if (status) {
+    return status
+      .toLowerCase()
+      .split(/\s+/)
+      .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+      .join(" ");
+  }
+  if (details?.furnished != null) return details.furnished ? "Furnished" : "Unfurnished";
+  return null;
+}

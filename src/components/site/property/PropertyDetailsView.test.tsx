@@ -75,6 +75,17 @@ describe("PropertyDetailsView info card", () => {
     expect(screen.getAllByText("Property Type")).toHaveLength(1);
   });
 
+  it.each(["villa", "individual_portion"] as const)(
+    "curates the specs for %s: Furnishing and Facing, not Listed and Property Type",
+    (propertyType) => {
+      render(<PropertyDetailsView property={{ ...baseProperty, propertyType }} />);
+
+      expect(screen.getByText("Facing")).toBeDefined();
+      expect(screen.getByText("East")).toBeDefined();
+      expect(screen.queryByText("Listed")).toBeNull();
+    },
+  );
+
   it("hides the Facing row when the listing has no facing stored", () => {
     render(
       <PropertyDetailsView
@@ -87,7 +98,7 @@ describe("PropertyDetailsView info card", () => {
   });
 
   it("keeps the generic rows for property types that are not curated yet", () => {
-    render(<PropertyDetailsView property={{ ...baseProperty, propertyType: "villa" }} />);
+    render(<PropertyDetailsView property={{ ...baseProperty, propertyType: "plot" }} />);
 
     expect(screen.getByText("Listed")).toBeDefined();
     expect(screen.getAllByText("Property Type")).toHaveLength(2);

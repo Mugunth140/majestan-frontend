@@ -38,6 +38,12 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
   const isApartment = property.propertyType === "apartment";
+  // Villas and individual houses show the same home specs as apartments
+  // (Furnishing + Facing) instead of Listed + Property Type.
+  const isHomeType =
+    property.propertyType === "apartment" ||
+    property.propertyType === "villa" ||
+    property.propertyType === "individual_portion";
   const isSale = !property.status.toLowerCase().includes("rent");
 
   const locData = property.locations?.[0]?.localityData;
@@ -71,7 +77,7 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
     property.details?.areaSqft
       ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${property.details.areaSqft} Sq Ft` }
       : null,
-    ...(isApartment
+    ...(isHomeType
       ? [
           property.details?.furnished != null
             ? {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { VISIT_SLOTS, formatSlot, isValidVisitDate, isValidVisitSlot, todayYmd } from "./visit-slots";
+import { VISIT_SLOTS, formatSlot, isValidVisitDate, isValidVisitSlot, maxVisitDate, todayYmd } from "./visit-slots";
 
 describe("visit-slots", () => {
   it("lists twelve hourly starts, 08:00 to 19:00", () => {
@@ -24,5 +24,11 @@ describe("visit-slots", () => {
     expect(isValidVisitDate("2000-01-01")).toBe(false);
     expect(isValidVisitDate(todayYmd())).toBe(true);
     expect(isValidVisitDate("not-a-date")).toBe(false);
+  });
+
+  it("caps booking at 3 months ahead", () => {
+    expect(isValidVisitDate(maxVisitDate())).toBe(true);
+    expect(isValidVisitDate("2999-01-01")).toBe(false);
+    expect(maxVisitDate()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

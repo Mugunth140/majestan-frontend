@@ -22,6 +22,16 @@ export function isValidVisitSlot(slot: string): boolean {
   return (VISIT_SLOTS as readonly string[]).includes(slot);
 }
 
+/** Latest bookable visit date: 3 calendar months from today, YYYY-MM-DD. */
+export function maxVisitDate(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 3);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export function isValidVisitDate(ymd: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(ymd) && ymd >= todayYmd();
+  return /^\d{4}-\d{2}-\d{2}$/.test(ymd) && ymd >= todayYmd() && ymd <= maxVisitDate();
 }

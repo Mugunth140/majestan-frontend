@@ -7,7 +7,7 @@ import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { createPropertyEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
-import { VISIT_SLOTS, formatSlot, isValidVisitDate, todayYmd } from "@/lib/visit-slots";
+import { VISIT_SLOTS, formatSlot, isValidVisitDate, maxVisitDate, todayYmd } from "@/lib/visit-slots";
 
 export type EnquiryPropertyRef = {
   id: number;
@@ -470,10 +470,11 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
                   {/* Date */}
                   <div>
                     <label className={labelClass}>Preferred Date</label>
-                    <input
-                      type="date"
-                      min={todayYmd()}
-                      value={visitDate}
+                      <input
+                        type="date"
+                        min={todayYmd()}
+                        max={maxVisitDate()}
+                        value={visitDate}
                       onChange={(e) => setVisitDate(e.target.value)}
                       className={inputClass}
                     />

@@ -19,7 +19,8 @@ export type EnquiryPropertyRef = {
   city: string;
 };
 
-type Intent = "enquire" | "visit";
+export type EnquiryIntent = "enquire" | "visit";
+type Intent = EnquiryIntent;
 type Status = "idle" | "submitting" | "success" | "error";
 
 /** The backend sets this placeholder for OTP-login users who skipped name entry. */
@@ -258,9 +259,17 @@ function SubmitBtn({
 
 interface PropertyEnquiryActionsProps {
   property: EnquiryPropertyRef;
+  /** Hide the island's own trigger buttons (parent opens the dialog). */
+  hideTriggers?: boolean;
+  /**
+   * External open request. Parent sets a fresh `{ intent, token }` object per
+   * click; the island opens that dialog. Used by listing cards that keep
+   * their own styled Enquire button.
+   */
+  externalOpen?: { intent: EnquiryIntent; token: number } | null;
 }
 
-export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps) {
+export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }: PropertyEnquiryActionsProps) {
   const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
   const authedUser = useUserAuthStore((s) => s.user);
   const token = useUserAuthStore((s) => s.token);
@@ -327,6 +336,19 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
       nameInputRef.current.focus();
     }
   }, [editingName]);
+
+  // External open request from a parent with its own trigger button.
+  // Each click carries a fresh token, so repeated clicks re-open reliably.
+  const externalToken = externalOpen?.token;
+  const externalIntent = externalOpen?.intent;
+  useEffect(() => {
+    if (externalToken != null && externalIntent) {
+      openIntent(externalIntent);
+    }
+    // intentional: fire only when the parent issues a new token, not on
+    // every render (openIntent reads auth store imperatively)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalToken]);
 
   // Escape closes open dialog
   useEffect(() => {
@@ -413,6 +435,7 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
   return (
     <>
       {/* Trigger buttons */}
+      {!hideTriggers && (
       <div className="mt-4! flex! flex-col! gap-2.5!">
         <button
           onClick={() => openIntent("enquire")}
@@ -429,6 +452,7 @@ export function PropertyEnquiryActions({ property }: PropertyEnquiryActionsProps
           Schedule Visit
         </button>
       </div>
+      )}
 
       {/* Auth modal */}
       <UserAuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />

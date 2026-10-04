@@ -6,6 +6,7 @@ import { useState } from "react";
 import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Sprout } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
+import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
 import {
   PROPERTY_TYPES,
   buildPseoSlug,
@@ -353,6 +354,21 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   })();
 
   const [copied, setCopied] = useState(false);
+  // External open signal for the enquiry dialog. The backend resolves the
+  // property by id and ignores client code/slug, so only id is authoritative.
+  const [enquireToken, setEnquireToken] = useState<number | null>(null);
+  const enquiryRef: EnquiryPropertyRef = {
+    id: item.id,
+    propertyCode:
+      (item as any).propertyCode ?? (item as any).property_code ??
+      item.apartment_code ?? item.villa_code ?? null,
+    slug:
+      item.slug_url ?? (typeof (item as any).slug === "string" ? (item as any).slug : null),
+    title: item.propertyname ?? "Property",
+    propertyType: item.propertyType,
+    listingType: item.posttype ?? "",
+    city: ((item as any).city as string | undefined) ?? item.sublocation ?? "",
+  };
 
   // Land parcels often have no building photos — and the legacy
   // noproperty.* asset reads as an error state. Photo-less plot/farmland
@@ -573,10 +589,18 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!"
           onClick={(e) => e.stopPropagation()}
         >
-          <button className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-[#27427f]! bg-[#eef2f7]! hover:bg-[#dde5f0]! transition-colors! cursor-pointer!">
+          <button
+            onClick={() => setEnquireToken(Date.now())}
+            className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-[#27427f]! bg-[#eef2f7]! hover:bg-[#dde5f0]! transition-colors! cursor-pointer!"
+          >
             <Phone className="w-4! h-4!" />
             Enquire
           </button>
+          <PropertyEnquiryActions
+            property={enquiryRef}
+            hideTriggers
+            externalOpen={enquireToken != null ? { intent: "enquire", token: enquireToken } : null}
+          />
           <Link
             href={detailPath}
             className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! no-underline!"

@@ -18,4 +18,10 @@ describe("NeedMoreDetails", () => {
     ).toBeDefined();
     expect(screen.getByRole("button", { name: "Contact Us" })).toBeDefined();
   });
+
+  it("renders without the message icon", () => {
+    const { container } = render(<NeedMoreDetails />);
+
+    expect(container.querySelector("svg")).toBeNull();
+  });
 });

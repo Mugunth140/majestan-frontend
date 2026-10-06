@@ -9,9 +9,11 @@ import {
 
 type FloorPlanSectionProps = {
   property: SeoProperty;
+  /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */
+  embedded?: boolean;
 };
 
-export function FloorPlanSection({ property }: FloorPlanSectionProps) {
+export function FloorPlanSection({ property, embedded = false }: FloorPlanSectionProps) {
   const details = property.details;
 
   // Units that have a floor plan image uploaded
@@ -217,8 +219,8 @@ export function FloorPlanSection({ property }: FloorPlanSectionProps) {
       </div>
       */}
 
-      {/* Shared contact call-to-action, identical on every page */}
-      <NeedMoreDetails />
+      {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
+      {!embedded && <NeedMoreDetails />}
     </div>
   );
 }

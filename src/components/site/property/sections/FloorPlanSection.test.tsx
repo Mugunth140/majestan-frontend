@@ -39,4 +39,9 @@ describe("FloorPlanSection gallery", () => {
       .filter((src) => src?.includes("-plan.jpg"));
     expect(srcs).toEqual(["/uploaded-plan.jpg", "/details-plan.jpg", "/unit-plan.jpg"]);
   });
+
+  it("hides the contact CTA in embedded mode", () => {
+    render(<FloorPlanSection property={property} embedded />);
+    expect(screen.queryByText("Need more details?")).toBeNull();
+  });
 });

@@ -150,7 +150,7 @@ type LocalitySectionProps = {
   property: SeoProperty;
 };
 
-export function LocalitySection({ property }: LocalitySectionProps) {
+export function LocalitySection({ property, embedded = false }: LocalitySectionProps & { /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */ embedded?: boolean }) {
   const localityData = property.locations?.[0]?.localityData;
   const customCategories = localityData?.categories || (property.seo?.seoData?.locality as any)?.categories;
   const categories: LocalityCategory[] = customCategories && customCategories.length > 0
@@ -314,8 +314,8 @@ export function LocalitySection({ property }: LocalitySectionProps) {
         </div>
       </div>
 
-      {/* Shared contact call-to-action, identical on every page */}
-      <NeedMoreDetails />
+      {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
+      {!embedded && <NeedMoreDetails />}
     </div>
   );
 }

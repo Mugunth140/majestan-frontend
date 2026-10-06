@@ -111,9 +111,11 @@ function AmenityCard({ amenity }: { amenity: Amenity }) {
 
 type AmenitiesSectionProps = {
   property: SeoProperty;
+  /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */
+  embedded?: boolean;
 };
 
-export function AmenitiesSection({ property }: AmenitiesSectionProps) {
+export function AmenitiesSection({ property, embedded = false }: AmenitiesSectionProps) {
   const categories = getAmenityCategories(property);
 
   return (
@@ -159,8 +161,8 @@ export function AmenitiesSection({ property }: AmenitiesSectionProps) {
         </div>
       )}
 
-      {/* CTA Card — the shared section, identical on every page */}
-      <NeedMoreDetails />
+      {/* CTA Card — the shared section, identical on every page (skipped when embedded) */}
+      {!embedded && <NeedMoreDetails />}
     </div>
   );
 }

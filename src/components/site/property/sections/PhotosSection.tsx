@@ -15,9 +15,11 @@ import {
 
 type PhotosSectionProps = {
   property: SeoProperty;
+  /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */
+  embedded?: boolean;
 };
 
-export function PhotosSection({ property }: PhotosSectionProps) {
+export function PhotosSection({ property, embedded = false }: PhotosSectionProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -88,8 +90,8 @@ export function PhotosSection({ property }: PhotosSectionProps) {
           </div>
         </div>
 
-      {/* Shared contact call-to-action, identical on every page */}
-      <NeedMoreDetails />
+      {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
+      {!embedded && <NeedMoreDetails />}
     </div>
   );
   }
@@ -253,8 +255,8 @@ export function PhotosSection({ property }: PhotosSectionProps) {
         </div>
       )}
 
-      {/* Shared contact call-to-action, identical on every page */}
-      <NeedMoreDetails />
+      {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
+      {!embedded && <NeedMoreDetails />}
     </div>
   );
 }

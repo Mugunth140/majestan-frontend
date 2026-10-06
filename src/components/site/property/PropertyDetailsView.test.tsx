@@ -335,6 +335,13 @@ describe("PropertyDetailsView info card", () => {
     expect(screen.getAllByText("₹ 1,00,000/cent").length).toBeGreaterThan(0);
   });
 
+  it("shows the brand mark in the Listed By card", () => {
+    render(<PropertyDetailsView property={baseProperty} />);
+
+    const avatar = screen.getByAltText("Majestan Realty");
+    expect(avatar.getAttribute("src")).toContain("android-chrome-512x512.png");
+  });
+
   it("shows the bare title for apartments, without the city suffix", () => {
     render(<PropertyDetailsView property={baseProperty} />);
 

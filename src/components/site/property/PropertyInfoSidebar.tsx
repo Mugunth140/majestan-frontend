@@ -216,9 +216,11 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
 
       {/* Listed-by card */}
       <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm! flex! items-center! gap-4!">
-        <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
-          <Building2 className="w-6! h-6! text-gray-600!" />
-        </div>
+        <img
+          src="/favicon/android-chrome-512x512.png"
+          alt="Majestan Realty"
+          className="w-14! h-14! rounded-full! object-cover! shrink-0!"
+        />
         <div>
           <p className="text-xs! font-manrope! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
             Listed By

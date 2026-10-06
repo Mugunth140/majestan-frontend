@@ -4,26 +4,44 @@
 // context exist for every listing), so it is always included.
 
 import {
+  Bath,
   Box,
+  Briefcase,
+  Building2,
   Calendar,
+  Car,
+  Bike,
+  Coffee,
   Compass,
   Droplets,
+  Expand,
   Fence,
   Hash,
+  IndianRupee,
   Info,
   Landmark,
   Layers,
+  LayoutGrid,
   Map,
   Milestone,
+  Monitor,
   Mountain,
   Maximize2,
+  Plug,
+  Presentation,
   Ruler,
+  Snowflake,
+  Sofa,
   Sprout,
   Tag,
   TreePine,
+  Truck,
+  Users,
   Waves,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
+import { formatFurnishing } from "./property-format";
 import type { SeoProperty } from "./api/property-by-slug";
 
 export type SingleSectionId = "amenities" | "floor-plan" | "locality" | "photos";
@@ -246,6 +264,141 @@ export function getFarmlandSpecs(details: LandDetails | null | undefined): LandS
       : null,
     trimStr(d.suitableFor)
       ? { label: "Suitable For", value: trimStr(d.suitableFor) as string, icon: Info }
+      : null,
+  ];
+  return rows.filter((r): r is LandSpecRow => r !== null);
+}
+
+function sqft(value: unknown): string | null {
+  const n = nzNum(value);
+  return n == null ? null : `${n.toLocaleString("en-IN")} sq.ft`;
+}
+
+function countRow(label: string, value: unknown, icon: LucideIcon): LandSpecRow | null {
+  const n = nzNum(value);
+  return n == null ? null : { label, value: String(trimNum(n)), icon };
+}
+
+/**
+ * Office-relevant rows in priority order. Washrooms use the commercial
+ * vocabulary (the wizard labels bathrooms "Washrooms" for offices).
+ */
+export function getCommercialSpecs(details: LandDetails | null | undefined): LandSpecRow[] {
+  if (!details) return [];
+  const d = details;
+  const furnishing = formatFurnishing(d);
+  const rows: (LandSpecRow | null)[] = [
+    nzNum(d.superBuiltUpArea) != null
+      ? { label: "Built-Up Area", value: sqft(d.superBuiltUpArea) as string, icon: Maximize2 }
+      : nzNum(d.carpetArea) != null
+        ? { label: "Carpet Area", value: sqft(d.carpetArea) as string, icon: Maximize2 }
+        : null,
+    nzNum(d.bathrooms) != null
+      ? { label: "Washrooms", value: String(d.bathrooms), icon: Bath }
+      : null,
+    d.floorsOccupied?.length
+      ? { label: "Floors Occupied", value: d.floorsOccupied.join(", "), icon: Layers }
+      : null,
+    nzNum(d.totalFloors) != null
+      ? { label: "Total Floors", value: String(d.totalFloors), icon: Building2 }
+      : null,
+    nzNum(d.parking) != null
+      ? { label: "Parking", value: `${d.parking} Spaces`, icon: Car }
+      : null,
+    furnishing ? { label: "Furnishing", value: furnishing, icon: Sofa } : null,
+    d.hasPantry ? { label: "Pantry", value: "Yes", icon: Coffee } : null,
+    d.hasCentralAc ? { label: "Central AC", value: "Yes", icon: Snowflake } : null,
+    d.powerBackup ? { label: "Power Backup", value: "Yes", icon: Zap } : null,
+    trimStr(d.propertyAge)
+      ? { label: "Property Age", value: trimStr(d.propertyAge) as string, icon: Calendar }
+      : null,
+  ];
+  return rows.filter((r): r is LandSpecRow => r !== null);
+}
+
+/**
+ * Shed-relevant rows in priority order: areas, ceiling and power first,
+ * then access, vehicle parking and road connectivity.
+ */
+export function getIndustrialSpecs(details: LandDetails | null | undefined): LandSpecRow[] {
+  if (!details) return [];
+  const d = details;
+  const rows: (LandSpecRow | null)[] = [
+    nzNum(d.builtUpArea) != null
+      ? { label: "Built-Up Area", value: sqft(d.builtUpArea) as string, icon: Maximize2 }
+      : nzNum(d.areaSqft) != null
+        ? { label: "Built-Up Area", value: sqft(d.areaSqft) as string, icon: Maximize2 }
+        : null,
+    nzNum(d.plotArea) != null
+      ? { label: "Plot Area", value: sqft(d.plotArea) as string, icon: Maximize2 }
+      : null,
+    nzNum(d.coveredArea) != null
+      ? { label: "Covered Area", value: sqft(d.coveredArea) as string, icon: Box }
+      : null,
+    nzNum(d.openArea) != null
+      ? { label: "Open Area", value: sqft(d.openArea) as string, icon: Expand }
+      : null,
+    nzNum(d.ceilingHeightFt) != null
+      ? { label: "Ceiling Height", value: `${trimNum(Number(d.ceilingHeightFt))} ft`, icon: LayoutGrid }
+      : null,
+    trimStr(d.floorType)
+      ? { label: "Floor Type", value: trimStr(d.floorType) as string, icon: Layers }
+      : null,
+    nzNum(d.powerSupplyHp) != null
+      ? { label: "Power Supply", value: `${trimNum(Number(d.powerSupplyHp))} HP`, icon: Plug }
+      : null,
+    d.powerBackup ? { label: "Power Backup", value: "Yes", icon: Zap } : null,
+    d.heavyVehicleAccess
+      ? { label: "Heavy Vehicle Access", value: "Yes", icon: Truck }
+      : null,
+    countRow("Truck Parking", d.truckParking, Truck),
+    countRow("Car Parking", d.carParking, Car),
+    countRow("Bike Parking", d.bikeParking, Bike),
+    trimStr(d.roadWidth)
+      ? { label: "Road Width", value: trimStr(d.roadWidth) as string, icon: Milestone }
+      : null,
+    nzNum(d.bathrooms) != null
+      ? { label: "Washrooms", value: String(d.bathrooms), icon: Bath }
+      : null,
+  ];
+  return rows.filter((r): r is LandSpecRow => r !== null);
+}
+
+/**
+ * Seat-relevant rows in priority order: capacity and per-seat rent first,
+ * then rooms, area, floor and facilities.
+ */
+export function getCoworkingSpecs(details: LandDetails | null | undefined): LandSpecRow[] {
+  if (!details) return [];
+  const d = details;
+  const rows: (LandSpecRow | null)[] = [
+    countRow("Seats", d.minSeats, Users),
+    nzNum(d.rentPerSeat) != null
+      ? { label: "Rent / Seat", value: `₹ ${Number(d.rentPerSeat).toLocaleString("en-IN")}`, icon: IndianRupee }
+      : null,
+    countRow("Private Cabins", d.privateCabins, Briefcase),
+    countRow("Meeting Rooms", d.meetingRooms, Presentation),
+    countRow("Workstations", d.availableWorkstations, Monitor),
+    nzNum(d.carpetArea) != null
+      ? { label: "Total Area", value: sqft(d.carpetArea) as string, icon: Maximize2 }
+      : null,
+    trimStr(d.floorNumber)
+      ? {
+          label: "Floor",
+          value:
+            nzNum(d.totalFloors) != null
+              ? `${trimStr(d.floorNumber)} of ${d.totalFloors}`
+              : (trimStr(d.floorNumber) as string),
+          icon: Layers,
+        }
+      : null,
+    nzNum(d.parking) != null
+      ? { label: "Parking", value: `${d.parking} Spaces`, icon: Car }
+      : null,
+    d.hasRestroom ? { label: "Restroom", value: "Yes", icon: Bath } : null,
+    d.powerBackup ? { label: "Power Backup", value: "Yes", icon: Zap } : null,
+    nzNum(d.bathrooms) != null
+      ? { label: "Washrooms", value: String(d.bathrooms), icon: Bath }
       : null,
   ];
   return rows.filter((r): r is LandSpecRow => r !== null);

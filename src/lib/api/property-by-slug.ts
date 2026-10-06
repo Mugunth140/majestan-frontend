@@ -49,6 +49,30 @@ export type SeoPropertyDetails = {
   boreWell?: boolean | null;
   storageTank?: boolean | null;
   waterSources?: string | null;
+  // Commercial / industrial / coworking fields (DB `property_details`
+  // columns). Only stored for those types — rows hide when absent.
+  superBuiltUpArea?: string | null;
+  carpetArea?: string | null;
+  builtUpArea?: string | null;
+  coveredArea?: string | null;
+  openArea?: string | null;
+  ceilingHeightFt?: string | null;
+  floorType?: string | null;
+  powerSupplyHp?: string | null;
+  heavyVehicleAccess?: boolean | null;
+  truckParking?: number | null;
+  carParking?: number | null;
+  bikeParking?: number | null;
+  hasPantry?: boolean | null;
+  hasCentralAc?: boolean | null;
+  powerBackup?: boolean | null;
+  minSeats?: number | null;
+  rentPerSeat?: string | null;
+  privateCabins?: number | null;
+  meetingRooms?: number | null;
+  availableWorkstations?: number | null;
+  hasRestroom?: boolean | null;
+  floorsOccupied?: string[] | null;
   sfNumber?: string | null;
   propertyUse?: string | null;
   propertyAge?: string | null;

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  getCommercialSpecs,
+  getCoworkingSpecs,
   getFarmlandSpecs,
   getFloorPlanLabel,
+  getIndustrialSpecs,
   getLandPricePerUnit,
   getPlotSpecs,
   getVisibleSingleSections,
@@ -236,6 +239,141 @@ describe("getLandPricePerUnit", () => {
   it("returns null when cents are unknown", () => {
     expect(getLandPricePerUnit("5000000", { plotArea: "2400" }, "plot")).toBeNull();
     expect(getLandPricePerUnit("5000000", {}, "farmland")).toBeNull();
+  });
+});
+
+describe("getCommercialSpecs", () => {
+  const officeDetails = {
+    superBuiltUpArea: "3000.00",
+    bathrooms: 2,
+    floorsOccupied: ["Ground", "1st"],
+    totalFloors: 5,
+    parking: 10,
+    furnishingStatus: "FULLY FURNISHED",
+    hasPantry: true,
+    hasCentralAc: true,
+    powerBackup: true,
+  };
+
+  it("returns office-relevant rows in priority order", () => {
+    const labels = getCommercialSpecs(officeDetails).map((r) => r.label);
+    expect(labels).toEqual([
+      "Built-Up Area",
+      "Washrooms",
+      "Floors Occupied",
+      "Total Floors",
+      "Parking",
+      "Furnishing",
+      "Pantry",
+      "Central AC",
+      "Power Backup",
+    ]);
+  });
+
+  it("formats floors and parking for offices", () => {
+    const rows = getCommercialSpecs(officeDetails);
+    expect(rows.find((r) => r.label === "Floors Occupied")?.value).toBe("Ground, 1st");
+    expect(rows.find((r) => r.label === "Parking")?.value).toBe("10 Spaces");
+    expect(rows.find((r) => r.label === "Furnishing")?.value).toBe("Fully Furnished");
+  });
+
+  it("prefers carpet area when no super built-up exists", () => {
+    const rows = getCommercialSpecs({ carpetArea: "2500" });
+    expect(rows).toMatchObject([{ label: "Carpet Area", value: "2,500 sq.ft" }]);
+  });
+
+  it("returns no rows when nothing is stored", () => {
+    expect(getCommercialSpecs({})).toEqual([]);
+  });
+});
+
+describe("getIndustrialSpecs", () => {
+  const shedDetails = {
+    builtUpArea: "10000.00",
+    coveredArea: "8000",
+    openArea: "2000",
+    ceilingHeightFt: "24",
+    floorType: "Concrete",
+    powerSupplyHp: "50",
+    powerBackup: true,
+    heavyVehicleAccess: true,
+    truckParking: 5,
+    carParking: 10,
+    bikeParking: 20,
+    roadWidth: "40 ft",
+    bathrooms: 2,
+  };
+
+  it("returns shed-relevant rows in priority order", () => {
+    const labels = getIndustrialSpecs(shedDetails).map((r) => r.label);
+    expect(labels).toEqual([
+      "Built-Up Area",
+      "Covered Area",
+      "Open Area",
+      "Ceiling Height",
+      "Floor Type",
+      "Power Supply",
+      "Power Backup",
+      "Heavy Vehicle Access",
+      "Truck Parking",
+      "Car Parking",
+      "Bike Parking",
+      "Road Width",
+      "Washrooms",
+    ]);
+  });
+
+  it("formats power and ceiling with units", () => {
+    const rows = getIndustrialSpecs(shedDetails);
+    expect(rows.find((r) => r.label === "Power Supply")?.value).toBe("50 HP");
+    expect(rows.find((r) => r.label === "Ceiling Height")?.value).toBe("24 ft");
+  });
+
+  it("returns no rows when nothing is stored", () => {
+    expect(getIndustrialSpecs({})).toEqual([]);
+  });
+});
+
+describe("getCoworkingSpecs", () => {
+  const coworkDetails = {
+    minSeats: 4,
+    rentPerSeat: 8000,
+    privateCabins: 2,
+    meetingRooms: 1,
+    availableWorkstations: 30,
+    carpetArea: "5000",
+    floorNumber: "2",
+    totalFloors: 6,
+    parking: 5,
+    hasRestroom: true,
+    powerBackup: true,
+    bathrooms: 4,
+  };
+
+  it("returns seat-relevant rows in priority order", () => {
+    const labels = getCoworkingSpecs(coworkDetails).map((r) => r.label);
+    expect(labels).toEqual([
+      "Seats",
+      "Rent / Seat",
+      "Private Cabins",
+      "Meeting Rooms",
+      "Workstations",
+      "Total Area",
+      "Floor",
+      "Parking",
+      "Restroom",
+      "Power Backup",
+      "Washrooms",
+    ]);
+  });
+
+  it("formats rent per seat in rupees", () => {
+    const rows = getCoworkingSpecs(coworkDetails);
+    expect(rows.find((r) => r.label === "Rent / Seat")?.value).toBe("₹ 8,000");
+  });
+
+  it("returns no rows when nothing is stored", () => {
+    expect(getCoworkingSpecs({})).toEqual([]);
   });
 });
 

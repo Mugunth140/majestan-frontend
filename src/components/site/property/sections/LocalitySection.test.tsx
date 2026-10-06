@@ -136,6 +136,40 @@ describe("LocalitySection with the ap088 production payload", () => {
     }
   });
 
+  it("replaces the generic header card with the locality overview in embedded mode", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [
+          {
+            id: 3,
+            sublocation: "Saravanampatti",
+            cityId: 2,
+            city: "Coimbatore",
+            description: "Saravanampatti is one of Coimbatore's fastest-growing corridors.",
+          },
+        ],
+      }),
+    );
+    try {
+      render(
+        <LocalitySection
+          property={{
+            ...ap088,
+            locations: [{ address: "saravanampatti main", latitude: null, longitude: null }] as unknown as SeoProperty["locations"],
+          }}
+          embedded
+        />,
+      );
+
+      expect(await screen.findByText("About Saravanampatti")).toBeDefined();
+      expect(screen.queryByText("Location & Neighbourhood")).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("opens an upward popup with the full place info on hover", () => {
     const longName = "KGiSL Institute of Technology And Research Campus";
     render(

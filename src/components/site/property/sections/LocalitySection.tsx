@@ -168,7 +168,13 @@ export function LocalitySection({ property, embedded = false }: LocalitySectionP
 
   return (
     <div className="space-y-8!">
-      {/* Location Overview */}
+      {/* Stacked single pages lead with the editorial locality overview
+          instead of the generic header card (which stays on sub-pages). */}
+      {embedded ? (
+        localityName ? (
+          <LocalityTeaser locality={localityName} city={property.city} full />
+        ) : null
+      ) : (
       <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
         <div className="mb-4!">
           <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
@@ -198,6 +204,7 @@ export function LocalitySection({ property, embedded = false }: LocalitySectionP
           ))}
         </div>
       </div>
+      )}
 
       {/* Distance search: origin is the exact coords, else the locality */}
       <PlaceDistanceSearch
@@ -286,8 +293,9 @@ export function LocalitySection({ property, embedded = false }: LocalitySectionP
       </div>
 
       {/* Locality description from the sublocations table. Renders only
-          when that locality has an overview; no self-link — this IS the page. */}
-      {localityName && (
+          when that locality has an overview; no self-link — this IS the page.
+          Skipped when embedded: the teaser already leads the section. */}
+      {!embedded && localityName && (
         <LocalityTeaser locality={localityName} city={property.city} full />
       )}
 

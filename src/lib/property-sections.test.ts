@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getVisibleSingleSections } from "./property-sections";
+import { getFloorPlanLabel, getVisibleSingleSections, isGroundPlanType } from "./property-sections";
 import type { SeoProperty } from "./api/property-by-slug";
 
 const barePlot = {
@@ -56,8 +56,41 @@ describe("getVisibleSingleSections", () => {
   it("shows floor-plan when core measurements exist", () => {
     const p = {
       ...barePlot,
+      propertyType: "commercial",
       details: { areaSqft: "1200.00" },
     } as unknown as SeoProperty;
     expect(getVisibleSingleSections(p)).toEqual(["floor-plan", "locality"]);
   });
+
+  it("hides ground-plan for plot with only measurements (no plan uploaded)", () => {
+    const p = {
+      ...barePlot,
+      details: { areaSqft: "1200.00" },
+    } as unknown as SeoProperty;
+    expect(getVisibleSingleSections(p)).toEqual(["locality"]);
+  });
+
+  it("shows ground-plan for farmland once a plan is uploaded", () => {
+    const p = {
+      ...barePlot,
+      propertyType: "farmland",
+      floorPlanFiles: [{ title: "Plan", imageUrl: "/plan.jpg", imageKey: "f1" }],
+    } as unknown as SeoProperty;
+    expect(getVisibleSingleSections(p)).toEqual(["floor-plan", "locality"]);
+  });
+});
+
+describe("getFloorPlanLabel", () => {
+  it.each(["plot", "farmland"])("returns Ground Plan for %s", (t) => {
+    expect(isGroundPlanType(t)).toBe(true);
+    expect(getFloorPlanLabel(t)).toBe("Ground Plan");
+  });
+
+  it.each(["apartment", "villa", "commercial", "industrial", "coworking", "other"])(
+    "returns Floor Plan for %s",
+    (t) => {
+      expect(isGroundPlanType(t)).toBe(false);
+      expect(getFloorPlanLabel(t)).toBe("Floor Plan");
+    }
+  );
 });

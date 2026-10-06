@@ -577,6 +577,7 @@ export default async function SlugPage({
           activeSection=""
           mode={isSingle ? "anchors" : "pages"}
           sections={isSingle ? getVisibleSingleSections(property) : undefined}
+          propertyType={property.propertyType}
         />
         <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
           <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">

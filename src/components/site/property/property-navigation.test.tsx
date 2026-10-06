@@ -45,6 +45,12 @@ describe("PropertyNavigation anchors mode", () => {
     expect(screen.queryByRole("button", { name: /Photos/ })).toBeNull();
   });
 
+  it.each(["plot", "farmland"] as const)("labels the plan item Ground Plan for %s", (propertyType) => {
+    render(<PropertyNavigation slug="some-slug" mode="anchors" propertyType={propertyType} />);
+    expect(screen.getByRole("button", { name: /Ground Plan/ })).toBeDefined();
+    expect(screen.queryByRole("button", { name: /^Floor Plan$/ })).toBeNull();
+  });
+
   it("keeps link mode as default", () => {
     render(<PropertyNavigation slug="some-slug" />);
     expect(screen.getByRole("link", { name: /Overview/ }).getAttribute("href")).toBe("/some-slug");

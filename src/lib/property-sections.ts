@@ -29,12 +29,22 @@ function hasMeasureData(property: SeoProperty): boolean {
   return !!(d?.areaSqft || d?.bedrooms || d?.bathrooms || d?.parking);
 }
 
+/** Land types call the floor plan a ground plan. */
+export function isGroundPlanType(propertyType: string): boolean {
+  return propertyType === "plot" || propertyType === "farmland";
+}
+
+export function getFloorPlanLabel(propertyType: string): string {
+  return isGroundPlanType(propertyType) ? "Ground Plan" : "Floor Plan";
+}
+
 function hasFloorPlanData(property: SeoProperty): boolean {
-  return (
-    floorPlanImageCount(property) > 0 ||
-    (property.details?.roomDimensions?.length || 0) > 0 ||
-    hasMeasureData(property)
-  );
+  if (floorPlanImageCount(property) > 0) return true;
+  if ((property.details?.roomDimensions?.length || 0) > 0) return true;
+  // Land types show the plan section only when a plan is actually
+  // presented — bare measurements never render a ground-plan card.
+  if (isGroundPlanType(property.propertyType)) return false;
+  return hasMeasureData(property);
 }
 
 export function getVisibleSingleSections(property: SeoProperty): SingleSectionId[] {

@@ -44,4 +44,14 @@ describe("FloorPlanSection gallery", () => {
     render(<FloorPlanSection property={property} embedded />);
     expect(screen.queryByText("Need more details?")).toBeNull();
   });
+
+  it.each(["plot", "farmland"] as const)("titles the section Ground Plan for %s", (propertyType) => {
+    render(<FloorPlanSection property={{ ...property, propertyType }} />);
+    expect(screen.getByRole("heading", { level: 2, name: "Ground Plan" })).toBeDefined();
+  });
+
+  it("titles the section Floor Plan for other types", () => {
+    render(<FloorPlanSection property={property} />);
+    expect(screen.getByRole("heading", { level: 2, name: "Floor Plan" })).toBeDefined();
+  });
 });

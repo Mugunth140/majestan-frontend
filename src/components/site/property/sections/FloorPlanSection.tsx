@@ -1,5 +1,6 @@
 import { type SeoProperty, type SeoPropertyUnit } from "@/lib/api/property-by-slug";
 import { getFloorPlanMeasurements } from "@/lib/floor-plan-measurements";
+import { getFloorPlanLabel } from "@/lib/property-sections";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import {
   Building2,
@@ -63,7 +64,7 @@ export function FloorPlanSection({ property, embedded = false }: FloorPlanSectio
       <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="mb-8!">
           <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-            Floor Plan
+            {getFloorPlanLabel(property.propertyType)}
           </h2>
           <p className="text-sm! font-normal! text-gray-500! mt-1!">Layout and space configuration</p>
         </div>

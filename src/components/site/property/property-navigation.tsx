@@ -10,6 +10,7 @@ import {
   MapPinned,
   Images,
 } from "lucide-react";
+import { getFloorPlanLabel } from "@/lib/property-sections";
 
 /** Anchor ids for the single-page (stacked-sections) property layout. */
 export const PROPERTY_ANCHOR_SECTIONS = [
@@ -67,6 +68,7 @@ export function PropertyNavigation({
   activeSection,
   mode = "pages",
   sections,
+  propertyType,
 }: {
   slug: string;
   activeSection?: string;
@@ -81,6 +83,8 @@ export function PropertyNavigation({
    * Hides nav items for sections with no data.
    */
   sections?: string[];
+  /** Anchors mode only: DB property type — plot/farmland label the plan item Ground Plan. */
+  propertyType?: string;
 }) {
   const pathname = usePathname();
   const links = buildNavLinks(slug);
@@ -96,7 +100,12 @@ export function PropertyNavigation({
     const visible = sections
       ? links.filter((l) => l.section === "" || sections.includes(l.section))
       : links;
-    return <PropertyAnchorNavigation links={visible} />;
+    const labeled = visible.map((l) =>
+      l.section === "floor-plan" && propertyType
+        ? { ...l, label: getFloorPlanLabel(propertyType) }
+        : l
+    );
+    return <PropertyAnchorNavigation links={labeled} />;
   }
 
   return (

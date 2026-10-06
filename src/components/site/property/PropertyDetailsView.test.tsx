@@ -204,14 +204,20 @@ describe("PropertyDetailsView single-page types", () => {
     }
   });
 
-  it("hides sections without data (measures only: floor-plan + locality stay)", () => {
+  it("hides sections without data (plot with measures only: locality stays, ground-plan hidden)", () => {
     const { container } = render(<PropertyDetailsView property={plot} />);
     expect(container.querySelector("#overview")).not.toBeNull();
-    expect(container.querySelector("#floor-plan")).not.toBeNull();
     expect(container.querySelector("#locality")).not.toBeNull();
     expect(container.querySelector("#amenities")).toBeNull();
+    expect(container.querySelector("#floor-plan")).toBeNull();
     expect(container.querySelector("#photos")).toBeNull();
     expect(screen.queryByText("No Amenities Listed")).toBeNull();
+  });
+
+  it("keeps floor-plan for non-land types with measures only", () => {
+    const commercial = { ...plot, propertyType: "commercial" };
+    const { container } = render(<PropertyDetailsView property={commercial} />);
+    expect(container.querySelector("#floor-plan")).not.toBeNull();
   });
 
   it("renders exactly one contact CTA", () => {

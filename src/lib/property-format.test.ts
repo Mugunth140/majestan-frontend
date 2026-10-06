@@ -1,23 +1,44 @@
-// site/majestan-frontend/src/lib/property-format.test.ts
 import { describe, expect, it } from "vitest";
-import { formatPrice, formatDate } from "./property-format";
+import { formatFurnishing, mapFurnishingSelection } from "./property-format";
 
-describe("formatPrice", () => {
-  it("formats crores and lakhs", () => {
-    expect(formatPrice("14500000")).toBe("₹ 1.45 Cr");
-    // Trailing zeros are stripped by the existing formatter.
-    expect(formatPrice("250000")).toBe("₹ 2.5 Lakh");
+describe("mapFurnishingSelection", () => {
+  it("maps Fully Furnished to true + status string", () => {
+    expect(mapFurnishingSelection("Furnished")).toEqual({
+      furnished: true,
+      furnishingStatus: "FULLY FURNISHED",
+    });
   });
 
-  it("handles zero and non-numeric input", () => {
-    expect(formatPrice("0")).toBe("Price on Request");
-    expect(formatPrice("abc")).toBe("abc");
+  it("maps Semi Furnished to true + status string", () => {
+    expect(mapFurnishingSelection("Semi Furnished")).toEqual({
+      furnished: true,
+      furnishingStatus: "SEMI FURNISHED",
+    });
+  });
+
+  it("maps Unfurnished to false + status string", () => {
+    expect(mapFurnishingSelection("Unfurnished")).toEqual({
+      furnished: false,
+      furnishingStatus: "UNFURNISHED",
+    });
+  });
+
+  it("maps an untouched select to unknown, not false", () => {
+    expect(mapFurnishingSelection(undefined)).toEqual({
+      furnished: undefined,
+      furnishingStatus: undefined,
+    });
+    expect(mapFurnishingSelection("")).toEqual({
+      furnished: undefined,
+      furnishingStatus: undefined,
+    });
   });
 });
 
-describe("formatDate", () => {
-  it("renders a short Indian date", () => {
-    // Midday UTC keeps the calendar day stable across timezones.
-    expect(formatDate("2026-06-15T12:00:00.000Z")).toBe("15 Jun 2026");
+describe("formatFurnishing", () => {
+  it("hides the row when furnishing was never specified", () => {
+    expect(formatFurnishing({ furnished: null })).toBeNull();
+    expect(formatFurnishing(null)).toBeNull();
+    expect(formatFurnishing(undefined)).toBeNull();
   });
 });

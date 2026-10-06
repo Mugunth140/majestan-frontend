@@ -11,6 +11,7 @@ import {
 import { z } from 'zod';
 import { toast } from '@/components/ui/toast-store';
 import { parseIndianCurrency } from '@/lib/utils/currency.util';
+import { mapFurnishingSelection, type FurnishingSelection } from '@/lib/property-format';
 import { ArrowLeft, ArrowRight, Save, Loader2, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/api';
@@ -188,7 +189,7 @@ export default function PropertyWizard({ isAdmin, availableCities, availableSubl
           bedrooms: safeNum(finalData.bedrooms),
           bathrooms: safeNum(finalData.bathrooms),
           areaSqft: safeNum(finalData.builtUpArea),
-          furnished: finalData.furnishing === 'Furnished' || finalData.furnishing === 'Semi Furnished',
+          ...mapFurnishingSelection(finalData.furnishing as FurnishingSelection),
           facing: finalData.propertyFacing,
           buildUpArea: safeNum(finalData.builtUpArea),
           carpetArea: safeNum(finalData.carpetArea),

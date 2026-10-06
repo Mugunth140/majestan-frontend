@@ -11,7 +11,9 @@ export type SeoPropertyDetails = {
   bathrooms: number;
   areaSqft: string;
   parking: number;
-  furnished: boolean;
+  // Nullable since the unknown-preserving backend change: NULL means never
+  // specified (row hides); TRUE/FALSE are explicit choices.
+  furnished: boolean | null;
   // propertyDetails.furnishingStatus from the API (DB `furnishing_status`):
   // BARESHELL / SEMI FURNISHED / FULLY FURNISHED / UNFURNISHED. Absent from
   // older payloads, so optional — display falls back to the `furnished` flag.

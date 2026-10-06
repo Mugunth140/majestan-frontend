@@ -191,6 +191,18 @@ describe("PropertyDetailsView info card", () => {
     expect(screen.getAllByText("Suitable For")).toHaveLength(2);
   });
 
+  it("hides furnishing when it was never specified", () => {
+    render(
+      <PropertyDetailsView
+        property={{
+          ...baseProperty,
+          details: { ...baseProperty.details!, furnished: null, furnishingStatus: null },
+        }}
+      />
+    );
+    expect(screen.queryByText("Furnishing")).toBeNull();
+  });
+
   it.each(["plot", "farmland"] as const)("never shows furnishing for %s", (propertyType) => {
     render(
       <PropertyDetailsView

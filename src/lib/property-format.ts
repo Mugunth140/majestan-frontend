@@ -29,6 +29,31 @@ export function formatDate(dateStr: string): string {
   }
 }
 
+export type FurnishingSelection = "Furnished" | "Semi Furnished" | "Unfurnished" | "" | undefined;
+
+export type FurnishingPayload = {
+  furnished: boolean | undefined;
+  furnishingStatus: string | undefined;
+};
+
+/**
+ * Site wizard furnishing dropdown → submit payload, in CRM vocabulary so
+ * both sources store the same strings. An untouched select stays unknown
+ * (undefined) — never collapsed to false.
+ */
+export function mapFurnishingSelection(value: FurnishingSelection): FurnishingPayload {
+  switch (value) {
+    case "Furnished":
+      return { furnished: true, furnishingStatus: "FULLY FURNISHED" };
+    case "Semi Furnished":
+      return { furnished: true, furnishingStatus: "SEMI FURNISHED" };
+    case "Unfurnished":
+      return { furnished: false, furnishingStatus: "UNFURNISHED" };
+    default:
+      return { furnished: undefined, furnishingStatus: undefined };
+  }
+}
+
 /**
  * Display value for the Furnishing row. Prefers the CRM's furnishing-status
  * dropdown value (SEMI FURNISHED, FULLY FURNISHED, BARESHELL, UNFURNISHED),

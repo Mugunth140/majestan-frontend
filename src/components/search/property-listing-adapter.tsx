@@ -119,13 +119,6 @@ function getFacing(item: PropertySearchItem): string | null {
   return d.propertyFacing ?? item.facing ?? item.facing_direction ?? null;
 }
 
-function getFurnishing(item: PropertySearchItem): string | null {
-  const d = getDetails(item);
-  if (d.furnished === true) return "Furnished";
-  if (typeof d.furnishing_status === "string" && d.furnishing_status) return d.furnishing_status;
-  return (item as any).furnishing_status ?? null;
-}
-
 function getFloor(item: PropertySearchItem): string | null {
   const d = getDetails(item);
   if (d.floorNumber == null || String(d.floorNumber).trim() === "") return null;

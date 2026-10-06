@@ -24,8 +24,12 @@ import {
   Tag,
   Info,
 } from "lucide-react";
-import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
+import { AmenitiesSection } from "@/components/site/property/sections/AmenitiesSection";
+import { FloorPlanSection } from "@/components/site/property/sections/FloorPlanSection";
+import { LocalitySection } from "@/components/site/property/sections/LocalitySection";
+import { PhotosSection } from "@/components/site/property/sections/PhotosSection";
 import { FloorPlanTeaser } from "@/components/site/property/FloorPlanTeaser";
 import { PhotosTeaser } from "@/components/site/property/PhotosTeaser";
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
@@ -38,6 +42,12 @@ type PropertyDetailsViewProps = {
 };
 
 export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
+  // Single-page types stack every section on this overview with anchor ids;
+  // multi-page types keep the teaser cards linking out to subpages.
+  const isSingle = isSinglePageType(property.propertyType);
+  const faqsFor = (section: string) =>
+    (property.faqs || []).filter((f) => f.section === section);
+
   const images =
     property.images?.length > 0
       ? property.images
@@ -157,8 +167,11 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       <div className="grid! grid-cols-1! lg:grid-cols-3! gap-5!">
         {/* Left column */}
         <div className="lg:col-span-2! flex! flex-col! gap-5! min-w-0!">
-          {/* Hero gallery */}
-          <div className="relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery">
+          {/* Hero gallery (the #overview anchor on single-page types) */}
+          <div
+            {...(isSingle ? { id: "overview" } : {})}
+            className={`relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery${isSingle ? " scroll-mt-40!" : ""}`}
+          >
             <img
               key={currentImage.imageUrl}
               src={currentImage.imageUrl}
@@ -208,7 +221,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                 </span>
               )}
               <Link
-                href={`/${property.canonicalSlug}/photos`}
+                href={isSingle ? "#photos" : `/${property.canonicalSlug}/photos`}
                 className="inline-flex! items-center! gap-2! px-4! py-2! bg-white/95! backdrop-blur-md! rounded-xl! text-gray-900! text-xs! font-semibold! no-underline! hover:bg-white! transition-all! shadow-sm!"
               >
                 <Images className="w-4! h-4!" />
@@ -258,55 +271,80 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             )}
           </div>
 
-          {/* Locality teaser (renders only when the sublocation has an overview) */}
-          {subLocation ? (
-            <LocalityTeaser
-              locality={subLocation}
-              city={property.city}
-              localityHref={`/${property.canonicalSlug}/locality`}
-            />
-          ) : null}
+          {isSingle ? (
+            <>
+              {/* Single-page types: full sections stacked with anchor ids.
+                  Embedded sections skip their own CTA — one page-level CTA below. */}
+              <section id="amenities" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                <AmenitiesSection property={property} embedded />
+                <FaqSection faqs={faqsFor("amenities")} />
+              </section>
+              <section id="floor-plan" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                <FloorPlanSection property={property} embedded />
+                <FaqSection faqs={faqsFor("floor-plan")} />
+              </section>
+              <section id="locality" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                <LocalitySection property={property} embedded />
+                <FaqSection faqs={faqsFor("locality")} />
+              </section>
+              <section id="photos" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                <PhotosSection property={property} embedded />
+                <FaqSection faqs={faqsFor("photos")} />
+              </section>
+            </>
+          ) : (
+            <>
+              {/* Locality teaser (renders only when the sublocation has an overview) */}
+              {subLocation ? (
+                <LocalityTeaser
+                  locality={subLocation}
+                  city={property.city}
+                  localityHref={`/${property.canonicalSlug}/locality`}
+                />
+              ) : null}
 
-          {/* Amenities card */}
-          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <div className="flex! items-center! justify-between!">
-              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Key Amenities</h2>
-              <Link
-                href={`/${property.canonicalSlug}/amenities`}
-                className="inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
-              >
-                View All
-              </Link>
-            </div>
-            <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! md:grid-cols-3! gap-6!">
-              {amenitiesPreview.map((amenity, i) => (
-                <div key={i} className="flex! items-center! gap-3!">
-                  <div className="text-gray-500!">
-                    {amenity.icon}
-                  </div>
-                  <span className="font-semibold! text-base! text-gray-600!">
-                    {amenity.name}
-                  </span>
+              {/* Amenities card */}
+              <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+                <div className="flex! items-center! justify-between!">
+                  <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Key Amenities</h2>
+                  <Link
+                    href={`/${property.canonicalSlug}/amenities`}
+                    className="inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
+                  >
+                    View All
+                  </Link>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! md:grid-cols-3! gap-6!">
+                  {amenitiesPreview.map((amenity, i) => (
+                    <div key={i} className="flex! items-center! gap-3!">
+                      <div className="text-gray-500!">
+                        {amenity.icon}
+                      </div>
+                      <span className="font-semibold! text-base! text-gray-600!">
+                        {amenity.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-          {/* Floor plan teaser: key measurements only, linking to the sub-page */}
-          <FloorPlanTeaser
-            details={property.details}
-            floorPlanHref={`/${property.canonicalSlug}/floor-plan`}
-          />
+              {/* Floor plan teaser: key measurements only, linking to the sub-page */}
+              <FloorPlanTeaser
+                details={property.details}
+                floorPlanHref={`/${property.canonicalSlug}/floor-plan`}
+              />
 
-          {/* Photos teaser: primary-first strip with overflow count, hidden when empty */}
-          <PhotosTeaser
-            images={property.images ?? []}
-            title={property.title}
-            photosHref={`/${property.canonicalSlug}/photos`}
-          />
+              {/* Photos teaser: primary-first strip with overflow count, hidden when empty */}
+              <PhotosTeaser
+                images={property.images ?? []}
+                title={property.title}
+                photosHref={`/${property.canonicalSlug}/photos`}
+              />
+            </>
+          )}
 
           {/* FAQ Section (Overview only) */}
-          <FaqSection faqs={(property.faqs || []).filter(f => f.section === 'overview')} />
+          <FaqSection faqs={faqsFor("overview")} />
 
           {/* Shared contact call-to-action, identical on every page */}
           <NeedMoreDetails />

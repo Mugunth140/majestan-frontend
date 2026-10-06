@@ -188,6 +188,43 @@ describe("PropertyDetailsView overview teasers", () => {
   });
 });
 
+describe("PropertyDetailsView single-page types", () => {
+  const plot = { ...baseProperty, propertyType: "plot" };
+
+  it("stacks full sections with anchor ids", () => {
+    const { container } = render(<PropertyDetailsView property={plot} />);
+    for (const id of ["overview", "amenities", "floor-plan", "locality", "photos"]) {
+      expect(container.querySelector(`#${id}`)).not.toBeNull();
+    }
+  });
+
+  it("renders exactly one contact CTA", () => {
+    render(<PropertyDetailsView property={plot} />);
+    expect(screen.getAllByText("Need more details?")).toHaveLength(1);
+  });
+
+  it("shows no subpage View All links", () => {
+    render(<PropertyDetailsView property={plot} />);
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((a) => a.getAttribute("href"));
+    expect(
+      hrefs.filter(
+        (h) =>
+          h?.includes("/amenities") ||
+          h?.includes("/floor-plan") ||
+          h?.includes("/photos")
+      )
+    ).toEqual([]);
+  });
+
+  it("keeps the teaser layout for multi-page types", () => {
+    const { container } = render(<PropertyDetailsView property={baseProperty} />);
+    expect(container.querySelector("#amenities")).toBeNull();
+    expect(container.querySelector("#floor-plan")).toBeNull();
+  });
+});
+
 describe("PropertyDetailsView floor item", () => {
   const withFloors = (over: Record<string, unknown> = {}) => ({
     ...baseProperty,

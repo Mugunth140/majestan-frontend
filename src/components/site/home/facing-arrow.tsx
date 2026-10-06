@@ -44,7 +44,7 @@ export function FacingArrow({ facing }: { facing: string | null | undefined }): 
       aria-label={`${fixed.label} facing`}
       title={fixed.label}
       data-testid="facing-indicator"
-      className="inline-flex! items-center! gap-1! whitespace-nowrap! text-gray-900!"
+      className="inline-flex! min-w-0! items-center! gap-1! whitespace-nowrap! text-gray-900!"
     >
       <ArrowUp
         className="h-4! w-4! shrink-0! text-gray-700!"
@@ -52,7 +52,7 @@ export function FacingArrow({ facing }: { facing: string | null | undefined }): 
         aria-hidden="true"
         style={{ transform: `rotate(${fixed.degrees}deg)` }}
       />
-      <span className="text-base! font-medium!">{fixed.abbr}</span>
+      <span className="truncate! text-[12px]! font-medium! leading-tight!">{fixed.label}</span>
     </span>
   );
 }

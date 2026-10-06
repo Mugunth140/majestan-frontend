@@ -35,11 +35,11 @@ describe('normalizeFacing', () => {
 });
 
 describe('FacingArrow', () => {
-  it('renders a rotated arrow followed by the abbreviation', () => {
+  it('renders a rotated arrow followed by the full direction name', () => {
     const { container } = render(<FacingArrow facing="north_east" />);
     const indicator = screen.getByTestId('facing-indicator');
     expect(indicator.getAttribute('aria-label')).toBe('North-East facing');
-    expect(indicator.textContent).toBe('NE');
+    expect(indicator.textContent).toBe('North-East');
     const needle = container.querySelector('svg');
     expect(needle?.getAttribute('style')).toContain('rotate(45deg)');
   });

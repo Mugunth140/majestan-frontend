@@ -105,6 +105,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   const priceNum = parseFloat(property.price);
   // Land is priced per cent, never per sq.ft — and only land-relevant rows
   // show for plot/farmland (no beds/baths/parking/furnishing).
+  const isLand = property.propertyType === "plot" || property.propertyType === "farmland";
   const landSpecs =
     property.propertyType === "plot"
       ? getPlotSpecs(property.details)
@@ -123,10 +124,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   const title = property.seo?.seoData?.overview?.h1 || property.title;
 
   const overviewStats: { icon: React.ReactNode; label: string; value: string }[] = [
-    ...(property.details?.bedrooms
+    ...(!isLand && property.details?.bedrooms
       ? [{ icon: <BedDouble className="w-5! h-5!" />, label: "Bedrooms", value: `${property.details.bedrooms} BHK` }]
       : []),
-    ...(property.details?.bathrooms
+    ...(!isLand && property.details?.bathrooms
       ? [{ icon: <Bath className="w-5! h-5!" />, label: "Bathrooms", value: `${property.details.bathrooms}` }]
       : []),
     // Apartment-only: floor over total, shown only when both are stored.
@@ -140,10 +141,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     ...(!hasLandArea && property.details?.areaSqft
       ? [{ icon: <Square className="w-5! h-5!" />, label: "Area", value: `${property.details.areaSqft} sq.ft` }]
       : []),
-    ...(property.details?.parking
+    ...(!isLand && property.details?.parking
       ? [{ icon: <Car className="w-5! h-5!" />, label: "Parking", value: `${property.details.parking} Covered` }]
       : []),
-    ...(formatFurnishing(property.details)
+    ...(!isLand && formatFurnishing(property.details)
       ? [{ icon: <ShieldCheck className="w-5! h-5!" />, label: "Furnishing", value: formatFurnishing(property.details) as string }]
       : []),
     ...(perSqft

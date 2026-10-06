@@ -191,6 +191,19 @@ describe("PropertyDetailsView info card", () => {
     expect(screen.getAllByText("Suitable For")).toHaveLength(2);
   });
 
+  it.each(["plot", "farmland"] as const)("never shows furnishing for %s", (propertyType) => {
+    render(
+      <PropertyDetailsView
+        property={{
+          ...baseProperty,
+          propertyType,
+          details: { ...baseProperty.details!, plotArea: "2400" },
+        }}
+      />
+    );
+    expect(screen.queryByText("Furnishing")).toBeNull();
+  });
+
   it("shows price per cent for land with cents known", () => {
     const land = {
       ...baseProperty,

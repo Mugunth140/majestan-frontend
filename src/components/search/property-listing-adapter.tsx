@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Sprout } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
+import {
+  getCommercialSpecs,
+  getCoworkingSpecs,
+  getFloorPlanLabel,
+  getIndustrialSpecs,
+  hasGroundPlanData,
+} from "@/lib/property-sections";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
 import {
@@ -298,25 +305,134 @@ function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string
   return `₹ ${Math.round(price / area).toLocaleString("en-IN")}/sqft`;
 }
 
+export type CardSpecCell = { label: string; value: React.ReactNode };
+
+/**
+ * Spec table cells per property type. Apartments, villas, individual
+ * houses and `other` keep the generic cells; land keeps its curated cells
+ * (capped at 4); commercial/industrial/coworking reuse the detail-page
+ * spec helpers (first 4 rows = the sidebar picks).
+ */
+export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
+  const specCells: CardSpecCell[] = [];
+  const d = getDetails(item);
+  const areaCell = getAreaCell(item);
+  const facing = getFacing(item);
+  const possession = getPossession(item);
+
+  if (item.propertyType === "plot") {
+    // Plot buyers decide on size, orientation, dimensions, type and legal
+    // clarity — plus boundary/open-sides which signal development readiness.
+    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
+    if (facing) specCells.push({ label: "Facing", value: facing });
+    const dimension = getLandDimension(d);
+    if (dimension) specCells.push({ label: "Dimension", value: dimension });
+    const plotType = trimStr(d.plotType);
+    if (plotType) specCells.push({ label: "Plot Type", value: plotType });
+    const zoning = trimStr(d.zoning);
+    if (zoning) specCells.push({ label: "Zoning", value: zoning });
+    else if (d.approvals) specCells.push({ label: "Approvals", value: d.approvals });
+    else if (possession) specCells.push({ label: "Possession", value: possession });
+    if (d.boundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });
+    else {
+      const openSides = nzNum(d.openSides);
+      if (openSides != null) specCells.push({ label: "Open Sides", value: String(openSides) });
+    }
+    return specCells.slice(0, 4);
+  }
+
+  if (item.propertyType === "farmland") {
+    // Farmland carries richer agronomy data: soil, water and crop suitability
+    // take precedence; facing is the fallback when crop data is absent.
+    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
+    const water = trimStr(d.waterSources) ?? trimStr(d.irrigation);
+    if (water) specCells.push({ label: trimStr(d.waterSources) ? "Water Sources" : "Irrigation", value: water });
+    const crop = trimStr(d.cropSuitability);
+    if (crop) specCells.push({ label: "Crop Suitability", value: crop });
+    else if (facing) specCells.push({ label: "Facing", value: facing });
+    if (d.boundaryWall) specCells.push({ label: "Fencing", value: "Yes" });
+    const age = getAge(item);
+    if (age) specCells.push({ label: "Property Age", value: age });
+    return specCells.slice(0, 4);
+  }
+
+  if (item.propertyType === "commercial") {
+    return getCommercialSpecs(d).slice(0, 4);
+  }
+
+  if (item.propertyType === "industrial") {
+    return getIndustrialSpecs(d).slice(0, 4);
+  }
+
+  if (item.propertyType === "coworking") {
+    return getCoworkingSpecs(d).slice(0, 4);
+  }
+
+  const unitSpec = (() => {
+    const meta = item as unknown as {
+      isProject?: boolean;
+      ranges?: { unitsCount?: number; bhk?: string[] };
+    };
+    if (meta.isProject && (meta.ranges?.unitsCount ?? 0) >= 2) {
+      const bhk = meta.ranges?.bhk;
+      if (bhk && bhk.length > 0) return `${bhk.join(", ")} BHK`;
+      return `${meta.ranges?.unitsCount} Plans`;
+    }
+    if (item.units && item.units.length >= 2) return `${item.units.length} Plans`;
+    if (item.unittype) return item.unittype;
+    return null;
+  })();
+  if (unitSpec) specCells.push({ label: "BHK", value: unitSpec });
+  if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
+  if (facing) specCells.push({ label: "Facing", value: facing });
+  if (possession) specCells.push({ label: "Possession", value: possession });
+  return specCells;
+}
+
+export type CardSectionLink = { href: string; label: string; icon: React.ReactNode };
+
+/**
+ * Section links per property type. Non-land types link all four sections
+ * (plan label follows the detail page: Floor/Site/Ground Plan). Land hides
+ * Amenities (list responses carry no amenity data) and shows the plan link
+ * only when plan data exists — mirroring the detail-page visibility gate.
+ */
+export function getCardSectionLinks(item: PropertySearchItem, detailPath: string): CardSectionLink[] {
+  const links: CardSectionLink[] = [
+    { href: `${detailPath}/amenities`, label: "Amenities", icon: <Sparkles className="w-3.5! h-3.5!" /> },
+    { href: `${detailPath}/floor-plan`, label: getFloorPlanLabel(item.propertyType), icon: <Grid3X3 className="w-3.5! h-3.5!" /> },
+    { href: `${detailPath}/locality`, label: "Locality", icon: <MapPinned className="w-3.5! h-3.5!" /> },
+    { href: `${detailPath}/photos`, label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
+  ];
+  const isLandCard = item.propertyType === "plot" || item.propertyType === "farmland";
+  if (!isLandCard) return links;
+  const d = getDetails(item);
+  const showPlan = hasGroundPlanData(
+    d,
+    item.units as { floorPlanImageUrl?: string | null }[] | undefined
+  );
+  return links.filter((link) => {
+    if (link.label === "Amenities") return false;
+    if (link.href === `${detailPath}/floor-plan`) return showPlan;
+    return true;
+  });
+}
+
+/** Rent listings quote periodic prices — cards suffix them like detail pages do. */
+export function isRentListing(posttype: unknown): boolean {
+  return (
+    typeof posttype === "string" && posttype.trim() !== "" && posttype.toLowerCase() !== "sell"
+  );
+}
+
 function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   const router = useRouter();
   const detailPath = getDetailPath(item);
   const photosPath = `${detailPath}/photos`;
-  const facing = getFacing(item);
-  const possession = getPossession(item);
   const locationLabel = getLocationLabel(item);
-  const areaCell = getAreaCell(item);
   const reraVerified = isReraVerified(item);
-
-  const sectionLinks = [
-    { href: `${detailPath}/amenities`, label: "Amenities", icon: <Sparkles className="w-3.5! h-3.5!" /> },
-    { href: `${detailPath}/floor-plan`, label: "Floor Plan", icon: <Grid3X3 className="w-3.5! h-3.5!" /> },
-    { href: `${detailPath}/locality`, label: "Locality", icon: <MapPinned className="w-3.5! h-3.5!" /> },
-    { href: `${detailPath}/photos`, label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
-  ];
-
-  // Land has no building and captures no amenity tags — Floor Plan and
-  // Amenities links would only ever lead to empty sections.
+  const sectionLinks = getCardSectionLinks(item, detailPath);
+  const specCells = getCardSpecCells(item);
 
   const priceDisplay = (() => {
     if ((item as any).isProject && (item as any).ranges && (item as any).ranges.unitsCount >= 2) {
@@ -333,17 +449,6 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
       }
     }
     return formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent);
-  })();
-
-  const unitSpec = (() => {
-    if ((item as any).isProject && (item as any).ranges?.unitsCount >= 2) {
-      const ranges = (item as any).ranges;
-      if (ranges.bhk?.length > 0) return `${ranges.bhk.join(", ")} BHK`;
-      return `${ranges.unitsCount} Plans`;
-    }
-    if (item.units && item.units.length >= 2) return `${item.units.length} Plans`;
-    if (item.unittype) return item.unittype;
-    return null;
   })();
 
   const [copied, setCopied] = useState(false);
@@ -371,9 +476,6 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   const [imgOk, setImgOk] = useState(true);
   const photoUrl = getPhotoUrl(item);
   const showLandPlaceholder = isLandCard && (!photoUrl || !imgOk);
-  const visibleLinks = isLandCard
-    ? sectionLinks.filter((link) => link.label !== "Floor Plan" && link.label !== "Amenities")
-    : sectionLinks;
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -390,46 +492,6 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
       /* user dismissed */
     }
   };
-
-  const specCells: { label: string; value: React.ReactNode }[] = [];
-  const d = getDetails(item);
-
-  if (item.propertyType === "plot") {
-    // Plot buyers decide on size, orientation, dimensions, type and legal
-    // clarity — plus boundary/open-sides which signal development readiness.
-    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
-    if (facing) specCells.push({ label: "Facing", value: facing });
-    const dimension = getLandDimension(d);
-    if (dimension) specCells.push({ label: "Dimension", value: dimension });
-    const plotType = trimStr(d.plotType);
-    if (plotType) specCells.push({ label: "Plot Type", value: plotType });
-    const zoning = trimStr(d.zoning);
-    if (zoning) specCells.push({ label: "Zoning", value: zoning });
-    else if (d.approvals) specCells.push({ label: "Approvals", value: d.approvals });
-    else if (possession) specCells.push({ label: "Possession", value: possession });
-    if (d.boundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });
-    else {
-      const openSides = nzNum(d.openSides);
-      if (openSides != null) specCells.push({ label: "Open Sides", value: String(openSides) });
-    }
-  } else if (item.propertyType === "farmland") {
-    // Farmland carries richer agronomy data: soil, water and crop suitability
-    // take precedence; facing is the fallback when crop data is absent.
-    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
-    const water = trimStr(d.waterSources) ?? trimStr(d.irrigation);
-    if (water) specCells.push({ label: trimStr(d.waterSources) ? "Water Sources" : "Irrigation", value: water });
-    const crop = trimStr(d.cropSuitability);
-    if (crop) specCells.push({ label: "Crop Suitability", value: crop });
-    else if (facing) specCells.push({ label: "Facing", value: facing });
-    if (d.boundaryWall) specCells.push({ label: "Fencing", value: "Yes" });
-    const age = getAge(item);
-    if (age) specCells.push({ label: "Property Age", value: age });
-  } else {
-    if (unitSpec) specCells.push({ label: "BHK", value: unitSpec });
-    if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
-    if (facing) specCells.push({ label: "Facing", value: facing });
-    if (possession) specCells.push({ label: "Possession", value: possession });
-  }
 
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
@@ -525,7 +587,12 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
 
         {/* Price — dotted divider above, directly under title/location for prominence */}
         <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-end! gap-3! leading-none!">
-          <span className="text-[22px]! font-semibold! text-[#27427f]!">{priceDisplay}</span>
+          <span className="text-[22px]! font-semibold! text-[#27427f]!">
+            {priceDisplay}
+            {isRentListing(item.posttype) && (
+              <span className="text-[13px]! font-medium! text-gray-500!"> /mo</span>
+            )}
+          </span>
           {(() => {
             const perSqft = getPricePerSqft(item, priceDisplay);
             return perSqft ? (
@@ -563,7 +630,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
-          {visibleLinks.map((link) => (
+          {sectionLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}

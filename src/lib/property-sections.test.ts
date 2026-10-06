@@ -9,6 +9,7 @@ import {
   getPlotSpecs,
   getTypeMeasurements,
   getVisibleSingleSections,
+  hasGroundPlanData,
   isGroundPlanType,
   workspaceAmenitySuffix,
 } from "./property-sections";
@@ -441,6 +442,23 @@ describe("workspaceAmenitySuffix", () => {
       expect(workspaceAmenitySuffix(t)).toBeNull();
     }
   );
+});
+
+describe("hasGroundPlanData", () => {
+  it("is true with detail plan images", () => {
+    expect(
+      hasGroundPlanData({ floorPlanImages: [{ title: "P", imageUrl: "/p.jpg", imageKey: "k" }] }, [])
+    ).toBe(true);
+  });
+
+  it("is true with a unit plan image", () => {
+    expect(hasGroundPlanData({}, [{ floorPlanImageUrl: "/u.jpg" }])).toBe(true);
+  });
+
+  it("is false with measures alone", () => {
+    expect(hasGroundPlanData({ plotArea: "2400" }, [])).toBe(false);
+    expect(hasGroundPlanData(null, null)).toBe(false);
+  });
 });
 
 describe("getFloorPlanLabel", () => {

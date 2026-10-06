@@ -105,6 +105,19 @@ function hasFloorPlanData(property: SeoProperty): boolean {
   return hasMeasureData(property);
 }
 
+/**
+ * Card-side plan gate: list responses carry no CRM plan files, so only
+ * detail plan images and unit plan images count. Measures alone never
+ * qualify (mirrors the strict ground-plan rule on the detail page).
+ */
+export function hasGroundPlanData(
+  details: LandDetails | null | undefined,
+  units?: { floorPlanImageUrl?: string | null }[] | null
+): boolean {
+  const fromUnits = (units ?? []).filter((u) => !!u?.floorPlanImageUrl).length;
+  return (details?.floorPlanImages?.length || 0) + fromUnits > 0;
+}
+
 export type LandSpecRow = {
   label: string;
   value: string;

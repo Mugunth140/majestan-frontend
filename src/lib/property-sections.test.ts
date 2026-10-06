@@ -245,11 +245,15 @@ describe("getFloorPlanLabel", () => {
     expect(getFloorPlanLabel(t)).toBe("Ground Plan");
   });
 
-  it.each(["apartment", "villa", "commercial", "industrial", "coworking", "other"])(
+  it.each(["apartment", "villa", "commercial", "coworking", "other"])(
     "returns Floor Plan for %s",
     (t) => {
       expect(isGroundPlanType(t)).toBe(false);
       expect(getFloorPlanLabel(t)).toBe("Floor Plan");
     }
   );
+
+  it("returns Site Plan for industrial", () => {
+    expect(getFloorPlanLabel("industrial")).toBe("Site Plan");
+  });
 });

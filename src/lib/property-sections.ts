@@ -56,7 +56,9 @@ export function isGroundPlanType(propertyType: string): boolean {
 }
 
 export function getFloorPlanLabel(propertyType: string): string {
-  return isGroundPlanType(propertyType) ? "Ground Plan" : "Floor Plan";
+  if (isGroundPlanType(propertyType)) return "Ground Plan";
+  if (propertyType === "industrial") return "Site Plan";
+  return "Floor Plan";
 }
 
 function hasFloorPlanData(property: SeoProperty): boolean {

@@ -51,6 +51,11 @@ describe("PropertyNavigation anchors mode", () => {
     expect(screen.queryByRole("button", { name: /^Floor Plan$/ })).toBeNull();
   });
 
+  it("labels the plan item Site Plan for industrial", () => {
+    render(<PropertyNavigation slug="some-slug" mode="anchors" propertyType="industrial" />);
+    expect(screen.getByRole("button", { name: /Site Plan/ })).toBeDefined();
+  });
+
   it("keeps link mode as default", () => {
     render(<PropertyNavigation slug="some-slug" />);
     expect(screen.getByRole("link", { name: /Overview/ }).getAttribute("href")).toBe("/some-slug");

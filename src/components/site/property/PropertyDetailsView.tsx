@@ -25,6 +25,7 @@ import {
   Info,
 } from "lucide-react";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
+import { getVisibleSingleSections } from "@/lib/property-sections";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
 import { AmenitiesSection } from "@/components/site/property/sections/AmenitiesSection";
 import { FloorPlanSection } from "@/components/site/property/sections/FloorPlanSection";
@@ -47,6 +48,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   const isSingle = isSinglePageType(property.propertyType);
   const faqsFor = (section: string) =>
     (property.faqs || []).filter((f) => f.section === section);
+  // Single-page types show a section only when it has at least one data item.
+  const visibleSections = isSingle ? getVisibleSingleSections(property) : [];
+  const showSection = (id: "amenities" | "floor-plan" | "locality" | "photos") =>
+    visibleSections.includes(id);
 
   const images =
     property.images?.length > 0
@@ -275,22 +280,30 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             <>
               {/* Single-page types: full sections stacked with anchor ids.
                   Embedded sections skip their own CTA — one page-level CTA below. */}
-              <section id="amenities" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
-                <AmenitiesSection property={property} embedded />
-                <FaqSection faqs={faqsFor("amenities")} />
-              </section>
-              <section id="floor-plan" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
-                <FloorPlanSection property={property} embedded />
-                <FaqSection faqs={faqsFor("floor-plan")} />
-              </section>
-              <section id="locality" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
-                <LocalitySection property={property} embedded />
-                <FaqSection faqs={faqsFor("locality")} />
-              </section>
-              <section id="photos" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
-                <PhotosSection property={property} embedded />
-                <FaqSection faqs={faqsFor("photos")} />
-              </section>
+              {showSection("amenities") && (
+                <section id="amenities" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                  <AmenitiesSection property={property} embedded />
+                  <FaqSection faqs={faqsFor("amenities")} />
+                </section>
+              )}
+              {showSection("floor-plan") && (
+                <section id="floor-plan" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                  <FloorPlanSection property={property} embedded />
+                  <FaqSection faqs={faqsFor("floor-plan")} />
+                </section>
+              )}
+              {showSection("locality") && (
+                <section id="locality" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                  <LocalitySection property={property} embedded />
+                  <FaqSection faqs={faqsFor("locality")} />
+                </section>
+              )}
+              {showSection("photos") && (
+                <section id="photos" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
+                  <PhotosSection property={property} embedded />
+                  <FaqSection faqs={faqsFor("photos")} />
+                </section>
+              )}
             </>
           ) : (
             <>

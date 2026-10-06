@@ -16,6 +16,7 @@ import {
   isSinglePageType,
   type PropertyTypeSlug,
 } from "@/lib/seo-urls";
+import { getVisibleSingleSections } from "@/lib/property-sections";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
@@ -575,6 +576,7 @@ export default async function SlugPage({
           slug={property.canonicalSlug}
           activeSection=""
           mode={isSingle ? "anchors" : "pages"}
+          sections={isSingle ? getVisibleSingleSections(property) : undefined}
         />
         <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
           <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">

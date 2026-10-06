@@ -37,6 +37,14 @@ describe("PropertyNavigation anchors mode", () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
   });
 
+  it("only shows the given sections in anchors mode", () => {
+    render(<PropertyNavigation slug="some-slug" mode="anchors" sections={["locality"]} />);
+    expect(screen.getByRole("button", { name: /Overview/ })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Locality/ })).toBeDefined();
+    expect(screen.queryByRole("button", { name: /Amenities/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Photos/ })).toBeNull();
+  });
+
   it("keeps link mode as default", () => {
     render(<PropertyNavigation slug="some-slug" />);
     expect(screen.getByRole("link", { name: /Overview/ }).getAttribute("href")).toBe("/some-slug");

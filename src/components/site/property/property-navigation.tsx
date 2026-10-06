@@ -66,6 +66,7 @@ export function PropertyNavigation({
   slug,
   activeSection,
   mode = "pages",
+  sections,
 }: {
   slug: string;
   activeSection?: string;
@@ -75,6 +76,11 @@ export function PropertyNavigation({
    * (single-page types), with scroll-spy active highlighting.
    */
   mode?: "pages" | "anchors";
+  /**
+   * Anchors mode only: sub-section keys to show (overview always stays).
+   * Hides nav items for sections with no data.
+   */
+  sections?: string[];
 }) {
   const pathname = usePathname();
   const links = buildNavLinks(slug);
@@ -87,7 +93,10 @@ export function PropertyNavigation({
   };
 
   if (mode === "anchors") {
-    return <PropertyAnchorNavigation links={links} />;
+    const visible = sections
+      ? links.filter((l) => l.section === "" || sections.includes(l.section))
+      : links;
+    return <PropertyAnchorNavigation links={visible} />;
   }
 
   return (

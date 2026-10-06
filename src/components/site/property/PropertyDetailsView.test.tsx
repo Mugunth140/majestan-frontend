@@ -190,12 +190,28 @@ describe("PropertyDetailsView overview teasers", () => {
 
 describe("PropertyDetailsView single-page types", () => {
   const plot = { ...baseProperty, propertyType: "plot" };
+  const fullPlot = {
+    ...plot,
+    amenities: [{ id: 1, amenity: { id: 1, name: "Pool" } }],
+    images: [{ id: 1, imageUrl: "/p1.jpg", imageKey: "p1", isPrimary: true, createdAt: "" }],
+    floorPlanFiles: [{ title: "Plan", imageUrl: "/plan.jpg", imageKey: "f1" }],
+  };
 
-  it("stacks full sections with anchor ids", () => {
-    const { container } = render(<PropertyDetailsView property={plot} />);
+  it("stacks full sections with anchor ids when every section has data", () => {
+    const { container } = render(<PropertyDetailsView property={fullPlot} />);
     for (const id of ["overview", "amenities", "floor-plan", "locality", "photos"]) {
       expect(container.querySelector(`#${id}`)).not.toBeNull();
     }
+  });
+
+  it("hides sections without data (measures only: floor-plan + locality stay)", () => {
+    const { container } = render(<PropertyDetailsView property={plot} />);
+    expect(container.querySelector("#overview")).not.toBeNull();
+    expect(container.querySelector("#floor-plan")).not.toBeNull();
+    expect(container.querySelector("#locality")).not.toBeNull();
+    expect(container.querySelector("#amenities")).toBeNull();
+    expect(container.querySelector("#photos")).toBeNull();
+    expect(screen.queryByText("No Amenities Listed")).toBeNull();
   });
 
   it("renders exactly one contact CTA", () => {

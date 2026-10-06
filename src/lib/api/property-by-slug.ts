@@ -73,6 +73,15 @@ export type SeoPropertyDetails = {
   availableWorkstations?: number | null;
   hasRestroom?: boolean | null;
   floorsOccupied?: string[] | null;
+  // Industrial connectivity (DB `property_details` columns). Display-only:
+  // no site inputs exist, rows hide when absent.
+  nearestHighway?: string | null;
+  nearestRailway?: string | null;
+  nearestPort?: string | null;
+  nearestAirport?: string | null;
+  labourAvailability?: string | null;
+  truckTrailerAccess?: boolean | null;
+  craneAvailable?: boolean | null;
   sfNumber?: string | null;
   propertyUse?: string | null;
   propertyAge?: string | null;

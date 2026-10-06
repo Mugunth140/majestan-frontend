@@ -11,9 +11,13 @@ import {
   Globe,
   Train,
   Plane,
+  Ship,
   Stethoscope,
   Film,
   Landmark,
+  Users,
+  Truck,
+  Forklift,
 } from "lucide-react";
 import { LocalityGoogleMap } from './LocalityGoogleMap';
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
@@ -146,6 +150,38 @@ function getConnectivityHighlights(city: string): ConnectivityHighlight[] {
   ];
 }
 
+function trimText(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t === "" ? null : t;
+}
+
+/**
+ * Industrial connectivity from stored columns (highway/port/rail/airport
+ * reach, labour, heavy-vehicle and crane readiness). Null when nothing is
+ * stored — the caller keeps the generic city fallback then.
+ */
+function getIndustrialConnectivity(
+  details: SeoProperty["details"]
+): ConnectivityHighlight[] | null {
+  const d = details as unknown as Record<string, unknown> | null | undefined;
+  if (!d) return null;
+  const rows: ConnectivityHighlight[] = [];
+  const highway = trimText(d.nearestHighway);
+  if (highway) rows.push({ icon: Navigation, label: "Highway Access", detail: highway });
+  const railway = trimText(d.nearestRailway);
+  if (railway) rows.push({ icon: Train, label: "Rail Connectivity", detail: railway });
+  const port = trimText(d.nearestPort);
+  if (port) rows.push({ icon: Ship, label: "Port Access", detail: port });
+  const airport = trimText(d.nearestAirport);
+  if (airport) rows.push({ icon: Plane, label: "Airport Access", detail: airport });
+  const labour = trimText(d.labourAvailability);
+  if (labour) rows.push({ icon: Users, label: "Labour Availability", detail: labour });
+  if (d.truckTrailerAccess) rows.push({ icon: Truck, label: "Truck-Trailer Access", detail: "Yes" });
+  if (d.craneAvailable) rows.push({ icon: Forklift, label: "Crane Facility", detail: "Yes" });
+  return rows.length > 0 ? rows : null;
+}
+
 type LocalitySectionProps = {
   property: SeoProperty;
 };
@@ -158,9 +194,11 @@ export function LocalitySection({ property, embedded = false }: LocalitySectionP
     : getLocalityCategoriesForCity(property.city);
 
   const customConnectivity = localityData?.connectivity;
+  const storedIndustrial =
+    property.propertyType === "industrial" ? getIndustrialConnectivity(property.details) : null;
   const connectivityHighlights: ConnectivityHighlight[] = customConnectivity && customConnectivity.length > 0
     ? customConnectivity.map((c: any) => ({ ...c, icon: resolveLocalityIcon(c.icon, Navigation) }))
-    : getConnectivityHighlights(property.city);
+    : (storedIndustrial ?? getConnectivityHighlights(property.city));
 
   const lat = property.locations?.[0]?.latitude ? Number(property.locations[0].latitude) : null;
   const lng = property.locations?.[0]?.longitude ? Number(property.locations[0].longitude) : null;

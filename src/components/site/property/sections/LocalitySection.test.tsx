@@ -170,6 +170,34 @@ describe("LocalitySection with the ap088 production payload", () => {
     }
   });
 
+  it("shows industrial connectivity highlights when stored", () => {
+    render(
+      <LocalitySection
+        property={{
+          ...ap088,
+          propertyType: "industrial",
+          details: {
+            bedrooms: 0,
+            bathrooms: 0,
+            areaSqft: "",
+            parking: 0,
+            furnished: false,
+            nearestHighway: "NH-544, 2 km",
+            nearestPort: "Cochin Port, 180 km",
+            labourAvailability: "High",
+            truckTrailerAccess: true,
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText("NH-544, 2 km")).toBeDefined();
+    expect(screen.getByText("Cochin Port, 180 km")).toBeDefined();
+    expect(screen.getByText("High")).toBeDefined();
+    // The generic city fallback steps aside for stored connectivity.
+    expect(screen.queryByText("Public Transit")).toBeNull();
+  });
+
   it("opens an upward popup with the full place info on hover", () => {
     const longName = "KGiSL Institute of Technology And Research Campus";
     render(

@@ -21,6 +21,16 @@ import {
   Footprints,
   Sparkles,
   Armchair,
+  Bath,
+  Briefcase,
+  Coffee,
+  ConciergeBell,
+  CookingPot,
+  Forklift,
+  Monitor,
+  Presentation,
+  Snowflake,
+  Wifi,
 } from "lucide-react";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 
@@ -36,12 +46,26 @@ type AmenityCategory = {
 };
 
 // Map keywords in amenity names to Lucide icons
-function getIconForAmenity(name?: string): React.ElementType {
+export function getIconForAmenity(name?: string): React.ElementType {
   if (!name) return Sparkles;
   const n = name.toLowerCase();
   if (n.includes("pool")) return Waves;
   if (n.includes("gym") || n.includes("fitness")) return Dumbbell;
   if (n.includes("club")) return Home;
+  if (n.includes("wifi")) return Wifi;
+  if (n.includes("pantry")) return CookingPot;
+  if (n.includes("cafeteria") || n.includes("canteen") || n.includes("coffee")) return Coffee;
+  if (n.includes("conference") || n.includes("meeting")) return Presentation;
+  if (n.includes("workstation")) return Monitor;
+  if (n.includes("cabin")) return Briefcase;
+  if (n.includes("reception")) return ConciergeBell;
+  if (n.includes("restroom") || n.includes("washroom") || n.includes("toilet")) return Bath;
+  if (n.includes("dock") || n.includes("loading") || n.includes("crane") || n.includes("forklift")) return Forklift;
+  if (n.includes("central") && n.includes("ac")) return Snowflake;
+  if (n.includes("housekeeping")) return Sparkles;
+  // Vehicle parking must match before park/garden below — "parking"
+  // contains "park" and previously rendered as a tree.
+  if (n.includes("car") || n.includes("garage") || n.includes("parking") || n.includes("vehicle")) return Car;
   if (n.includes("park") || n.includes("garden") || n.includes("tree") || n.includes("lawn")) return TreePine;
   if (n.includes("play") || n.includes("kid") || n.includes("baby")) return Baby;
   if (n.includes("party") || n.includes("hall") || n.includes("event")) return PartyPopper;
@@ -57,7 +81,6 @@ function getIconForAmenity(name?: string): React.ElementType {
   if (n.includes("security") || n.includes("cctv") || n.includes("guard")) return Shield;
   if (n.includes("power") || n.includes("electricity") || n.includes("backup")) return Zap;
   if (n.includes("water") || n.includes("plumb")) return Droplets;
-  if (n.includes("park") || n.includes("car") || n.includes("garage")) return Car;
   if (n.includes("furnish")) return Armchair;
   return Sparkles; // Default generic icon
 }

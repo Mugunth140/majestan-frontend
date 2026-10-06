@@ -91,7 +91,7 @@ export function PhotosSection({ property, embedded = false }: PhotosSectionProps
         </div>
 
       {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
-      {!embedded && <NeedMoreDetails />}
+      {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );
   }
@@ -256,7 +256,7 @@ export function PhotosSection({ property, embedded = false }: PhotosSectionProps
       )}
 
       {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
-      {!embedded && <NeedMoreDetails />}
+      {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );
 }

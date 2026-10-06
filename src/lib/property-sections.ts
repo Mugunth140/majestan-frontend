@@ -84,6 +84,18 @@ export function getFloorPlanLabel(propertyType: string): string {
   return "Floor Plan";
 }
 
+/**
+ * Workspace override for the amenities SEO description suffix, or null to
+ * keep the default ("lifestyle features" fits homes, not workplaces).
+ */
+export function workspaceAmenitySuffix(propertyType: string): string | null {
+  return propertyType === "commercial" ||
+    propertyType === "industrial" ||
+    propertyType === "coworking"
+    ? "including parking, power backup, and workspace facilities."
+    : null;
+}
+
 function hasFloorPlanData(property: SeoProperty): boolean {
   if (floorPlanImageCount(property) > 0) return true;
   if ((property.details?.roomDimensions?.length || 0) > 0) return true;

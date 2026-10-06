@@ -323,7 +323,7 @@ export function LocalitySection({ property, embedded = false }: LocalitySectionP
       </div>
 
       {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
-      {!embedded && <NeedMoreDetails />}
+      {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );
 }

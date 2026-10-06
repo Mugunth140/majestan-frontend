@@ -185,7 +185,7 @@ export function AmenitiesSection({ property, embedded = false }: AmenitiesSectio
       )}
 
       {/* CTA Card — the shared section, identical on every page (skipped when embedded) */}
-      {!embedded && <NeedMoreDetails />}
+      {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );
 }

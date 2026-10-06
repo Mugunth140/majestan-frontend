@@ -398,7 +398,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
           <FaqSection faqs={faqsFor("overview")} />
 
           {/* Shared contact call-to-action, identical on every page */}
-          <NeedMoreDetails />
+          <NeedMoreDetails propertyType={property.propertyType} />
         </div>
 
         {/* Right sidebar — the same card shown on every sub-page */}

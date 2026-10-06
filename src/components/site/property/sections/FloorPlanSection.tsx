@@ -223,7 +223,7 @@ export function FloorPlanSection({ property, embedded = false }: FloorPlanSectio
       */}
 
       {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
-      {!embedded && <NeedMoreDetails />}
+      {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );
 }

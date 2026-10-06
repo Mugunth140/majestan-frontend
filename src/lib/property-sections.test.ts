@@ -10,6 +10,7 @@ import {
   getTypeMeasurements,
   getVisibleSingleSections,
   isGroundPlanType,
+  workspaceAmenitySuffix,
 } from "./property-sections";
 import type { SeoProperty } from "./api/property-by-slug";
 
@@ -422,6 +423,24 @@ describe("getTypeMeasurements", () => {
     );
     expect(m.map((r) => r.label)).toEqual(["Seats", "Private Cabins", "Meeting Rooms", "Total Area"]);
   });
+});
+
+describe("workspaceAmenitySuffix", () => {
+  it.each(["commercial", "industrial", "coworking"])(
+    "returns the workspace suffix for %s",
+    (t) => {
+      expect(workspaceAmenitySuffix(t)).toBe(
+        "including parking, power backup, and workspace facilities."
+      );
+    }
+  );
+
+  it.each(["apartment", "villa", "plot", "farmland", "other"])(
+    "returns null for %s (default suffix applies)",
+    (t) => {
+      expect(workspaceAmenitySuffix(t)).toBeNull();
+    }
+  );
 });
 
 describe("getFloorPlanLabel", () => {

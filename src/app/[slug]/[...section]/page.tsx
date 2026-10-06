@@ -13,6 +13,7 @@ import { getPropertyBySeoSlug, type SeoProperty } from "@/lib/api/property-by-sl
 import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
+import { workspaceAmenitySuffix } from "@/lib/property-sections";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
@@ -181,7 +182,11 @@ export async function generateMetadata({
       )?.label || property.propertyType;
 
     const fallbackTitle = `${sectionConfig.titlePrefix} - ${property.title} | ${typeLabel} in ${property.city} | Majestan Realty`;
-    const fallbackDescription = `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${sectionConfig.descriptionSuffix}`;
+    const suffix =
+      sectionKey === "amenities"
+        ? (workspaceAmenitySuffix(property.propertyType) ?? sectionConfig.descriptionSuffix)
+        : sectionConfig.descriptionSuffix;
+    const fallbackDescription = `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${suffix}`;
 
     const title = seoPage?.title || fallbackTitle;
     const description = seoPage?.description || fallbackDescription;

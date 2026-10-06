@@ -204,6 +204,36 @@ describe("PropertyDetailsView info card", () => {
     expect(screen.queryByText("Furnishing")).toBeNull();
   });
 
+  it("shows a single overview FAQ section at the end for plot", () => {
+    const plotWithFaqs = {
+      ...baseProperty,
+      propertyType: "plot",
+      amenities: [{ id: 1, amenity: { id: 1, name: "Pool" } }],
+      faqs: [
+        { id: 1, question: "Overview Q", answer: "A", section: "overview", sortOrder: 0 },
+        { id: 2, question: "Amenity Q", answer: "A", section: "amenities", sortOrder: 0 },
+      ],
+    };
+    render(<PropertyDetailsView property={plotWithFaqs} />);
+    expect(screen.getAllByText("Frequently Asked Questions")).toHaveLength(1);
+    expect(screen.getByText("Overview Q")).toBeDefined();
+    expect(screen.queryByText("Amenity Q")).toBeNull();
+  });
+
+  it("keeps per-section FAQs for other single types", () => {
+    const commercialWithFaqs = {
+      ...baseProperty,
+      propertyType: "commercial",
+      amenities: [{ id: 1, amenity: { id: 1, name: "Pool" } }],
+      faqs: [
+        { id: 1, question: "Overview Q", answer: "A", section: "overview", sortOrder: 0 },
+        { id: 2, question: "Amenity Q", answer: "A", section: "amenities", sortOrder: 0 },
+      ],
+    };
+    render(<PropertyDetailsView property={commercialWithFaqs} />);
+    expect(screen.getAllByText("Frequently Asked Questions")).toHaveLength(2);
+  });
+
   it("shows price per cent for land with cents known", () => {
     const land = {
       ...baseProperty,

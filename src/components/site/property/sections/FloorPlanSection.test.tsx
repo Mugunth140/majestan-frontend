@@ -54,4 +54,14 @@ describe("FloorPlanSection gallery", () => {
     render(<FloorPlanSection property={property} />);
     expect(screen.getByRole("heading", { level: 2, name: "Floor Plan" })).toBeDefined();
   });
+
+  it.each(["plot", "farmland"] as const)("hides key measurements for %s", (propertyType) => {
+    render(<FloorPlanSection property={{ ...property, propertyType }} />);
+    expect(screen.queryByText("Key Measurements")).toBeNull();
+  });
+
+  it("keeps key measurements for other types", () => {
+    render(<FloorPlanSection property={property} />);
+    expect(screen.getByText("Key Measurements")).toBeDefined();
+  });
 });

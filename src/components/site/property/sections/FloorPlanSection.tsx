@@ -1,6 +1,6 @@
 import { type SeoProperty, type SeoPropertyUnit } from "@/lib/api/property-by-slug";
 import { getFloorPlanMeasurements } from "@/lib/floor-plan-measurements";
-import { getFloorPlanLabel } from "@/lib/property-sections";
+import { getFloorPlanLabel, isGroundPlanType } from "@/lib/property-sections";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import {
   Building2,
@@ -110,7 +110,9 @@ export function FloorPlanSection({ property, embedded = false }: FloorPlanSectio
         )}
       </div>
 
-      {/* Key Measurements */}
+      {/* Key Measurements — bedrooms/baths make no sense on land, so plot
+          and farmland never render this card. */}
+      {!isGroundPlanType(property.propertyType) && (
       <div className="bg-white! rounded-[24px]! p-8! md:p-10! border! border-gray-200! shadow-sm!">
         <div className="mb-8!">
           <h3 className="text-2xl! font-semibold! text-gray-900!">
@@ -139,6 +141,7 @@ export function FloorPlanSection({ property, embedded = false }: FloorPlanSectio
           })}
         </div>
       </div>
+      )}
 
       {/* Room Dimensions */}
       {hasRoomDimensions && (

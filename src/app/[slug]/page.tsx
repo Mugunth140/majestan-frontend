@@ -557,13 +557,11 @@ export default async function SlugPage({
 
     const structuredData = buildPropertyStructuredData(property);
     const breadcrumbItems = buildBreadcrumbItems(property);
-    // Single-page types render every section stacked, so all FAQs are
-    // visible and marked up; multi-page types mark up overview FAQs only.
+    // Every property page renders exactly one FAQ block (overview FAQs at
+    // the end), so only those are marked up.
     const isSingle = isSinglePageType(property.propertyType);
     const faqJsonLd = buildFaqPageJsonLd(
-      isSingle
-        ? property.faqs || []
-        : (property.faqs || []).filter((f) => f.section === "overview"),
+      (property.faqs || []).filter((f) => f.section === "overview"),
       `https://www.majestanrealty.com/${property.canonicalSlug}`,
     );
 

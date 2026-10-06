@@ -220,19 +220,27 @@ describe("PropertyDetailsView info card", () => {
     expect(screen.queryByText("Amenity Q")).toBeNull();
   });
 
-  it("keeps per-section FAQs for other single types", () => {
-    const commercialWithFaqs = {
-      ...baseProperty,
-      propertyType: "commercial",
-      amenities: [{ id: 1, amenity: { id: 1, name: "Pool" } }],
-      faqs: [
-        { id: 1, question: "Overview Q", answer: "A", section: "overview", sortOrder: 0 },
-        { id: 2, question: "Amenity Q", answer: "A", section: "amenities", sortOrder: 0 },
-      ],
-    };
-    render(<PropertyDetailsView property={commercialWithFaqs} />);
-    expect(screen.getAllByText("Frequently Asked Questions")).toHaveLength(2);
-  });
+  it.each(["commercial", "industrial", "coworking", "other"] as const)(
+    "shows a single overview FAQ section for %s",
+    (propertyType) => {
+      render(
+        <PropertyDetailsView
+          property={{
+            ...baseProperty,
+            propertyType,
+            amenities: [{ id: 1, amenity: { id: 1, name: "Pool" } }],
+            faqs: [
+              { id: 1, question: "Overview Q", answer: "A", section: "overview", sortOrder: 0 },
+              { id: 2, question: "Amenity Q", answer: "A", section: "amenities", sortOrder: 0 },
+            ],
+          }}
+        />
+      );
+      expect(screen.getAllByText("Frequently Asked Questions")).toHaveLength(1);
+      expect(screen.getByText("Overview Q")).toBeDefined();
+      expect(screen.queryByText("Amenity Q")).toBeNull();
+    }
+  );
 
   it("shows price per cent for land with cents known", () => {
     const land = {

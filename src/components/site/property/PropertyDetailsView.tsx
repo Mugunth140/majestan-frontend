@@ -30,7 +30,6 @@ import {
   getLandPricePerUnit,
   getPlotSpecs,
   getVisibleSingleSections,
-  isGroundPlanType,
 } from "@/lib/property-sections";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
 import { AmenitiesSection } from "@/components/site/property/sections/AmenitiesSection";
@@ -107,9 +106,6 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   // Land is priced per cent, never per sq.ft — and only land-relevant rows
   // show for plot/farmland (no beds/baths/parking/furnishing).
   const isLand = property.propertyType === "plot" || property.propertyType === "farmland";
-  // Plot/farmland keep exactly one FAQ block: the overview FAQs at the end,
-  // right before the contact CTA. Other single types keep per-section FAQs.
-  const isGroundPlan = isGroundPlanType(property.propertyType);
   const landSpecs =
     property.propertyType === "plot"
       ? getPlotSpecs(property.details)
@@ -315,25 +311,21 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
               {showSection("amenities") && (
                 <section id="amenities" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
                   <AmenitiesSection property={property} embedded />
-                  {!isGroundPlan && <FaqSection faqs={faqsFor("amenities")} />}
                 </section>
               )}
               {showSection("floor-plan") && (
                 <section id="floor-plan" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
                   <FloorPlanSection property={property} embedded />
-                  {!isGroundPlan && <FaqSection faqs={faqsFor("floor-plan")} />}
                 </section>
               )}
               {showSection("locality") && (
                 <section id="locality" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
                   <LocalitySection property={property} embedded />
-                  {!isGroundPlan && <FaqSection faqs={faqsFor("locality")} />}
                 </section>
               )}
               {showSection("photos") && (
                 <section id="photos" className="scroll-mt-40! flex! flex-col! gap-5! min-w-0!">
                   <PhotosSection property={property} embedded />
-                  {!isGroundPlan && <FaqSection faqs={faqsFor("photos")} />}
                 </section>
               )}
             </>

@@ -67,7 +67,7 @@ export type SeoPropertyDetails = {
   hasCentralAc?: boolean | null;
   powerBackup?: boolean | null;
   minSeats?: number | null;
-  rentPerSeat?: string | null;
+  rentPerSeat?: string | number | null;
   privateCabins?: number | null;
   meetingRooms?: number | null;
   availableWorkstations?: number | null;

@@ -1,6 +1,5 @@
 import { type SeoProperty, type SeoPropertyUnit } from "@/lib/api/property-by-slug";
-import { getFloorPlanMeasurements } from "@/lib/floor-plan-measurements";
-import { getFloorPlanLabel, isGroundPlanType } from "@/lib/property-sections";
+import { getFloorPlanLabel, getTypeMeasurements, isGroundPlanType } from "@/lib/property-sections";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import {
   Building2,
@@ -43,7 +42,7 @@ export function FloorPlanSection({ property, embedded = false }: FloorPlanSectio
 
   // Shared with the overview teaser — one definition, so the teaser can never
   // drift from the page it links to.
-  const measurements = getFloorPlanMeasurements(property.details);
+  const measurements = getTypeMeasurements(property.details, property.propertyType);
 
   const formatPrice = (price: string | null | undefined) => {
     if (!price) return null;

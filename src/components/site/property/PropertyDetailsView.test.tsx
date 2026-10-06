@@ -113,7 +113,7 @@ describe("PropertyDetailsView info card", () => {
   });
 
   it("keeps the generic rows for property types that are not curated yet", () => {
-    render(<PropertyDetailsView property={{ ...baseProperty, propertyType: "commercial" }} />);
+    render(<PropertyDetailsView property={{ ...baseProperty, propertyType: "other" }} />);
 
     expect(screen.getByText("Listed")).toBeDefined();
     expect(screen.getAllByText("Property Type")).toHaveLength(2);
@@ -241,6 +241,81 @@ describe("PropertyDetailsView info card", () => {
       expect(screen.queryByText("Amenity Q")).toBeNull();
     }
   );
+
+  it("curates the sidebar for commercial: area, washrooms, floors, furnishing", () => {
+    const office = {
+      ...baseProperty,
+      propertyType: "commercial",
+      details: {
+        bedrooms: 0,
+        bathrooms: 2,
+        areaSqft: "",
+        parking: 0,
+        furnished: false,
+        superBuiltUpArea: "3000",
+        floorsOccupied: ["Ground", "1st"],
+        totalFloors: 5,
+        furnishingStatus: "FULLY FURNISHED",
+      },
+    };
+    render(<PropertyDetailsView property={office} />);
+    expect(screen.queryByText("Listed")).toBeNull();
+    // Sidebar row + overview stat + measurements card each.
+    expect(screen.getAllByText("Washrooms")).toHaveLength(3);
+    expect(screen.queryByText("Bathrooms")).toBeNull();
+    expect(screen.getAllByText("Ground, 1st")).toHaveLength(3);
+  });
+
+  it("curates the sidebar for industrial: power, ceiling, heavy vehicles", () => {
+    const shed = {
+      ...baseProperty,
+      propertyType: "industrial",
+      details: {
+        bedrooms: 0,
+        bathrooms: 0,
+        areaSqft: "10000",
+        parking: 0,
+        furnished: false,
+        builtUpArea: "10000",
+        powerSupplyHp: "50",
+        ceilingHeightFt: "24",
+        heavyVehicleAccess: true,
+      },
+    };
+    render(<PropertyDetailsView property={shed} />);
+    expect(screen.queryByText("Listed")).toBeNull();
+    expect(screen.queryByText("Furnishing")).toBeNull();
+    // Sidebar row + overview stat + measurements card each.
+    expect(screen.getAllByText("50 HP")).toHaveLength(3);
+    // Sidebar row + overview stat each.
+    expect(screen.getAllByText("Heavy Vehicle Access")).toHaveLength(2);
+  });
+
+  it("curates the sidebar for coworking: seats, rent per seat, cabins", () => {
+    const cowork = {
+      ...baseProperty,
+      propertyType: "coworking",
+      details: {
+        bedrooms: 0,
+        bathrooms: 4,
+        areaSqft: "",
+        parking: 0,
+        furnished: false,
+        minSeats: 4,
+        rentPerSeat: "8000",
+        privateCabins: 2,
+        meetingRooms: 1,
+      },
+    };
+    render(<PropertyDetailsView property={cowork} />);
+    expect(screen.queryByText("Listed")).toBeNull();
+    expect(screen.queryByText("Bedrooms")).toBeNull();
+    expect(screen.queryByText("Furnishing")).toBeNull();
+    // Sidebar row + overview stat each.
+    expect(screen.getAllByText("₹ 8,000")).toHaveLength(2);
+    // Overview stat only (5th spec row, outside the sidebar slice).
+    expect(screen.getByText("Washrooms")).toBeDefined();
+  });
 
   it("shows price per cent for land with cents known", () => {
     const land = {

@@ -26,7 +26,10 @@ import {
 } from "lucide-react";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
 import {
+  getCommercialSpecs,
+  getCoworkingSpecs,
   getFarmlandSpecs,
+  getIndustrialSpecs,
   getLandPricePerUnit,
   getPlotSpecs,
   getVisibleSingleSections,
@@ -112,6 +115,20 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       : property.propertyType === "farmland"
         ? getFarmlandSpecs(property.details)
         : [];
+  // Workspace types curate their own rows too — the generic building rows
+  // below stay hidden for them, same as land.
+  const isWorkspace =
+    property.propertyType === "commercial" ||
+    property.propertyType === "industrial" ||
+    property.propertyType === "coworking";
+  const workspaceSpecs =
+    property.propertyType === "commercial"
+      ? getCommercialSpecs(property.details)
+      : property.propertyType === "industrial"
+        ? getIndustrialSpecs(property.details)
+        : property.propertyType === "coworking"
+          ? getCoworkingSpecs(property.details)
+          : [];
   const hasLandArea = landSpecs.some(
     (r) => r.label === "Plot Area" || r.label === "Farm Area"
   );
@@ -124,10 +141,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   const title = property.seo?.seoData?.overview?.h1 || property.title;
 
   const overviewStats: { icon: React.ReactNode; label: string; value: string }[] = [
-    ...(!isLand && property.details?.bedrooms
+    ...(!isLand && !isWorkspace && property.details?.bedrooms
       ? [{ icon: <BedDouble className="w-5! h-5!" />, label: "Bedrooms", value: `${property.details.bedrooms} BHK` }]
       : []),
-    ...(!isLand && property.details?.bathrooms
+    ...(!isLand && !isWorkspace && property.details?.bathrooms
       ? [{ icon: <Bath className="w-5! h-5!" />, label: "Bathrooms", value: `${property.details.bathrooms}` }]
       : []),
     // Apartment-only: floor over total, shown only when both are stored.
@@ -138,13 +155,13 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     Number(property.details?.totalFloors) > 0
       ? [{ icon: <Layers className="w-5! h-5!" />, label: "Floor No", value: `${property.details.floorNumber} / ${property.details.totalFloors}` }]
       : []),
-    ...(!hasLandArea && property.details?.areaSqft
+    ...(!hasLandArea && !isWorkspace && property.details?.areaSqft
       ? [{ icon: <Square className="w-5! h-5!" />, label: "Area", value: `${property.details.areaSqft} sq.ft` }]
       : []),
-    ...(!isLand && property.details?.parking
+    ...(!isLand && !isWorkspace && property.details?.parking
       ? [{ icon: <Car className="w-5! h-5!" />, label: "Parking", value: `${property.details.parking} Covered` }]
       : []),
-    ...(!isLand && formatFurnishing(property.details)
+    ...(!isLand && !isWorkspace && formatFurnishing(property.details)
       ? [{ icon: <ShieldCheck className="w-5! h-5!" />, label: "Furnishing", value: formatFurnishing(property.details) as string }]
       : []),
     ...(perSqft
@@ -157,6 +174,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
         ]
       : []),
     ...landSpecs.map((spec) => {
+      const Icon = spec.icon;
+      return { icon: <Icon className="w-5! h-5!" />, label: spec.label, value: spec.value };
+    }),
+    ...workspaceSpecs.map((spec) => {
       const Icon = spec.icon;
       return { icon: <Icon className="w-5! h-5!" />, label: spec.label, value: spec.value };
     }),

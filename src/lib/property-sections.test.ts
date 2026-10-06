@@ -7,6 +7,7 @@ import {
   getIndustrialSpecs,
   getLandPricePerUnit,
   getPlotSpecs,
+  getTypeMeasurements,
   getVisibleSingleSections,
   isGroundPlanType,
 } from "./property-sections";
@@ -261,9 +262,9 @@ describe("getCommercialSpecs", () => {
       "Built-Up Area",
       "Washrooms",
       "Floors Occupied",
+      "Furnishing",
       "Total Floors",
       "Parking",
-      "Furnishing",
       "Pantry",
       "Central AC",
       "Power Backup",
@@ -280,6 +281,11 @@ describe("getCommercialSpecs", () => {
   it("prefers carpet area when no super built-up exists", () => {
     const rows = getCommercialSpecs({ carpetArea: "2500" });
     expect(rows).toMatchObject([{ label: "Carpet Area", value: "2,500 sq.ft" }]);
+  });
+
+  it("falls back to areaSqft for built-up area", () => {
+    const rows = getCommercialSpecs({ areaSqft: "2000" });
+    expect(rows).toMatchObject([{ label: "Built-Up Area", value: "2,000 sq.ft" }]);
   });
 
   it("returns no rows when nothing is stored", () => {
@@ -308,13 +314,13 @@ describe("getIndustrialSpecs", () => {
     const labels = getIndustrialSpecs(shedDetails).map((r) => r.label);
     expect(labels).toEqual([
       "Built-Up Area",
+      "Power Supply",
+      "Ceiling Height",
+      "Heavy Vehicle Access",
       "Covered Area",
       "Open Area",
-      "Ceiling Height",
       "Floor Type",
-      "Power Supply",
       "Power Backup",
-      "Heavy Vehicle Access",
       "Truck Parking",
       "Car Parking",
       "Bike Parking",
@@ -372,8 +378,49 @@ describe("getCoworkingSpecs", () => {
     expect(rows.find((r) => r.label === "Rent / Seat")?.value).toBe("₹ 8,000");
   });
 
+  it("falls back to areaSqft for built-up area", () => {
+    const rows = getCoworkingSpecs({ areaSqft: "5000" });
+    expect(rows).toMatchObject([{ label: "Built-Up Area", value: "5,000 sq.ft" }]);
+  });
+
   it("returns no rows when nothing is stored", () => {
     expect(getCoworkingSpecs({})).toEqual([]);
+  });
+});
+
+describe("getTypeMeasurements", () => {
+  it("returns residential measurements for apartments", () => {
+    const m = getTypeMeasurements(
+      { areaSqft: "1456", bedrooms: 3, bathrooms: 2, parking: 1 },
+      "apartment"
+    );
+    expect(m.map((r) => r.label)).toEqual(["Total Area", "Bedrooms", "Bathrooms", "Parking"]);
+  });
+
+  it("returns office measurements for commercial", () => {
+    const m = getTypeMeasurements(
+      { superBuiltUpArea: "3000", bathrooms: 2, parking: 10, floorsOccupied: ["Ground", "1st"] },
+      "commercial"
+    );
+    expect(m.map((r) => r.label)).toEqual(["Total Area", "Washrooms", "Parking", "Floors"]);
+    expect(m.find((r) => r.label === "Washrooms")?.value).toBe("2 Washrooms");
+  });
+
+  it("returns shed measurements for industrial", () => {
+    const m = getTypeMeasurements(
+      { builtUpArea: "10000", coveredArea: "8000", openArea: "2000", powerSupplyHp: "50" },
+      "industrial"
+    );
+    expect(m.map((r) => r.label)).toEqual(["Built-Up Area", "Covered Area", "Open Area", "Power Supply"]);
+    expect(m.find((r) => r.label === "Power Supply")?.value).toBe("50 HP");
+  });
+
+  it("returns seat measurements for coworking", () => {
+    const m = getTypeMeasurements(
+      { minSeats: 4, privateCabins: 2, meetingRooms: 1, carpetArea: "5000" },
+      "coworking"
+    );
+    expect(m.map((r) => r.label)).toEqual(["Seats", "Private Cabins", "Meeting Rooms", "Total Area"]);
   });
 });
 

@@ -42,6 +42,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { formatFurnishing } from "./property-format";
+import {
+  formatAreaSqft,
+  getFloorPlanMeasurements,
+  type FloorPlanMeasurement,
+} from "./floor-plan-measurements";
 import type { SeoProperty } from "./api/property-by-slug";
 
 export type SingleSectionId = "amenities" | "floor-plan" | "locality" | "photos";
@@ -292,20 +297,22 @@ export function getCommercialSpecs(details: LandDetails | null | undefined): Lan
       ? { label: "Built-Up Area", value: sqft(d.superBuiltUpArea) as string, icon: Maximize2 }
       : nzNum(d.carpetArea) != null
         ? { label: "Carpet Area", value: sqft(d.carpetArea) as string, icon: Maximize2 }
-        : null,
+        : nzNum(d.areaSqft) != null
+          ? { label: "Built-Up Area", value: sqft(d.areaSqft) as string, icon: Maximize2 }
+          : null,
     nzNum(d.bathrooms) != null
       ? { label: "Washrooms", value: String(d.bathrooms), icon: Bath }
       : null,
     d.floorsOccupied?.length
       ? { label: "Floors Occupied", value: d.floorsOccupied.join(", "), icon: Layers }
       : null,
+    furnishing ? { label: "Furnishing", value: furnishing, icon: Sofa } : null,
     nzNum(d.totalFloors) != null
       ? { label: "Total Floors", value: String(d.totalFloors), icon: Building2 }
       : null,
     nzNum(d.parking) != null
       ? { label: "Parking", value: `${d.parking} Spaces`, icon: Car }
       : null,
-    furnishing ? { label: "Furnishing", value: furnishing, icon: Sofa } : null,
     d.hasPantry ? { label: "Pantry", value: "Yes", icon: Coffee } : null,
     d.hasCentralAc ? { label: "Central AC", value: "Yes", icon: Snowflake } : null,
     d.powerBackup ? { label: "Power Backup", value: "Yes", icon: Zap } : null,
@@ -329,8 +336,14 @@ export function getIndustrialSpecs(details: LandDetails | null | undefined): Lan
       : nzNum(d.areaSqft) != null
         ? { label: "Built-Up Area", value: sqft(d.areaSqft) as string, icon: Maximize2 }
         : null,
-    nzNum(d.plotArea) != null
-      ? { label: "Plot Area", value: sqft(d.plotArea) as string, icon: Maximize2 }
+    nzNum(d.powerSupplyHp) != null
+      ? { label: "Power Supply", value: `${trimNum(Number(d.powerSupplyHp))} HP`, icon: Plug }
+      : null,
+    nzNum(d.ceilingHeightFt) != null
+      ? { label: "Ceiling Height", value: `${trimNum(Number(d.ceilingHeightFt))} ft`, icon: LayoutGrid }
+      : null,
+    d.heavyVehicleAccess
+      ? { label: "Heavy Vehicle Access", value: "Yes", icon: Truck }
       : null,
     nzNum(d.coveredArea) != null
       ? { label: "Covered Area", value: sqft(d.coveredArea) as string, icon: Box }
@@ -338,19 +351,13 @@ export function getIndustrialSpecs(details: LandDetails | null | undefined): Lan
     nzNum(d.openArea) != null
       ? { label: "Open Area", value: sqft(d.openArea) as string, icon: Expand }
       : null,
-    nzNum(d.ceilingHeightFt) != null
-      ? { label: "Ceiling Height", value: `${trimNum(Number(d.ceilingHeightFt))} ft`, icon: LayoutGrid }
+    nzNum(d.plotArea) != null
+      ? { label: "Plot Area", value: sqft(d.plotArea) as string, icon: Maximize2 }
       : null,
     trimStr(d.floorType)
       ? { label: "Floor Type", value: trimStr(d.floorType) as string, icon: Layers }
       : null,
-    nzNum(d.powerSupplyHp) != null
-      ? { label: "Power Supply", value: `${trimNum(Number(d.powerSupplyHp))} HP`, icon: Plug }
-      : null,
     d.powerBackup ? { label: "Power Backup", value: "Yes", icon: Zap } : null,
-    d.heavyVehicleAccess
-      ? { label: "Heavy Vehicle Access", value: "Yes", icon: Truck }
-      : null,
     countRow("Truck Parking", d.truckParking, Truck),
     countRow("Car Parking", d.carParking, Car),
     countRow("Bike Parking", d.bikeParking, Bike),
@@ -381,7 +388,9 @@ export function getCoworkingSpecs(details: LandDetails | null | undefined): Land
     countRow("Workstations", d.availableWorkstations, Monitor),
     nzNum(d.carpetArea) != null
       ? { label: "Total Area", value: sqft(d.carpetArea) as string, icon: Maximize2 }
-      : null,
+      : nzNum(d.areaSqft) != null
+        ? { label: "Built-Up Area", value: sqft(d.areaSqft) as string, icon: Maximize2 }
+        : null,
     trimStr(d.floorNumber)
       ? {
           label: "Floor",
@@ -402,6 +411,58 @@ export function getCoworkingSpecs(details: LandDetails | null | undefined): Land
       : null,
   ];
   return rows.filter((r): r is LandSpecRow => r !== null);
+}
+
+/**
+ * Key-measurement cards per property type (shared by the floor/site-plan
+ * sub-page and the overview teaser). Residential keeps the BHK layout;
+ * workspace types get their own decision-relevant four.
+ */
+export function getTypeMeasurements(
+  details: LandDetails | null | undefined,
+  propertyType: string
+): FloorPlanMeasurement[] {
+  if (propertyType === "commercial") {
+    const area = nzNum(details?.superBuiltUpArea) ?? nzNum(details?.carpetArea) ?? nzNum(details?.areaSqft);
+    const floors = details?.floorsOccupied?.length
+      ? details.floorsOccupied.join(", ")
+      : nzNum(details?.totalFloors) != null
+        ? String(details?.totalFloors)
+        : "—";
+    return [
+      { label: "Total Area", value: area != null ? `${area.toLocaleString("en-IN")} sq.ft` : "—", icon: Maximize2 },
+      { label: "Washrooms", value: details?.bathrooms ? `${details.bathrooms} Washrooms` : "—", icon: Bath },
+      { label: "Parking", value: details?.parking ? `${details.parking} Spaces` : "—", icon: Car },
+      { label: "Floors", value: floors, icon: Layers },
+    ];
+  }
+  if (propertyType === "industrial") {
+    return [
+      { label: "Built-Up Area", value: formatAreaSqft(details?.builtUpArea ?? details?.areaSqft ?? null), icon: Maximize2 },
+      { label: "Covered Area", value: formatAreaSqft(details?.coveredArea ?? null), icon: Box },
+      { label: "Open Area", value: formatAreaSqft(details?.openArea ?? null), icon: Expand },
+      {
+        label: "Power Supply",
+        value: nzNum(details?.powerSupplyHp) != null ? `${trimNum(Number(details?.powerSupplyHp))} HP` : "—",
+        icon: Plug,
+      },
+    ];
+  }
+  if (propertyType === "coworking") {
+    return [
+      { label: "Seats", value: nzNum(details?.minSeats) != null ? String(details?.minSeats) : "—", icon: Users },
+      { label: "Private Cabins", value: nzNum(details?.privateCabins) != null ? String(details?.privateCabins) : "—", icon: Briefcase },
+      { label: "Meeting Rooms", value: nzNum(details?.meetingRooms) != null ? String(details?.meetingRooms) : "—", icon: Presentation },
+      {
+        label: "Total Area",
+        value: formatAreaSqft(details?.carpetArea ?? details?.areaSqft ?? null),
+        icon: Maximize2,
+      },
+    ];
+  }
+  return getFloorPlanMeasurements(
+    details as Parameters<typeof getFloorPlanMeasurements>[0]
+  );
 }
 
 /**

@@ -14,7 +14,14 @@ import {
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import { formatDate, formatFurnishing, formatPrice } from "@/lib/property-format";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
-import { getFarmlandSpecs, getLandPricePerUnit, getPlotSpecs } from "@/lib/property-sections";
+import {
+  getCommercialSpecs,
+  getCoworkingSpecs,
+  getFarmlandSpecs,
+  getIndustrialSpecs,
+  getLandPricePerUnit,
+  getPlotSpecs,
+} from "@/lib/property-sections";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
 
 type PropertyInfoSidebarProps = {
@@ -73,6 +80,18 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
       : property.propertyType === "farmland"
         ? getFarmlandSpecs(property.details)
         : [];
+  const isWorkspace =
+    property.propertyType === "commercial" ||
+    property.propertyType === "industrial" ||
+    property.propertyType === "coworking";
+  const workspaceSpecs =
+    property.propertyType === "commercial"
+      ? getCommercialSpecs(property.details)
+      : property.propertyType === "industrial"
+        ? getIndustrialSpecs(property.details)
+        : property.propertyType === "coworking"
+          ? getCoworkingSpecs(property.details)
+          : [];
   const perSqft =
     getLandPricePerUnit(property.price, property.details, property.propertyType) ??
     (Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
@@ -87,7 +106,12 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           const Icon = spec.icon;
           return { icon: <Icon className="w-4.5! h-4.5!" />, label: spec.label, value: spec.value };
         })
-      : [
+      : isWorkspace
+        ? workspaceSpecs.slice(0, 4).map((spec) => {
+            const Icon = spec.icon;
+            return { icon: <Icon className="w-4.5! h-4.5!" />, label: spec.label, value: spec.value };
+          })
+        : [
           property.details?.bedrooms
             ? { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: `${property.details.bedrooms} BHK` }
             : null,

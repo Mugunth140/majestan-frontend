@@ -148,6 +148,49 @@ describe("PropertyDetailsView info card", () => {
     expect(screen.getAllByText("40 × 60 ft")).toHaveLength(2);
   });
 
+  it("shows CRM-supplied land rows (water, land type) for plot", () => {
+    const plotWithCrm = {
+      ...baseProperty,
+      propertyType: "plot",
+      details: {
+        bedrooms: 0,
+        bathrooms: 0,
+        areaSqft: "",
+        parking: 0,
+        furnished: false,
+        waterSources: "BORE WATER",
+        landType: "RESIDENTIAL LAND",
+      },
+    };
+    render(<PropertyDetailsView property={plotWithCrm} />);
+    // Sidebar row + overview stat each.
+    expect(screen.getAllByText("BORE WATER")).toHaveLength(2);
+    expect(screen.getAllByText("RESIDENTIAL LAND")).toHaveLength(2);
+  });
+
+  it("shows richer rows (plot no, zoning, storage) for farmland", () => {
+    const farm = {
+      ...baseProperty,
+      propertyType: "farmland",
+      details: {
+        bedrooms: 0,
+        bathrooms: 0,
+        areaSqft: "",
+        parking: 0,
+        furnished: false,
+        plotNos: 4,
+        zoning: "Residential",
+        storageTank: true,
+        suitableFor: "Organic Farming",
+      },
+    };
+    render(<PropertyDetailsView property={farm} />);
+    // Sidebar row + overview stat each.
+    expect(screen.getAllByText("Zoning")).toHaveLength(2);
+    expect(screen.getAllByText("Storage Tank")).toHaveLength(2);
+    expect(screen.getAllByText("Suitable For")).toHaveLength(2);
+  });
+
   it("shows price per cent for land with cents known", () => {
     const land = {
       ...baseProperty,

@@ -101,11 +101,16 @@ function landDimension(d: LandDetails): string | null {
   return null;
 }
 
+/** areaSqft counts as cents only when explicitly stored in cents. */
+function areaSqftInCents(d: LandDetails): number | null {
+  return /cent/i.test(String(d.areaUnit ?? "")) ? nzNum(d.areaSqft) : null;
+}
+
 function plotAreaRow(d: LandDetails): LandSpecRow | null {
   if (nzNum(d.plotArea) != null) {
     return { label: "Plot Area", value: `${Number(d.plotArea).toLocaleString("en-IN")} sq.ft`, icon: Maximize2 };
   }
-  const cents = nzNum(d.plotSizeCents);
+  const cents = nzNum(d.plotSizeCents) ?? areaSqftInCents(d);
   if (cents != null) {
     return { label: "Plot Area", value: `${trimNum(cents)} cents`, icon: Maximize2 };
   }
@@ -113,7 +118,7 @@ function plotAreaRow(d: LandDetails): LandSpecRow | null {
 }
 
 function farmAreaRow(d: LandDetails): LandSpecRow | null {
-  const cents = nzNum(d.plotSizeCents);
+  const cents = nzNum(d.plotSizeCents) ?? areaSqftInCents(d);
   if (cents != null) {
     return { label: "Farm Area", value: `${trimNum(cents)} cents`, icon: Maximize2 };
   }
@@ -124,6 +129,16 @@ function farmAreaRow(d: LandDetails): LandSpecRow | null {
     return { label: "Farm Area", value: `${trimNum(Number(d.plotArea))} cents`, icon: Maximize2 };
   }
   return null;
+}
+
+function waterRow(d: LandDetails): LandSpecRow | null {
+  const water = trimStr(d.waterSources) ?? trimStr(d.irrigation);
+  if (!water) return null;
+  return {
+    label: trimStr(d.waterSources) ? "Water Sources" : "Irrigation",
+    value: water,
+    icon: Droplets,
+  };
 }
 
 function boundaryOrOpenSides(d: LandDetails, boundaryLabel: string): LandSpecRow[] {
@@ -158,9 +173,13 @@ export function getPlotSpecs(details: LandDetails | null | undefined): LandSpecR
     trimStr(d.roadWidth)
       ? { label: "Road Width", value: trimStr(d.roadWidth) as string, icon: Milestone }
       : null,
+    waterRow(d),
     ...boundaryOrOpenSides(d, "Boundary Wall"),
     trimStr(d.suitableFor)
       ? { label: "Suitable For", value: trimStr(d.suitableFor) as string, icon: Info }
+      : null,
+    trimStr(d.landType)
+      ? { label: "Land Type", value: trimStr(d.landType) as string, icon: Map }
       : null,
   ];
   return rows.filter((r): r is LandSpecRow => r !== null);
@@ -173,17 +192,11 @@ export function getPlotSpecs(details: LandDetails | null | undefined): LandSpecR
 export function getFarmlandSpecs(details: LandDetails | null | undefined): LandSpecRow[] {
   if (!details) return [];
   const d = details;
-  const water = trimStr(d.waterSources) ?? trimStr(d.irrigation);
   const crop = trimStr(d.cropSuitability);
+  const fence = trimStr(d.fencing);
   const rows: (LandSpecRow | null)[] = [
     farmAreaRow(d),
-    water
-      ? {
-          label: trimStr(d.waterSources) ? "Water Sources" : "Irrigation",
-          value: water,
-          icon: Droplets,
-        }
-      : null,
+    waterRow(d),
     crop ? { label: "Crop Suitability", value: crop, icon: Sprout } : null,
     trimStr(d.soilType)
       ? { label: "Soil Type", value: trimStr(d.soilType) as string, icon: Layers }
@@ -201,11 +214,25 @@ export function getFarmlandSpecs(details: LandDetails | null | undefined): LandS
           icon: TreePine,
         }
       : null,
-    ...boundaryOrOpenSides(d, "Fencing"),
+    ...(d.boundaryWall
+      ? [{ label: "Fencing", value: "Yes", icon: Fence } as LandSpecRow]
+      : fence
+        ? [{ label: "Fencing", value: fence, icon: Fence } as LandSpecRow]
+        : boundaryOrOpenSides(d, "Fencing")),
     trimStr(d.sfNumber)
       ? { label: "SF Number", value: trimStr(d.sfNumber) as string, icon: Hash }
       : null,
+    nzNum(d.plotNos) != null
+      ? { label: "Plot No", value: String(trimNum(Number(d.plotNos))), icon: Hash }
+      : null,
+    trimStr(d.plotType)
+      ? { label: "Plot Type", value: trimStr(d.plotType) as string, icon: Tag }
+      : null,
+    trimStr(d.zoning)
+      ? { label: "Zoning", value: trimStr(d.zoning) as string, icon: Landmark }
+      : null,
     d.boreWell ? { label: "Bore Well", value: "Yes", icon: Waves } : null,
+    d.storageTank ? { label: "Storage Tank", value: "Yes", icon: Waves } : null,
     !crop && trimStr(d.propertyFacing)
       ? { label: "Facing", value: trimStr(d.propertyFacing) as string, icon: Compass }
       : null,
@@ -214,6 +241,9 @@ export function getFarmlandSpecs(details: LandDetails | null | undefined): LandS
       : null,
     trimStr(d.propertyAge)
       ? { label: "Property Age", value: trimStr(d.propertyAge) as string, icon: Calendar }
+      : null,
+    trimStr(d.suitableFor)
+      ? { label: "Suitable For", value: trimStr(d.suitableFor) as string, icon: Info }
       : null,
   ];
   return rows.filter((r): r is LandSpecRow => r !== null);

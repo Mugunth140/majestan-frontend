@@ -130,6 +130,19 @@ describe("getPlotSpecs", () => {
   it("returns no rows when nothing is stored", () => {
     expect(getPlotSpecs({})).toEqual([]);
   });
+
+  it("shows water and land type from real plot data", () => {
+    const rows = getPlotSpecs({ waterSources: "BORE WATER", landType: "RESIDENTIAL LAND" });
+    expect(rows).toMatchObject([
+      { label: "Water Sources", value: "BORE WATER" },
+      { label: "Land Type", value: "RESIDENTIAL LAND" },
+    ]);
+  });
+
+  it("falls back to area in cents when only areaSqft-in-cents is stored", () => {
+    const rows = getPlotSpecs({ areaSqft: "4.00", areaUnit: "Cents" });
+    expect(rows).toMatchObject([{ label: "Plot Area", value: "4 cents" }]);
+  });
 });
 
 describe("getFarmlandSpecs", () => {
@@ -171,6 +184,33 @@ describe("getFarmlandSpecs", () => {
   it("falls back to facing when no crop data exists", () => {
     const rows = getFarmlandSpecs({ propertyFacing: "East" });
     expect(rows.map((r) => r.label)).toContain("Facing");
+  });
+
+  it("shows plot no, plot type, zoning, storage tank and suitable use", () => {
+    const rows = getFarmlandSpecs({
+      plotNos: 4,
+      plotType: "Center Plot",
+      zoning: "Residential",
+      storageTank: true,
+      suitableFor: "Organic Farming",
+    });
+    expect(rows.map((r) => r.label)).toEqual([
+      "Plot No",
+      "Plot Type",
+      "Zoning",
+      "Storage Tank",
+      "Suitable For",
+    ]);
+  });
+
+  it("falls back to the fencing string when no boundary wall is stored", () => {
+    const rows = getFarmlandSpecs({ fencing: "Available" });
+    expect(rows).toMatchObject([{ label: "Fencing", value: "Available" }]);
+  });
+
+  it("falls back to area in cents when only areaSqft-in-cents is stored", () => {
+    const rows = getFarmlandSpecs({ areaSqft: "6.00", areaUnit: "Cents" });
+    expect(rows).toMatchObject([{ label: "Farm Area", value: "6 cents" }]);
   });
 
   it("carries more rows than a comparable plot", () => {

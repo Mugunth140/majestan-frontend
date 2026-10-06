@@ -30,6 +30,7 @@ export type SeoPropertyDetails = {
   areaUnit?: string | null;
   plotLength?: string | number | null;
   plotWidth?: string | number | null;
+  plotNos?: number | null;
   dimension?: string | null;
   openSides?: number | null;
   boundaryWall?: boolean | null;
@@ -46,6 +47,7 @@ export type SeoPropertyDetails = {
   cropSuitability?: string | null;
   existingPlantation?: string | null;
   boreWell?: boolean | null;
+  storageTank?: boolean | null;
   waterSources?: string | null;
   sfNumber?: string | null;
   propertyUse?: string | null;

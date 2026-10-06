@@ -13,6 +13,7 @@ import {
   buildPseoSlug,
   PSEO_BEDROOM_OPTIONS,
   BEDROOM_PROPERTY_TYPE_SLUGS,
+  isSinglePageType,
   type PropertyTypeSlug,
 } from "@/lib/seo-urls";
 import type { Metadata } from "next";
@@ -555,9 +556,13 @@ export default async function SlugPage({
 
     const structuredData = buildPropertyStructuredData(property);
     const breadcrumbItems = buildBreadcrumbItems(property);
-    // Only FAQs visible on this page are marked up.
+    // Single-page types render every section stacked, so all FAQs are
+    // visible and marked up; multi-page types mark up overview FAQs only.
+    const isSingle = isSinglePageType(property.propertyType);
     const faqJsonLd = buildFaqPageJsonLd(
-      (property.faqs || []).filter((f) => f.section === "overview"),
+      isSingle
+        ? property.faqs || []
+        : (property.faqs || []).filter((f) => f.section === "overview"),
       `https://www.majestanrealty.com/${property.canonicalSlug}`,
     );
 
@@ -566,7 +571,11 @@ export default async function SlugPage({
         <SiteHeader />
         {/* Spacer matching fixed header height (64px constant across breakpoints) */}
         <div className="h-[64px]!" aria-hidden="true" />
-        <PropertyNavigation slug={property.canonicalSlug} activeSection="" />
+        <PropertyNavigation
+          slug={property.canonicalSlug}
+          activeSection=""
+          mode={isSingle ? "anchors" : "pages"}
+        />
         <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
           <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">
             <div className="mb-0!">

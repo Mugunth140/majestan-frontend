@@ -369,15 +369,38 @@ describe("PropertyDetailsView overview teasers", () => {
 
     const viewAllLinks = screen.getAllByRole("link", { name: "View All" });
     const hrefs = viewAllLinks.map((a) => a.getAttribute("href")).sort();
-    // Key Amenities + Floor Plan. The photos teaser hides: this listing has
-    // no real photos (the hero falls back to a default image instead).
-    expect(hrefs).toEqual([`/${slug}/amenities`, `/${slug}/floor-plan`].sort());
+    // Floor Plan only: the Key Amenities preview hides without real tags,
+    // and the photos teaser hides without real photos.
+    expect(hrefs).toEqual([`/${slug}/floor-plan`].sort());
 
     // The teaser carries the floor-plan page's measurements, not its imagery.
     expect(screen.getByText("1,456 sq.ft")).toBeDefined();
     expect(
       screen.queryByRole("heading", { level: 2, name: "Photos" }),
     ).toBeNull();
+  });
+
+  it("shows real amenity tags in the Key Amenities preview", () => {
+    render(
+      <PropertyDetailsView
+        property={{
+          ...baseProperty,
+          amenities: [
+            { id: 1, amenity: { id: 1, name: "High-Speed Wifi" } },
+            { id: 2, amenity: { id: 2, name: "Pantry" } },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("High-Speed Wifi")).toBeDefined();
+    expect(screen.getByText("Pantry")).toBeDefined();
+    // The hardcoded residential fallback never shows alongside real tags.
+    expect(screen.queryByText("24/7 Security")).toBeNull();
+    const hrefs = screen
+      .getAllByRole("link", { name: "View All" })
+      .map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain(`/${slug}/amenities`);
   });
 
   it("shows the photos teaser once the listing has real photos", () => {

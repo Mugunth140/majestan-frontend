@@ -15,9 +15,6 @@ import {
   ChevronRight,
   Building2,
   Calendar,
-  Shield,
-  Zap,
-  Droplets,
   ShieldCheck,
   Images,
   ArrowRight,
@@ -35,7 +32,7 @@ import {
   getVisibleSingleSections,
 } from "@/lib/property-sections";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
-import { AmenitiesSection } from "@/components/site/property/sections/AmenitiesSection";
+import { AmenitiesSection, getIconForAmenity } from "@/components/site/property/sections/AmenitiesSection";
 import { FloorPlanSection } from "@/components/site/property/sections/FloorPlanSection";
 import { LocalitySection } from "@/components/site/property/sections/LocalitySection";
 import { PhotosSection } from "@/components/site/property/sections/PhotosSection";
@@ -188,28 +185,19 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       : []),
   ];
 
-  // Amenities preview
-  const amenitiesPreview = [
-    { icon: <Shield className="w-4.5! h-4.5!" />, name: "24/7 Security" },
-    { icon: <Zap className="w-4.5! h-4.5!" />, name: "Power Backup" },
-    { icon: <Droplets className="w-4.5! h-4.5!" />, name: "Water Supply" },
-    ...(property.details?.parking
-      ? [
-          {
-            icon: <Car className="w-4.5! h-4.5!" />,
-            name: "Reserved Parking",
-          },
-        ]
-      : []),
-    ...(property.details?.furnished
-      ? [
-          {
-            icon: <ShieldCheck className="w-4.5! h-4.5!" />,
-            name: "Fully Furnished",
-          },
-        ]
-      : []),
-  ];
+  // Amenities preview — real tags only, never a hardcoded fallback.
+  // Normalized amenities first, raw join as fallback (tests and older
+  // payloads carry either shape).
+  const normalizedNames = (property.amenities ?? [])
+    .map((a) => a.amenity?.name)
+    .filter((n): n is string => !!n && n.trim() !== "");
+  const rawNames = (
+    (property as unknown as { propertyAmenities?: { amenity?: { name?: string } }[] })
+      .propertyAmenities ?? []
+  )
+    .map((pa) => pa.amenity?.name)
+    .filter((n): n is string => !!n && n.trim() !== "");
+  const amenityNames = (normalizedNames.length > 0 ? normalizedNames : rawNames).slice(0, 6);
 
   const prevImg = () => setActiveImg((i) => (i - 1 + images.length) % images.length);
   const nextImg = () => setActiveImg((i) => (i + 1) % images.length);
@@ -361,30 +349,35 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                 />
               ) : null}
 
-              {/* Amenities card */}
-              <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-                <div className="flex! items-center! justify-between!">
-                  <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Key Amenities</h2>
-                  <Link
-                    href={`/${property.canonicalSlug}/amenities`}
-                    className="inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
-                  >
-                    View All
-                  </Link>
-                </div>
-                <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! md:grid-cols-3! gap-6!">
-                  {amenitiesPreview.map((amenity, i) => (
-                    <div key={i} className="flex! items-center! gap-3!">
-                      <div className="text-gray-500!">
-                        {amenity.icon}
-                      </div>
-                      <span className="font-semibold! text-base! text-gray-600!">
-                        {amenity.name}
-                      </span>
+          {/* Amenities card — real tags only; hidden when the listing has none */}
+          {amenityNames.length > 0 && (
+          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+            <div className="flex! items-center! justify-between!">
+              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Key Amenities</h2>
+              <Link
+                href={`/${property.canonicalSlug}/amenities`}
+                className="inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
+              >
+                View All
+              </Link>
+            </div>
+            <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! md:grid-cols-3! gap-6!">
+              {amenityNames.map((name) => {
+                const Icon = getIconForAmenity(name);
+                return (
+                  <div key={name} className="flex! items-center! gap-3!">
+                    <div className="text-gray-500!">
+                      <Icon className="w-4.5! h-4.5!" />
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <span className="font-semibold! text-base! text-gray-600!">
+                      {name}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          )}
 
               {/* Floor plan teaser: key measurements only, linking to the sub-page */}
               <FloorPlanTeaser

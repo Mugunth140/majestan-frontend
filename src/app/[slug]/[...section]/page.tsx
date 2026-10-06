@@ -12,7 +12,7 @@ import { PropertyTopActions } from "@/components/site/property/PropertyTopAction
 import { getPropertyBySeoSlug, type SeoProperty } from "@/lib/api/property-by-slug";
 import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
-import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
@@ -316,6 +316,12 @@ export default async function PropertySectionPage({
 
     if (property.shouldRedirect) {
       permanentRedirect(`/${property.canonicalSlug}/${sectionKey}`);
+    }
+
+    // Single-page types live on the one overview page: sub-URLs fold back
+    // to their anchor section (never indexed separately).
+    if (isSinglePageType(property.propertyType)) {
+      permanentRedirect(`/${property.canonicalSlug}#${sectionKey}`);
     }
 
     const breadcrumbItems = buildBreadcrumbItems(

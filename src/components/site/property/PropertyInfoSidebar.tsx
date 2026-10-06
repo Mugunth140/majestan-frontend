@@ -14,6 +14,7 @@ import {
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import { formatDate, formatFurnishing, formatPrice } from "@/lib/property-format";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { getFarmlandSpecs, getLandPricePerUnit, getPlotSpecs } from "@/lib/property-sections";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
 
 type PropertyInfoSidebarProps = {
@@ -63,38 +64,55 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
 
   const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;
   const priceNum = parseFloat(property.price);
+  // Land types curate their own spec rows (area, facing, dimensions, water,
+  // crop…) instead of the generic Listed + Property Type pair.
+  const isLand = property.propertyType === "plot" || property.propertyType === "farmland";
+  const landSpecs =
+    property.propertyType === "plot"
+      ? getPlotSpecs(property.details)
+      : property.propertyType === "farmland"
+        ? getFarmlandSpecs(property.details)
+        : [];
   const perSqft =
-    Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
+    getLandPricePerUnit(property.price, property.details, property.propertyType) ??
+    (Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
       ? `₹ ${Math.round(priceNum / areaNum).toLocaleString("en-IN")} / sq.ft`
-      : null;
+      : null);
 
   const title = property.seo?.seoData?.overview?.h1 || property.title;
 
-  const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = [
-    property.details?.bedrooms
-      ? { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: `${property.details.bedrooms} BHK` }
-      : null,
-    property.details?.areaSqft
-      ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${property.details.areaSqft} Sq Ft` }
-      : null,
-    ...(isHomeType
-      ? [
-          formatFurnishing(property.details)
-            ? {
-                icon: <Sofa className="w-4.5! h-4.5!" />,
-                label: "Furnishing",
-                value: formatFurnishing(property.details) as string,
-              }
-            : null,
-          property.details?.propertyFacing
-            ? { icon: <Compass className="w-4.5! h-4.5!" />, label: "Facing", value: property.details.propertyFacing }
-            : null,
-        ]
+  const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = (
+    isLand
+      ? landSpecs.slice(0, 4).map((spec) => {
+          const Icon = spec.icon;
+          return { icon: <Icon className="w-4.5! h-4.5!" />, label: spec.label, value: spec.value };
+        })
       : [
-          { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Listed", value: formatDate(property.createdAt) },
-          { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: propertyTypeLabel },
-        ]),
-  ].filter((s) => s && s.value) as { icon: React.ReactNode; label: string; value: string }[];
+          property.details?.bedrooms
+            ? { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: `${property.details.bedrooms} BHK` }
+            : null,
+          property.details?.areaSqft
+            ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${property.details.areaSqft} Sq Ft` }
+            : null,
+          ...(isHomeType
+            ? [
+                formatFurnishing(property.details)
+                  ? {
+                      icon: <Sofa className="w-4.5! h-4.5!" />,
+                      label: "Furnishing",
+                      value: formatFurnishing(property.details) as string,
+                    }
+                  : null,
+                property.details?.propertyFacing
+                  ? { icon: <Compass className="w-4.5! h-4.5!" />, label: "Facing", value: property.details.propertyFacing }
+                  : null,
+              ]
+            : [
+                { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Listed", value: formatDate(property.createdAt) },
+                { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: propertyTypeLabel },
+              ]),
+        ]
+  ).filter((s) => s && s.value) as { icon: React.ReactNode; label: string; value: string }[];
 
   return (
     <div className="lg:sticky! lg:top-[140px]! flex! flex-col! gap-5!">

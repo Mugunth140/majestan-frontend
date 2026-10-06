@@ -113,13 +113,57 @@ describe("PropertyDetailsView info card", () => {
   });
 
   it("keeps the generic rows for property types that are not curated yet", () => {
-    render(<PropertyDetailsView property={{ ...baseProperty, propertyType: "plot" }} />);
+    render(<PropertyDetailsView property={{ ...baseProperty, propertyType: "commercial" }} />);
 
     expect(screen.getByText("Listed")).toBeDefined();
     expect(screen.getAllByText("Property Type")).toHaveLength(2);
     expect(screen.queryByText("Facing")).toBeNull();
     // The overview stat still says "Furnishing" — the info card must not.
     expect(screen.getAllByText("Furnishing")).toHaveLength(1);
+  });
+
+  it("curates the sidebar for plot: land rows, not Listed and Property Type", () => {
+    const plotWithLand = {
+      ...baseProperty,
+      propertyType: "plot",
+      details: {
+        bedrooms: 0,
+        bathrooms: 0,
+        areaSqft: "",
+        parking: 0,
+        furnished: false,
+        plotArea: "2400",
+        plotLength: "40",
+        plotWidth: "60",
+        propertyFacing: "East",
+      },
+    };
+    render(<PropertyDetailsView property={plotWithLand} />);
+
+    expect(screen.queryByText("Listed")).toBeNull();
+    // One "Property Type" remains: the overview stats row. The card's copy goes.
+    expect(screen.getAllByText("Property Type")).toHaveLength(1);
+    // Sidebar row + overview stat each.
+    expect(screen.getAllByText("Plot Area")).toHaveLength(2);
+    expect(screen.getAllByText("40 × 60 ft")).toHaveLength(2);
+  });
+
+  it("shows price per cent for land with cents known", () => {
+    const land = {
+      ...baseProperty,
+      propertyType: "plot",
+      price: "5000000",
+      details: {
+        bedrooms: 0,
+        bathrooms: 0,
+        areaSqft: "",
+        parking: 0,
+        furnished: false,
+        plotSizeCents: "50",
+      },
+    };
+    render(<PropertyDetailsView property={land} />);
+    expect(screen.getAllByText("₹ 1,00,000/cent").length).toBeGreaterThan(0);
   });
 
   it("shows the bare title for apartments, without the city suffix", () => {

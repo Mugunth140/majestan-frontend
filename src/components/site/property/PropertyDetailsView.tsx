@@ -25,7 +25,12 @@ import {
   Info,
 } from "lucide-react";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
-import { getVisibleSingleSections } from "@/lib/property-sections";
+import {
+  getFarmlandSpecs,
+  getLandPricePerUnit,
+  getPlotSpecs,
+  getVisibleSingleSections,
+} from "@/lib/property-sections";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
 import { AmenitiesSection } from "@/components/site/property/sections/AmenitiesSection";
 import { FloorPlanSection } from "@/components/site/property/sections/FloorPlanSection";
@@ -98,10 +103,22 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
 
   const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;
   const priceNum = parseFloat(property.price);
+  // Land is priced per cent, never per sq.ft — and only land-relevant rows
+  // show for plot/farmland (no beds/baths/parking/furnishing).
+  const landSpecs =
+    property.propertyType === "plot"
+      ? getPlotSpecs(property.details)
+      : property.propertyType === "farmland"
+        ? getFarmlandSpecs(property.details)
+        : [];
+  const hasLandArea = landSpecs.some(
+    (r) => r.label === "Plot Area" || r.label === "Farm Area"
+  );
   const perSqft =
-    Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
+    getLandPricePerUnit(property.price, property.details, property.propertyType) ??
+    (Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
       ? `₹ ${Math.round(priceNum / areaNum).toLocaleString("en-IN")} / sq.ft`
-      : null;
+      : null);
 
   const title = property.seo?.seoData?.overview?.h1 || property.title;
 
@@ -120,7 +137,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     Number(property.details?.totalFloors) > 0
       ? [{ icon: <Layers className="w-5! h-5!" />, label: "Floor No", value: `${property.details.floorNumber} / ${property.details.totalFloors}` }]
       : []),
-    ...(property.details?.areaSqft
+    ...(!hasLandArea && property.details?.areaSqft
       ? [{ icon: <Square className="w-5! h-5!" />, label: "Area", value: `${property.details.areaSqft} sq.ft` }]
       : []),
     ...(property.details?.parking
@@ -130,8 +147,18 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       ? [{ icon: <ShieldCheck className="w-5! h-5!" />, label: "Furnishing", value: formatFurnishing(property.details) as string }]
       : []),
     ...(perSqft
-      ? [{ icon: <Tag className="w-5! h-5!" />, label: "Price / Sq.Ft", value: perSqft }]
+      ? [
+          {
+            icon: <Tag className="w-5! h-5!" />,
+            label: perSqft.includes("/cent") ? "Price / Cent" : "Price / Sq.Ft",
+            value: perSqft,
+          },
+        ]
       : []),
+    ...landSpecs.map((spec) => {
+      const Icon = spec.icon;
+      return { icon: <Icon className="w-5! h-5!" />, label: spec.label, value: spec.value };
+    }),
     { icon: <Calendar className="w-5! h-5!" />, label: "Listed On", value: formatDate(property.createdAt) },
     { icon: <Building2 className="w-5! h-5!" />, label: "Property Type", value: propertyTypeLabel },
     ...(property.propertyCode

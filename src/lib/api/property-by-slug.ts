@@ -23,6 +23,33 @@ export type SeoPropertyDetails = {
   // propertyDetails.propertyFacing from the API (DB `property_facing`). Absent
   // from older payloads, so optional — rows hide when it is missing.
   propertyFacing?: string | null;
+  // Land fields (DB `property_details` plot/farmland columns). Only stored
+  // for land listings — rows hide when absent.
+  plotArea?: string | null;
+  plotSizeCents?: string | null;
+  areaUnit?: string | null;
+  plotLength?: string | number | null;
+  plotWidth?: string | number | null;
+  dimension?: string | null;
+  openSides?: number | null;
+  boundaryWall?: boolean | null;
+  roadWidth?: string | null;
+  suitableFor?: string | null;
+  plotType?: string | null;
+  zoning?: string | null;
+  approvals?: string | null;
+  landType?: string | null;
+  topography?: string | null;
+  soilType?: string | null;
+  irrigation?: string | null;
+  fencing?: string | null;
+  cropSuitability?: string | null;
+  existingPlantation?: string | null;
+  boreWell?: boolean | null;
+  waterSources?: string | null;
+  sfNumber?: string | null;
+  propertyUse?: string | null;
+  propertyAge?: string | null;
   roomDimensions?: { name: string; dimensions: string }[];
   floorPlanImages?: { title: string; imageUrl: string; imageKey: string }[];
 } | null;

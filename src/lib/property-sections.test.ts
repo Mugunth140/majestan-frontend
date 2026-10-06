@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getFloorPlanLabel, getVisibleSingleSections, isGroundPlanType } from "./property-sections";
+import {
+  getFarmlandSpecs,
+  getFloorPlanLabel,
+  getLandPricePerUnit,
+  getPlotSpecs,
+  getVisibleSingleSections,
+  isGroundPlanType,
+} from "./property-sections";
 import type { SeoProperty } from "./api/property-by-slug";
 
 const barePlot = {
@@ -77,6 +84,118 @@ describe("getVisibleSingleSections", () => {
       floorPlanFiles: [{ title: "Plan", imageUrl: "/plan.jpg", imageKey: "f1" }],
     } as unknown as SeoProperty;
     expect(getVisibleSingleSections(p)).toEqual(["floor-plan", "locality"]);
+  });
+});
+
+describe("getPlotSpecs", () => {
+  const plotDetails = {
+    plotArea: "2400.00",
+    areaUnit: "Sq Ft",
+    plotLength: "40",
+    plotWidth: "60",
+    propertyFacing: "East",
+    plotType: "Residential",
+    zoning: "Residential",
+    roadWidth: "30 ft",
+    boundaryWall: true,
+    suitableFor: "Villa",
+  };
+
+  it("returns plot-relevant rows in priority order", () => {
+    const labels = getPlotSpecs(plotDetails).map((r) => r.label);
+    expect(labels).toEqual([
+      "Plot Area",
+      "Dimension",
+      "Facing",
+      "Plot Type",
+      "Zoning",
+      "Road Width",
+      "Boundary Wall",
+      "Suitable For",
+    ]);
+  });
+
+  it("formats dimension from length and width", () => {
+    const dim = getPlotSpecs(plotDetails).find((r) => r.label === "Dimension");
+    expect(dim?.value).toBe("40 × 60 ft");
+  });
+
+  it("falls back to open sides when no boundary wall", () => {
+    const rows = getPlotSpecs({ ...plotDetails, boundaryWall: null, openSides: 2 });
+    const labels = rows.map((r) => r.label);
+    expect(labels).not.toContain("Boundary Wall");
+    expect(labels).toContain("Open Sides");
+  });
+
+  it("returns no rows when nothing is stored", () => {
+    expect(getPlotSpecs({})).toEqual([]);
+  });
+});
+
+describe("getFarmlandSpecs", () => {
+  const farmDetails = {
+    plotSizeCents: "50.0000",
+    waterSources: "Borewell + Canal",
+    cropSuitability: "Coconut, Banana",
+    soilType: "Red Loam",
+    landType: "Wet Land",
+    topography: "Flat",
+    existingPlantation: "Coconut trees",
+    boundaryWall: true,
+    sfNumber: "123/4",
+    boreWell: true,
+    propertyFacing: "East",
+  };
+
+  it("returns richer agronomy rows in priority order", () => {
+    const labels = getFarmlandSpecs(farmDetails).map((r) => r.label);
+    expect(labels).toEqual([
+      "Farm Area",
+      "Water Sources",
+      "Crop Suitability",
+      "Soil Type",
+      "Land Type",
+      "Topography",
+      "Existing Plantation",
+      "Fencing",
+      "SF Number",
+      "Bore Well",
+    ]);
+  });
+
+  it("prefers irrigation label when only irrigation is stored", () => {
+    const rows = getFarmlandSpecs({ irrigation: "Canal" });
+    expect(rows[0]).toMatchObject({ label: "Irrigation", value: "Canal" });
+  });
+
+  it("falls back to facing when no crop data exists", () => {
+    const rows = getFarmlandSpecs({ propertyFacing: "East" });
+    expect(rows.map((r) => r.label)).toContain("Facing");
+  });
+
+  it("carries more rows than a comparable plot", () => {
+    const plotRows = getPlotSpecs({ plotArea: "2400", propertyFacing: "East" });
+    const farmRows = getFarmlandSpecs({
+      plotSizeCents: "50",
+      propertyFacing: "East",
+      soilType: "Red Loam",
+      cropSuitability: "Coconut",
+      waterSources: "Borewell",
+    });
+    expect(farmRows.length).toBeGreaterThan(plotRows.length);
+  });
+});
+
+describe("getLandPricePerUnit", () => {
+  it("prices land per cent when cents are known", () => {
+    expect(getLandPricePerUnit("5000000", { plotSizeCents: "50" }, "plot")).toBe(
+      "₹ 1,00,000/cent"
+    );
+  });
+
+  it("returns null when cents are unknown", () => {
+    expect(getLandPricePerUnit("5000000", { plotArea: "2400" }, "plot")).toBeNull();
+    expect(getLandPricePerUnit("5000000", {}, "farmland")).toBeNull();
   });
 });
 

@@ -509,7 +509,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-3!">
 
             {/* Sticky row: breadcrumbs + sort only */}
-            <div className="lg:sticky! lg:top-[64px]! z-20! bg-[#f6f7f9]! border-b! border-gray-200/60! py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
+            <div className="lg:sticky! lg:top-[64px]! z-20! bg-[#f6f7f9]! py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
               <div className="flex! flex-row! items-center! justify-between! gap-3!">
                 <div className="flex-1! min-w-0!">
                   <Breadcrumbs items={breadcrumbItems} jsonLd />

@@ -33,6 +33,22 @@ export const BEDROOM_PROPERTY_TYPE_SLUGS: PropertyTypeSlug[] = [
 // BHK options for PSEO page generation (1-BHK excluded from indexable PSEO pages)
 export const PSEO_BEDROOM_OPTIONS = [2, 3, 4] as const;
 
+// Property types rendered as ONE anchored page (/:slug with #sections).
+// Multi-page types (apartment, villa, individual_portion) keep separate
+// subpage URLs. Values are DB apiValues (property.entity.ts).
+export const SINGLE_PAGE_TYPES: ReadonlySet<string> = new Set([
+  "plot",
+  "farmland",
+  "commercial",
+  "industrial",
+  "coworking",
+  "other",
+]);
+
+export function isSinglePageType(propertyType: string): boolean {
+  return SINGLE_PAGE_TYPES.has(propertyType);
+}
+
 export function toLocationSlug(value: string): string {
   return value
     .trim()

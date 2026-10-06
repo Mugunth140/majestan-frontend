@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatPlotArea,
   getCommercialSpecs,
   getCoworkingSpecs,
   getFarmlandSpecs,
@@ -135,6 +136,11 @@ describe("getPlotSpecs", () => {
 
   it("returns no rows when nothing is stored", () => {
     expect(getPlotSpecs({})).toEqual([]);
+  });
+
+  it("reads plot area in cents when the area unit is cents", () => {
+    const rows = getPlotSpecs({ plotArea: "5.5", areaUnit: "Cents" });
+    expect(rows).toMatchObject([{ label: "Plot Area", value: "5.5 cents" }]);
   });
 
   it("shows water and land type from real plot data", () => {
@@ -458,6 +464,25 @@ describe("hasGroundPlanData", () => {
   it("is false with measures alone", () => {
     expect(hasGroundPlanData({ plotArea: "2400" }, [])).toBe(false);
     expect(hasGroundPlanData(null, null)).toBe(false);
+  });
+});
+
+describe("formatPlotArea", () => {
+  it("uses cents when the area unit is cents", () => {
+    expect(formatPlotArea("5.5", "Cents")).toBe("5.5 cents");
+  });
+
+  it("uses acres when the area unit is acres", () => {
+    expect(formatPlotArea("2", "Acres")).toBe("2 acres");
+  });
+
+  it("uses sq.ft otherwise", () => {
+    expect(formatPlotArea("2400.00", "Sq Ft")).toBe("2,400 sq.ft");
+    expect(formatPlotArea("2400.00", null)).toBe("2,400 sq.ft");
+  });
+
+  it("returns null for missing area", () => {
+    expect(formatPlotArea(null, "Cents")).toBeNull();
   });
 });
 

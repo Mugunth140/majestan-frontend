@@ -101,6 +101,26 @@ describe("getCardSpecCells", () => {
     expect(labels).toEqual(["Plot Area", "Facing", "Dimension", "Plot Type"]);
   });
 
+  it("never shows possession on plot cards, even when available-from exists", () => {
+    const cells = getCardSpecCells({
+      ...withDetails("plot", {
+        plotArea: "2400",
+        propertyFacing: "East",
+        plotLength: "40",
+        plotWidth: "60",
+      }),
+      availableFrom: "2026-06-14",
+    });
+    expect(cells.map((c) => c.label)).toEqual(["Plot Area", "Facing", "Dimension"]);
+  });
+
+  it("honors cents area unit on plot cards", () => {
+    const cells = getCardSpecCells(
+      withDetails("plot", { plotArea: "5.5", areaUnit: "Cents" })
+    );
+    expect(cells).toMatchObject([{ label: "Plot Area", value: "5.5 cents" }]);
+  });
+
   it("caps farmland cells at 4, dropping property age", () => {
     const labels = getCardSpecCells(
       withDetails("farmland", {

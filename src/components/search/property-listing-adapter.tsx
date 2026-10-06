@@ -6,6 +6,7 @@ import { useState } from "react";
 import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Sprout } from "lucide-react";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import {
+  formatPlotArea,
   getCommercialSpecs,
   getCoworkingSpecs,
   getFloorPlanLabel,
@@ -199,7 +200,8 @@ function getTypeLabel(item: PropertySearchItem): string | null {
 function getAreaCell(item: PropertySearchItem): { label: string; value: string } | null {
   const d = getDetails(item);
   if (item.propertyType === "plot") {
-    if (nzNum(d.plotArea) != null) return { label: "Plot Area", value: fmtArea(d.plotArea)! };
+    const area = formatPlotArea(d.plotArea, d.areaUnit);
+    if (area != null) return { label: "Plot Area", value: area };
     const cents = fmtTrimmedNum(d.plotSizeCents);
     if (cents != null) return { label: "Plot Area", value: `${cents} cents` };
   }
@@ -332,7 +334,8 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
     const zoning = trimStr(d.zoning);
     if (zoning) specCells.push({ label: "Zoning", value: zoning });
     else if (d.approvals) specCells.push({ label: "Approvals", value: d.approvals });
-    else if (possession) specCells.push({ label: "Possession", value: possession });
+    // No possession fallback: the photo strip already shows availability,
+    // and a move-in date is noise on a land card.
     if (d.boundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });
     else {
       const openSides = nzNum(d.openSides);

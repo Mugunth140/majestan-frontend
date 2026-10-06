@@ -156,9 +156,23 @@ function areaSqftInCents(d: LandDetails): number | null {
   return /cent/i.test(String(d.areaUnit ?? "")) ? nzNum(d.areaSqft) : null;
 }
 
+/**
+ * Plot area with the stored unit honored: the Area Unit selector offers
+ * Sq Ft, Sq M, Acres and Cents, so a stored "5.5" can mean cents —
+ * never blindly print sq.ft.
+ */
+export function formatPlotArea(value: unknown, areaUnit?: string | null): string | null {
+  const n = nzNum(value);
+  if (n == null) return null;
+  if (/cent/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} cents`;
+  if (/acre/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} acres`;
+  return `${n.toLocaleString("en-IN")} sq.ft`;
+}
+
 function plotAreaRow(d: LandDetails): LandSpecRow | null {
-  if (nzNum(d.plotArea) != null) {
-    return { label: "Plot Area", value: `${Number(d.plotArea).toLocaleString("en-IN")} sq.ft`, icon: Maximize2 };
+  const area = formatPlotArea(d.plotArea, d.areaUnit);
+  if (area != null) {
+    return { label: "Plot Area", value: area, icon: Maximize2 };
   }
   const cents = nzNum(d.plotSizeCents) ?? areaSqftInCents(d);
   if (cents != null) {

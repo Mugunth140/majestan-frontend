@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
-import { formatDate, formatFurnishing } from "@/lib/property-format";
+import { formatDate, formatDescriptionParagraphs, formatFurnishing } from "@/lib/property-format";
 import {
   BedDouble,
   Bath,
@@ -304,7 +304,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             {property.description ? (
               <div
                 className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! [&_p]:mb-6! [&_h3]:text-xl! [&_h3]:font-semibold! [&_h3]:text-gray-900! [&_h3]:mt-10! [&_h3]:mb-4! [&_ul]:list-disc! [&_ul]:pl-5! [&_li]:mb-2! [&_strong]:font-medium! [&_strong]:text-gray-900!"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(property.description, { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['h1', 'h2', 'img']) }) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(formatDescriptionParagraphs(property.description), { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['h1', 'h2', 'img']) }) }}
               />
             ) : (
               <p className="mt-4! text-gray-500! font-light! italic!">

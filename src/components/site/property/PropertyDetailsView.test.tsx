@@ -502,6 +502,21 @@ describe("PropertyDetailsView single-page types", () => {
   });
 });
 
+describe("PropertyDetailsView description", () => {
+  it("renders blank-line-separated paragraphs as separate blocks", () => {
+    const { container } = render(
+      <PropertyDetailsView
+        property={{ ...baseProperty, description: "Para one.\n\nPara two.\n\nPara three." }}
+      />
+    );
+    const paras = container.querySelectorAll("p");
+    const texts = [...paras].map((p) => p.textContent);
+    expect(texts).toContain("Para one.");
+    expect(texts).toContain("Para two.");
+    expect(texts).toContain("Para three.");
+  });
+});
+
 describe("PropertyDetailsView floor item", () => {
   const withFloors = (over: Record<string, unknown> = {}) => ({
     ...baseProperty,

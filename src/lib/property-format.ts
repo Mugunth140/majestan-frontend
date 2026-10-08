@@ -55,6 +55,26 @@ export function mapFurnishingSelection(value: FurnishingSelection): FurnishingPa
 }
 
 /**
+ * Plain-text descriptions (textarea input) carry no paragraph markup, so
+ * browsers collapse their line breaks into one wall of text. Split blank-
+ * line-separated blocks into <p> tags (single breaks become <br>) before
+ * sanitizing. Already-formatted HTML passes through untouched.
+ */
+export function formatDescriptionParagraphs(input: string): string {
+  if (!input) return input;
+  const normalized = input.replace(/\r\n?/g, "\n");
+  if (/<\s*(p|div|h1|h2|h3|ul|ol|li|br|strong|em)[\s>/]/i.test(normalized)) {
+    return normalized;
+  }
+  const blocks = normalized
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+  if (blocks.length === 0) return normalized;
+  return blocks.map((b) => `<p>${b.replace(/\n/g, "<br>")}</p>`).join("");
+}
+
+/**
  * Display value for the Furnishing row. Prefers the CRM's furnishing-status
  * dropdown value (SEMI FURNISHED, FULLY FURNISHED, BARESHELL, UNFURNISHED),
  * falling back to the legacy `furnished` checkbox flag. Null when neither is

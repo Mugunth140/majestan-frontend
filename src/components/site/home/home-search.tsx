@@ -99,7 +99,7 @@ export function HomeSearch({
      against the trigger's viewport rect, and re-anchor on scroll/resize instead
      of closing. */
   function useAnchoredMenu(open: boolean, triggerRef: React.RefObject<HTMLElement | null>) {
-    const [rect, setRect] = useState<{ top: number; left: number; minWidth: number } | null>(null);
+    const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
 
     useEffect(() => {
       if (!open) {
@@ -111,11 +111,13 @@ export function HomeSearch({
         const el = triggerRef.current;
         if (!el) return;
         const r = el.getBoundingClientRect();
+        // Fixed panel width hugging the trigger (floored so narrow triggers
+        // still fit content, capped so long names can't blow it wide).
         // Clamp to the viewport so a trigger near the right edge does not push
         // the panel off-screen.
-        const width = Math.max(r.width, 224);
+        const width = Math.min(Math.max(r.width, 224), 320);
         const left = Math.min(r.left, window.innerWidth - width - 12);
-        setRect({ top: r.bottom + 8, left: Math.max(12, left), minWidth: width });
+        setRect({ top: r.bottom + 8, left: Math.max(12, left), width });
       };
 
       update();
@@ -255,8 +257,8 @@ export function HomeSearch({
               <div
                 role="listbox"
                 data-search-menu
-                style={{ top: propertyAnchor.top, left: propertyAnchor.left, minWidth: propertyAnchor.minWidth }}
-                className="fixed! z-[60]! w-max! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
+                style={{ top: propertyAnchor.top, left: propertyAnchor.left, width: propertyAnchor.width }}
+                className="fixed! z-[60]! max-h-72! overflow-y-auto! overflow-x-hidden! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
               >
                 {propertyTypeOptions.map(([value, label]) => (
                   <button
@@ -306,8 +308,8 @@ export function HomeSearch({
               <div
                 role="listbox"
                 data-search-menu
-                style={{ top: localityAnchor.top, left: localityAnchor.left, minWidth: localityAnchor.minWidth }}
-                className="fixed! z-[60]! w-max! max-h-72! overflow-y-auto! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
+                style={{ top: localityAnchor.top, left: localityAnchor.left, width: localityAnchor.width }}
+                className="fixed! z-[60]! max-h-72! overflow-y-auto! overflow-x-hidden! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
               >
                 {filteredSublocations.length > 0 ? (
                   filteredSublocations.map((item) => (

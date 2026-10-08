@@ -66,6 +66,18 @@ describe("HomeSearch responsive search bar", () => {
     expect(within(trigger).getByText("Apartment")).toBeDefined();
   });
 
+  it("caps dropdown panels at a narrow width instead of content width", async () => {
+    const user = userEvent.setup();
+    renderSearch();
+
+    await user.click(screen.getByRole("button", { name: /property type/i }));
+    const panel = screen.getByRole("listbox");
+    // Fixed pixel width (trigger width clamped to 224–320), never w-max.
+    expect(panel.style.width).toMatch(/^\d+px$/);
+    expect(parseInt(panel.style.width, 10)).toBeLessThanOrEqual(320);
+    expect(panel.className).not.toContain("w-max");
+  });
+
   it("keeps a portaled menu open long enough to select an option", async () => {
     // The menu renders outside the trigger's DOM subtree. If the outside-click
     // handler closed it on mousedown, the option would unmount before its own

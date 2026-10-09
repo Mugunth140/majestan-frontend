@@ -350,7 +350,7 @@ export async function generateMetadata({
     if (project) {
       const canonicalPath = `/${project.canonicalSlug}`;
       const seo = project.seo?.seoData?.overview;
-      const typeLabel = project.projectType === "villa" ? "Villa" : "Apartment";
+      const typeLabel = project.projectType === "villa" ? "Villa" : project.projectType === "plot" ? "Plot" : "Apartment";
       const bhkLabel = project.ranges.bhk.length
         ? `${project.ranges.bhk.join(", ")} BHK `
         : "";

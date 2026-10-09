@@ -50,7 +50,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
   const [activeImg, setActiveImg] = useState(0);
   const [copied, setCopied] = useState(false);
 
-  const typeLabel = project.projectType === "villa" ? "Villa" : "Apartment";
+  const typeLabel = project.projectType === "villa" ? "Villa" : project.projectType === "plot" ? "Plot" : "Apartment";
 
   const min = project.ranges.minPrice;
   const max = project.ranges.maxPrice;
@@ -79,10 +79,15 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
       : null;
 
   const possessionDate = formatPossessionDate(project.possessionDate);
-  const locationLine = [
+  const projectAddress = (project.address || "").trim();
+  const projectPincode = (() => {
+    const m = projectAddress.match(/\b\d{6}\b/);
+    return m ? m[0] : "";
+  })();
+  const projectLocationLine2 = [
     project.sublocation,
     project.city,
-    project.state,
+    projectPincode,
   ]
     .filter(Boolean)
     .join(", ");
@@ -92,6 +97,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
     { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Super Built-Up", value: areaRange },
     { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Possession", value: possessionDate ?? titleCase(project.possessionStatus) },
     { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: typeLabel },
+    { icon: <Layers className="w-4.5! h-4.5!" />, label: "Total Floors", value: project.totalFloors ? `${project.totalFloors} Floors` : null },
   ].filter((s) => s.value) as { icon: React.ReactNode; label: string; value: string }[];
 
   const overviewStats: { icon: React.ReactNode; label: string; value: string }[] = [
@@ -99,8 +105,14 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
     ...(project.totalUnits
       ? [{ icon: <Layers className="w-4.5! h-4.5!" />, label: "No. of Units", value: `${project.totalUnits} Units` }]
       : []),
-    ...(project.towers
+    ...(project.projectType === "apartment" && project.towers
       ? [{ icon: <Building2 className="w-4.5! h-4.5!" />, label: "Towers", value: `${project.towers} ${project.towers === 1 ? "Tower" : "Towers"}` }]
+      : []),
+    ...(project.totalFloors
+      ? [{ icon: <Layers className="w-4.5! h-4.5!" />, label: "Total Floors", value: `${project.totalFloors} Floors` }]
+      : []),
+    ...(project.projectAreaSqft
+      ? [{ icon: <Ruler className="w-4.5! h-4.5!" />, label: "Project Area", value: `${Number(project.projectAreaSqft).toLocaleString("en-IN")} Sq Ft` }]
       : []),
     ...(bhkLabel ? [{ icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: bhkLabel }] : []),
     ...(areaRange ? [{ icon: <Ruler className="w-4.5! h-4.5!" />, label: "Super Built-Up", value: areaRange }] : []),
@@ -294,7 +306,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
           <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
             <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">About {project.name}</h2>
             {project.description ? (
-              <div className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! whitespace-pre-line!">
+              <div className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! whitespace-pre-wrap! break-words!">
                 {project.description}
               </div>
             ) : (
@@ -313,6 +325,31 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             />
           ) : null}
 
+          {/* Highlights */}
+          {project.highlights ? (
+            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Highlights</h2>
+              <div className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! whitespace-pre-wrap! break-words!">
+                {project.highlights}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Specifications */}
+          {project.specifications && project.specifications.length > 0 ? (
+            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Specifications</h2>
+              <div className="mt-4! grid! grid-cols-1! sm:grid-cols-2! gap-x-6! gap-y-4!">
+                {project.specifications.map((spec, i) => (
+                  <div key={i} className="min-w-0!">
+                    <p className="text-[12px]! text-gray-400! font-normal!">{spec.label}</p>
+                    <p className="text-[14px]! font-semibold! text-gray-900! mt-0.5! leading-snug!">{spec.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           {/* Configurations card */}
           {project.units.length > 0 && (
             <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
@@ -324,6 +361,9 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                       <th className="py-3! pr-4! font-bold!">Unit</th>
                       <th className="py-3! pr-4! font-bold!">Type</th>
                       <th className="py-3! pr-4! font-bold!">Area (sq.ft)</th>
+                      <th className="py-3! pr-4! font-bold!">Floor</th>
+                      <th className="py-3! pr-4! font-bold!">Facing</th>
+                      <th className="py-3! pr-4! font-bold!">Parking</th>
                       <th className="py-3! pr-4! font-bold!">Price</th>
                       <th className="py-3! font-bold!">Status</th>
                     </tr>
@@ -340,6 +380,17 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                           {(u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft)
                             ? Number(u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft).toLocaleString("en-IN")
                             : "-"}
+                        </td>
+                        <td className="py-3.5! pr-4! text-gray-600!">
+                          {u.floorNo != null ? (u.totalFloors ? `${u.floorNo} of ${u.totalFloors}` : `${u.floorNo}`) : "-"}
+                        </td>
+                        <td className="py-3.5! pr-4! text-gray-600! capitalize!">{u.facing?.replace(/_/g, " ") ?? "-"}</td>
+                        <td className="py-3.5! pr-4! text-gray-600! capitalize!">
+                          {[
+                            u.parking != null ? `${u.parking}` : null,
+                            u.parkingType ? String(u.parkingType).replace(/_/g, " ") : null,
+                            u.unitGuestParking ? "Guest" : null,
+                          ].filter(Boolean).join(" · ") || "-"}
                         </td>
                         <td className="py-3.5! pr-4! font-extrabold! text-[#27427f]! whitespace-nowrap!">{u.price ? formatINR(u.price) : "-"}</td>
                         <td className="py-3.5! capitalize! text-gray-600!">{u.status?.replace(/_/g, " ")}</td>
@@ -392,11 +443,18 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                 </h1>
               </div>
 
-              {locationLine ? (
-                <p className="mt-2! flex! items-start! gap-2! text-[13px]! text-gray-500! leading-relaxed!">
+              {(projectAddress || projectLocationLine2) ? (
+                <div className="mt-2! flex! items-start! gap-2! text-[13px]! text-gray-500! leading-relaxed!">
                   <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
-                  {project.address ? `${project.address}, ${locationLine}` : locationLine}
-                </p>
+                  <span className="min-w-0!">
+                    {projectAddress ? (
+                      <span className="block! text-gray-700!">{projectAddress}</span>
+                    ) : null}
+                    {projectLocationLine2 ? (
+                      <span className="block!">{projectLocationLine2}</span>
+                    ) : null}
+                  </span>
+                </div>
               ) : null}
 
               {sidebarSpecs.length > 0 && (

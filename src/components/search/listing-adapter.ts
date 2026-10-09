@@ -19,6 +19,9 @@ export interface ListingAdapter<TFilters extends Record<string, string>, TItem> 
   emptyTitle: string;
   emptyHint: (filters: TFilters) => string;
   resetFilters: TFilters;
+  /** Noun used in title/pagination counts ("properties" default, "projects" for project listing) */
+  countNoun?: string;
+  countNounPlural?: string;
   syncUrl: (args: { filters: TFilters; sort: string; pathname: string; searchParams: URLSearchParams }) => string;
   filtersFromParams: (searchParams: URLSearchParams) => Partial<TFilters>;
 }

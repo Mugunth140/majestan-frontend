@@ -365,6 +365,10 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   const breadcrumbItems = adapter.buildBreadcrumbs(filters);
   const activeFilterCount = countActiveFilters(filters);
   const filtersAsRecord = filters as Record<string, string>;
+  const countNoun = adapter.countNoun ?? "property";
+  const countNounPlural = adapter.countNounPlural ?? "properties";
+  const totalCount = data?.total ?? 0;
+  const countLabel = totalCount === 1 ? countNoun : countNounPlural;
 
   const totalPages = data ? Math.ceil(data.total / data.limit) : 0;
   const pageHref = (pageNum: number) => {
@@ -536,7 +540,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             <div className="min-w-0! mt-0! mb-4!">
               <h1 className="font-['Manrope',sans-serif]! text-lg! sm:text-2xl! font-medium! text-gray-900! leading-snug! capitalize! truncate!">
                 <span className="text-gray-900! text-lg! font-['Manrope',sans-serif] font-normal!">
-                  {data?.total ?? 0} properties
+                  {totalCount} {countLabel}
                 </span>{" "}
                 <span className="font-light! text-gray-300!">|</span>{" "}
                 {pageTitle}
@@ -625,7 +629,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                           <span className="font-semibold! text-gray-900!">
                             {data.total}
                           </span>{" "}
-                          properties
+                          {countLabel}
                         </p>
                       <nav
                         aria-label="Listing pages"

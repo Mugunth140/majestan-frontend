@@ -284,7 +284,7 @@ function getLocationLabel(item: PropertySearchItem): string {
   const sub = capFirst((item.sublocation || "").trim());
   const city = ((item as any).city || "").trim();
   if (sub && city && sub.toLowerCase() !== city.toLowerCase()) return `${sub}, ${city}`;
-  return sub || city || item.address || "";
+  return sub || city || "";
 }
 
 function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string | null {

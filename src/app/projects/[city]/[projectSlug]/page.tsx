@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const canonicalPath = `/${project.canonicalSlug}`;
   const seo = project.seo?.seoData?.overview;
-  const typeLabel = project.projectType === "villa" ? "Villa" : "Apartment";
+  const typeLabel = project.projectType === "villa" ? "Villa" : project.projectType === "plot" ? "Plot" : "Apartment";
   const bhkLabel = project.ranges.bhk.length ? `${project.ranges.bhk.join(", ")} BHK ` : "";
   const priceLabel =
     project.ranges.minPrice != null

@@ -56,9 +56,15 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
 
   const locData = property.locations?.[0]?.localityData;
   const locRow = property.locations?.[0] as unknown as
-    | { address?: string | null; landmark?: string | null }
+    | { address?: string | null; landmark?: string | null; pincode?: string | null }
     | undefined;
-  const addrPart = (locRow?.address || locRow?.landmark || "").split(",")[0].trim();
+  const fullAddress = (
+    locRow?.address ||
+    locRow?.landmark ||
+    (locData as any)?.address ||
+    ""
+  ).trim();
+  const addrPart = fullAddress.split(",")[0].trim();
   const rawSub =
     (property as any).sublocation ||
     (property as any).locality ||
@@ -67,7 +73,14 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
     addrPart;
   const capFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
   const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
-  const locationLine = [subLocation, property.city, property.state].filter(Boolean).join(", ");
+  const pincode = (
+    (locRow as any)?.pincode ||
+    (locData as any)?.pincode ||
+    (locData as any)?.postalCode ||
+    (locData as any)?.postal_code ||
+    ""
+  ).toString().trim();
+  const locationLine2 = [subLocation, property.city, pincode].filter(Boolean).join(", ");
 
   const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;
   const priceNum = parseFloat(property.price);
@@ -148,11 +161,18 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           </h1>
         </div>
 
-        {locationLine ? (
-          <p className="mt-2! flex! items-start! gap-2! text-[13px]! font-manrope! text-gray-500! leading-relaxed!">
+        {(fullAddress || locationLine2) ? (
+          <div className="mt-2! flex! items-start! gap-2! text-[13px]! font-manrope! text-gray-500! leading-relaxed!">
             <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
-            {locationLine}
-          </p>
+            <span className="min-w-0!">
+              {fullAddress ? (
+                <span className="block! text-gray-700!">{fullAddress}</span>
+              ) : null}
+              {locationLine2 ? (
+                <span className="block!">{locationLine2}</span>
+              ) : null}
+            </span>
+          </div>
         ) : null}
 
         {sidebarSpecs.length > 0 && (

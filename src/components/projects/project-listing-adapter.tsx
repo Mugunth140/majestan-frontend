@@ -170,8 +170,8 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
       const requested = (filters.city || city).trim() || "Coimbatore";
       return `We couldn't find any projects matching your current criteria in ${requested}. Try adjusting your filters or exploring a different area.`;
     },
-    countNoun: "project",
-    countNounPlural: "projects",
+    countNoun: "result",
+    countNounPlural: "results",
 
     syncUrl: ({ filters, sort, pathname, searchParams }) => {
       const params = new URLSearchParams(searchParams.toString());

@@ -117,6 +117,14 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
       ? `₹ ${Math.round(priceNum / areaNum).toLocaleString("en-IN")} / sq.ft`
       : null);
 
+  // DB decimals arrive as strings ("4.0000") — display rounded to whole sq.ft.
+  const trimArea = (v: string | null | undefined): string | null => {
+    if (v == null || String(v).trim() === "") return null;
+    const n = Number(v);
+    if (!Number.isFinite(n)) return String(v).trim();
+    return String(Math.round(n));
+  };
+
   const title = property.seo?.seoData?.overview?.h1 || property.title;
 
   const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = (
@@ -135,7 +143,7 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
             ? { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: `${property.details.bedrooms} BHK` }
             : null,
           property.details?.areaSqft
-            ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${property.details.areaSqft} Sq Ft` }
+            ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${trimArea(property.details.areaSqft)} Sq Ft` }
             : null,
           ...(isHomeType
             ? [

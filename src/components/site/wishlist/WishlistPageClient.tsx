@@ -9,6 +9,8 @@ import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { ListingImage } from "@/components/site/listing/ListingImage";
+import { getPlaceholderImage } from "@/lib/placeholder-images";
 
 function formatINR(value: unknown): string {
   const num = Number(value);
@@ -22,12 +24,18 @@ type CardData = {
   title: string;
   location: string;
   photo: string | null;
+  placeholder: string;
   slug: string | null;
   price: unknown;
   postLabel: string | null;
 };
 
-function getCardData(p: Record<string, any>, isProject: boolean, propertyId: number): CardData {
+function getCardData(
+  p: Record<string, any>,
+  isProject: boolean,
+  propertyId: number,
+  rawType: string,
+): CardData {
   const photo =
     (typeof p.coverImageUrl === "string" && p.coverImageUrl) ||
     (typeof p.cover_image_url === "string" && p.cover_image_url) ||
@@ -46,6 +54,9 @@ function getCardData(p: Record<string, any>, isProject: boolean, propertyId: num
     title: String(p.propertyname ?? p.title ?? p.name ?? (isProject ? `Project #${propertyId}` : `Property #${propertyId}`)),
     location: String(p.sublocation ?? p.city ?? p.address ?? ""),
     photo,
+    placeholder: isProject
+      ? getPlaceholderImage({ projectType: p.projectType ?? p.project_type ?? rawType })
+      : getPlaceholderImage({ propertyType: rawType }),
     slug,
     price: p.expectedsaleprice ?? p.monthly_rent ?? p.price ?? null,
     postLabel: post === "sell" ? "For Sale" : post === "rent" ? "For Rent" : null,
@@ -154,7 +165,7 @@ export function WishlistPageClient() {
                 const p = (item.property ?? {}) as Record<string, any>;
                 const isProject = item.propertyType.toLowerCase() === "project";
                 const gone = !item.property;
-                const card = getCardData(p, isProject, item.propertyId);
+                const card = getCardData(p, isProject, item.propertyId, item.propertyType);
                 const builder = p.builder_name ?? p.builderName;
                 const k = `${item.propertyType}:${item.propertyId}`;
                 const busy = removing === k;
@@ -196,26 +207,32 @@ export function WishlistPageClient() {
                     {/* Photo */}
                     {card.photo ? (
                       card.slug ? (
-                        <Link href={`/${card.slug}`} className="shrink-0! no-underline!">
-                          <img
+                        <Link href={`/${card.slug}`} className="relative! block! h-24! w-24! sm:h-28! sm:w-28! shrink-0! overflow-hidden! rounded-xl! no-underline!">
+                          <ListingImage
                             src={card.photo}
+                            placeholderSrc={card.placeholder}
                             alt={card.title}
-                            loading="lazy"
-                            className="h-24! w-24! sm:h-28! sm:w-28! rounded-xl! object-cover! group-hover:scale-[1.02]! transition-transform! duration-500!"
+                            className="h-full! w-full! object-cover! group-hover:scale-[1.02]! transition-transform! duration-500!"
                           />
                         </Link>
                       ) : (
-                        <img
-                          src={card.photo}
-                          alt={card.title}
-                          loading="lazy"
-                          className="h-24! w-24! sm:h-28! sm:w-28! rounded-xl! object-cover! shrink-0!"
-                        />
+                        <span className="relative! block! h-24! w-24! sm:h-28! sm:w-28! shrink-0! overflow-hidden! rounded-xl!">
+                          <ListingImage
+                            src={card.photo}
+                            placeholderSrc={card.placeholder}
+                            alt={card.title}
+                            className="h-full! w-full! object-cover!"
+                          />
+                        </span>
                       )
                     ) : (
-                      <div className="flex! h-24! w-24! sm:h-28! sm:w-28! shrink-0! items-center! justify-center! rounded-xl! bg-gradient-to-br! from-[#27427f]/10! to-[#27427f]/5! text-3xl! font-semibold! text-[#27427f]/25!">
-                        {card.title.charAt(0).toUpperCase()}
-                      </div>
+                      <img
+                        src={card.placeholder}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        className="h-24! w-24! sm:h-28! sm:w-28! rounded-xl! object-cover! shrink-0!"
+                      />
                     )}
 
                     {/* Body */}

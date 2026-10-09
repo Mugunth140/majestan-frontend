@@ -173,6 +173,21 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 86400,
     formats: ["image/avif", "image/webp"],
   },
+  async headers() {
+    return [
+      {
+        // Type placeholders are content-hashed by design (fixed filenames,
+        // replaced — never modified in place), so cache them immutably.
+        source: "/assets/placeholder/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

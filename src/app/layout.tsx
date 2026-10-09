@@ -144,6 +144,10 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://prismarkcrm.in" crossOrigin="anonymous" />
+        {/* Warm the most common listing placeholders so first paint never waits. */}
+        <link rel="preload" as="image" type="image/webp" href="/assets/placeholder/Apartment.webp" />
+        <link rel="preload" as="image" type="image/webp" href="/assets/placeholder/Villa.webp" />
+        <link rel="preload" as="image" type="image/webp" href="/assets/placeholder/Plot.webp" />
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"

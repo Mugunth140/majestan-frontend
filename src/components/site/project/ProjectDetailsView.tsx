@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { formatINR } from "@/lib/api/projects";
+import { getPlaceholderImage } from "@/lib/placeholder-images";
+import { ListingImage } from "@/components/site/listing/ListingImage";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
 import {
@@ -46,9 +48,11 @@ function formatPossessionDate(v: string | null | undefined): string | null {
 
 export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
   const images = [project.coverImageUrl, ...(project.galleryImageUrls ?? [])].filter(Boolean) as string[];
-  const allImages = images.length > 0 ? images : ["/assets/images/home/apartment-buy.png"];
+  const allImages = images;
   const [activeImg, setActiveImg] = useState(0);
   const [copied, setCopied] = useState(false);
+  const currentImage = images.length > 0 ? images[Math.min(activeImg, images.length - 1)] : undefined;
+  const placeholderUrl = getPlaceholderImage({ projectType: project.projectType });
 
   const typeLabel = project.projectType === "villa" ? "Villa" : project.projectType === "plot" ? "Plot" : "Apartment";
 
@@ -219,12 +223,13 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
         <div className="lg:col-span-2! flex! flex-col! gap-5! min-w-0!">
           {/* Hero gallery */}
           <div className="relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery!">
-            <img
-              key={allImages[activeImg]}
-              src={allImages[activeImg]}
+            <ListingImage
+              key={currentImage ?? "placeholder"}
+              src={currentImage ?? null}
+              placeholderSrc={placeholderUrl}
               alt={project.name}
+              eager
               className="w-full! h-full! object-cover! animate-fade-in!"
-              loading="eager"
             />
             <div className="absolute! inset-0! bg-gradient-to-t! from-black/25! via-transparent! to-transparent! pointer-events-none!" />
 
@@ -260,6 +265,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             )}
 
             {/* Counter + photos button */}
+            {allImages.length > 0 && (
             <div className="absolute! bottom-4! right-4! flex! items-center! gap-2!">
               {allImages.length > 1 && (
                 <span className="px-3! py-1.5! rounded-full! bg-black/45! backdrop-blur-md! text-white! text-xs! font-medium! tabular-nums!">
@@ -274,6 +280,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                 {allImages.length} Photos
               </button>
             </div>
+            )}
           </div>
 
           {/* Overview card */}

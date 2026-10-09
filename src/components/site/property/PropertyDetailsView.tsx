@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
+import { getPlaceholderImage } from "@/lib/placeholder-images";
+import { ListingImage } from "@/components/site/listing/ListingImage";
 import { formatDate, formatDescriptionParagraphs, formatFurnishing } from "@/lib/property-format";
 import {
   BedDouble,
@@ -58,21 +60,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   const showSection = (id: "amenities" | "floor-plan" | "locality" | "photos") =>
     visibleSections.includes(id);
 
-  const images =
-    property.images?.length > 0
-      ? property.images
-      : [
-          {
-            id: 0,
-            imageUrl: "/assets/images/home/apartment-buy.png",
-            imageKey: "default",
-            isPrimary: true,
-            createdAt: "",
-          },
-        ];
-
+  const images = property.images ?? [];
   const [activeImg, setActiveImg] = useState(0);
-  const currentImage = images[Math.min(activeImg, images.length - 1)];
+  const currentImage = images.length > 0 ? images[Math.min(activeImg, images.length - 1)] : undefined;
+  const placeholderUrl = getPlaceholderImage({ propertyType: property.propertyType });
 
   const propertyTypeLabel =
     Object.values(PROPERTY_TYPES).find(
@@ -214,12 +205,13 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             {...(isSingle ? { id: "overview" } : {})}
             className={`relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery${isSingle ? " scroll-mt-40!" : ""}`}
           >
-            <img
-              key={currentImage.imageUrl}
-              src={currentImage.imageUrl}
+            <ListingImage
+              key={currentImage?.imageUrl ?? "placeholder"}
+              src={currentImage?.imageUrl ?? null}
+              placeholderSrc={placeholderUrl}
               alt={title}
+              eager
               className="w-full! h-full! object-cover! animate-fade-in!"
-              loading="eager"
             />
             <div className="absolute! inset-0! bg-gradient-to-t! from-black/25! via-transparent! to-transparent! pointer-events-none!" />
 
@@ -256,6 +248,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             )}
 
             {/* Counter + photos button */}
+            {images.length > 0 && (
             <div className="absolute! bottom-4! right-4! flex! items-center! gap-2!">
               {images.length > 1 && (
                 <span className="px-3! py-1.5! rounded-full! bg-black/45! backdrop-blur-md! text-white! text-xs! font-medium! tabular-nums!">
@@ -270,6 +263,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                 {images.length} Photos
               </Link>
             </div>
+            )}
           </div>
 
           {/* Overview card */}

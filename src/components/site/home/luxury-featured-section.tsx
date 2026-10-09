@@ -7,6 +7,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import { A11y, Autoplay, Navigation, Pagination } from "swiper/modules";
 import { createEnquiry, type FeaturedProperty } from "@/lib/api";
+import { ListingImage } from "@/components/site/listing/ListingImage";
+import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { MapPin, ChevronLeft, ChevronRight, X, BedDouble, Ruler, CheckCircle2 } from "lucide-react";
 
@@ -16,14 +18,9 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const FALLBACK = [
-  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?auto=format&fit=crop&w=900&q=80",
-];
+/* ─────────── fallback images ───────────
+   Per-type local placeholders (public/assets/placeholder). Unsplash
+   fallbacks retired — missing/failed photos settle on the type image. */
 
 type LuxuryFeaturedSectionProps = {
   properties: FeaturedProperty[];
@@ -95,7 +92,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
                   key={`${prop.id}-${i}`}
                   property={prop}
                   isActive={true}
-                  imgSrc={prop.photo ?? FALLBACK[i % FALLBACK.length]}
+                  photo={prop.photo}
                   onContact={() => setEnquiry(prop)}
                 />
               ))}
@@ -132,7 +129,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
                   <LuxuryCard 
                     property={prop} 
                     isActive={isActive} 
-                    imgSrc={prop.photo ?? FALLBACK[(i % properties.length) % FALLBACK.length]}
+                    photo={prop.photo}
                     onContact={() => setEnquiry(properties[i % properties.length])}
                   />
                 )}
@@ -172,7 +169,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
   );
 }
 
-function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedProperty, isActive: boolean, imgSrc: string, onContact: () => void }) {
+function LuxuryCard({ property, photo, onContact }: { property: FeaturedProperty, isActive: boolean, photo: string | null, onContact: () => void }) {
   const router = useRouter();
   const price = formatPrice(property);
   const priceParts = formatPriceParts(property);
@@ -202,10 +199,10 @@ function LuxuryCard({ property, imgSrc, onContact }: { property: FeaturedPropert
     >
       {/* Photo — fixed 4:3, height comes from content below */}
       <div className="relative! w-full! aspect-[4/3]! shrink-0! overflow-hidden! bg-gray-100!">
-        <img
-          src={imgSrc}
+        <ListingImage
+          src={photo}
+          placeholderSrc={getPlaceholderImage({ propertyType: property.propertyType })}
           alt={property.propertyName || "Property"}
-          loading="lazy"
           className="w-full! h-full! object-cover! transition-transform! duration-700! ease-[cubic-bezier(0.32,0.72,0,1)]! group-hover:scale-105!"
         />
         {/* Condition ribbon — flat edge flush to the card, notch facing inward.

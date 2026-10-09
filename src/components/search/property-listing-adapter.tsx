@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Sprout } from "lucide-react";
+import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck } from "lucide-react";
+import { ListingImage } from "@/components/site/listing/ListingImage";
+import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import {
   formatPlotArea,
@@ -471,14 +473,12 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     city: ((item as any).city as string | undefined) ?? item.sublocation ?? "",
   };
 
-  // Land parcels often have no building photos — and the legacy
-  // noproperty.* asset reads as an error state. Photo-less plot/farmland
-  // cards render a designed placeholder instead; other types keep the
-  // previous apartment fallback untouched.
-  const isLandCard = item.propertyType === "plot" || item.propertyType === "farmland";
-  const [imgOk, setImgOk] = useState(true);
+  // Photo with a cached per-type placeholder underneath: instant meaningful
+  // paint, progressive swap when the real photo decodes, placeholder settle
+  // on missing/failed photos (incl. the legacy noproperty.* asset, which
+  // getPhotoUrl already filters out).
   const photoUrl = getPhotoUrl(item);
-  const showLandPlaceholder = isLandCard && (!photoUrl || !imgOk);
+  const placeholderUrl = getPlaceholderImage({ propertyType: item.propertyType });
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -503,30 +503,14 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           300px-wide column that stretches to the content height, so the card
           hugs the content with no leftover top/bottom whitespace. */}
       <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
-        {showLandPlaceholder ? (
-          <div className="absolute! inset-0! flex! flex-col! items-center! justify-center! gap-2.5! bg-gradient-to-br! from-[#eef2f7]! via-[#e6ecf5]! to-[#d8e1ef]!">
-            <span className="flex! h-14! w-14! items-center! justify-center! rounded-2xl! bg-white! shadow-sm!">
-              {item.propertyType === "farmland" ? (
-                <Sprout className="w-7! h-7! text-emerald-600!" />
-              ) : (
-                <MapPinned className="w-7! h-7! text-[#27427f]!" />
-              )}
-            </span>
-            <span className="text-[12px]! font-semibold! text-[#27427f]/70!">
-              {item.propertyType === "farmland" ? "Farm photos coming soon" : "Plot photos coming soon"}
-            </span>
-          </div>
-        ) : (
-          <Link href={photosPath} aria-label={`View photos of ${item.propertyname || "property"}`} className="absolute! inset-0!">
-            <img
-              src={photoUrl ?? "/assets/images/home/apartment-buy.png"}
-              alt={item.propertyname || "Property"}
-              className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
-              loading="lazy"
-              onError={() => setImgOk(false)}
-            />
-          </Link>
-        )}
+        <Link href={photosPath} aria-label={`View photos of ${item.propertyname || "property"}`} className="absolute! inset-0!">
+          <ListingImage
+            src={photoUrl}
+            placeholderSrc={placeholderUrl}
+            alt={item.propertyname || "Property"}
+            className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+          />
+        </Link>
         {/* RERA verified badge — top-right over image */}
         {reraVerified && (
           <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/90! backdrop-blur-sm! text-[#1d9bf0]! text-[10px]! font-bold! px-2! py-1! rounded-lg! shadow-sm!">
@@ -535,10 +519,8 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           </span>
         )}
         {/* Available-from strip — slim black-to-transparent gradient over the
-            bottom 10% of the photo so the date reads on any image. Photos
-            only; land placeholders keep their clean look. */}
-        {!showLandPlaceholder &&
-          (() => {
+            bottom 10% of the photo so the date reads on any image. */}
+        {(() => {
             const availableFrom = getAvailableFromLabel(item);
             return availableFrom ? (
               <div className="absolute! inset-x-0! bottom-0! h-[10%]! min-h-[34px]! flex! items-end! justify-center! pb-1.5! bg-gradient-to-t! from-black/85! via-black/40! to-transparent! pointer-events-none!">

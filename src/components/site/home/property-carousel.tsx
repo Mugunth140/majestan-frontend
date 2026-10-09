@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Autoplay, Navigation, Pagination, EffectCoverflow } from "swiper/modules";
 import { createEnquiry, type FeaturedProperty, type HomeBanner } from "@/lib/api";
+import { ListingImage } from "@/components/site/listing/ListingImage";
+import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { MapPin, ChevronLeft, ChevronRight, X, ArrowUpRight, Phone, Tag } from "lucide-react";
 
 import "swiper/css";
@@ -18,15 +20,9 @@ type PropertyCarouselProps =
   | { properties: FeaturedProperty[]; banners?: never; emptyMessage: string; variant?: "properties" }
   | { banners: HomeBanner[]; properties?: never; emptyMessage: string; variant: "banner" };
 
-/* ─────────── fallback images ─────────── */
-const FALLBACK = [
-  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?auto=format&fit=crop&w=900&q=80",
-];
+/* ─────────── fallback images ───────────
+   Per-type local placeholders (public/assets/placeholder). Unsplash
+   fallbacks retired — missing/failed photos settle on the type image. */
 
 /* ══════════════════════════════════════════════════════════════════
    ENTRY POINT
@@ -108,7 +104,8 @@ function CurvedPathCarousel({ properties }: { properties: FeaturedProperty[] }) 
               <CurveCard
                 property={prop}
                 isActive={isActive}
-                imgSrc={prop.photo ?? FALLBACK[i % FALLBACK.length]}
+                photo={prop.photo}
+                placeholderSrc={getPlaceholderImage({ propertyType: prop.propertyType })}
                 onContact={() => setEnquiry(prop)}
               />
             )}
@@ -171,11 +168,12 @@ function SwiperNavBtn({ dir }: { dir: "left" | "right" }) {
    CURVE CARD
 ══════════════════════════════════════════════════════════════════ */
 function CurveCard({
-  property, isActive, imgSrc, onContact,
+  property, isActive, photo, placeholderSrc, onContact,
 }: {
   property: FeaturedProperty;
   isActive: boolean;
-  imgSrc: string;
+  photo: string | null;
+  placeholderSrc: string;
   onContact: () => void;
 }) {
   return (
@@ -190,11 +188,12 @@ function CurveCard({
       style={{ aspectRatio: "2/3" }}
     >
       {/* photo */}
-      <img
-        src={imgSrc}
+      <ListingImage
+        src={photo}
+        placeholderSrc={placeholderSrc}
         alt={property.propertyName ?? "Property"}
+        eager={isActive}
         className="absolute! inset-0! w-full! h-full! object-cover! transition-transform! duration-700!"
-        style={{ transform: isActive ? "scale(1.06)" : "scale(1.01)" }}
       />
 
       {/* ambient gradient — 3 layers for depth */}

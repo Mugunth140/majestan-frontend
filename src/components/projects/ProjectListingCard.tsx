@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { MapPin, Phone, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Download } from "lucide-react";
 import { type ProjectListItem } from "@/lib/api/projects";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
+import { ListingImage } from "@/components/site/listing/ListingImage";
+import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
@@ -84,9 +86,9 @@ function getConditionBadge(possessionStatus: string | null | undefined): string 
 
 export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const router = useRouter();
-  const [imgOk, setImgOk] = useState(true);
   const detailPath = `/${item.canonicalSlug}`;
   const photosPath = `${detailPath}#photos`;
+  const placeholderUrl = getPlaceholderImage({ projectType: item.projectType });
 
   const projectSections = [
     { hash: "overview", label: "Overview", icon: <LayoutDashboard className="w-3.5! h-3.5!" /> },
@@ -95,7 +97,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     { hash: "locality", label: "Locality", icon: <MapPinned className="w-3.5! h-3.5!" /> },
     { hash: "photos", label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
   ];
-  const showImg = Boolean(item.coverImageUrl) && imgOk;
+  const showImg = Boolean(item.coverImageUrl);
   const [copied, setCopied] = useState(false);
   const [enquireToken, setEnquireToken] = useState<number | null>(null);
   const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
@@ -216,19 +218,12 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           hugs the content with no leftover top/bottom whitespace. */}
       <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
         <Link href={photosPath} aria-label={`View photos of ${item.name || "project"}`} className="absolute! inset-0!">
-          {showImg ? (
-            <img
-              src={item.coverImageUrl!}
-              alt={item.name}
-              onError={() => setImgOk(false)}
-              className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
-              loading="lazy"
-            />
-          ) : (
-            <span className="absolute! inset-0! flex! items-center! justify-center! text-6xl! font-bold! text-[#27427f]/15!">
-              {(item.name || "P").charAt(0)}
-            </span>
-          )}
+          <ListingImage
+            src={showImg ? item.coverImageUrl : null}
+            placeholderSrc={placeholderUrl}
+            alt={item.name || "Project"}
+            className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+          />
         </Link>
         {/* RERA verified badge — top-right over image */}
         {reraVerified && (

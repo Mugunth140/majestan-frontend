@@ -81,6 +81,12 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
     ""
   ).toString().trim();
   const locationLine2 = [subLocation, property.city, pincode].filter(Boolean).join(", ");
+  // Line 1 shows the full CRM address only when it exists and isn't just
+  // the sublocality repeated; otherwise the locality/city/pincode line
+  // moves up to the first line.
+  const showFullAddress =
+    fullAddress !== "" &&
+    (subLocation === "" || fullAddress.toLowerCase() !== subLocation.toLowerCase());
 
   const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;
   const priceNum = parseFloat(property.price);
@@ -161,16 +167,20 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           </h1>
         </div>
 
-        {(fullAddress || locationLine2) ? (
+        {(showFullAddress ? fullAddress : locationLine2) ? (
           <div className="mt-2! flex! items-start! gap-2! text-[13px]! font-manrope! text-gray-500! leading-relaxed!">
             <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
             <span className="min-w-0!">
-              {fullAddress ? (
-                <span className="block! text-gray-700!">{fullAddress}</span>
-              ) : null}
-              {locationLine2 ? (
+              {showFullAddress ? (
+                <>
+                  <span className="block! text-gray-700!">{fullAddress}</span>
+                  {locationLine2 ? (
+                    <span className="block!">{locationLine2}</span>
+                  ) : null}
+                </>
+              ) : (
                 <span className="block!">{locationLine2}</span>
-              ) : null}
+              )}
             </span>
           </div>
         ) : null}

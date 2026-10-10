@@ -333,8 +333,8 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             />
           ) : null}
 
-          {/* Highlights */}
-          {project.highlights ? (
+          {/* Highlights — apartments and villas only */}
+          {project.projectType !== "plot" && project.highlights ? (
             <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
               <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Highlights</h2>
               <div className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! whitespace-pre-wrap! break-words!">
@@ -343,8 +343,8 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             </div>
           ) : null}
 
-          {/* Specifications */}
-          {project.specifications && project.specifications.length > 0 ? (
+          {/* Specifications — apartments and villas only */}
+          {project.projectType !== "plot" && project.specifications && project.specifications.length > 0 ? (
             <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
               <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Specifications</h2>
               <div className="mt-4! grid! grid-cols-1! sm:grid-cols-2! gap-x-6! gap-y-4!">

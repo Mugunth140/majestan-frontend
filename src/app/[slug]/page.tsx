@@ -656,7 +656,9 @@ export default async function SlugPage({
                 </div>
                 <ProjectFloorPlanSection project={project} />
                 <ProjectPhotosSection project={project} />
-                <ProjectAmenitiesSection project={project} />
+                {project.projectType !== "plot" && (
+                  <ProjectAmenitiesSection project={project} />
+                )}
                 <ProjectLocalitySection project={project} />
               </div>
             </main>

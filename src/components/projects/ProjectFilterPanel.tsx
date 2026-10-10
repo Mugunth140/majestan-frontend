@@ -293,9 +293,9 @@ export function ProjectFilterPanel({ values, onChange, onReset }: { values: Proj
                 value={values.possession}
                 options={[
                   { value: "", label: "Any" },
-                  { value: "ready_to_move", label: "Ready to Move" },
-                  { value: "under_construction", label: "Under Construction" },
                   { value: "new_launch", label: "New Launch" },
+                  { value: "under_construction", label: "Under Construction" },
+                  { value: "ready_to_move", label: "Ready to Move" },
                 ]}
                 onChange={(v) => updateFilter("possession", v)}
                 ariaLabel="Possession"

@@ -82,13 +82,12 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   const locRow = property.locations?.[0] as unknown as
     | { address?: string | null; landmark?: string | null }
     | undefined;
-  const addrPart = (locRow?.address || locRow?.landmark || "").split(",")[0].trim();
   const rawSub =
     (property as any).sublocation ||
     (property as any).locality ||
     (locData as any)?.subLocation ||
     (locData as any)?.locality ||
-    addrPart;
+    "";
   const capFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
   const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
 

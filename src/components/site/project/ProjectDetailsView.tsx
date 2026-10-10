@@ -86,10 +86,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
 
   const possessionDate = formatPossessionDate(project.possessionDate);
   const projectAddress = (project.address || "").trim();
-  const projectPincode = (() => {
-    const m = projectAddress.match(/\b\d{6}\b/);
-    return m ? m[0] : "";
-  })();
+  const projectPincode = (project.pincode || "").toString().trim();
   const projectLocationLine2 = [
     project.sublocation,
     project.city,

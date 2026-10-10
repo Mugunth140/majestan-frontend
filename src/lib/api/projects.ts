@@ -24,6 +24,7 @@ export type ProjectUnit = {
   roomDimensions?: { name: string; dimensions: string }[] | null;
   furnishedStatus: string | null;
   facing: string | null;
+  furnishingItems?: { furnishingItemId: number; furnishingItem?: { id: number; name: string; icon?: string } | null }[] | null;
   listingMode?: string | null;
   price: string | null;
   monthlyRent?: string | null;
@@ -73,6 +74,9 @@ export type ProjectDetail = {
   towerDetails?: { tower?: string; floors?: number; units?: number }[] | null;
   highlights?: string | null;
   specifications?: { label: string; value: string }[] | null;
+  connectivity?: { icon?: string; label?: string; detail?: string }[] | null;
+  nearbyCategories?: { title?: string; icon?: string; places?: { name?: string; distance?: string }[] }[] | null;
+  projectFaqs?: { id: number; question: string; answer: string; sortOrder?: number }[] | null;
   brochureUrl?: string | null;
   brochureName?: string | null;
   projectAmenities?: { amenityId: number; availability?: string; notes?: string | null; amenity?: { id: number; name: string; icon?: string } | null }[] | null;

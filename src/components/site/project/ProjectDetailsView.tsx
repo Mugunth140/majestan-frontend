@@ -9,6 +9,7 @@ import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { ListingImage } from "@/components/site/listing/ListingImage";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
+import { FaqSection } from "@/components/site/property/sections/FaqSection";
 import {
   MapPin,
   BedDouble,
@@ -386,6 +387,15 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                         <td className="py-3.5! pr-4! font-bold! text-gray-900!">
                           {u.bedrooms != null ? `${u.bedrooms} BHK` : u.title || u.unitCode}
                           <span className="block! text-xs! font-medium! text-gray-400!">{u.unitCode}</span>
+                          {(u.furnishingItems ?? []).length > 0 && (
+                            <span className="block! text-[11px]! font-medium! text-gray-400! mt-0.5!">
+                              {(u.furnishingItems ?? [])
+                                .map((f: any) => f.furnishingItem?.name)
+                                .filter(Boolean)
+                                .slice(0, 3)
+                                .join(" · ")}
+                            </span>
+                          )}
                         </td>
                         <td className="py-3.5! pr-4! text-gray-600! capitalize!">{u.unitType?.replace(/_/g, " ")}</td>
                         <td className="py-3.5! pr-4! text-gray-600!">
@@ -423,6 +433,19 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                 </table>
               </div>
             </div>
+          )}
+
+          {/* FAQs */}
+          {(project.projectFaqs ?? []).length > 0 && (
+            <FaqSection
+              faqs={(project.projectFaqs ?? []).map((f, i) => ({
+                id: f.id,
+                question: f.question,
+                answer: f.answer,
+                section: "overview",
+                sortOrder: f.sortOrder ?? i,
+              }))}
+            />
           )}
 
           {/* Explore more */}

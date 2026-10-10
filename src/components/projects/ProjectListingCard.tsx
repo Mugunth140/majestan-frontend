@@ -63,6 +63,21 @@ function formatFacing(v: string): string {
     .join("-");
 }
 
+// Consecutive integer sets collapse to a range ("4 - 5 Cents", "2 - 4 BHK");
+// anything else lists out ("4, 6, 7 Cents") so non-sequential unit mixes
+// never read as a continuous range.
+function formatSmartRange(values: number[], unit: string): string | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  if (sorted.length === 1) return `${trimNum(sorted[0])} ${unit}`;
+  const consecutive =
+    sorted.every((v) => Number.isInteger(v)) &&
+    sorted[sorted.length - 1] - sorted[0] + 1 === sorted.length;
+  return consecutive
+    ? `${trimNum(sorted[0])} - ${trimNum(sorted[sorted.length - 1])} ${unit}`
+    : `${sorted.map(trimNum).join(", ")} ${unit}`;
+}
+
 // DB enum values read raw on a card ("ready_to_move") — map the known
 // vocabulary to display labels, title-casing anything unexpected.
 function formatPossessionStatus(v: string | null | undefined): string | null {
@@ -87,7 +102,7 @@ function getConditionBadge(possessionStatus: string | null | undefined): string 
 export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const router = useRouter();
   const detailPath = `/${item.canonicalSlug}`;
-  const photosPath = `${detailPath}#photos`;
+  const photosPath = `${detailPath}/photos`;
   const placeholderUrl = getPlaceholderImage({ projectType: item.projectType });
 
   const projectSections = [
@@ -100,6 +115,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const showImg = Boolean(item.coverImageUrl);
   const [copied, setCopied] = useState(false);
   const [enquireToken, setEnquireToken] = useState<number | null>(null);
+  const [downloadingBrochure, setDownloadingBrochure] = useState(false);
   const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
   const [authOpen, setAuthOpen] = useState(false);
   const hasBrochure = Boolean(item.brochureUrl);
@@ -129,14 +145,36 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     }
   };
 
-  const handleBrochure = (e: React.MouseEvent) => {
+  const handleBrochure = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!item.brochureUrl) return;
+    if (!item.brochureUrl || downloadingBrochure) return;
     if (!isAuthenticated) {
       setAuthOpen(true);
       return;
     }
-    window.open(item.brochureUrl, "_blank", "noopener");
+    // Force a real download (fetch → blob → anchor download) instead of
+    // opening the PDF in a new tab. Falls back to a new tab if the fetch
+    // fails (e.g. storage CORS), preserving previous behavior.
+    setDownloadingBrochure(true);
+    try {
+      const res = await fetch(item.brochureUrl);
+      if (!res.ok) throw new Error("download failed");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download =
+        item.brochureName ??
+        `${item.projectCode ? `${item.projectCode}-` : ""}brochure.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+    } catch {
+      window.open(item.brochureUrl, "_blank", "noopener");
+    } finally {
+      setDownloadingBrochure(false);
+    }
   };
 
   const price =
@@ -210,23 +248,41 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   })();
 
   const specCells: { label: string; value: React.ReactNode }[] = [];
-  if (item.projectType === "plot") {
-    // Land parcels quote in cents; a single Plot Area cell leads.
-    const { minPlotCents, maxPlotCents } = item.ranges;
-    if (minPlotCents != null) {
-      const plotArea =
-        maxPlotCents != null && maxPlotCents !== minPlotCents
-          ? `${formatPlotCents(minPlotCents)} – ${formatPlotCents(maxPlotCents)}`
-          : formatPlotCents(minPlotCents);
-      if (plotArea) specCells.push({ label: "Plot Area", value: plotArea });
-    }
+  const isPlot = item.projectType === "plot";
+  if (isPlot) {
+    // Land parcels quote in cents; a single Plot Area cell leads — mirroring
+    // the property plot card cells (area, facing, dimension, boundary).
+    // Consecutive sizes collapse to a range, scattered ones list out.
+    const cents = (item.ranges.plotCents ?? []).filter(
+      (n) => Number.isFinite(n) && (n as number) > 0,
+    );
+    const plotArea =
+      cents.length > 0
+        ? formatSmartRange(cents, "Cents")
+        : (() => {
+            const { minPlotCents, maxPlotCents } = item.ranges;
+            if (minPlotCents == null) return null;
+            return maxPlotCents != null && maxPlotCents !== minPlotCents
+              ? `${formatPlotCents(minPlotCents)} – ${formatPlotCents(maxPlotCents)}`
+              : formatPlotCents(minPlotCents);
+          })();
+    if (plotArea) specCells.push({ label: "Plot Area", value: plotArea });
   } else {
-    if (item.ranges.bhk.length > 0)
-      specCells.push({ label: "BHK", value: `${item.ranges.bhk.join(", ")} BHK` });
+    if (item.ranges.bhk.length > 0) {
+      const bhk = formatSmartRange(item.ranges.bhk, "BHK");
+      if (bhk) specCells.push({ label: "BHK", value: bhk });
+    }
     if (area) specCells.push({ label: "Built-Up Area", value: area });
   }
   if (facingLabel) specCells.push({ label: "Facing", value: facingLabel });
-  if (possession) specCells.push({ label: "Possession", value: possession });
+  if (isPlot) {
+    if (item.ranges.plotDimensions.length > 0)
+      specCells.push({ label: "Dimension", value: item.ranges.plotDimensions.join(", ") });
+    if (item.ranges.plotBoundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });
+    else if (item.ranges.plotOpenSides.length > 0)
+      specCells.push({ label: "Open Sides", value: item.ranges.plotOpenSides.join(", ") });
+  }
+  if (possession && !isPlot) specCells.push({ label: "Possession", value: possession });
 
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
@@ -337,7 +393,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           {projectSections.map((s) => (
             <Link
               key={s.hash}
-              href={`${detailPath}#${s.hash}`}
+              href={s.hash === "overview" ? detailPath : `${detailPath}/${s.hash}`}
               className="flex! items-center! gap-1.5! text-[12px]! font-medium! text-gray-500! hover:text-[#27427f]! transition-colors! no-underline! group/link!"
             >
               <span className="text-gray-400! group-hover/link:text-[#27427f]! transition-colors!">
@@ -369,10 +425,11 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           {hasBrochure ? (
             <button
               onClick={handleBrochure}
-              className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! cursor-pointer!"
+              disabled={downloadingBrochure}
+              className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! cursor-pointer! disabled:opacity-70!"
             >
               <Download className="w-4! h-4!" />
-              Brochure
+              {downloadingBrochure ? "Downloading..." : "Brochure"}
             </button>
           ) : (
             <Link

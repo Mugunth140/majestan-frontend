@@ -44,9 +44,13 @@ export type ProjectRanges = {
   maxArea: number | null;
   minPlotCents: number | null;
   maxPlotCents: number | null;
+  plotCents: number[];
   bhk: number[];
   facings: string[];
   unitsCount: number;
+  plotDimensions: string[];
+  plotBoundaryWall: boolean;
+  plotOpenSides: number[];
 };
 
 export type ProjectDetail = {

@@ -171,10 +171,6 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
       : []),
   ];
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const handleShare = async () => {
     const url = `${window.location.origin}/${project.canonicalSlug}`;
     try {
@@ -289,13 +285,13 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                   {activeImg + 1} / {allImages.length}
                 </span>
               )}
-              <button
-                onClick={() => scrollTo("photos")}
-                className="inline-flex! items-center! gap-2! px-4! py-2! bg-white/95! backdrop-blur-md! rounded-xl! text-gray-900! text-xs! font-semibold! hover:bg-white! transition-all! shadow-sm! cursor-pointer!"
+              <Link
+                href={`/${project.canonicalSlug}/photos`}
+                className="inline-flex! items-center! gap-2! px-4! py-2! bg-white/95! backdrop-blur-md! rounded-xl! text-gray-900! text-xs! font-semibold! hover:bg-white! transition-all! shadow-sm! cursor-pointer! no-underline!"
               >
                 <Images className="w-4! h-4!" />
                 {allImages.length} Photos
-              </button>
+              </Link>
             </div>
             )}
           </div>
@@ -345,7 +341,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             <LocalityTeaser
               locality={project.sublocation}
               city={project.city}
-              localityHref="#locality"
+              localityHref={`/${project.canonicalSlug}/locality`}
             />
           ) : null}
 
@@ -424,6 +420,17 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                             : (u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft)
                               ? Number(u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft).toLocaleString("en-IN")
                               : "-"}
+                          {project.projectType === "plot" &&
+                            (() => {
+                              const dims = (u.roomDimensions ?? []).find(
+                                (r: any) => (r?.name ?? "") === "Plot",
+                              )?.dimensions;
+                              return dims ? (
+                                <span className="block! text-xs! font-medium! text-gray-400! mt-0.5!">
+                                  {dims}
+                                </span>
+                              ) : null;
+                            })()}
                         </td>
                         {project.projectType !== "plot" && (
                           <td className="py-3.5! pr-4! text-gray-600!">
@@ -468,10 +475,10 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Explore More</h2>
             <div className="mt-5! grid! grid-cols-1! sm:grid-cols-2! gap-4!">
               {sectionLinks.map((section) => (
-                <button
+                <Link
                   key={section.target}
-                  onClick={() => scrollTo(section.target)}
-                  className="group! flex! items-center! justify-between! p-5! border! border-gray-200! bg-gray-50/60! rounded-2xl! hover:border-gray-300! hover:bg-white! hover:shadow-sm! transition-all! w-full! text-left! cursor-pointer!"
+                  href={`/${project.canonicalSlug}/${section.target}`}
+                  className="group! flex! items-center! justify-between! p-5! border! border-gray-200! bg-gray-50/60! rounded-2xl! hover:border-gray-300! hover:bg-white! hover:shadow-sm! transition-all! w-full! text-left! cursor-pointer! no-underline!"
                 >
                   <div className="flex! items-center! gap-4!">
                     <div className="w-11! h-11! flex! items-center! justify-center! text-gray-600! transition-all!">
@@ -487,7 +494,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                     </div>
                   </div>
                   <ChevronRight className="w-5! h-5! text-gray-400! group-hover:text-gray-900! group-hover:translate-x-0.5! transition-all!" />
-                </button>
+                </Link>
               ))}
             </div>
           </div>

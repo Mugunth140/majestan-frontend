@@ -1,10 +1,13 @@
-import { permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { getProjectBySlugUrl } from "@/lib/api/projects";
 
 export default async function ProjectFloorPlanRedirect({
   params,
 }: {
   params: Promise<{ city: string; projectSlug: string }>;
 }) {
-  const { city, projectSlug } = await params;
-  permanentRedirect(`/projects/${city}/${projectSlug}#floor-plans`);
+  const { projectSlug } = await params;
+  const project = await getProjectBySlugUrl(projectSlug).catch(() => null);
+  if (!project) notFound();
+  permanentRedirect(`/${project.canonicalSlug}/floor-plans`);
 }

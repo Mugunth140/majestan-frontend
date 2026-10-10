@@ -107,6 +107,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
+  // ── Project section sub-pages (single-segment canonical slugs only) ──
+  const projectSectionUrls: MetadataRoute.Sitemap = projectSlugs
+    .filter((slug) => !!slug && !slug.includes("/"))
+    .flatMap((slug) =>
+      ["amenities", "floor-plans", "locality", "photos"].map((section) => ({
+        url: `${SITE_URL}/${slug}/${section}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      })),
+    );
+
   // ── Property detail pages ─────────────────────────────────────────────────
   const propertyUrls: MetadataRoute.Sitemap = slugs.map((slug) => ({
     url: `${SITE_URL}/${slug}`,
@@ -210,5 +222,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...propertyUrls,
     ...sectionUrls,
     ...projectUrls,
+    ...projectSectionUrls,
   ];
 }

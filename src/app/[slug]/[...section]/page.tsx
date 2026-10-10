@@ -9,6 +9,14 @@ import { LocalitySection } from "@/components/site/property/sections/LocalitySec
 import { PhotosSection } from "@/components/site/property/sections/PhotosSection";
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
 import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
+import { ProjectNavigation } from "@/components/site/project/project-navigation";
+import { ProjectAmenitiesSection } from "@/components/site/project/sections/ProjectAmenitiesSection";
+import { ProjectFloorPlanSection } from "@/components/site/project/sections/ProjectFloorPlanSection";
+import { ProjectLocalitySection } from "@/components/site/project/sections/ProjectLocalitySection";
+import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
+import { getProjectBySlugUrl, getAllProjectSlugs } from "@/lib/api/projects";
+import type { ProjectDetail } from "@/lib/api/projects";
+import { getFloorPlanLabel } from "@/lib/property-sections";
 import { getPropertyBySeoSlug, type SeoProperty } from "@/lib/api/property-by-slug";
 import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
@@ -49,6 +57,21 @@ export async function generateStaticParams() {
       for (const section of sections) {
         params.push({ slug, section: [section] });
       }
+    }
+
+    // Project sub-pages (single-segment canonical slugs only; multi-segment
+    // legacy /projects/city/slug URLs keep their redirect route).
+    try {
+      const projectSlugs = (await getAllProjectSlugs()).filter(
+        (s) => !!s && !s.includes("/")
+      );
+      for (const slug of projectSlugs) {
+        for (const section of PROJECT_SECTION_SLUGS) {
+          params.push({ slug, section: [section] });
+        }
+      }
+    } catch {
+      /* projects API unreachable — property params still generate */
     }
     
     return params;
@@ -98,6 +121,56 @@ const SECTION_META: Record<
 };
 
 const VALID_SECTIONS = new Set(Object.keys(SECTION_META));
+
+// Project sub-pages — one URL per section for all three project types,
+// mirroring the property multi-page structure.
+const PROJECT_SECTION_SLUGS = ["amenities", "floor-plans", "locality", "photos"];
+
+const PROJECT_SECTION_META: Record<
+  string,
+  {
+    titlePrefix: string;
+    descriptionPrefix: string;
+    descriptionSuffix: string;
+  }
+> = {
+  amenities: {
+    titlePrefix: "Amenities",
+    descriptionPrefix: "Discover amenities and facilities available at",
+    descriptionSuffix:
+      "from everyday conveniences to lifestyle features.",
+  },
+  "floor-plans": {
+    // Title prefix is replaced with getFloorPlanLabel(projectType) at use.
+    titlePrefix: "Floor Plan",
+    descriptionPrefix: "View layouts and configurations for",
+    descriptionSuffix:
+      "including area details, configurations, and key measurements.",
+  },
+  locality: {
+    titlePrefix: "Locality",
+    descriptionPrefix: "Explore the locality and neighbourhood of",
+    descriptionSuffix:
+      "with nearby essentials and transport connectivity.",
+  },
+  photos: {
+    titlePrefix: "Photos",
+    descriptionPrefix: "Browse the complete photo gallery of",
+    descriptionSuffix:
+      "featuring project exteriors, layouts, and locality views.",
+  },
+};
+
+function projectTypeLabel(projectType: string): string {
+  if (projectType === "villa") return "Villa";
+  if (projectType === "plot") return "Plot";
+  return "Apartment";
+}
+
+function projectSectionTitlePrefix(sectionKey: string, projectType: string): string {
+  if (sectionKey === "floor-plans") return getFloorPlanLabel(projectType);
+  return PROJECT_SECTION_META[sectionKey]?.titlePrefix ?? sectionKey;
+}
 
 function buildBreadcrumbItems(property: SeoProperty, sectionLabel: string) {
   const isSale = !property.status.toLowerCase().includes("rent");
@@ -250,6 +323,53 @@ export async function generateMetadata({
     };
   }
 
+  // Project sub-page metadata (no per-section SEO rows — fallback copy).
+  // Checked before static views, mirroring the property branch above.
+  try {
+    const project = await getProjectBySlugUrl(slug).catch(() => null);
+    if (project) {
+      const sectionKey = section[0];
+      const sectionConfig = PROJECT_SECTION_META[sectionKey];
+      if (!sectionConfig || section.length !== 1) {
+        return {
+          title: "Page Not Found | Majestan Realty",
+          robots: { index: false, follow: false },
+        };
+      }
+      const canonicalPath = `/${project.canonicalSlug}/${sectionKey}`;
+      const typeLabel = projectTypeLabel(project.projectType);
+      const bhkLabel = project.ranges.bhk.length
+        ? `${project.ranges.bhk.join(", ")} BHK `
+        : "";
+      const titlePrefix = projectSectionTitlePrefix(sectionKey, project.projectType);
+      const title = `${titlePrefix} - ${project.name} | ${bhkLabel}${typeLabel} in ${project.city} | Majestan Realty`;
+      const description = `${sectionConfig.descriptionPrefix} ${project.name} in ${project.city}. ${sectionConfig.descriptionSuffix}`;
+      const ogImage = project.coverImageUrl || undefined;
+      return {
+        title,
+        description,
+        alternates: { canonical: canonicalPath },
+        openGraph: {
+          title,
+          description,
+          url: canonicalPath,
+          type: "article",
+          ...(ogImage
+            ? { images: [{ url: ogImage, width: 1200, height: 630, alt: `${project.name} - ${titlePrefix}` }] }
+            : {}),
+        },
+        twitter: {
+          card: "summary_large_image",
+          title,
+          description,
+          ...(ogImage ? { images: [ogImage] } : {}),
+        },
+      };
+    }
+  } catch {
+    /* fall through to views / 404 */
+  }
+
   const pathname = `/${slug}/${section.join("/")}`;
   const viewName = resolveViewForPath(pathname);
   if (viewName) {
@@ -284,6 +404,28 @@ function SectionContent({
   }
 }
 
+
+/** Renders the project section-specific content */
+function ProjectSectionContent({
+  sectionKey,
+  project,
+}: {
+  sectionKey: string;
+  project: ProjectDetail;
+}) {
+  switch (sectionKey) {
+    case "amenities":
+      return <ProjectAmenitiesSection project={project} />;
+    case "floor-plans":
+      return <ProjectFloorPlanSection project={project} />;
+    case "locality":
+      return <ProjectLocalitySection project={project} />;
+    case "photos":
+      return <ProjectPhotosSection project={project} />;
+    default:
+      return null;
+  }
+}
 
 export default async function PropertySectionPage({
   params,
@@ -416,6 +558,83 @@ export default async function PropertySectionPage({
             />
           )}
         </div>
+        <SiteFooter />
+      </>
+    );
+  }
+
+  // Project sub-pages — same multi-page shape as properties, for all three
+  // project types. Checked before static views (like the property branch)
+  // so /{projectSlug}/{section} never falls into the view 404 gate.
+  let project: ProjectDetail | null = null;
+  try {
+    project = await getProjectBySlugUrl(slug).catch(() => null);
+  } catch (err) {
+    console.error(`[ProjectSectionPage] Failed to fetch project for slug "${slug}":`, err);
+  }
+  if (project) {
+    const sectionKey = section[0];
+    if (!PROJECT_SECTION_META[sectionKey] || section.length !== 1) {
+      notFound();
+    }
+    if (sectionKey === "overview") {
+      permanentRedirect(`/${project.canonicalSlug}`);
+    }
+    const titlePrefix = projectSectionTitlePrefix(sectionKey, project.projectType);
+    const sectionConfig = PROJECT_SECTION_META[sectionKey];
+    const breadcrumbItems = [
+      { label: "Projects", href: "/projects" },
+      { label: project.city, href: "/projects" },
+      { label: project.name, href: `/${project.canonicalSlug}` },
+      { label: titlePrefix },
+    ];
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: `${titlePrefix} - ${project.name}`,
+      description: `${sectionConfig.descriptionPrefix} ${project.name} in ${project.city}. ${sectionConfig.descriptionSuffix}`,
+      url: `https://www.majestanrealty.com/${project.canonicalSlug}/${sectionKey}`,
+      isPartOf: {
+        "@type": "WebPage",
+        url: `https://www.majestanrealty.com/${project.canonicalSlug}`,
+        name: project.name,
+      },
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://www.majestanrealty.com" },
+          ...breadcrumbItems.map((item, i) => ({
+            "@type": "ListItem",
+            position: i + 2,
+            name: item.label,
+            ...(item.href ? { item: `https://www.majestanrealty.com${item.href}` } : {}),
+          })),
+        ],
+      },
+    };
+    return (
+      <>
+        <SiteHeader />
+        <div className="h-[64px]!" aria-hidden="true" />
+        <ProjectNavigation
+          slug={project.canonicalSlug}
+          activeSection={sectionKey}
+          projectType={project.projectType}
+        />
+        <div className="min-h-screen! bg-gray-50! font-manrope">
+          <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-5! pb-24!">
+            <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
+            <div className="mt-5!">
+              <ProjectSectionContent sectionKey={sectionKey} project={project} />
+            </div>
+          </main>
+        </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
+          }}
+        />
         <SiteFooter />
       </>
     );

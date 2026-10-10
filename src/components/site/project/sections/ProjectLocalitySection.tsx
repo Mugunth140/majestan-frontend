@@ -1,6 +1,7 @@
-import { MapPinned, Navigation } from "lucide-react";
+import { MapPinned } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { LocalityInteractiveMap } from "@/components/site/locality/LocalityInteractiveMap";
+import { connectivityIconFor } from "@/components/site/project/connectivity-icons";
 
 export function ProjectLocalitySection({ project }: { project: ProjectDetail }) {
   const query = [project.sublocation, project.city].filter(Boolean).join(", ");
@@ -23,15 +24,18 @@ export function ProjectLocalitySection({ project }: { project: ProjectDetail }) 
         <div className="mb-6!">
           <h3 className="text-base! font-bold! text-gray-900! mb-3!">Connectivity Highlights</h3>
           <div className="grid! grid-cols-1! sm:grid-cols-2! gap-3!">
-            {connectivity.map((c, i) => (
-              <div key={i} className="flex! items-center! gap-3! rounded-xl! border! border-gray-100! bg-gray-50/60! px-4! py-3!">
-                <Navigation className="w-4! h-4! text-[#27427f]! shrink-0!" />
-                <div className="min-w-0!">
-                  {c.label && <p className="text-[13px]! font-bold! text-gray-900! truncate!">{c.label}</p>}
-                  {c.detail && <p className="text-[12px]! text-gray-500! truncate!">{c.detail}</p>}
+            {connectivity.map((c, i) => {
+              const Icon = connectivityIconFor(c.icon);
+              return (
+                <div key={i} className="flex! items-center! gap-3! rounded-xl! border! border-gray-100! bg-gray-50/60! px-4! py-3!">
+                  <Icon className="w-4! h-4! text-[#27427f]! shrink-0!" />
+                  <div className="min-w-0!">
+                    {c.label && <p className="text-[13px]! font-bold! text-gray-900! truncate!">{c.label}</p>}
+                    {c.detail && <p className="text-[12px]! text-gray-500! truncate!">{c.detail}</p>}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

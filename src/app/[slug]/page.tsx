@@ -31,10 +31,6 @@ import {
 } from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
 import { ProjectDetailsView } from "@/components/site/project/ProjectDetailsView";
-import { ProjectFloorPlanSection } from "@/components/site/project/sections/ProjectFloorPlanSection";
-import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
-import { ProjectAmenitiesSection } from "@/components/site/project/sections/ProjectAmenitiesSection";
-import { ProjectLocalitySection } from "@/components/site/project/sections/ProjectLocalitySection";
 import { batchHasPseoInventory, type PseoCheckParams } from "@/lib/pseo-inventory";
 
 export const dynamicParams = true;
@@ -618,7 +614,11 @@ export default async function SlugPage({
           <div className="min-h-screen! bg-gray-50! font-manrope">
             {/* Spacer matching fixed header height (64px) */}
             <div className="h-[64px]!" aria-hidden="true" />
-            <ProjectNavigation projectType={project.projectType} />
+            <ProjectNavigation
+              slug={project.canonicalSlug}
+              activeSection=""
+              projectType={project.projectType}
+            />
             <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-5! pb-24! scroll-smooth!">
               <div className="flex! flex-col! gap-5!">
                 <div className="mb-0!">
@@ -654,12 +654,6 @@ export default async function SlugPage({
                 <div id="overview" className="scroll-mt-40!">
                   <ProjectDetailsView project={project} />
                 </div>
-                <ProjectFloorPlanSection project={project} />
-                <ProjectPhotosSection project={project} />
-                {project.projectType !== "plot" && (
-                  <ProjectAmenitiesSection project={project} />
-                )}
-                <ProjectLocalitySection project={project} />
               </div>
             </main>
           </div>

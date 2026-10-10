@@ -78,6 +78,10 @@ export function ListingImage({
   }, [src]);
 
   const showReal = Boolean(src) && !failed;
+  // Blur-up only while a real photo is still loading. When the placeholder
+  // is the final image (no photo, or the photo failed), render it sharp.
+  const placeholderIsFinal = !showReal;
+  const placeholderLook = placeholderIsFinal ? "" : " blur-[2px] scale-105";
 
   return (
     <span className="contents">
@@ -89,7 +93,7 @@ export function ListingImage({
           loading="eager"
           decoding="async"
           draggable={false}
-          className={`${className ?? ""} blur-[2px] scale-105`}
+          className={`${className ?? ""}${placeholderLook}`}
         />
       )}
       {showReal && (

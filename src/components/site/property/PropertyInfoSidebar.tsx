@@ -111,9 +111,10 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
         : property.propertyType === "coworking"
           ? getCoworkingSpecs(property.details)
           : [];
+  // Land is priced per cent or not at all — never per sq.ft.
   const perSqft =
     getLandPricePerUnit(property.price, property.details, property.propertyType) ??
-    (Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
+    (!isLand && Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
       ? `₹ ${Math.round(priceNum / areaNum).toLocaleString("en-IN")} / sq.ft`
       : null);
 

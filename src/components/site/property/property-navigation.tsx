@@ -83,11 +83,15 @@ export function PropertyNavigation({
    * Hides nav items for sections with no data.
    */
   sections?: string[];
-  /** Anchors mode only: DB property type — plot/farmland label the plan item Ground Plan. */
+  /** DB property type — plot/farmland label the plan item Ground Plan in both modes. */
   propertyType?: string;
 }) {
   const pathname = usePathname();
-  const links = buildNavLinks(slug);
+  const links = buildNavLinks(slug).map((l) =>
+    l.section === "floor-plan" && propertyType
+      ? { ...l, label: getFloorPlanLabel(propertyType) }
+      : l
+  );
 
   const getIsActive = (link: NavLink): boolean => {
     if (activeSection !== undefined) {

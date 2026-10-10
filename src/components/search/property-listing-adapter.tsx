@@ -8,7 +8,6 @@ import { ListingImage } from "@/components/site/listing/ListingImage";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import {
-  formatPlotArea,
   getCommercialSpecs,
   getCoworkingSpecs,
   getFloorPlanLabel,
@@ -202,10 +201,14 @@ function getTypeLabel(item: PropertySearchItem): string | null {
 function getAreaCell(item: PropertySearchItem): { label: string; value: string } | null {
   const d = getDetails(item);
   if (item.propertyType === "plot") {
-    const area = formatPlotArea(d.plotArea, d.areaUnit);
-    if (area != null) return { label: "Plot Area", value: area };
+    // Cents-only: sqft plotArea never shows on plot cards. Generic Area
+    // (kept for plots) falls back under the Plot Area label — never
+    // "Built-Up Area".
     const cents = fmtTrimmedNum(d.plotSizeCents);
     if (cents != null) return { label: "Plot Area", value: `${cents} cents` };
+    const generic = fmtArea(d.areaSqft);
+    if (generic != null) return { label: "Plot Area", value: generic };
+    return null;
   }
   if (item.propertyType === "farmland") {
     // Farm Area is always quoted in cents, never sq.ft. plotSizeCents is
@@ -327,15 +330,21 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
   if (item.propertyType === "plot") {
     // Plot buyers decide on size, orientation, dimensions, type and legal
     // clarity — plus boundary/open-sides which signal development readiness.
+    // Details-only reads: no legacy item-level fallbacks on land cards.
     if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
-    if (facing) specCells.push({ label: "Facing", value: facing });
+    const plotFacing = trimStr(d.propertyFacing);
+    if (plotFacing) specCells.push({ label: "Facing", value: plotFacing });
     const dimension = getLandDimension(d);
     if (dimension) specCells.push({ label: "Dimension", value: dimension });
     const plotType = trimStr(d.plotType);
     if (plotType) specCells.push({ label: "Plot Type", value: plotType });
     const zoning = trimStr(d.zoning);
     if (zoning) specCells.push({ label: "Zoning", value: zoning });
-    else if (d.approvals) specCells.push({ label: "Approvals", value: d.approvals });
+    else {
+      // Approvals lives on the property row, not details — read both shapes.
+      const approvals = trimStr(d.approvals) ?? trimStr((item as any).approvals);
+      if (approvals) specCells.push({ label: "Approvals", value: approvals });
+    }
     // No possession fallback: the photo strip already shows availability,
     // and a move-in date is noise on a land card.
     if (d.boundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });

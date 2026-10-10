@@ -618,7 +618,7 @@ export default async function SlugPage({
           <div className="min-h-screen! bg-gray-50! font-manrope">
             {/* Spacer matching fixed header height (64px) */}
             <div className="h-[64px]!" aria-hidden="true" />
-            <ProjectNavigation />
+            <ProjectNavigation projectType={project.projectType} />
             <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-5! pb-24! scroll-smooth!">
               <div className="flex! flex-col! gap-5!">
                 <div className="mb-0!">

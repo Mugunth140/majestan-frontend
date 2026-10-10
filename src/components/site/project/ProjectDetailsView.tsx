@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ProjectDetail } from "@/lib/api/projects";
-import { formatINR } from "@/lib/api/projects";
+import { CENT_TO_SQFT, formatINR } from "@/lib/api/projects";
+import { getFloorPlanLabel } from "@/lib/property-sections";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { ListingImage } from "@/components/site/listing/ListingImage";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
@@ -101,7 +102,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
     { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Super Built-Up", value: areaRange },
     { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Possession", value: possessionDate ?? titleCase(project.possessionStatus) },
     { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: typeLabel },
-    { icon: <Layers className="w-4.5! h-4.5!" />, label: "Total Floors", value: project.totalFloors ? `${project.totalFloors} Floors` : null },
+    { icon: <Layers className="w-4.5! h-4.5!" />, label: "Total Floors", value: project.projectType !== "plot" && project.totalFloors ? `${project.totalFloors} Floors` : null },
   ].filter((s) => s.value) as { icon: React.ReactNode; label: string; value: string }[];
 
   const overviewStats: { icon: React.ReactNode; label: string; value: string }[] = [
@@ -112,7 +113,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
     ...(project.projectType === "apartment" && project.towers
       ? [{ icon: <Building2 className="w-4.5! h-4.5!" />, label: "Towers", value: `${project.towers} ${project.towers === 1 ? "Tower" : "Towers"}` }]
       : []),
-    ...(project.totalFloors
+    ...(project.projectType !== "plot" && project.totalFloors
       ? [{ icon: <Layers className="w-4.5! h-4.5!" />, label: "Total Floors", value: `${project.totalFloors} Floors` }]
       : []),
     ...(project.projectAreaSqft
@@ -148,7 +149,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
       ? [
           {
             target: "floor-plans",
-            label: "Floor Plan",
+            label: getFloorPlanLabel(project.projectType),
             icon: <Grid3X3 className="w-5! h-5!" />,
             desc: "Layouts & configs",
           },
@@ -367,10 +368,14 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                     <tr className="text-xs! uppercase! tracking-wider! text-gray-400! border-b! border-gray-100!">
                       <th className="py-3! pr-4! font-bold!">Unit</th>
                       <th className="py-3! pr-4! font-bold!">Type</th>
-                      <th className="py-3! pr-4! font-bold!">Area (sq.ft)</th>
-                      <th className="py-3! pr-4! font-bold!">Floor</th>
+                      <th className="py-3! pr-4! font-bold!">{project.projectType === "plot" ? "Area" : "Area (sq.ft)"}</th>
+                      {project.projectType !== "plot" && (
+                        <th className="py-3! pr-4! font-bold!">Floor</th>
+                      )}
                       <th className="py-3! pr-4! font-bold!">Facing</th>
-                      <th className="py-3! pr-4! font-bold!">Parking</th>
+                      {project.projectType !== "plot" && (
+                        <th className="py-3! pr-4! font-bold!">Parking</th>
+                      )}
                       <th className="py-3! pr-4! font-bold!">Price</th>
                       <th className="py-3! font-bold!">Status</th>
                     </tr>
@@ -384,21 +389,32 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                         </td>
                         <td className="py-3.5! pr-4! text-gray-600! capitalize!">{u.unitType?.replace(/_/g, " ")}</td>
                         <td className="py-3.5! pr-4! text-gray-600!">
-                          {(u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft)
-                            ? Number(u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft).toLocaleString("en-IN")
-                            : "-"}
+                          {project.projectType === "plot"
+                            ? (() => {
+                                const cents = u.plotAreaCents != null ? Number(u.plotAreaCents) : NaN;
+                                if (!Number.isFinite(cents) || cents <= 0) return "-";
+                                const sqft = Math.round(cents * CENT_TO_SQFT).toLocaleString("en-IN");
+                                return `${String(parseFloat(cents.toFixed(2)))} cents (${sqft} sq.ft)`;
+                              })()
+                            : (u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft)
+                              ? Number(u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft).toLocaleString("en-IN")
+                              : "-"}
                         </td>
-                        <td className="py-3.5! pr-4! text-gray-600!">
-                          {u.floorNo != null ? (u.totalFloors ? `${u.floorNo} of ${u.totalFloors}` : `${u.floorNo}`) : "-"}
-                        </td>
+                        {project.projectType !== "plot" && (
+                          <td className="py-3.5! pr-4! text-gray-600!">
+                            {u.floorNo != null ? (u.totalFloors ? `${u.floorNo} of ${u.totalFloors}` : `${u.floorNo}`) : "-"}
+                          </td>
+                        )}
                         <td className="py-3.5! pr-4! text-gray-600! capitalize!">{u.facing?.replace(/_/g, " ") ?? "-"}</td>
-                        <td className="py-3.5! pr-4! text-gray-600! capitalize!">
-                          {[
-                            u.parking != null ? `${u.parking}` : null,
-                            u.parkingType ? String(u.parkingType).replace(/_/g, " ") : null,
-                            u.unitGuestParking ? "Guest" : null,
-                          ].filter(Boolean).join(" · ") || "-"}
-                        </td>
+                        {project.projectType !== "plot" && (
+                          <td className="py-3.5! pr-4! text-gray-600! capitalize!">
+                            {[
+                              u.parking != null ? `${u.parking}` : null,
+                              u.parkingType ? String(u.parkingType).replace(/_/g, " ") : null,
+                              u.unitGuestParking ? "Guest" : null,
+                            ].filter(Boolean).join(" · ") || "-"}
+                          </td>
+                        )}
                         <td className="py-3.5! pr-4! font-extrabold! text-[#27427f]! whitespace-nowrap!">{u.price ? formatINR(u.price) : "-"}</td>
                         <td className="py-3.5! capitalize! text-gray-600!">{u.status?.replace(/_/g, " ")}</td>
                       </tr>

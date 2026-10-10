@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MapPin, Phone, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Download } from "lucide-react";
-import { type ProjectListItem } from "@/lib/api/projects";
+import { formatPlotCents, type ProjectListItem } from "@/lib/api/projects";
+import { getFloorPlanLabel } from "@/lib/property-sections";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { ListingImage } from "@/components/site/listing/ListingImage";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
@@ -92,7 +93,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const projectSections = [
     { hash: "overview", label: "Overview", icon: <LayoutDashboard className="w-3.5! h-3.5!" /> },
     { hash: "amenities", label: "Amenities", icon: <Sparkles className="w-3.5! h-3.5!" /> },
-    { hash: "floor-plans", label: "Floor Plan", icon: <Grid3X3 className="w-3.5! h-3.5!" /> },
+    { hash: "floor-plans", label: getFloorPlanLabel(item.projectType), icon: <Grid3X3 className="w-3.5! h-3.5!" /> },
     { hash: "locality", label: "Locality", icon: <MapPinned className="w-3.5! h-3.5!" /> },
     { hash: "photos", label: "Photos", icon: <Images className="w-3.5! h-3.5!" /> },
   ];
@@ -186,8 +187,14 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
   // Representative per-sqft rate from the range floor (min price / min area),
   // shown beside the price exactly like the property card's ₹/sqft.
+  // Plot projects quote per cent instead, mirroring property land cards.
   const pricePerSqft = (() => {
     const minPrice = item.ranges.minPrice;
+    if (item.projectType === "plot") {
+      const minCents = item.ranges.minPlotCents;
+      if (minPrice == null || minCents == null || minPrice <= 0 || minCents <= 0) return null;
+      return `₹ ${Math.round(minPrice / minCents).toLocaleString("en-IN")}/cent`;
+    }
     const minArea = item.ranges.minArea;
     if (minPrice == null || minArea == null || minPrice <= 0 || minArea <= 0) return null;
     return `₹ ${Math.round(minPrice / minArea).toLocaleString("en-IN")}/sqft`;
@@ -203,9 +210,21 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   })();
 
   const specCells: { label: string; value: React.ReactNode }[] = [];
-  if (item.ranges.bhk.length > 0)
-    specCells.push({ label: "BHK", value: `${item.ranges.bhk.join(", ")} BHK` });
-  if (area) specCells.push({ label: "Built-Up Area", value: area });
+  if (item.projectType === "plot") {
+    // Land parcels quote in cents; a single Plot Area cell leads.
+    const { minPlotCents, maxPlotCents } = item.ranges;
+    if (minPlotCents != null) {
+      const plotArea =
+        maxPlotCents != null && maxPlotCents !== minPlotCents
+          ? `${formatPlotCents(minPlotCents)} – ${formatPlotCents(maxPlotCents)}`
+          : formatPlotCents(minPlotCents);
+      if (plotArea) specCells.push({ label: "Plot Area", value: plotArea });
+    }
+  } else {
+    if (item.ranges.bhk.length > 0)
+      specCells.push({ label: "BHK", value: `${item.ranges.bhk.join(", ")} BHK` });
+    if (area) specCells.push({ label: "Built-Up Area", value: area });
+  }
   if (facingLabel) specCells.push({ label: "Facing", value: facingLabel });
   if (possession) specCells.push({ label: "Possession", value: possession });
 

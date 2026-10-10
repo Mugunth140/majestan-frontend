@@ -8,6 +8,7 @@ import {
   MapPinned,
   Images,
 } from "lucide-react";
+import { getFloorPlanLabel } from "@/lib/property-sections";
 
 export const PROJECT_SECTIONS = [
   { id: "overview", label: "Overview", icon: <LayoutDashboard className="w-4! h-4!" /> },
@@ -17,8 +18,9 @@ export const PROJECT_SECTIONS = [
   { id: "photos", label: "Photos", icon: <Images className="w-4! h-4!" /> },
 ];
 
-export function ProjectNavigation() {
+export function ProjectNavigation({ projectType }: { projectType?: string } = {}) {
   const [active, setActive] = useState("overview");
+  const planLabel = projectType ? getFloorPlanLabel(projectType) : "Floor Plan";
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -47,6 +49,7 @@ export function ProjectNavigation() {
         <nav className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar!" aria-label="Project sections">
           {PROJECT_SECTIONS.map((s) => {
             const isActive = active === s.id;
+            const label = s.id === "floor-plans" ? planLabel : s.label;
             return (
               <button
                 key={s.id}
@@ -61,7 +64,7 @@ export function ProjectNavigation() {
                 <span className={`transition-colors! duration-300! ${isActive ? "text-[#27427f]!" : "text-gray-400! group-hover:text-gray-500!"}`}>
                   {s.icon}
                 </span>
-                {s.label}
+                {label}
                 {isActive && (
                   <div className="absolute! bottom-0! left-0! right-0! h-0.5! bg-[#27427f]! rounded-t-full!" />
                 )}

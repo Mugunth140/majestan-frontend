@@ -13,6 +13,7 @@ export type ProjectUnit = {
   superBuiltupAreaSqft: string | null;
   udsAreaSqft?: string | null;
   plotAreaSqft?: string | null;
+  plotAreaCents?: string | number | null;
   parking?: number | null;
   parkingType?: string | null;
   unitGuestParking?: boolean | null;
@@ -40,6 +41,8 @@ export type ProjectRanges = {
   maxPrice: number | null;
   minArea: number | null;
   maxArea: number | null;
+  minPlotCents: number | null;
+  maxPlotCents: number | null;
   bhk: number[];
   facings: string[];
   unitsCount: number;
@@ -168,6 +171,21 @@ export async function getAllProjectSlugs(): Promise<string[]> {
 
 export function toSlug(value: string): string {
   return value.trim().toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+/** 1 cent of land = 435.6 sq.ft. Single source for cents ↔ sqft display. */
+export const CENT_TO_SQFT = 435.6;
+
+export function centsToSqft(cents: number | null | undefined): number | null {
+  if (cents == null || !Number.isFinite(cents) || cents <= 0) return null;
+  return Math.round(cents * CENT_TO_SQFT);
+}
+
+export function formatPlotCents(value: number | string | null | undefined): string | null {
+  if (value == null || String(value).trim() === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return `${String(parseFloat(n.toFixed(2)))} cents`;
 }
 
 export function formatINR(value: string | number | null | undefined): string {

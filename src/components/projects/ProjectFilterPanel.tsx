@@ -197,7 +197,12 @@ export function ProjectFilterPanel({ values, onChange, onReset }: { values: Proj
               { value: "villa", label: "Villa" },
               { value: "plot", label: "Plot" },
             ]}
-            onChange={(v) => updateFilter("projectType", v)}
+            onChange={(v) => {
+              // Plots have no bedrooms — clear a stale BHK rather than
+              // keeping a contradictory bhk+plot filter combo.
+              if (v === "plot") onChange({ ...values, ...textFields, projectType: v, bhk: "" });
+              else updateFilter("projectType", v);
+            }}
             ariaLabel="Project Type"
           />
         </Section>
@@ -247,23 +252,25 @@ export function ProjectFilterPanel({ values, onChange, onReset }: { values: Proj
           </div>
         </Section>
 
-        <Section title="Bedrooms" value={bhkSummary}>
-          <div className="flex! gap-1.5!">
-            {["1", "2", "3", "4", "5"].map((num) => (
-              <button
-                key={num}
-                onClick={() => updateFilter("bhk", values.bhk === num ? "" : num)}
-                className={`flex-1! h-9! rounded-lg! border! text-[13px]! font-medium! transition-all! cursor-pointer! tabular-nums! ${
-                  values.bhk === num
-                    ? "bg-[#27427f]! text-white! border-[#27427f]!"
-                    : "bg-white! text-gray-500! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
-        </Section>
+        {values.projectType !== "plot" && (
+          <Section title="Bedrooms" value={bhkSummary}>
+            <div className="flex! gap-1.5!">
+              {["1", "2", "3", "4", "5"].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => updateFilter("bhk", values.bhk === num ? "" : num)}
+                  className={`flex-1! h-9! rounded-lg! border! text-[13px]! font-medium! transition-all! cursor-pointer! tabular-nums! ${
+                    values.bhk === num
+                      ? "bg-[#27427f]! text-white! border-[#27427f]!"
+                      : "bg-white! text-gray-500! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </Section>
+        )}
 
         <Section title="More Filters" value={moreSummary}>
           <div className="space-y-4!">

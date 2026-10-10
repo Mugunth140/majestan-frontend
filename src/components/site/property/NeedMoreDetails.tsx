@@ -5,6 +5,9 @@ type NeedMoreDetailsProps = {
 
 function getCopy(propertyType?: string): string {
   switch (propertyType) {
+    case "plot":
+    case "farmland":
+      return "Get the complete plot details (dimensions, zoning and approvals) and confirm availability with the property owner.";
     case "commercial":
       return "Get the complete specifications and confirm availability with the property manager.";
     case "industrial":

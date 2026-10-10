@@ -89,7 +89,7 @@ describe("getCardSpecCells", () => {
   it("caps plot cells at 4, dropping zoning and boundary", () => {
     const labels = getCardSpecCells(
       withDetails("plot", {
-        plotArea: "2400",
+        plotSizeCents: "10",
         propertyFacing: "East",
         plotLength: "40",
         plotWidth: "60",
@@ -104,7 +104,7 @@ describe("getCardSpecCells", () => {
   it("never shows possession on plot cards, even when available-from exists", () => {
     const cells = getCardSpecCells({
       ...withDetails("plot", {
-        plotArea: "2400",
+        plotSizeCents: "10",
         propertyFacing: "East",
         plotLength: "40",
         plotWidth: "60",
@@ -116,9 +116,26 @@ describe("getCardSpecCells", () => {
 
   it("honors cents area unit on plot cards", () => {
     const cells = getCardSpecCells(
-      withDetails("plot", { plotArea: "5.5", areaUnit: "Cents" })
+      withDetails("plot", { plotSizeCents: "5.5" })
     );
     expect(cells).toMatchObject([{ label: "Plot Area", value: "5.5 cents" }]);
+  });
+
+  it("ignores sqft plotArea on plot cards (cents only)", () => {
+    const cells = getCardSpecCells(
+      withDetails("plot", { plotArea: "2400", propertyFacing: "East" })
+    );
+    expect(cells.map((c) => c.label)).not.toContain("Plot Area");
+    expect(cells.map((c) => c.label)).toContain("Facing");
+  });
+
+  it("reads facing from details only on plot cards (no legacy fallback)", () => {
+    const cells = getCardSpecCells({
+      ...withDetails("plot", { plotSizeCents: "10" }),
+      facing: "West",
+      facing_direction: "North",
+    });
+    expect(cells.map((c) => c.label)).not.toContain("Facing");
   });
 
   it("caps farmland cells at 4, dropping property age", () => {

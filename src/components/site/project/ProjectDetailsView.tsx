@@ -51,6 +51,9 @@ function formatPossessionDate(v: string | null | undefined): string | null {
 export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
   const images = [project.coverImageUrl, ...(project.galleryImageUrls ?? [])].filter(Boolean) as string[];
   const allImages = images;
+  // Dedicated mobile cover for the hero (slide 0); falls back to the
+  // desktop image when absent.
+  const mobileCover = project.mobileCoverImageUrl || null;
   const [activeImg, setActiveImg] = useState(0);
   const [copied, setCopied] = useState(false);
   const currentImage = images.length > 0 ? images[Math.min(activeImg, images.length - 1)] : undefined;
@@ -213,11 +216,9 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
         </div>
       </div>
 
-      <div className="grid! grid-cols-1! lg:grid-cols-3! gap-5!">
-        {/* Left column */}
-        <div className="lg:col-span-2! flex! flex-col! gap-5! min-w-0!">
-          {/* Hero gallery */}
-          <div className="relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery!">
+      {/* Cover hero — full-width cover image with title, price and photo
+          strip overlaid on it */}
+      <div className="relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[340px]! md:h-[460px]! group/gallery!">
             {allImages.length > 0 ? (
               allImages.map((img, idx) => (
                 <div
@@ -231,7 +232,14 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                     placeholderSrc={placeholderUrl}
                     alt={`${project.name} - view ${idx + 1}`}
                     eager={idx === 0}
-                    className="w-full! h-full! object-cover!"
+                    className="w-full! h-full! object-cover! hidden! md:block!"
+                  />
+                  <ListingImage
+                    src={idx === 0 && mobileCover ? mobileCover : img}
+                    placeholderSrc={placeholderUrl}
+                    alt={`${project.name} - view ${idx + 1}`}
+                    eager={idx === 0}
+                    className="w-full! h-full! object-cover! md:hidden!"
                   />
                 </div>
               ))
@@ -244,7 +252,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                 className="w-full! h-full! object-cover! animate-fade-in!"
               />
             )}
-            <div className="absolute! inset-0! bg-gradient-to-t! from-black/25! via-transparent! to-transparent! pointer-events-none! z-20!" />
+            <div className="absolute! inset-0! bg-gradient-to-t! from-black/70! via-black/20! to-black/10! pointer-events-none! z-20!" />
 
             {/* Overlay badges */}
             <div className="absolute! top-4! right-4! flex! gap-2! z-20!">
@@ -255,6 +263,22 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
               <span className="inline-flex! items-center! px-4! py-2! rounded-xl! bg-white/95! backdrop-blur-md! text-gray-900! text-xs! font-semibold! shadow-sm!">
                 {typeLabel}
               </span>
+            </div>
+
+            {/* Title + location + price overlaid bottom-left */}
+            <div className="absolute! left-5! md:left-8! bottom-5! md:bottom-8! z-20! max-w-[70%]!">
+              <h1 className="font-manrope! text-2xl! md:text-4xl! font-semibold! text-white! leading-tight! drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]!">
+                {project.name}
+              </h1>
+              {(project.sublocation || project.city) && (
+                <p className="mt-1.5! flex! items-center! gap-1.5! text-[13px]! md:text-sm! text-white/90! drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]!">
+                  <MapPin className="w-4! h-4! shrink-0!" />
+                  <span className="truncate!">{projectLocationLine2 || project.city}</span>
+                </p>
+              )}
+              <p className="mt-2! text-lg! md:text-2xl! font-semibold! text-white! drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]!">
+                {priceRange}
+              </p>
             </div>
 
             {/* Arrows */}
@@ -277,24 +301,53 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
               </>
             )}
 
-            {/* Counter + photos button */}
-            {allImages.length > 0 && (
-            <div className="absolute! bottom-4! right-4! flex! items-center! gap-2! z-20!">
-              {allImages.length > 1 && (
-                <span className="px-3! py-1.5! rounded-full! bg-black/45! backdrop-blur-md! text-white! text-xs! font-medium! tabular-nums!">
-                  {activeImg + 1} / {allImages.length}
-                </span>
-              )}
-              <Link
-                href={`/${project.canonicalSlug}/photos`}
-                className="inline-flex! items-center! gap-2! px-4! py-2! bg-white/95! backdrop-blur-md! rounded-xl! text-gray-900! text-xs! font-semibold! hover:bg-white! transition-all! shadow-sm! cursor-pointer! no-underline!"
-              >
-                <Images className="w-4! h-4!" />
-                {allImages.length} Photos
-              </Link>
-            </div>
+            {/* Counter */}
+            {allImages.length > 1 && (
+              <span className="absolute! bottom-4! right-4! z-20! px-3! py-1.5! rounded-full! bg-black/45! backdrop-blur-md! text-white! text-xs! font-medium! tabular-nums!">
+                {activeImg + 1} / {allImages.length}
+              </span>
             )}
           </div>
+
+          {/* Photo strip overlaid across the cover's bottom edge */}
+          {allImages.length > 1 && (
+            <div className="-mt-12! md:-mt-14! px-5! md:px-8! z-30! relative!">
+              <div className="flex! gap-3! overflow-x-auto! hide-scrollbar! pb-1!">
+                {allImages.slice(0, 5).map((img, idx) => (
+                  <button
+                    key={img}
+                    onClick={() => setActiveImg(idx)}
+                    aria-label={`View photo ${idx + 1}`}
+                    className={`relative! h-20! md:h-24! w-28! md:w-36! shrink-0! rounded-xl! overflow-hidden! cursor-pointer! transition-all! bg-gray-100! ${
+                      idx === activeImg
+                        ? "ring-3! ring-white! shadow-[0_8px_24px_rgba(0,0,0,0.35)]!"
+                        : "ring-1! ring-white/60! opacity-90! hover:opacity-100!"
+                    }`}
+                  >
+                    <ListingImage
+                      src={img}
+                      placeholderSrc={placeholderUrl}
+                      alt={`${project.name} thumbnail ${idx + 1}`}
+                      className="w-full! h-full! object-cover!"
+                    />
+                  </button>
+                ))}
+                <Link
+                  href={`/${project.canonicalSlug}/photos`}
+                  className="h-20! md:h-24! w-28! md:w-36! shrink-0! rounded-xl! bg-gray-900/85! backdrop-blur-md! text-white! flex! flex-col! items-center! justify-center! gap-1! no-underline! hover:bg-gray-900! transition-colors!"
+                >
+                  <Images className="w-5! h-5!" />
+                  <span className="text-xs! font-semibold!">
+                    {allImages.length} Photos
+                  </span>
+                </Link>
+              </div>
+            </div>
+          )}
+
+      <div className="grid! grid-cols-1! lg:grid-cols-3! gap-5!">
+        {/* Left column */}
+        <div className="lg:col-span-2! flex! flex-col! gap-5! min-w-0!">
 
           {/* Overview card */}
           <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">

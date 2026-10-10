@@ -86,6 +86,7 @@ export type ProjectDetail = {
   projectAmenities?: { amenityId: number; availability?: string; notes?: string | null; amenity?: { id: number; name: string; icon?: string } | null }[] | null;
   description: string | null;
   coverImageUrl: string | null;
+  mobileCoverImageUrl?: string | null;
   galleryImageUrls: string[] | null;
   status: string;
   ranges: ProjectRanges;

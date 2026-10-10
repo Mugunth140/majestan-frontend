@@ -73,14 +73,13 @@ function formatPossessionStatus(v: string | null | undefined): string | null {
   return v.trim().replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Condition ribbon for the pricing row, mirroring the property card's
-// canonical vocabulary badge.
+// Condition ribbon for the pricing row: only New Launch and New Arrival
+// (ready-to-move) get a badge — under-construction shows none.
 function getConditionBadge(possessionStatus: string | null | undefined): string | null {
   if (typeof possessionStatus !== "string") return null;
   const key = possessionStatus.trim().toLowerCase();
-  if (key === "ready_to_move") return "READY TO MOVE";
-  if (key === "under_construction") return "UNDER CONSTRUCTION";
   if (key === "new_launch") return "NEW LAUNCH";
+  if (key === "ready_to_move") return "NEW ARRIVAL";
   return null;
 }
 

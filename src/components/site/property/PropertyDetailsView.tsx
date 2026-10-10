@@ -205,18 +205,36 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             {...(isSingle ? { id: "overview" } : {})}
             className={`relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery${isSingle ? " scroll-mt-40!" : ""}`}
           >
-            <ListingImage
-              key={currentImage?.imageUrl ?? "placeholder"}
-              src={currentImage?.imageUrl ?? null}
-              placeholderSrc={placeholderUrl}
-              alt={title}
-              eager
-              className="w-full! h-full! object-cover! animate-fade-in!"
-            />
-            <div className="absolute! inset-0! bg-gradient-to-t! from-black/25! via-transparent! to-transparent! pointer-events-none!" />
+            {images.length > 0 ? (
+              images.map((img, idx) => (
+                <div
+                  key={img.imageUrl}
+                  className={`absolute! inset-0! transition-opacity! duration-500! ${
+                    idx === activeImg ? "opacity-100! z-10!" : "opacity-0! z-0!"
+                  }`}
+                >
+                  <ListingImage
+                    src={img.imageUrl}
+                    placeholderSrc={placeholderUrl}
+                    alt={`${title} - view ${idx + 1}`}
+                    eager={idx === 0}
+                    className="w-full! h-full! object-cover!"
+                  />
+                </div>
+              ))
+            ) : (
+              <ListingImage
+                src={null}
+                placeholderSrc={placeholderUrl}
+                alt={title}
+                eager
+                className="w-full! h-full! object-cover! animate-fade-in!"
+              />
+            )}
+            <div className="absolute! inset-0! bg-gradient-to-t! from-black/25! via-transparent! to-transparent! pointer-events-none! z-20!" />
 
             {/* Overlay badges */}
-            <div className="absolute! top-4! right-4! flex! gap-2!">
+            <div className="absolute! top-4! right-4! flex! gap-2! z-20!">
               <span
                 className={`inline-flex! items-center! px-4! py-2! rounded-xl! text-xs! font-semibold! backdrop-blur-md! ${isSale ? "bg-[#27427f]/95! text-white!" : "bg-gray-900/85! text-white!"}`}
               >
@@ -233,14 +251,14 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                 <button
                   onClick={prevImg}
                   aria-label="Previous photo"
-                  className="absolute! left-4! top-1/2! -translate-y-1/2! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer! hidden! group-hover/gallery:flex!"
+                  className="absolute! left-4! top-1/2! -translate-y-1/2! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer! hidden! group-hover/gallery:flex! z-20!"
                 >
                   <ChevronLeft className="w-5! h-5!" />
                 </button>
                 <button
                   onClick={nextImg}
                   aria-label="Next photo"
-                  className="absolute! right-4! top-1/2! -translate-y-1/2! flex! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer!"
+                  className="absolute! right-4! top-1/2! -translate-y-1/2! flex! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer! z-20!"
                 >
                   <ChevronRight className="w-5! h-5!" />
                 </button>
@@ -249,7 +267,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
 
             {/* Counter + photos button */}
             {images.length > 0 && (
-            <div className="absolute! bottom-4! right-4! flex! items-center! gap-2!">
+            <div className="absolute! bottom-4! right-4! flex! items-center! gap-2! z-20!">
               {images.length > 1 && (
                 <span className="px-3! py-1.5! rounded-full! bg-black/45! backdrop-blur-md! text-white! text-xs! font-medium! tabular-nums!">
                   {activeImg + 1} / {images.length}

@@ -7,6 +7,23 @@
      the legacy Lexend stack. Manrope itself (200-800) loads from Google
      Fonts via public/assets/css/styles.css. */
   --font-manrope: "Manrope", sans-serif;
+
+  /* Detail-page card radius. 20px sits between Tailwind's 2xl (16) and 3xl
+     (24) and was already hardcoded as `rounded-[20px]` on every property and
+     project card, including the shared FaqSection and LocalityTeaser. Named
+     here so `rounded-card!` is the one place it is written down, and so the
+     nested-radius arithmetic for anything inside a card (20 − gap) has a
+     fixed outer value to work from. */
+  --radius-card: 20px;
+
+  /* Easing. The built-in CSS keywords are too weak to read as deliberate at
+     the 150-300ms durations UI wants: `ease-out` barely diverges from linear,
+     and `ease-in` delays the first frame, which is the frame the pointer is
+     watching. These two cover the cases — things entering, leaving or
+     responding to a press use `ease-out-quint`; things moving from one
+     on-screen position to another use `ease-in-out-quint`. */
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-quint: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 html,
@@ -336,6 +353,37 @@ body {
   display: none;
 }
 
+/* Content tables, reset away from the legacy dashboard table theme.
+
+   public/assets/css/styles.css styles bare elements, so every <table> in the
+   app inherits three things nobody asked for:
+
+     thead tr { background-color: #3a3a3c; color: #fff }
+                                        → a near-black bar behind the headers,
+                                          with white text on it
+     td       { border-bottom: 1px solid #c5c5c5 }
+     th, td   { padding: 15px 12px }    → including a left pad on the first
+                                          column, so the table never lines up
+                                          with the card it sits in
+
+   Tailwind's important-suffixed utilities beat the padding and font rules but
+   cannot remove a border or background the component never declares. This
+   class zeroes all of it so the utilities on the cells are the whole story.
+   Opt-in by class, so the admin dashboard tables keep the legacy look.
+
+   Specificity, not !important, does the work: `.data-table td` (0,1,1) beats
+   `td` (0,0,1), so a component can still override any of it inline. */
+.data-table thead tr {
+  background-color: transparent;
+  color: inherit;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0;
+  border: 0;
+}
+
 /* Details/wishlist surfaces use Manrope. Legacy styles.css forces Lexend
    directly on h1-h6 element selectors, which beats inheritance — so
    re-assert Manrope on headings inside .font-manrope containers. Scoped to
@@ -370,7 +418,11 @@ body {
   li,
   ul,
   ol,
+  dl,
+  dt,
+  dd,
   figcaption,
+  caption,
   label,
   button,
   input,

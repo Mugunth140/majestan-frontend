@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
+import {
+  getYouTubeVideoId,
+  youtubeEmbedUrl,
+  youtubeThumbnailUrl,
+} from "@/lib/youtube";
 import {
   X,
   ChevronLeft,
@@ -11,11 +16,22 @@ import {
   Images,
   ZoomIn,
   Star,
+  Play,
 } from "lucide-react";
 
 export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [playingVideo, setPlayingVideo] = useState(false);
+
+  // Single featured video — first playable YouTube link in stored order.
+  const videoId = useMemo(() => {
+    for (const raw of project.videoUrls ?? []) {
+      const id = getYouTubeVideoId(raw);
+      if (id) return id;
+    }
+    return null;
+  }, [project.videoUrls]);
 
   const primaryImage = project.coverImageUrl || null;
   const galleryImages = (project.galleryImageUrls ?? []).filter(Boolean) as string[];
@@ -166,6 +182,49 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
                 </button>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Video — full-width player, thumbnail swaps in the embed on click */}
+      {videoId && (
+        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+          <div className="mb-6!">
+            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
+              Video
+            </h2>
+            <p className="text-sm! font-normal! text-gray-500! mt-1!">
+              Watch the walkthrough of {project.name}
+            </p>
+          </div>
+          <div className="relative! rounded-[16px]! overflow-hidden! bg-black! aspect-video!">
+            {playingVideo ? (
+              <iframe
+                src={youtubeEmbedUrl(videoId, true)}
+                title={`${project.name} video`}
+                className="absolute! inset-0! w-full! h-full!"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <button
+                onClick={() => setPlayingVideo(true)}
+                className="absolute! inset-0! w-full! h-full! group cursor-pointer!"
+                aria-label={`Play ${project.name} video`}
+              >
+                <img
+                  src={youtubeThumbnailUrl(videoId)}
+                  alt={`${project.name} video thumbnail`}
+                  className="absolute! inset-0! w-full! h-full! object-cover!"
+                  loading="lazy"
+                />
+                <div className="absolute! inset-0! bg-black/20! group-hover:bg-black/30! transition-colors! duration-300! flex! items-center! justify-center!">
+                  <div className="w-20! h-20! rounded-full! bg-white/95! backdrop-blur-md! flex! items-center! justify-center! shadow-lg! transition-transform! duration-300! group-hover:scale-110!">
+                    <Play className="w-8! h-8! text-gray-900! ml-1!" />
+                  </div>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       )}

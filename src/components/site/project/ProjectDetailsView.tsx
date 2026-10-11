@@ -1,787 +1,488 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import type { ProjectDetail } from "@/lib/api/projects";
-import { CENT_TO_SQFT, formatINR } from "@/lib/api/projects";
-import { getFloorPlanLabel } from "@/lib/property-sections";
-import { getPlaceholderImage } from "@/lib/placeholder-images";
-import { ListingImage } from "@/components/site/listing/ListingImage";
-import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
-import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
-import { FaqSection } from "@/components/site/property/sections/FaqSection";
 import {
-  MapPin,
-  BedDouble,
-  Phone,
-  Share2,
   Check,
-  ChevronLeft,
-  ChevronRight,
-  Building2,
-  Calendar,
-  ShieldCheck,
-  Sparkles,
-  Grid3X3,
-  MapPinned,
-  Images,
-  Tag,
-  Info,
-  Layers,
-  Ruler,
-  Coins,
+  Download,
   ExternalLink,
-  Award,
-  CheckCircle2,
-  Clock,
   Globe,
+  MapPin,
+  ShieldCheck,
 } from "lucide-react";
+import type { ProjectDetail } from "@/lib/api/projects";
+import {
+  amenityNames,
+  buildDetailRows,
+  buildFacts,
+  priceRangeLabel,
+  rateFact,
+} from "@/lib/project-overview";
+import { getIconForAmenity } from "@/components/site/property/sections/AmenitiesSection";
+import { FaqSection } from "@/components/site/property/sections/FaqSection";
+import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
+import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
+import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryActions";
+import { ProjectGallery } from "@/components/site/project/ProjectGallery";
+import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
+import { ProjectUnitsTable } from "@/components/site/project/ProjectUnitsTable";
 
-type ProjectDetailsViewProps = {
-  project: ProjectDetail;
-};
+/** How many amenities the overview shows before deferring to the sub-page. */
+const AMENITY_PREVIEW = 8;
 
-function titleCase(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const CARD =
+  "bg-white! rounded-card! border! border-gray-200/70! shadow-sm! p-6! md:p-8!";
+/* Matches FaqSection and LocalityTeaser, which this page also renders. A
+   heavier heading here would have made those two look like a different page. */
+const HEADING = "text-lg! md:text-xl! font-normal! text-gray-900!";
+/* gray-400 was the label colour everywhere on the old page — 2.8:1 on white,
+   under the 4.5:1 floor for text this size. gray-500 clears it at 4.6:1. */
+const LABEL = "text-xs! font-medium! uppercase! tracking-wide! text-gray-500!";
+const VALUE = "text-sm! font-semibold! text-gray-900!";
+const BODY = "text-base! text-gray-600! leading-relaxed!";
+
+/** CRM free text arrives newline separated. Blank lines are paragraph breaks. */
+function paragraphs(text: string): string[] {
+  return text
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
 }
 
-function formatPossessionDate(v: string | null | undefined): string | null {
-  if (!v || !v.trim()) return null;
-  const dt = new Date(v);
-  if (isNaN(dt.getTime())) return v;
-  const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.getMonth()];
-  return `${String(dt.getDate()).padStart(2, "0")}-${mon}-${dt.getFullYear()}`;
+/** Single newlines in a highlights field mean "list", not "paragraph". */
+function bulletLines(text: string): string[] {
+  return text
+    .split("\n")
+    .map((line) => line.replace(/^[-•*\s]+/, "").trim())
+    .filter(Boolean);
 }
 
-export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
-  const images = [project.coverImageUrl, ...(project.galleryImageUrls ?? [])].filter(Boolean) as string[];
-  const allImages = images;
-  // Dedicated mobile cover for the hero (slide 0); falls back to the
-  // desktop image when absent.
-  const mobileCover = project.mobileCoverImageUrl || null;
-  const [activeImg, setActiveImg] = useState(0);
-  const [copied, setCopied] = useState(false);
-  const currentImage = images.length > 0 ? images[Math.min(activeImg, images.length - 1)] : undefined;
-  const placeholderUrl = getPlaceholderImage({ projectType: project.projectType });
+function Card({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className={CARD}>
+      <div className="flex! items-center! justify-between! gap-4!">
+        <h2 className={HEADING}>{title}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
 
-  const typeLabel = project.projectType === "villa" ? "Villa" : project.projectType === "plot" ? "Plot" : "Apartment";
+/** Full-bleed hairline, so dividers never read as a half-bordered block. */
+function Divider() {
+  return <div className="my-6! h-px! bg-gray-200!" aria-hidden="true" />;
+}
 
-  const min = project.ranges.minPrice;
-  const max = project.ranges.maxPrice;
-  const priceRange =
-    min != null && max != null && min !== max
-      ? `${formatINR(min)} - ${formatINR(max)}`
-      : min != null
-        ? formatINR(min)
-        : max != null
-          ? formatINR(max)
-          : "Price on Request";
+function Subheading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-base! font-semibold! text-gray-900!">{children}</h3>
+  );
+}
 
-  const areas = project.units
-    .map((u) => Number(u.superBuiltupAreaSqft || u.builtupAreaSqft || u.carpetAreaSqft))
-    .filter((n) => Number.isFinite(n) && n > 0);
-  const areaRange =
-    areas.length >= 2
-      ? `${Math.min(...areas).toLocaleString("en-IN")} - ${Math.max(...areas).toLocaleString("en-IN")} Sq Ft`
-      : areas.length === 1
-        ? `${areas[0].toLocaleString("en-IN")} Sq Ft`
-        : null;
+function DefinitionGrid({
+  rows,
+  columns = 3,
+}: {
+  rows: { label: string; value: string }[];
+  columns?: 2 | 3;
+}) {
+  return (
+    <dl
+      className={`grid! grid-cols-2! ${
+        columns === 3 ? "sm:grid-cols-3!" : "sm:grid-cols-2!"
+      } gap-x-6! gap-y-6!`}
+    >
+      {rows.map((row) => (
+        <div key={row.label} className="min-w-0!">
+          <dt className={LABEL}>{row.label}</dt>
+          <dd className={`${VALUE} mt-1! break-words!`}>{row.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
-  const bhkLabel =
-    project.ranges.bhk.length > 0
-      ? project.ranges.bhk.map((b) => `${b}`).join(", ") + " BHK"
-      : null;
+export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
+  const heading = project.seo?.seoData?.overview?.h1 || project.name;
+  const facts = buildFacts(project);
+  const detailRows = buildDetailRows(project);
+  const amenities = amenityNames(project);
+  const rate = rateFact(project);
+  const isPlot = project.projectType === "plot";
 
-  const possessionDate = formatPossessionDate(project.possessionDate);
-  const projectAddress = (project.address || "").trim();
-  const projectPincode = (project.pincode || "").toString().trim();
-  const projectLocationLine2 = [
-    project.sublocation,
-    project.city,
-    projectPincode,
-  ]
+  const street = (project.address || "").trim();
+  const region = [project.sublocation, project.city, project.state, project.pincode]
     .filter(Boolean)
     .join(", ");
 
-  const builderInfo = project.builder;
-  const builderDisplayName = builderInfo?.name || project.builderName;
+  const towerRows = (project.towerDetails ?? []).filter(
+    (tower) => tower.tower || tower.floors || tower.units,
+  );
+  const specifications = (project.specifications ?? []).filter(
+    (spec) => spec.label && spec.value,
+  );
+  const highlightLines = bulletLines((project.highlights || "").trim());
 
-  const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = [
-    { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: bhkLabel },
-    { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Super Built-Up", value: areaRange },
-    { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Possession", value: possessionDate ?? titleCase(project.possessionStatus) },
-    { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: typeLabel },
-    { icon: <Layers className="w-4.5! h-4.5!" />, label: "Total Floors", value: project.projectType !== "plot" && project.totalFloors ? `${project.totalFloors} Floors` : null },
-  ].filter((s) => s.value) as { icon: React.ReactNode; label: string; value: string }[];
-
-  const overviewStats: { icon: React.ReactNode; label: string; value: string }[] = [
-    { icon: <Sparkles className="w-4.5! h-4.5!" />, label: "Project Status", value: titleCase(project.possessionStatus) },
-    ...(project.totalUnits
-      ? [{ icon: <Layers className="w-4.5! h-4.5!" />, label: "No. of Units", value: `${project.totalUnits} Units` }]
-      : []),
-    ...(project.projectType === "apartment" && project.towers
-      ? [{ icon: <Building2 className="w-4.5! h-4.5!" />, label: "Towers", value: `${project.towers} ${project.towers === 1 ? "Tower" : "Towers"}` }]
-      : []),
-    ...(project.projectType !== "plot" && project.totalFloors
-      ? [{ icon: <Layers className="w-4.5! h-4.5!" />, label: "Total Floors", value: `${project.totalFloors} Floors` }]
-      : []),
-    ...(project.projectAreaSqft
-      ? [{ icon: <Ruler className="w-4.5! h-4.5!" />, label: "Project Area", value: `${Number(project.projectAreaSqft).toLocaleString("en-IN")} Sq Ft` }]
-      : []),
-    ...(bhkLabel ? [{ icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: bhkLabel }] : []),
-    ...(areaRange ? [{ icon: <Ruler className="w-4.5! h-4.5!" />, label: "Super Built-Up", value: areaRange }] : []),
-    ...(possessionDate
-      ? [{ icon: <Calendar className="w-4.5! h-4.5!" />, label: "Possession Date", value: possessionDate }]
-      : []),
-    ...(project.reraNumber
-      ? [{ icon: <ShieldCheck className="w-4.5! h-4.5!" />, label: "Rera No.", value: project.reraNumber }]
-      : []),
-    ...(builderDisplayName
-      ? [{ icon: <Building2 className="w-4.5! h-4.5!" />, label: "Developed By", value: builderDisplayName }]
-      : []),
-    ...(project.projectCode
-      ? [{ icon: <Tag className="w-4.5! h-4.5!" />, label: "Project ID", value: project.projectCode }]
-      : []),
-  ];
-
-  const hasPlans = project.units.some((u) => u.floorPlanImageUrl);
-  const hasPhotos = [project.coverImageUrl, ...(project.galleryImageUrls ?? [])].filter(Boolean).length > 0;
-
-  const sectionLinks = [
-    {
-      target: "amenities",
-      label: "Amenities",
-      icon: <Sparkles className="w-5! h-5!" />,
-      desc: "To be updated",
-    },
-    ...(hasPlans
-      ? [
-          {
-            target: "floor-plans",
-            label: getFloorPlanLabel(project.projectType),
-            icon: <Grid3X3 className="w-5! h-5!" />,
-            desc: "Layouts & configs",
-          },
-        ]
-      : []),
-    {
-      target: "locality",
-      label: "Locality",
-      icon: <MapPinned className="w-5! h-5!" />,
-      desc: "Nearby places",
-    },
-    ...(hasPhotos
-      ? [
-          {
-            target: "photos",
-            label: "Photos",
-            icon: <Images className="w-5! h-5!" />,
-            desc: `${allImages.length} available`,
-          },
-        ]
-      : []),
-  ];
-
-  const handleShare = async () => {
-    const url = `${window.location.origin}/${project.canonicalSlug}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: project.name, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      /* user dismissed */
-    }
-  };
-
-  const prevImg = () => setActiveImg((i) => (i - 1 + allImages.length) % allImages.length);
-  const nextImg = () => setActiveImg((i) => (i + 1) % allImages.length);
+  const builder = project.builder;
+  const builderName = builder?.name || project.builderName;
+  const builderStats = [
+    builder?.experienceYears
+      ? { value: `${builder.experienceYears}+`, label: "Years building" }
+      : null,
+    builder?.completedProjects
+      ? { value: `${builder.completedProjects}`, label: "Projects delivered" }
+      : null,
+    builder?.ongoingProjects
+      ? { value: `${builder.ongoingProjects}`, label: "Under way" }
+      : null,
+  ].filter((stat): stat is { value: string; label: string } => stat !== null);
+  const builderWebsite = builder?.website
+    ? builder.website.startsWith("http")
+      ? builder.website
+      : `https://${builder.website}`
+    : null;
 
   return (
-    <div className="flex! flex-col! gap-5!">
-      {/* Top actions */}
-      <div className="flex! flex-col! sm:flex-row! justify-between! items-start! sm:items-center! gap-4!">
-        <Link
-          href="/projects"
-          className="inline-flex! items-center! gap-2! text-sm! font-medium! text-gray-500! hover:text-gray-900! transition-colors! no-underline!"
-        >
-          <ChevronLeft className="w-4! h-4!" />
-          Back to listings
-        </Link>
+    <div className="flex! flex-col! gap-6!">
+      <ProjectTopActions project={project} />
 
-        <div className="flex! items-center! gap-4!">
-          <button
-            onClick={handleShare}
-            className="inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-gray-300! hover:text-gray-900! transition-all! shadow-sm! cursor-pointer!"
-          >
-            {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
-            {copied ? "Copied" : "Share"}
-          </button>
-          <WishlistButton propertyId={project.id} propertyType="project" variant="pill" />
-        </div>
-      </div>
-
-      {/* Cover hero — full-width cover image with title, price and photo
-          strip overlaid on it */}
-      <div className="relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[340px]! md:h-[460px]! group/gallery!">
-            {allImages.length > 0 ? (
-              allImages.map((img, idx) => (
-                <div
-                  key={img}
-                  className={`absolute! inset-0! transition-opacity! duration-500! ${
-                    idx === activeImg ? "opacity-100! z-10!" : "opacity-0! z-0!"
-                  }`}
-                >
-                  <ListingImage
-                    src={img}
-                    placeholderSrc={placeholderUrl}
-                    alt={`${project.name} - view ${idx + 1}`}
-                    eager={idx === 0}
-                    className="w-full! h-full! object-cover! hidden! md:block!"
-                  />
-                  <ListingImage
-                    src={idx === 0 && mobileCover ? mobileCover : img}
-                    placeholderSrc={placeholderUrl}
-                    alt={`${project.name} - view ${idx + 1}`}
-                    eager={idx === 0}
-                    className="w-full! h-full! object-cover! md:hidden!"
-                  />
-                </div>
-              ))
-            ) : (
-              <ListingImage
-                src={null}
-                placeholderSrc={placeholderUrl}
-                alt={project.name}
-                eager
-                className="w-full! h-full! object-cover! animate-fade-in!"
-              />
-            )}
-            <div className="absolute! inset-0! bg-gradient-to-t! from-black/70! via-black/20! to-black/10! pointer-events-none! z-20!" />
-
-            {/* Title + location + price overlaid bottom-left */}
-            <div className="absolute! left-5! md:left-8! bottom-5! md:bottom-8! z-20! max-w-[70%]!">
-              <h1 className="font-manrope! text-2xl! md:text-4xl! font-semibold! text-white! leading-tight! drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]!">
-                {project.name}
-              </h1>
-              {(project.sublocation || project.city) && (
-                <p className="mt-1.5! flex! items-center! gap-1.5! text-[13px]! md:text-sm! text-white/90! drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]!">
-                  <MapPin className="w-4! h-4! shrink-0!" />
-                  <span className="truncate!">{projectLocationLine2 || project.city}</span>
-                </p>
+      {/* Identity sits on the page ground rather than over the cover photo. A
+          scrim dark enough to carry an h1 over an unknown photograph ruins the
+          photograph, and these three facts used to appear twice: once on the
+          image and again at the top of the sidebar, as a second h1. */}
+      <header>
+        <h1 className="text-3xl! md:text-4xl! font-semibold! text-gray-900! tracking-tight! leading-tight! text-balance!">
+          {heading}
+        </h1>
+        {(street || region) && (
+          <p className="mt-2! flex! items-start! gap-2! text-base! text-gray-600!">
+            <MapPin className="w-5! h-5! shrink-0! mt-0.5! text-gray-500!" />
+            <span className="min-w-0!">
+              {street && <span className="block!">{street}</span>}
+              {region && (
+                <span className={street ? "block! text-gray-500!" : "block!"}>
+                  {region}
+                </span>
               )}
-              <p className="mt-2! text-lg! md:text-2xl! font-semibold! text-white! drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]!">
-                {priceRange}
-              </p>
-            </div>
+            </span>
+          </p>
+        )}
+      </header>
 
-            {/* Arrows */}
-            {allImages.length > 1 && (
+      <ProjectGallery project={project} />
+
+      {/* The decision band. Each of these numbers appears exactly once on the
+          page — the spec sheet below deliberately carries none of them. */}
+      <section
+        aria-label="Key facts"
+        /* Two up on a phone, one divided row from sm. Stacking five
+           full-width rows put ~375px of scrolling between the cover photo
+           and the first sentence of copy. */
+        className="bg-white! rounded-card! border! border-gray-200/70! shadow-sm! overflow-hidden! grid! grid-cols-2! gap-x-6! gap-y-5! p-6! sm:flex! sm:gap-0! sm:p-0! sm:divide-x! sm:divide-gray-200!"
+      >
+        {facts.map((fact) => (
+          <div key={fact.label} className="min-w-0! sm:flex-1! sm:px-6! sm:py-4!">
+            <p className={LABEL}>{fact.label}</p>
+            {/* text-base on a phone: at two columns, "90.00 L - 6.00 Cr" at
+                text-lg wraps onto a second line in a ~150px cell. */}
+            <p className="mt-1! text-base! sm:text-lg! font-semibold! text-gray-900! tabular-nums! break-words!">
+              {fact.value}
+            </p>
+            {fact.note && (
+              <p className="mt-1! text-xs! text-gray-500!">{fact.note}</p>
+            )}
+          </div>
+        ))}
+      </section>
+
+      <div className="grid! grid-cols-1! lg:grid-cols-3! gap-6!">
+        <div className="lg:col-span-2! flex! flex-col! gap-6! min-w-0!">
+          <Card title={`About ${project.name}`}>
+            {project.description && project.description.trim() ? (
+              <div className="mt-4! flex! flex-col! gap-4!">
+                {paragraphs(project.description).map((block, index) => (
+                  <p
+                    key={index}
+                    className={`${BODY} text-pretty! whitespace-pre-line!`}
+                  >
+                    {block}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p className={`mt-4! ${BODY}`}>
+                A full description has not been published for this project yet.
+                Send an enquiry and our team will share the details.
+              </p>
+            )}
+
+            {highlightLines.length > 0 && (
               <>
-                <button
-                  onClick={prevImg}
-                  aria-label="Previous photo"
-                  className="absolute! left-4! top-1/2! -translate-y-1/2! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer! hidden! group-hover/gallery:flex! z-20!"
-                >
-                  <ChevronLeft className="w-5! h-5!" />
-                </button>
-                <button
-                  onClick={nextImg}
-                  aria-label="Next photo"
-                  className="absolute! right-4! top-1/2! -translate-y-1/2! flex! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer! z-20!"
-                >
-                  <ChevronRight className="w-5! h-5!" />
-                </button>
+                <Divider />
+                <Subheading>Highlights</Subheading>
+                {highlightLines.length > 1 ? (
+                  <ul className="mt-4! grid! grid-cols-1! sm:grid-cols-2! gap-x-6! gap-y-3! list-none! p-0! m-0!">
+                    {highlightLines.map((line, index) => (
+                      <li key={index} className="flex! items-start! gap-3!">
+                        <Check className="w-4! h-4! shrink-0! mt-1! text-[#27427f]!" />
+                        <span className="text-sm! text-gray-700! leading-relaxed!">
+                          {line}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className={`mt-4! ${BODY} text-pretty!`}>
+                    {highlightLines[0]}
+                  </p>
+                )}
               </>
             )}
+          </Card>
 
-            {/* Counter */}
-            {allImages.length > 1 && (
-              <span className="absolute! bottom-4! right-4! z-20! px-3! py-1.5! rounded-full! bg-black/45! backdrop-blur-md! text-white! text-xs! font-medium! tabular-nums!">
-                {activeImg + 1} / {allImages.length}
-              </span>
-            )}
-          </div>
-
-          {/* Photo strip overlaid across the cover's bottom edge */}
-          {allImages.length > 1 && (
-            <div className="-mt-12! md:-mt-14! px-5! md:px-8! z-30! relative!">
-              <div className="flex! gap-3! overflow-x-auto! hide-scrollbar! pb-1!">
-                {allImages.slice(0, 5).map((img, idx) => (
-                  <button
-                    key={img}
-                    onClick={() => setActiveImg(idx)}
-                    aria-label={`View photo ${idx + 1}`}
-                    className={`relative! h-20! md:h-24! w-28! md:w-36! shrink-0! rounded-xl! overflow-hidden! cursor-pointer! transition-all! bg-gray-100! ${
-                      idx === activeImg
-                        ? "ring-3! ring-white! shadow-[0_8px_24px_rgba(0,0,0,0.35)]!"
-                        : "ring-1! ring-white/60! opacity-90! hover:opacity-100!"
-                    }`}
-                  >
-                    <ListingImage
-                      src={img}
-                      placeholderSrc={placeholderUrl}
-                      alt={`${project.name} thumbnail ${idx + 1}`}
-                      className="w-full! h-full! object-cover!"
-                    />
-                  </button>
-                ))}
-                <Link
-                  href={`/${project.canonicalSlug}/photos`}
-                  className="h-20! md:h-24! w-28! md:w-36! shrink-0! rounded-xl! bg-gray-900/85! backdrop-blur-md! text-white! flex! flex-col! items-center! justify-center! gap-1! no-underline! hover:bg-gray-900! transition-colors!"
-                >
-                  <Images className="w-5! h-5!" />
-                  <span className="text-xs! font-semibold!">
-                    {allImages.length} Photos
-                  </span>
-                </Link>
+          {project.units.length > 0 && (
+            <Card title={isPlot ? "Plots and pricing" : "Configurations and pricing"}>
+              <div className="mt-6!">
+                <ProjectUnitsTable project={project} />
               </div>
-            </div>
+            </Card>
           )}
 
-      <div className="grid! grid-cols-1! lg:grid-cols-3! gap-5!">
-        {/* Left column */}
-        <div className="lg:col-span-2! flex! flex-col! gap-5! min-w-0!">
+          {detailRows.length > 0 && (
+            <Card title="Project details">
+              <div className="mt-6!">
+                <DefinitionGrid rows={detailRows} />
+              </div>
 
-          {/* Overview card */}
-          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
-              Project Overview of {project.name}
-            </h2>
-            {overviewStats.length > 0 && (
-              <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! sm:grid-cols-3! gap-x-4! gap-y-7!">
-                {overviewStats.map((stat, i) => (
-                  <div key={i} className="flex! items-start! gap-1.5! min-w-0!">
-                    <div className="w-12! h-12! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
-                      {stat.icon}
-                    </div>
-                    <div className="min-w-0!">
-                      <p className="text-[12px]! text-gray-400! font-normal! leading-tight!">
-                        {stat.label}
-                      </p>
-                      <p className="text-[14px]! font-semibold! text-gray-900! mt-1! leading-snug! break-words!">
-                        {stat.value}
-                      </p>
-                    </div>
+              {!isPlot && towerRows.length > 0 && (
+                <>
+                  <Divider />
+                  <Subheading>Towers</Subheading>
+                  <div className="mt-4! overflow-x-auto!">
+                    <table className="data-table w-full! text-left! border-collapse!">
+                      <thead>
+                        <tr>
+                          <th scope="col" className={`py-2! pr-4! ${LABEL}`}>
+                            Tower
+                          </th>
+                          <th scope="col" className={`py-2! pr-4! ${LABEL}`}>
+                            Floors
+                          </th>
+                          <th scope="col" className={`py-2! ${LABEL}`}>
+                            Units
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {towerRows.map((tower, index) => (
+                          <tr key={index} className="border-t! border-gray-200!">
+                            <td className="py-3! pr-4! text-sm! font-semibold! text-gray-900!">
+                              {tower.tower || `Tower ${index + 1}`}
+                            </td>
+                            <td className="py-3! pr-4! text-sm! text-gray-700! tabular-nums!">
+                              {tower.floors ?? "—"}
+                            </td>
+                            <td className="py-3! text-sm! text-gray-700! tabular-nums!">
+                              {tower.units ?? "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </>
+              )}
+            </Card>
+          )}
 
-          {/* About card */}
-          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">About {project.name}</h2>
-            {project.description ? (
-              <div className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! whitespace-pre-wrap! break-words!">
-                {project.description}
-              </div>
-            ) : (
-              <p className="mt-4! text-gray-500! font-light! italic!">
-                Detailed description will be available soon. Contact us for more information.
-              </p>
-            )}
-          </div>
+          {/* The old overview advertised an amenities sub-page with the
+              description "To be updated" while the amenity list was already in
+              the payload it had fetched. */}
+          {amenities.length > 0 && (
+            <Card
+              title="Amenities"
+              action={
+                amenities.length > AMENITY_PREVIEW ? (
+                  <Link
+                    href={`/${project.canonicalSlug}/amenities`}
+                    className="shrink-0! text-sm! font-medium! text-[#27427f]! no-underline! rounded-md! transition-colors! duration-150! ease-out-quint! hover:text-[#1e3563]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                  >
+                    All {amenities.length}
+                  </Link>
+                ) : undefined
+              }
+            >
+              <ul className="mt-6! grid! grid-cols-2! sm:grid-cols-3! gap-x-6! gap-y-4! list-none! p-0! m-0!">
+                {amenities.slice(0, AMENITY_PREVIEW).map((name) => {
+                  const Icon = getIconForAmenity(name);
+                  return (
+                    <li key={name} className="flex! items-center! gap-3! min-w-0!">
+                      <Icon
+                        className="w-4! h-4! shrink-0! text-[#27427f]!"
+                        strokeWidth={1.75}
+                      />
+                      <span className="text-sm! text-gray-700! truncate!">
+                        {name}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
+          )}
 
-          {/* Locality teaser (renders only when the sublocation has an overview) */}
-          {project.sublocation ? (
+          {specifications.length > 0 && (
+            <Card title="Specifications">
+              <div className="mt-6!">
+                <DefinitionGrid rows={specifications} columns={2} />
+              </div>
+            </Card>
+          )}
+
+          {project.sublocation && (
             <LocalityTeaser
               locality={project.sublocation}
               city={project.city}
               localityHref={`/${project.canonicalSlug}/locality`}
             />
-          ) : null}
-
-          {/* Highlights — apartments and villas only */}
-          {project.projectType !== "plot" && project.highlights ? (
-            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Highlights</h2>
-              <div className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! whitespace-pre-wrap! break-words!">
-                {project.highlights}
-              </div>
-            </div>
-          ) : null}
-
-          {/* Specifications — apartments and villas only */}
-          {project.projectType !== "plot" && project.specifications && project.specifications.length > 0 ? (
-            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Specifications</h2>
-              <div className="mt-4! grid! grid-cols-1! sm:grid-cols-2! gap-x-6! gap-y-4!">
-                {project.specifications.map((spec, i) => (
-                  <div key={i} className="min-w-0!">
-                    <p className="text-[12px]! text-gray-400! font-normal!">{spec.label}</p>
-                    <p className="text-[14px]! font-semibold! text-gray-900! mt-0.5! leading-snug!">{spec.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {/* Configurations card */}
-          {project.units.length > 0 && (
-            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Configurations & Pricing</h2>
-              <div className="mt-4! overflow-x-auto!">
-                <table className="w-full! text-sm! text-left!">
-                  <thead>
-                    <tr className="text-xs! uppercase! tracking-wider! text-gray-400! border-b! border-gray-100!">
-                      <th className="py-3! pr-4! font-bold!">Unit</th>
-                      <th className="py-3! pr-4! font-bold!">Type</th>
-                      <th className="py-3! pr-4! font-bold!">{project.projectType === "plot" ? "Area" : "Area (sq.ft)"}</th>
-                      {project.projectType !== "plot" && (
-                        <th className="py-3! pr-4! font-bold!">Floor</th>
-                      )}
-                      <th className="py-3! pr-4! font-bold!">Facing</th>
-                      {project.projectType !== "plot" && (
-                        <th className="py-3! pr-4! font-bold!">Parking</th>
-                      )}
-                      <th className="py-3! pr-4! font-bold!">Price</th>
-                      <th className="py-3! font-bold!">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y! divide-gray-50!">
-                    {project.units.map((u) => (
-                      <tr key={u.id}>
-                        <td className="py-3.5! pr-4! font-bold! text-gray-900!">
-                          {u.bedrooms != null ? `${u.bedrooms} BHK` : u.title || u.unitCode}
-                          <span className="block! text-xs! font-medium! text-gray-400!">{u.unitCode}</span>
-                          {(u.furnishingItems ?? []).length > 0 && (
-                            <span className="block! text-[11px]! font-medium! text-gray-400! mt-0.5!">
-                              {(u.furnishingItems ?? [])
-                                .map((f: any) => f.furnishingItem?.name)
-                                .filter(Boolean)
-                                .slice(0, 3)
-                                .join(" · ")}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3.5! pr-4! text-gray-600! capitalize!">{u.unitType?.replace(/_/g, " ")}</td>
-                        <td className="py-3.5! pr-4! text-gray-600!">
-                          {project.projectType === "plot"
-                            ? (() => {
-                                const cents = u.plotAreaCents != null ? Number(u.plotAreaCents) : NaN;
-                                if (!Number.isFinite(cents) || cents <= 0) return "-";
-                                const sqft = Math.round(cents * CENT_TO_SQFT).toLocaleString("en-IN");
-                                return `${String(parseFloat(cents.toFixed(2)))} cents (${sqft} sq.ft)`;
-                              })()
-                            : (u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft)
-                              ? Number(u.builtupAreaSqft || u.carpetAreaSqft || u.superBuiltupAreaSqft).toLocaleString("en-IN")
-                              : "-"}
-                          {project.projectType === "plot" &&
-                            (() => {
-                              const dims = (u.roomDimensions ?? []).find(
-                                (r: any) => (r?.name ?? "") === "Plot",
-                              )?.dimensions;
-                              return dims ? (
-                                <span className="block! text-xs! font-medium! text-gray-400! mt-0.5!">
-                                  {dims}
-                                </span>
-                              ) : null;
-                            })()}
-                        </td>
-                        {project.projectType !== "plot" && (
-                          <td className="py-3.5! pr-4! text-gray-600!">
-                            {u.floorNo != null ? (u.totalFloors ? `${u.floorNo} of ${u.totalFloors}` : `${u.floorNo}`) : "-"}
-                          </td>
-                        )}
-                        <td className="py-3.5! pr-4! text-gray-600! capitalize!">{u.facing?.replace(/_/g, " ") ?? "-"}</td>
-                        {project.projectType !== "plot" && (
-                          <td className="py-3.5! pr-4! text-gray-600! capitalize!">
-                            {[
-                              u.parking != null ? `${u.parking}` : null,
-                              u.parkingType ? String(u.parkingType).replace(/_/g, " ") : null,
-                              u.unitGuestParking ? "Guest" : null,
-                            ].filter(Boolean).join(" · ") || "-"}
-                          </td>
-                        )}
-                        <td className="py-3.5! pr-4! font-extrabold! text-[#27427f]! whitespace-nowrap!">{u.price ? formatINR(u.price) : "-"}</td>
-                        <td className="py-3.5! capitalize! text-gray-600!">{u.status?.replace(/_/g, " ")}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           )}
 
-          {/* About Builder */}
-          {(builderInfo || project.builderName) && (
-            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-              <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4! pb-6! border-b! border-gray-100!">
-                <div className="flex! items-center! gap-4!">
-                  {builderInfo?.logoUrl ? (
-                    <div className="relative! w-16! h-16! rounded-2xl! border! border-gray-100! bg-white! p-1.5! shadow-xs! shrink-0! flex! items-center! justify-center! overflow-hidden!">
-                      <img
-                        src={builderInfo.logoUrl}
-                        alt={builderDisplayName || "Builder"}
-                        className="w-full! h-full! object-contain!"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-16! h-16! rounded-2xl! bg-[#27427f]/8! border! border-[#27427f]/15! text-[#27427f]! flex! items-center! justify-center! shrink-0! font-semibold! text-xl!">
-                      {(builderDisplayName || "B").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-[11px]! font-semibold! uppercase! tracking-wider! text-[#27427f]! bg-[#27427f]/8! px-2.5! py-0.5! rounded-full!">
-                      Developer
-                    </span>
-                    <h3 className="text-lg! md:text-xl! font-semibold! text-gray-900! mt-1.5!">
-                      {builderDisplayName}
-                    </h3>
-                  </div>
-                </div>
-
-                {builderInfo?.website && (
+          {builderName && (
+            <Card
+              title={`About ${builderName}`}
+              action={
+                builderWebsite ? (
                   <a
-                    href={builderInfo.website.startsWith("http") ? builderInfo.website : `https://${builderInfo.website}`}
+                    href={builderWebsite}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex! items-center! gap-2! text-[13px]! font-medium! text-[#27427f]! hover:text-[#1e3366]! bg-gray-50! hover:bg-gray-100! px-4! py-2! rounded-xl! transition-all! w-fit!"
+                    className="shrink-0! inline-flex! items-center! gap-1.5! text-sm! font-medium! text-[#27427f]! no-underline! rounded-md! transition-colors! duration-150! ease-out-quint! hover:text-[#1e3563]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
                   >
                     <Globe className="w-4! h-4!" />
-                    <span>Visit Website</span>
-                    <ExternalLink className="w-3.5! h-3.5! opacity-70!" />
+                    Website
+                    <ExternalLink className="w-3! h-3!" aria-hidden="true" />
                   </a>
-                )}
-              </div>
+                ) : undefined
+              }
+            >
+              {builder?.logoUrl && (
+                /* Raw <img>, as everywhere else storage-backed assets are
+                   rendered: generateReadUrl hands back a signed URL whose
+                   query string rotates, so next/image would miss its cache on
+                   every request and still pay the optimizer round trip. */
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={builder.logoUrl}
+                  alt={`${builderName} logo`}
+                  loading="lazy"
+                  decoding="async"
+                  className="mt-6! h-10! w-auto! max-w-40! object-contain! object-left!"
+                />
+              )}
 
-              {/* Builder stats if present */}
-              {builderInfo &&
-                (builderInfo.experienceYears != null ||
-                  builderInfo.completedProjects != null ||
-                  builderInfo.ongoingProjects != null) && (
-                  <div className="mt-6! grid! grid-cols-2! sm:grid-cols-3! gap-3! sm:gap-4!">
-                    {builderInfo.experienceYears != null && builderInfo.experienceYears > 0 && (
-                      <div className="p-4! rounded-xl! border! border-gray-100! bg-gray-50/60! flex! items-center! gap-3!">
-                        <div className="w-10! h-10! rounded-lg! bg-amber-50! text-amber-700! flex! items-center! justify-center! shrink-0!">
-                          <Award className="w-5! h-5!" />
-                        </div>
-                        <div className="min-w-0!">
-                          <p className="text-base! sm:text-lg! font-bold! text-gray-900! leading-tight!">
-                            {builderInfo.experienceYears}+
-                          </p>
-                          <p className="text-xs! text-gray-500! mt-0.5! leading-tight!">
-                            Years Experience
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {builderInfo.completedProjects != null && builderInfo.completedProjects > 0 && (
-                      <div className="p-4! rounded-xl! border! border-gray-100! bg-gray-50/60! flex! items-center! gap-3!">
-                        <div className="w-10! h-10! rounded-lg! bg-emerald-50! text-emerald-700! flex! items-center! justify-center! shrink-0!">
-                          <CheckCircle2 className="w-5! h-5!" />
-                        </div>
-                        <div className="min-w-0!">
-                          <p className="text-base! sm:text-lg! font-bold! text-gray-900! leading-tight!">
-                            {builderInfo.completedProjects}
-                          </p>
-                          <p className="text-xs! text-gray-500! mt-0.5! leading-tight!">
-                            Completed Projects
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {builderInfo.ongoingProjects != null && builderInfo.ongoingProjects > 0 && (
-                      <div className="p-4! rounded-xl! border! border-gray-100! bg-gray-50/60! flex! items-center! gap-3!">
-                        <div className="w-10! h-10! rounded-lg! bg-blue-50! text-blue-700! flex! items-center! justify-center! shrink-0!">
-                          <Clock className="w-5! h-5!" />
-                        </div>
-                        <div className="min-w-0!">
-                          <p className="text-base! sm:text-lg! font-bold! text-gray-900! leading-tight!">
-                            {builderInfo.ongoingProjects}
-                          </p>
-                          <p className="text-xs! text-gray-500! mt-0.5! leading-tight!">
-                            Ongoing Projects
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-              {/* Builder description */}
-              {builderInfo?.description ? (
-                <div className="mt-5! prose! max-w-none! text-gray-600! font-normal! text-[14px]! leading-relaxed! whitespace-pre-wrap! break-words!">
-                  {builderInfo.description}
-                </div>
-              ) : !builderInfo ? (
-                <p className="mt-4! text-sm! text-gray-500! font-light!">
-                  Developed by <span className="font-medium! text-gray-800!">{project.builderName}</span>. Contact us for further portfolio and credibility details.
-                </p>
-              ) : null}
-            </div>
-          )}
-
-          {/* FAQs */}
-          {(project.projectFaqs ?? []).length > 0 && (
-            <FaqSection
-              faqs={(project.projectFaqs ?? []).map((f, i) => ({
-                id: f.id,
-                question: f.question,
-                answer: f.answer,
-                section: "overview",
-                sortOrder: f.sortOrder ?? i,
-              }))}
-            />
-          )}
-
-          {/* Explore more */}
-          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Explore More</h2>
-            <div className="mt-5! grid! grid-cols-1! sm:grid-cols-2! gap-4!">
-              {sectionLinks.map((section) => (
-                <Link
-                  key={section.target}
-                  href={`/${project.canonicalSlug}/${section.target}`}
-                  className="group! flex! items-center! justify-between! p-5! border! border-gray-200! bg-gray-50/60! rounded-2xl! hover:border-gray-300! hover:bg-white! hover:shadow-sm! transition-all! w-full! text-left! cursor-pointer! no-underline!"
-                >
-                  <div className="flex! items-center! gap-4!">
-                    <div className="w-11! h-11! flex! items-center! justify-center! text-gray-600! transition-all!">
-                      {section.icon}
-                    </div>
-                    <div>
-                      <p className="text-[15px]! font-medium! text-gray-900!">
-                        {section.label}
-                      </p>
-                      <p className="text-[13px]! font-light! text-gray-500! mt-0.5!">
-                        {section.desc}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5! h-5! text-gray-400! group-hover:text-gray-900! group-hover:translate-x-0.5! transition-all!" />
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right sidebar */}
-        <div className="lg:col-span-1! min-w-0!">
-          <div className="lg:sticky! lg:top-[140px]! flex! flex-col! gap-5!">
-            {/* Info card */}
-            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm!">
-              <div className="flex! items-start! justify-between! gap-3!">
-                <h1 className="text-xl! font-normal! text-[#27427f]! leading-snug!">
-                  {project.name} {project.city}
-                </h1>
-              </div>
-
-              {(projectAddress || projectLocationLine2) ? (
-                <div className="mt-2! flex! items-start! gap-2! text-[13px]! text-gray-500! leading-relaxed!">
-                  <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
-                  <span className="min-w-0!">
-                    {projectAddress ? (
-                      <span className="block! text-gray-700!">{projectAddress}</span>
-                    ) : null}
-                    {projectLocationLine2 ? (
-                      <span className="block!">{projectLocationLine2}</span>
-                    ) : null}
-                  </span>
-                </div>
-              ) : null}
-
-              {sidebarSpecs.length > 0 && (
-                <div className="mt-5! pt-5! border-t! border-gray-100! grid! grid-cols-2! gap-x-3! gap-y-5!">
-                  {sidebarSpecs.map((spec, i) => (
-                    <div key={i} className="flex! items-start! gap-2.5! min-w-0!">
-                      <span className="text-gray-400! shrink-0! mt-0!">{spec.icon}</span>
-                      <span className="min-w-0!">
-                        <span className="block! text-[12px]! text-gray-400! font-normal! leading-tight!">
-                          {spec.label}
-                        </span>
-                        <span className="block! text-base! font-semibold! text-gray-800! mt-1! leading-snug!">
-                          {spec.value}
-                        </span>
-                      </span>
+              {builderStats.length > 0 && (
+                <dl className="mt-6! flex! flex-col! divide-y! divide-gray-200! sm:flex-row! sm:divide-y-0! sm:divide-x! border-y! border-gray-200!">
+                  {builderStats.map((stat) => (
+                    <div key={stat.label} className="flex-1! py-4! sm:px-6! sm:first:pl-0!">
+                      <dd className="text-xl! font-semibold! text-gray-900! tabular-nums!">
+                        {stat.value}
+                      </dd>
+                      <dt className={`${LABEL} mt-1!`}>{stat.label}</dt>
                     </div>
                   ))}
+                </dl>
+              )}
+
+              {builder?.description && builder.description.trim() ? (
+                <div className="mt-6! flex! flex-col! gap-4!">
+                  {paragraphs(builder.description).map((block, index) => (
+                    <p
+                      key={index}
+                      className={`${BODY} text-pretty! whitespace-pre-line!`}
+                    >
+                      {block}
+                    </p>
+                  ))}
                 </div>
-              )}
-
-              <p className="mt-5! pt-5! border-t! border-gray-100! text-xl! font-medium! text-gray-900! tracking-tight!">
-                {priceRange}
-              </p>
-
-              <div className="mt-4! flex! flex-col! gap-2.5!">
-                <button className="w-full! bg-[#27427f]! text-white! text-base! font-normal! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
-                  <Phone className="w-4! h-4!" />
-                  Enquire Now
-                </button>
-                <button className="w-full! bg-white! text-[#27427f]! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!">
-                  <Calendar className="w-4! h-4!" />
-                  Schedule Visit
-                </button>
-              </div>
-
-              {(project.reraNumber || builderDisplayName) && (
-                <div className="mt-5! pt-5! border-t! border-gray-100! flex! flex-col! gap-4!">
-                  {project.reraNumber && (
-                    <div className="flex! items-center! gap-3!">
-                      <div className="w-10! h-10! rounded-xl! border! border-gray-200! bg-gray-50/60! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
-                        <Coins className="w-4.5! h-4.5!" />
-                      </div>
-                      <div className="min-w-0!">
-                        <p className="text-[12px]! text-gray-400!">Rera No.</p>
-                        <p className="text-[13px]! font-semibold! text-gray-900! truncate!">{project.reraNumber}</p>
-                      </div>
-                    </div>
-                  )}
-                  {builderDisplayName && (
-                    <div className="flex! items-center! gap-3!">
-                      {builderInfo?.logoUrl ? (
-                        <div className="w-10! h-10! rounded-xl! border! border-gray-200! bg-white! p-1! flex! items-center! justify-center! shrink-0! overflow-hidden!">
-                          <img
-                            src={builderInfo.logoUrl}
-                            alt={builderDisplayName}
-                            className="w-full! h-full! object-contain!"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-10! h-10! rounded-xl! border! border-gray-200! bg-gray-50/60! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
-                          <Building2 className="w-4.5! h-4.5!" />
-                        </div>
-                      )}
-                      <div className="min-w-0!">
-                        <p className="text-[12px]! text-gray-400!">Developed By</p>
-                        <p className="text-[13px]! font-semibold! text-gray-900! truncate!">{builderDisplayName}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {project.projectCode && (
-                <p className="mt-2! flex! items-center! justify-center! gap-2! text-[12px]! text-gray-400!">
-                  <Info className="w-3.5! h-3.5!" />
-                  ID: {project.projectCode}
+              ) : (
+                <p className={`mt-6! ${BODY}`}>
+                  {builderName} is the developer of record for this project. Ask
+                  us for their delivery history and ongoing projects.
                 </p>
               )}
-            </div>
+            </Card>
+          )}
 
-            {/* Listed-by card */}
-            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm! flex! items-center! gap-4!">
-              <div className="w-14! h-14! rounded-full! bg-gray-50! flex! items-center! justify-center! shrink-0!">
-                <Building2 className="w-6! h-6! text-gray-600!" />
-              </div>
-              <div>
-                <p className="text-xs! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
-                  Listed By
-                </p>
-                <p className="font-medium! text-base! text-gray-900!">
-                  Majestan Realty
-                </p>
-                <p className="text-xs! font-light! text-gray-500! mt-1! flex! items-center! gap-1.5!">
-                  <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
-                  Verified
-                </p>
-              </div>
-            </div>
-          </div>
+          <FaqSection
+            faqs={(project.projectFaqs ?? []).map((faq, index) => ({
+              id: faq.id,
+              question: faq.question,
+              answer: faq.answer,
+              section: "overview",
+              sortOrder: faq.sortOrder ?? index,
+            }))}
+          />
+
+          <NeedMoreDetails propertyType={project.projectType} />
         </div>
+
+        {/* Only the action card now. It used to restate the name, address,
+            BHK, area, possession, floors, RERA number, developer and project
+            id that the main column already carried. */}
+        <aside className="lg:col-span-1! min-w-0!">
+          <div className="lg:sticky! lg:top-32! bg-white! rounded-card! border! border-gray-200/70! shadow-sm! p-6!">
+            <p className={LABEL}>{isPlot ? "Plot price" : "Price"}</p>
+            <p className="mt-1! text-2xl! font-semibold! text-gray-900! tracking-tight! tabular-nums!">
+              {priceRangeLabel(project)}
+            </p>
+            {rate && (
+              <p className="mt-1! text-sm! text-gray-500! tabular-nums!">
+                {rate.value} {rate.label.replace("Rate ", "")}
+                {rate.note ? ` ${rate.note}` : ""}
+              </p>
+            )}
+            {builderName && (
+              <p className="mt-3! text-sm! text-gray-600!">
+                By{" "}
+                <span className="font-medium! text-gray-900!">{builderName}</span>
+              </p>
+            )}
+
+            <div className="mt-6!">
+              <ProjectEnquiryActions project={project} />
+            </div>
+
+            {project.brochureUrl && (
+              <a
+                href={project.brochureUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+                title={project.brochureName ?? undefined}
+                className="mt-2! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! px-4! py-3! text-sm! font-medium! text-gray-700! ring-1! ring-gray-200! no-underline! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-gray-50! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+              >
+                <Download className="w-4! h-4!" />
+                Download brochure
+              </a>
+            )}
+
+            {project.reraNumber && (
+              <p className="mt-6! pt-6! border-t! border-gray-200! flex! items-center! gap-2! text-sm! text-gray-600!">
+                <ShieldCheck className="w-4! h-4! shrink-0! text-emerald-600!" />
+                RERA registered
+                <span className="sr-only">
+                  , registration number {project.reraNumber}
+                </span>
+              </p>
+            )}
+          </div>
+        </aside>
       </div>
     </div>
   );

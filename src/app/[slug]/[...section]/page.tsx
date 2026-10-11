@@ -157,7 +157,7 @@ const PROJECT_SECTION_META: Record<
     titlePrefix: "Photos",
     descriptionPrefix: "Browse the complete photo gallery of",
     descriptionSuffix:
-      "featuring project exteriors, layouts, and locality views.",
+      "featuring project exteriors, layouts, locality views and videos.",
   },
 };
 
@@ -621,7 +621,7 @@ export default async function PropertySectionPage({
           activeSection={sectionKey}
           projectType={project.projectType}
         />
-        <div className="min-h-screen! bg-gray-50! font-manrope">
+        <div className="min-h-screen! bg-gray-50! font-manrope-page">
           <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-5! pb-24!">
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
             <div className="mt-5!">

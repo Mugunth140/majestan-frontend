@@ -611,7 +611,7 @@ export default async function SlugPage({
       return (
         <>
           <SiteHeader />
-          <div className="min-h-screen! bg-gray-50! font-manrope">
+          <div className="min-h-screen! bg-gray-50! font-manrope-page">
             {/* Spacer matching fixed header height (64px) */}
             <div className="h-[64px]!" aria-hidden="true" />
             <ProjectNavigation

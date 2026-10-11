@@ -31,6 +31,8 @@ import {
 } from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
 import { ProjectDetailsView } from "@/components/site/project/ProjectDetailsView";
+import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
+import { PAGE_CONTAINER } from "@/components/site/project/project-ui";
 import { batchHasPseoInventory, type PseoCheckParams } from "@/lib/pseo-inventory";
 
 export const dynamicParams = true;
@@ -619,10 +621,15 @@ export default async function SlugPage({
               activeSection=""
               projectType={project.projectType}
             />
-            <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-5! pb-24! scroll-smooth!">
-              <div className="flex! flex-col! gap-5!">
-                <div className="mb-0!">
-                  <Breadcrumbs items={breadcrumbItems} jsonLd />
+            {/* No width cap on <main>: the overview's cover runs edge to edge,
+                so each block below sets its own page container instead. */}
+            <main className="pt-3! pb-24! scroll-smooth!">
+              <div className="flex! flex-col! gap-4!">
+                <div className={`${PAGE_CONTAINER} w-full! flex! items-center! justify-between! gap-4! min-w-0!`}>
+                  <div className="min-w-0! flex-1!">
+                    <Breadcrumbs items={breadcrumbItems} jsonLd />
+                  </div>
+                  <ProjectTopActions project={project} />
                 </div>
                 <script
                   type="application/ld+json"

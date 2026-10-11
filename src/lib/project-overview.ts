@@ -1,4 +1,4 @@
-import { CENT_TO_SQFT, formatINR } from "@/lib/api/projects";
+import { CENT_TO_SQFT, formatINRRange } from "@/lib/api/projects";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
 
 /**
@@ -76,35 +76,52 @@ export function sellableUnits(project: ProjectDetail): ProjectUnit[] {
 }
 
 export function priceRangeLabel(project: ProjectDetail): string {
-  const { minPrice, maxPrice } = project.ranges;
-  if (minPrice != null && maxPrice != null && minPrice !== maxPrice) {
-    return `${formatINR(minPrice)} – ${formatINR(maxPrice)}`;
-  }
-  if (minPrice != null) return formatINR(minPrice);
-  if (maxPrice != null) return formatINR(maxPrice);
-  return "Price on request";
+  return formatINRRange(project.ranges.minPrice, project.ranges.maxPrice);
 }
 
-/** Range of a numeric series as "low – high", or the single value. */
-function rangeOf(values: number[], format: (n: number) => string): string | null {
+/**
+ * Range of a numeric series as "low – high unit", or "value unit". The unit is
+ * written once, after the range: "1,400 sq.ft – 1,800 sq.ft" wrapped onto two
+ * lines in a fact-rail cell, and repeating it adds nothing a reader needs.
+ */
+function rangeOf(
+  values: number[],
+  format: (n: number) => string,
+  unit: string,
+): string | null {
   if (values.length === 0) return null;
   const low = Math.min(...values);
   const high = Math.max(...values);
-  return low === high ? format(low) : `${format(low)} – ${format(high)}`;
+  return low === high
+    ? `${format(low)} ${unit}`
+    : `${format(low)} – ${format(high)} ${unit}`;
+}
+
+/**
+ * Built-up area per unit, so the number matches the fact rail's label. Falls
+ * back to super built-up, then carpet, only for a unit with no built-up
+ * figure recorded, rather than dropping that unit from the range.
+ */
+export function builtUpAreaSqft(unit: ProjectUnit): number {
+  return (
+    num(unit.builtupAreaSqft) ||
+    num(unit.superBuiltupAreaSqft) ||
+    num(unit.carpetAreaSqft)
+  );
 }
 
 export function areaRangeLabel(project: ProjectDetail): string | null {
   const areas = sellableUnits(project)
-    .map((u) => unitAreaSqft(u, project.projectType))
+    .map((u) => builtUpAreaSqft(u))
     .filter((n) => n > 0);
-  return rangeOf(areas, (n) => `${Math.round(n).toLocaleString("en-IN")} sq.ft`);
+  return rangeOf(areas, (n) => Math.round(n).toLocaleString("en-IN"), "sq.ft");
 }
 
 export function plotSizeLabel(project: ProjectDetail): string | null {
   const cents = sellableUnits(project)
     .map((u) => num(u.plotAreaCents))
     .filter((n) => n > 0);
-  return rangeOf(cents, (n) => `${parseFloat(n.toFixed(2))} cents`);
+  return rangeOf(cents, (n) => `${parseFloat(n.toFixed(2))}`, "cents");
 }
 
 export function configurationLabel(project: ProjectDetail): string | null {
@@ -146,7 +163,8 @@ export type Fact = {
 };
 
 /**
- * The fact rail: price, rate, what you get, how big, when.
+ * The fact rail: price, what you get, how big, when. The rate lives in the
+ * enquiry card instead, beside the price it is derived from.
  * Four to five cells — past that it stops being a glance and becomes a table,
  * which is what buildDetailRows is for.
  */
@@ -164,9 +182,6 @@ export function buildFacts(project: ProjectDetail): Fact[] {
     },
   ];
 
-  const rate = rateFact(project);
-  if (rate) facts.push(rate);
-
   if (isPlot) {
     const plots = plotSizeLabel(project);
     if (plots) facts.push({ label: "Plot sizes", value: plots });
@@ -182,7 +197,7 @@ export function buildFacts(project: ProjectDetail): Fact[] {
     const config = configurationLabel(project);
     if (config) facts.push({ label: "Configurations", value: config });
     const area = areaRangeLabel(project);
-    if (area) facts.push({ label: "Saleable area", value: area });
+    if (area) facts.push({ label: "Built-up area", value: area });
   }
 
   facts.push(
@@ -303,4 +318,111 @@ export function unitFurnishings(unit: ProjectUnit): string[] {
   return (unit.furnishingItems ?? [])
     .map((link) => link.furnishingItem?.name)
     .filter((name): name is string => !!name && name.trim() !== "");
+}
+
+export type ConfigurationGroup = {
+  /** Stable id: "bhk-2", "cents-4", or "other-<title or unit type>". */
+  key: string;
+  /** "2 BHK", "4 cents", or a fallback label for units with no bedroom count. */
+  label: string;
+  /** Lowest positive price in the group, or null when none is priced. */
+  minPrice: number | null;
+  /** Available units first, then the rest, each in stored order. */
+  units: ProjectUnit[];
+};
+
+type ConfigurationSlot = { key: string; label: string; sortValue: number | null };
+
+/**
+ * Buyers shop by configuration ("show me the 3 BHKs"), so units are grouped
+ * on the axis they compare on: bedrooms for flats and villas, land area for
+ * plots. A unit without bedrooms falls back to its own title, because
+ * lumping every bedroom-less unit into one "Other" bucket would hide the
+ * difference between, say, a villa and a penthouse.
+ */
+function configurationOf(unit: ProjectUnit, isPlot: boolean): ConfigurationSlot {
+  if (isPlot) {
+    const cents = Math.round(num(unit.plotAreaCents) * 100) / 100;
+    if (!cents) return { key: "plot", label: "Plot", sortValue: null };
+    return { key: `cents-${cents}`, label: `${cents} cents`, sortValue: cents };
+  }
+  if (unit.bedrooms != null) {
+    return {
+      key: `bhk-${unit.bedrooms}`,
+      label: `${unit.bedrooms} BHK`,
+      sortValue: unit.bedrooms,
+    };
+  }
+  const title = unit.title?.trim();
+  const type = (unit.unitType ?? "").trim();
+  return {
+    key: `other-${(title || type || "other").toLowerCase().replace(/\s+/g, "-")}`,
+    label: title || (type ? titleCase(type) : "Other"),
+    sortValue: null,
+  };
+}
+
+/**
+ * Groups units by configuration, numeric groups first in ascending order and
+ * named groups after them, alphabetically. Within each group, units still on
+ * sale come first: a buyer scanning a 3 BHK wants the ones they can book, and
+ * sold stock stays visible without pushing them off the top.
+ */
+export function groupUnitsByConfiguration(project: ProjectDetail): ConfigurationGroup[] {
+  const isPlot = project.projectType === "plot";
+  const buckets = new Map<
+    string,
+    { label: string; sortValue: number | null; units: ProjectUnit[] }
+  >();
+
+  for (const unit of project.units) {
+    const { key, label, sortValue } = configurationOf(unit, isPlot);
+    const bucket = buckets.get(key);
+    if (bucket) bucket.units.push(unit);
+    else buckets.set(key, { label, sortValue, units: [unit] });
+  }
+
+  return [...buckets.entries()]
+    .map(([key, bucket]) => ({ key, ...bucket }))
+    .sort((a, b) => {
+      if (a.sortValue != null && b.sortValue != null) return a.sortValue - b.sortValue;
+      if (a.sortValue != null) return -1;
+      if (b.sortValue != null) return 1;
+      return a.label.localeCompare(b.label);
+    })
+    .map(({ key, label, units }) => {
+      const open = units.filter((u) => u.status === "available");
+      const rest = units.filter((u) => u.status !== "available");
+      // "from" on a tab is a price someone can still pay: priced from open
+      // stock while any exists, the same fallback sellableUnits applies to
+      // the page's headline price. A sold 2 BHK at an old launch price would
+      // otherwise advertise a number nobody can book at.
+      const prices = (open.length > 0 ? open : units)
+        .map((u) => num(u.price))
+        .filter((n) => n > 0);
+      return {
+        key,
+        label,
+        minPrice: prices.length > 0 ? Math.min(...prices) : null,
+        units: [...open, ...rest],
+      };
+    });
+}
+
+/**
+ * Price per the size a buyer compares on: per cent for plots, per sq.ft for
+ * everything else. Null when either half is missing, rather than a rate
+ * built on a zero denominator, which would read as a real price.
+ */
+export function unitRateLabel(unit: ProjectUnit, projectType: string): string | null {
+  const price = num(unit.price);
+  if (!price) return null;
+  if (projectType === "plot") {
+    const cents = num(unit.plotAreaCents);
+    if (!cents) return null;
+    return `₹${Math.round(price / cents).toLocaleString("en-IN")} / cent`;
+  }
+  const area = unitAreaSqft(unit, projectType);
+  if (!area) return null;
+  return `₹${Math.round(price / area).toLocaleString("en-IN")} / sq.ft`;
 }

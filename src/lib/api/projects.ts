@@ -96,7 +96,7 @@ export type ProjectDetail = {
   projectFaqs?: { id: number; question: string; answer: string; sortOrder?: number }[] | null;
   brochureUrl?: string | null;
   brochureName?: string | null;
-  projectAmenities?: { amenityId: number; availability?: string; notes?: string | null; amenity?: { id: number; name: string; icon?: string } | null }[] | null;
+  projectAmenities?: { amenityId: number; availability?: string; notes?: string | null; amenity?: { id: number; name: string; icon?: string; category?: string | null } | null }[] | null;
   description: string | null;
   coverImageUrl: string | null;
   mobileCoverImageUrl?: string | null;
@@ -215,7 +215,36 @@ export function formatINR(value: string | number | null | undefined): string {
   if (value === null || value === undefined || value === "") return "Price on Request";
   const num = Number(value);
   if (!Number.isFinite(num) || num === 0) return "Price on Request";
-  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
-  if (num >= 100000) return `₹${(num / 100000).toFixed(2)} L`;
+  // Two decimals at most, and only the ones that carry information:
+  // ₹40.45 L stays as it is, ₹90.00 L reads ₹90 L, ₹1.20 Cr reads ₹1.2 Cr.
+  // Padding every price to two places made round numbers look measured.
+  const short = (n: number) => `${parseFloat(n.toFixed(2))}`;
+  if (num >= 10000000) return `₹${short(num / 10000000)} Cr`;
+  if (num >= 100000) return `₹${short(num / 100000)} L`;
   return `₹${num.toLocaleString("en-IN")}`;
+}
+
+/**
+ * A price range with the unit written once when both ends share it:
+ * "₹1.3 – 1.46 Cr", "₹60 – 90 L". Mixed units keep both: "₹90 L – ₹1.2 Cr".
+ * Equal ends, or a single known end, collapse to one formatted price.
+ */
+export function formatINRRange(
+  min: string | number | null | undefined,
+  max: string | number | null | undefined,
+): string {
+  const lo = Number(min);
+  const hi = Number(max);
+  const hasLo = min != null && min !== "" && Number.isFinite(lo) && lo > 0;
+  const hasHi = max != null && max !== "" && Number.isFinite(hi) && hi > 0;
+  if (!hasLo && !hasHi) return "Price on request";
+  if (!hasLo || !hasHi || lo === hi) return formatINR(hasLo ? lo : hi);
+  const [a, b] = lo < hi ? [lo, hi] : [hi, lo];
+  const left = formatINR(a);
+  const right = formatINR(b);
+  const unit = (text: string) => text.match(/ (Cr|L)$/)?.[1];
+  if (unit(left) && unit(left) === unit(right)) {
+    return `${left.replace(/ (Cr|L)$/, "")} – ${right.replace(/^₹/, "")}`;
+  }
+  return `${left} – ${right}`;
 }

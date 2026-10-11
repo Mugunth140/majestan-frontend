@@ -23,6 +23,10 @@ import {
 } from "@/lib/visit-slots";
 import { projectTypeLabel } from "@/lib/project-overview";
 import type { ProjectDetail } from "@/lib/api/projects";
+import {
+  PROJECT_ENQUIRE_EVENT,
+  type ProjectEnquireDetail,
+} from "@/components/site/project/enquiry-events";
 
 type Intent = "enquire" | "visit";
 type Status = "idle" | "submitting" | "success" | "error";
@@ -66,6 +70,24 @@ export function ProjectEnquiryActions({ project }: { project: ProjectDetail }) {
   function close() {
     setIntent(null);
   }
+
+  // Sections elsewhere on the page open this same form with a pre-filled
+  // note (see enquiry-events.ts). Only state setters are touched, and those
+  // are stable, so subscribing once is safe.
+  useEffect(() => {
+    const onRequest = (event: Event) => {
+      const detail = (event as CustomEvent<ProjectEnquireDetail>).detail ?? {};
+      setIntent(detail.intent ?? "enquire");
+      setStatus("idle");
+      setErrors({});
+      setErrorMsg("");
+      setVisitDate(todayYmd());
+      setVisitSlot("");
+      setMessage(detail.message ?? "");
+    };
+    window.addEventListener(PROJECT_ENQUIRE_EVENT, onRequest);
+    return () => window.removeEventListener(PROJECT_ENQUIRE_EVENT, onRequest);
+  }, []);
 
   // Escape to dismiss, and hold the page still behind the dialog.
   useEffect(() => {

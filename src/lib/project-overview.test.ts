@@ -3,8 +3,10 @@ import {
   buildDetailRows,
   buildFacts,
   formatPossession,
+  groupUnitsByConfiguration,
   rateFact,
   unitAreaCell,
+  unitRateLabel,
 } from "./project-overview";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
 
@@ -120,7 +122,7 @@ describe("the fact rail and the spec sheet never carry the same fact", () => {
 
   it.each(cases)("keeps price, size and possession out of the spec sheet (%s)", (_l, fixture) => {
     const rowLabels = buildDetailRows(fixture).map((r) => r.label.toLowerCase());
-    for (const banned of ["price", "plot price", "possession", "saleable area", "configurations"]) {
+    for (const banned of ["price", "plot price", "possession", "built-up area", "configurations"]) {
       expect(rowLabels).not.toContain(banned);
     }
   });
@@ -206,7 +208,7 @@ describe("buildFacts", () => {
       ranges: { ...project().ranges, minPrice: 6000000, maxPrice: 9000000 },
     });
     const price = buildFacts(fixture)[0];
-    expect(price.value).toBe("₹60.00 L – ₹90.00 L");
+    expect(price.value).toBe("₹60 – 90 L");
     expect(price.note).toBe("across 2 units");
   });
 
@@ -237,5 +239,157 @@ describe("unitAreaCell", () => {
 
   it("renders a dash rather than NaN when a plot has no recorded area", () => {
     expect(unitAreaCell(unit({ plotAreaCents: null }), "plot")).toBe("—");
+  });
+});
+
+describe("groupUnitsByConfiguration", () => {
+  it("groups flats by bedroom count and orders the groups ascending", () => {
+    const fixture = project({
+      units: [
+        unit({ id: 1, bedrooms: 3 }),
+        unit({ id: 2, bedrooms: 1 }),
+        unit({ id: 3, bedrooms: 2 }),
+        unit({ id: 4, bedrooms: 2 }),
+      ],
+    });
+    const groups = groupUnitsByConfiguration(fixture);
+    expect(groups.map((g) => g.label)).toEqual(["1 BHK", "2 BHK", "3 BHK"]);
+    expect(groups.map((g) => g.key)).toEqual(["bhk-1", "bhk-2", "bhk-3"]);
+    expect(groups[1].units.map((u) => u.id)).toEqual([3, 4]);
+  });
+
+  it("groups plots by land area rounded to two decimals, ascending, with unsized plots last", () => {
+    const fixture = project({
+      projectType: "plot",
+      units: [
+        unit({ id: 1, bedrooms: null, plotAreaCents: "4.0000" }),
+        unit({ id: 2, bedrooms: null, plotAreaCents: "2.5" }),
+        unit({ id: 3, bedrooms: null, plotAreaCents: "4.004" }),
+        unit({ id: 4, bedrooms: null, plotAreaCents: null }),
+      ],
+    });
+    const groups = groupUnitsByConfiguration(fixture);
+    expect(groups.map((g) => g.label)).toEqual(["2.5 cents", "4 cents", "Plot"]);
+    expect(groups.map((g) => g.key)).toEqual(["cents-2.5", "cents-4", "plot"]);
+    // 4.0000 and 4.004 both round to 4.00 cents, so they sell as one configuration.
+    expect(groups[1].units.map((u) => u.id)).toEqual([1, 3]);
+  });
+
+  it("falls back to the unit title, then the unit type, for units with no bedroom count", () => {
+    const fixture = project({
+      units: [
+        unit({ id: 1, bedrooms: 2 }),
+        unit({ id: 2, bedrooms: null, title: "  Penthouse  ", unitType: "apartment_unit" }),
+        unit({ id: 3, bedrooms: null, title: null, unitType: "villa_unit" }),
+      ],
+    });
+    const groups = groupUnitsByConfiguration(fixture);
+    // Numeric groups lead; named groups follow alphabetically.
+    expect(groups.map((g) => g.label)).toEqual(["2 BHK", "Penthouse", "Villa Unit"]);
+    expect(groups[1].key).toBe("other-penthouse");
+    expect(groups[2].key).toBe("other-villa_unit");
+  });
+
+  it("lists available units before sold ones within a group, keeping stored order otherwise", () => {
+    const fixture = project({
+      units: [
+        unit({ id: 1, bedrooms: 2, status: "sold" }),
+        unit({ id: 2, bedrooms: 2, status: "available" }),
+        unit({ id: 3, bedrooms: 2, status: "booked" }),
+        unit({ id: 4, bedrooms: 2, status: "available" }),
+      ],
+    });
+    const [group] = groupUnitsByConfiguration(fixture);
+    expect(group.units.map((u) => u.id)).toEqual([2, 4, 1, 3]);
+  });
+
+  it("takes the lowest positive price as the group's minimum, ignoring null and zero", () => {
+    const fixture = project({
+      units: [
+        unit({ id: 1, bedrooms: 2, price: null }),
+        unit({ id: 2, bedrooms: 2, price: "0" }),
+        unit({ id: 3, bedrooms: 2, price: "7500000" }),
+        unit({ id: 4, bedrooms: 2, price: "6000000.00" }),
+      ],
+    });
+    expect(groupUnitsByConfiguration(fixture)[0].minPrice).toBe(6000000);
+  });
+
+  it("reports a null minimum when no unit in the group is priced", () => {
+    const fixture = project({ units: [unit({ bedrooms: 2, price: null })] });
+    expect(groupUnitsByConfiguration(fixture)[0].minPrice).toBeNull();
+  });
+
+  it("returns no groups for a project with no units", () => {
+    expect(groupUnitsByConfiguration(project({ units: [] }))).toEqual([]);
+  });
+});
+
+describe("unitRateLabel", () => {
+  it("prices a flat per sq.ft, rounded to the rupee", () => {
+    expect(
+      unitRateLabel(unit({ superBuiltupAreaSqft: "1450", price: "6000000" }), "apartment"),
+    ).toBe("₹4,138 / sq.ft");
+  });
+
+  it("prices a plot per cent in Indian digit grouping", () => {
+    expect(
+      unitRateLabel(unit({ bedrooms: null, plotAreaCents: "4.0000", price: "9000000" }), "plot"),
+    ).toBe("₹22,50,000 / cent");
+  });
+
+  it("returns null when the unit has no price", () => {
+    expect(unitRateLabel(unit({ price: null }), "apartment")).toBeNull();
+    expect(unitRateLabel(unit({ price: "0" }), "apartment")).toBeNull();
+  });
+
+  it("returns null when the unit has no area to divide by", () => {
+    expect(
+      unitRateLabel(
+        unit({ superBuiltupAreaSqft: null, builtupAreaSqft: null, carpetAreaSqft: null }),
+        "apartment",
+      ),
+    ).toBeNull();
+    expect(unitRateLabel(unit({ bedrooms: null, plotAreaCents: null }), "plot")).toBeNull();
+  });
+});
+
+describe("range labels", () => {
+  it("writes the unit once, after the range", () => {
+    const fixture = project({
+      units: [
+        unit({ id: 1, superBuiltupAreaSqft: "1400" }),
+        unit({ id: 2, superBuiltupAreaSqft: "1800" }),
+      ],
+    });
+    expect(buildFacts(fixture).find((f) => f.label === "Built-up area")?.value).toBe(
+      "1,400 – 1,800 sq.ft",
+    );
+  });
+
+  it("keeps the unit on a single value", () => {
+    expect(buildFacts(project()).find((f) => f.label === "Built-up area")?.value).toBe(
+      "1,200 sq.ft",
+    );
+  });
+});
+
+describe("fact rail", () => {
+  it("leaves the rate to the enquiry card", () => {
+    const labels = buildFacts(project()).map((f) => f.label);
+    expect(labels).not.toContain("Rate per sq.ft");
+    expect(labels).not.toContain("Rate per cent");
+  });
+
+  it("quotes built-up area, falling back per unit when it is missing", () => {
+    const fixture = project({
+      units: [
+        unit({ id: 1, superBuiltupAreaSqft: "1450", builtupAreaSqft: "1200", carpetAreaSqft: "1000" }),
+        unit({ id: 2, superBuiltupAreaSqft: null, carpetAreaSqft: "1800" }),
+      ],
+    });
+    expect(buildFacts(fixture).find((f) => f.label === "Built-up area")?.value).toBe(
+      "1,200 – 1,800 sq.ft",
+    );
   });
 });

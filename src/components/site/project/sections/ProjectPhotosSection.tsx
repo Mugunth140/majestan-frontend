@@ -1,303 +1,185 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
-import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
-import {
-  getYouTubeVideoId,
-  youtubeEmbedUrl,
-  youtubeThumbnailUrl,
-} from "@/lib/youtube";
-import {
-  X,
-  ChevronLeft,
-  ChevronRight,
-  ImageOff,
-  Images,
-  ZoomIn,
-  Star,
-  Play,
-} from "lucide-react";
+import { getYouTubeVideoId } from "@/lib/youtube";
+import { BODY, Card } from "@/components/site/project/project-ui";
+import { YouTubeFacade } from "@/components/site/project/overview/YouTubeFacade";
+
+/**
+ * Full photo and video page. The overview only previews these, so everything
+ * the overview leaves out lives here: every video, and every photo at a size
+ * a buyer can actually judge. Tapping a photo opens the lightbox, which steps
+ * through the set with the arrow keys as well as the buttons.
+ */
+const FOCUS_RING =
+  "focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!";
 
 export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [playingVideo, setPlayingVideo] = useState(false);
 
-  // Single featured video — first playable YouTube link in stored order.
-  const videoId = useMemo(() => {
-    for (const raw of project.videoUrls ?? []) {
-      const id = getYouTubeVideoId(raw);
-      if (id) return id;
-    }
-    return null;
-  }, [project.videoUrls]);
+  const videoIds = [
+    ...new Set(
+      (project.videoUrls ?? [])
+        .map((url) => getYouTubeVideoId(url))
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
 
-  const primaryImage = project.coverImageUrl || null;
+  // Cover first, then the gallery, so the lightbox order matches the grid.
   const galleryImages = (project.galleryImageUrls ?? []).filter(Boolean) as string[];
+  const allImages = [project.coverImageUrl, ...galleryImages].filter(Boolean) as string[];
+  const count = allImages.length;
 
-  // Order: cover first, then gallery
-  const allImages = primaryImage
-    ? [primaryImage, ...galleryImages]
-    : [...galleryImages];
-
-  const openLightbox = useCallback((index: number) => {
-    setCurrentIndex(index);
-    setLightboxOpen(true);
-  }, []);
-
-  const closeLightbox = useCallback(() => {
-    setLightboxOpen(false);
-  }, []);
-
-  const goNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % allImages.length);
-  }, [allImages.length]);
-
-  const goPrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-  }, [allImages.length]);
-
-  // Keyboard navigation
+  // The lock and key handlers only exist while the lightbox is open, so the
+  // page scrolls normally the rest of the time.
   useEffect(() => {
     if (!lightboxOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") goNext();
-      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "ArrowRight") setCurrentIndex((i) => (i + 1) % count);
+      if (e.key === "ArrowLeft") setCurrentIndex((i) => (i - 1 + count) % count);
     };
 
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [lightboxOpen, closeLightbox, goNext, goPrev]);
+  }, [lightboxOpen, count]);
 
-  // Empty state
-  if (allImages.length === 0) {
+  if (count === 0 && videoIds.length === 0) {
     return (
-      <div className="space-y-8!">
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-          <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-            Photos
-          </h2>
-          <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-24! text-center! hover:bg-gray-50! transition-colors! mt-6!">
-            <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-6!">
-              <ImageOff className="w-8! h-8! text-gray-400!" />
-            </div>
-            <h3 className="text-xl! font-medium! text-gray-900! mb-2!">
-              No photos available yet
-            </h3>
-            <p className="text-gray-500! text-base! font-normal! max-w-md! leading-relaxed!">
-              Photos for this project are being uploaded. Check back soon or contact
-              us for a site visit.
-            </p>
-          </div>
-        </div>
-
-        <NeedMoreDetails propertyType={project.projectType} />
-      </div>
+      <Card title="Photos and videos">
+        <p className={`${BODY} mt-6!`}>Photos for this project have not been published yet.</p>
+      </Card>
     );
   }
 
+  const openLightbox = (index: number) => {
+    setCurrentIndex(index);
+    setLightboxOpen(true);
+  };
+
   return (
-    <div className="space-y-8!">
-      {/* Header */}
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-        <div className="flex! flex-col! sm:flex-row! items-start! sm:items-center! justify-between! gap-4!">
-          <div>
-            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-              Photos
-            </h2>
-            <p className="text-sm! font-normal! text-gray-500! mt-1!">
-              Browse all photos of {project.name}
-            </p>
-          </div>
-          <span className="inline-flex! items-center! gap-2! px-4! py-2.5! bg-white! border! border-gray-200! rounded-full! text-sm! font-medium! text-gray-600!">
-            <Images className="w-4.5! h-4.5!" />
-            {allImages.length} {allImages.length === 1 ? "Photo" : "Photos"}
-          </span>
-        </div>
-      </div>
-
-      {/* Primary Image — full-bleed inside its card, like the map */}
-      {primaryImage && (
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden!">
-          <div className="relative!">
-            <span className="absolute! top-5! left-5! z-10! inline-flex! items-center! gap-1.5! px-3! py-1.5! bg-white/95! backdrop-blur-md! border! border-gray-200/50! rounded-full! text-xs! font-medium! uppercase! tracking-widest! text-gray-900! shadow-sm!">
-              <Star className="w-3.5! h-3.5!" />
-              Primary
-            </span>
-            <button
-              onClick={() => openLightbox(0)}
-              className="w-full! block! relative! group cursor-pointer!"
-            >
-              <img
-                src={primaryImage}
-                alt={`${project.name} - Primary`}
-                className="w-full! h-[350px]! md:h-[550px]! object-cover! transition-transform! duration-700! group-hover:scale-[1.02]!"
+    <>
+      {videoIds.length > 0 && (
+        <Card title="Videos" id="videos">
+          <div className="grid! grid-cols-1! md:grid-cols-2! gap-4! mt-6!">
+            {videoIds.map((id, i) => (
+              <YouTubeFacade
+                key={id}
+                videoId={id}
+                title={`${project.name} video${videoIds.length > 1 ? ` ${i + 1}` : ""}`}
               />
-              <div className="absolute! inset-0! bg-black/0! group-hover:bg-black/10! transition-colors! duration-300! flex! items-center! justify-center!">
-                <div className="opacity-0! group-hover:opacity-100! transition-all! duration-300! w-14! h-14! rounded-full! bg-white/95! backdrop-blur-md! flex! items-center! justify-center! shadow-lg! scale-50! group-hover:scale-100!">
-                  <ZoomIn className="w-5! h-5! text-gray-900!" />
-                </div>
-              </div>
-            </button>
+            ))}
           </div>
-        </div>
+        </Card>
       )}
 
-      {/* Gallery Grid */}
-      {galleryImages.length > 0 && (
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-2! md:p-3! shadow-sm!">
-          <div className="grid! grid-cols-2! md:grid-cols-3! lg:grid-cols-4! gap-2! md:gap-3!">
-            {galleryImages.map((src, idx) => {
-              const imageIndex = primaryImage ? idx + 1 : idx;
-              // Create varied grid sizes for masonry effect
-              const isLarge = idx % 5 === 0;
-              return (
-                <button
-                  key={`${src}-${idx}`}
-                  onClick={() => openLightbox(imageIndex)}
-                  className={`relative! rounded-[16px]! overflow-hidden! group cursor-pointer! ${
-                    isLarge ? "md:col-span-2! md:row-span-2!" : ""
-                  }`}
-                >
-                  <img
-                    src={src}
-                    alt={`${project.name} - View ${idx + 2}`}
-                    className={`w-full! object-cover! transition-transform! duration-700! group-hover:scale-105! ${
-                      isLarge ? "h-[240px]! md:h-[400px]!" : "h-[180px]! md:h-[195px]!"
-                    }`}
-                  />
-                  <div className="absolute! inset-0! bg-black/0! group-hover:bg-black/10! transition-colors! duration-300! flex! items-center! justify-center!">
-                    <div className="opacity-0! group-hover:opacity-100! transition-all! duration-300! w-12! h-12! rounded-full! bg-white/95! backdrop-blur-md! flex! items-center! justify-center! shadow-lg! scale-50! group-hover:scale-100!">
-                      <ZoomIn className="w-4.5! h-4.5! text-gray-900!" />
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Video — full-width player, thumbnail swaps in the embed on click */}
-      {videoId && (
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-          <div className="mb-6!">
-            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-              Video
-            </h2>
-            <p className="text-sm! font-normal! text-gray-500! mt-1!">
-              Watch the walkthrough of {project.name}
-            </p>
-          </div>
-          <div className="relative! rounded-[16px]! overflow-hidden! bg-black! aspect-video!">
-            {playingVideo ? (
-              <iframe
-                src={youtubeEmbedUrl(videoId, true)}
-                title={`${project.name} video`}
-                className="absolute! inset-0! w-full! h-full!"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
+      {count > 0 && (
+        <Card title={`Photos · ${count}`}>
+          <div className="grid! grid-cols-2! md:grid-cols-3! gap-3! mt-6!">
+            {allImages.map((src, idx) => (
               <button
-                onClick={() => setPlayingVideo(true)}
-                className="absolute! inset-0! w-full! h-full! group cursor-pointer!"
-                aria-label={`Play ${project.name} video`}
+                key={`${src}-${idx}`}
+                type="button"
+                onClick={() => openLightbox(idx)}
+                className={`group aspect-[4/3]! rounded-xl! overflow-hidden! bg-gray-100! relative! cursor-pointer! ${FOCUS_RING}`}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={youtubeThumbnailUrl(videoId)}
-                  alt={`${project.name} video thumbnail`}
-                  className="absolute! inset-0! w-full! h-full! object-cover!"
+                  src={src}
+                  alt={`${project.name} photo ${idx + 1}`}
                   loading="lazy"
+                  draggable={false}
+                  className="w-full! h-full! object-cover! transition-transform! duration-300! ease-out-quint! group-hover:scale-[1.03]!"
                 />
-                <div className="absolute! inset-0! bg-black/20! group-hover:bg-black/30! transition-colors! duration-300! flex! items-center! justify-center!">
-                  <div className="w-20! h-20! rounded-full! bg-white/95! backdrop-blur-md! flex! items-center! justify-center! shadow-lg! transition-transform! duration-300! group-hover:scale-110!">
-                    <Play className="w-8! h-8! text-gray-900! ml-1!" />
-                  </div>
-                </div>
               </button>
-            )}
+            ))}
           </div>
-        </div>
+        </Card>
       )}
 
-      {/* Lightbox Modal */}
       {lightboxOpen && (
-        <div className="fixed! inset-0! z-[9999]! bg-white/95! backdrop-blur-xl! flex! items-center! justify-center!">
-          {/* Close Button */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${project.name} photos`}
+          className="fixed! inset-0! z-[9999]! bg-white/95! backdrop-blur-xl! flex! items-center! justify-center!"
+        >
           <button
-            onClick={closeLightbox}
-            className="absolute! top-6! right-6! z-10! w-12! h-12! rounded-full! bg-gray-100/50! hover:bg-gray-200/50! flex! items-center! justify-center! transition-colors! backdrop-blur-md!"
+            type="button"
+            onClick={() => setLightboxOpen(false)}
             aria-label="Close lightbox"
+            className={`absolute! top-6! right-6! z-10! w-12! h-12! rounded-full! bg-gray-100! hover:bg-gray-200! grid! place-items-center! transition-colors! duration-150! ease-out-quint! ${FOCUS_RING}`}
           >
-            <X className="w-5! h-5! text-gray-900!" />
+            <X className="w-6! h-6! text-gray-900!" aria-hidden="true" />
           </button>
 
-          {/* Image Counter */}
-          <div className="absolute! top-6! left-6! z-10! px-4! py-2! bg-gray-100/50! backdrop-blur-md! rounded-full!">
-            <span className="text-gray-900! text-sm! font-medium! tracking-widest!">
-              {currentIndex + 1} / {allImages.length}
+          <div className="absolute! top-6! left-6! z-10! px-4! py-2! bg-gray-100! rounded-full!">
+            <span className="text-gray-900! text-sm! font-medium! tabular-nums!">
+              {currentIndex + 1} / {count}
             </span>
           </div>
 
-          {/* Previous Button */}
-          {allImages.length > 1 && (
+          {count > 1 && (
             <button
-              onClick={(e) => { e.stopPropagation(); goPrev(); }}
-              className="absolute! left-6! z-10! w-14! h-14! rounded-full! bg-gray-100/50! hover:bg-gray-200/50! flex! items-center! justify-center! transition-all! backdrop-blur-md! hover:scale-105!"
+              type="button"
+              onClick={() => setCurrentIndex((i) => (i - 1 + count) % count)}
               aria-label="Previous image"
+              className={`absolute! left-6! z-10! w-12! h-12! rounded-full! bg-gray-100! hover:bg-gray-200! grid! place-items-center! transition-colors! duration-150! ease-out-quint! ${FOCUS_RING}`}
             >
-              <ChevronLeft className="w-6! h-6! text-gray-900!" />
+              <ChevronLeft className="w-6! h-6! text-gray-900!" aria-hidden="true" />
             </button>
           )}
 
-          {/* Current Image */}
-          <div className="max-w-[90vw]! max-h-[80vh]! flex! items-center! justify-center!">
+          <div className="max-w-[90vw]! max-h-[80vh]! grid! place-items-center!">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={allImages[currentIndex]}
-              alt={`${project.name} - Image ${currentIndex + 1}`}
-              className="max-w-full! max-h-[80vh]! object-contain! rounded-[16px]! select-none! shadow-sm! border! border-gray-200!"
+              alt={`${project.name} photo ${currentIndex + 1}`}
               draggable={false}
+              className="max-w-full! max-h-[80vh]! object-contain! rounded-xl! select-none! border! border-gray-200!"
             />
           </div>
 
-          {/* Next Button */}
-          {allImages.length > 1 && (
+          {count > 1 && (
             <button
-              onClick={(e) => { e.stopPropagation(); goNext(); }}
-              className="absolute! right-6! z-10! w-14! h-14! rounded-full! bg-gray-100/50! hover:bg-gray-200/50! flex! items-center! justify-center! transition-all! backdrop-blur-md! hover:scale-105!"
+              type="button"
+              onClick={() => setCurrentIndex((i) => (i + 1) % count)}
               aria-label="Next image"
+              className={`absolute! right-6! z-10! w-12! h-12! rounded-full! bg-gray-100! hover:bg-gray-200! grid! place-items-center! transition-colors! duration-150! ease-out-quint! ${FOCUS_RING}`}
             >
-              <ChevronRight className="w-6! h-6! text-gray-900!" />
+              <ChevronRight className="w-6! h-6! text-gray-900!" aria-hidden="true" />
             </button>
           )}
 
-          {/* Thumbnail Strip */}
-          {allImages.length > 1 && (
-            <div className="absolute! bottom-6! left-1/2! -translate-x-1/2! flex! gap-2! max-w-[90vw]! overflow-x-auto! py-2! px-4! bg-white/50! backdrop-blur-xl! rounded-[16px]! hide-scrollbar! border! border-gray-200!">
+          {count > 1 && (
+            <div className="absolute! bottom-6! left-1/2! -translate-x-1/2! flex! gap-2! max-w-[90vw]! overflow-x-auto! py-2! px-4! bg-white/70! backdrop-blur-xl! rounded-xl! hide-scrollbar border! border-gray-200!">
               {allImages.map((src, idx) => (
                 <button
                   key={`${src}-${idx}`}
-                  onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
-                  className={`w-16! h-12! rounded-[8px]! overflow-hidden! shrink-0! border-2! transition-all! duration-300! ${
+                  type="button"
+                  onClick={() => setCurrentIndex(idx)}
+                  aria-label={`Show photo ${idx + 1}`}
+                  aria-current={idx === currentIndex}
+                  className={`w-16! h-12! rounded-lg! overflow-hidden! shrink-0! border-2! transition-[opacity,border-color] duration-150! ease-out-quint! ${
                     idx === currentIndex
-                      ? "border-gray-900! opacity-100! scale-105! shadow-sm!"
-                      : "border-transparent! opacity-40! hover:opacity-100!"
-                  }`}
+                      ? "border-gray-900! opacity-100!"
+                      : "border-transparent! opacity-50! hover:opacity-100!"
+                  } ${FOCUS_RING}`}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={src}
                     alt=""
-                    className="w-full! h-full! object-cover!"
                     draggable={false}
+                    className="w-full! h-full! object-cover!"
                   />
                 </button>
               ))}
@@ -305,8 +187,6 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
           )}
         </div>
       )}
-
-      <NeedMoreDetails propertyType={project.projectType} />
-    </div>
+    </>
   );
 }

@@ -44,3 +44,36 @@ export function matchLocality(
   }
   return named[0];
 }
+
+/**
+ * Server-side lookup of a locality's editorial description, or null.
+ *
+ * The project pages render this on the server so a section can decide to
+ * exist before it ships: the client-side LocalityTeaser fetches after
+ * hydration, which left a titled card with nothing under it whenever a
+ * locality had no write-up. Cached for an hour — the copy changes when an
+ * editor rewrites it in Admin, not per request.
+ */
+export async function getLocalityDescription(
+  locality: string | null | undefined,
+  city?: string | null,
+): Promise<{ name: string; description: string } | null> {
+  if (!locality || !locality.trim()) return null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/metadata/sublocations`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const payload = (await res.json()) as Envelope<Sublocation[]> | Sublocation[];
+    const list = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
+    const match = matchLocality(list, locality, city ?? undefined);
+    const description = match?.description?.trim();
+    return match && description ? { name: match.sublocation, description } : null;
+  } catch {
+    return null;
+  }
+}

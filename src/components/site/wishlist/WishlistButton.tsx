@@ -14,6 +14,10 @@ type Props = {
   label?: string;
   /** "onImage" renders a white heart suited for overlaying photos. */
   tone?: "default" | "onImage";
+  /** Pill corner radius. A prop rather than a className override: two
+      `rounded-*!` utilities on one element resolve by stylesheet order, not
+      by which was passed last, so an override silently loses. */
+  radius?: string;
 };
 
 /**
@@ -21,7 +25,7 @@ type Props = {
  * OTP (SMS/WhatsApp) lands later inside UserAuthModal — this button
  * just requires a verified session before calling the backend.
  */
-export function WishlistButton({ propertyId, propertyType, variant = "icon", className, label = "Save", tone = "default" }: Props) {
+export function WishlistButton({ propertyId, propertyType, variant = "icon", className, label = "Save", tone = "default", radius = "rounded-xl!" }: Props) {
   const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
   const wishedFromStore = useWishlistStore((s) => s.isWished(propertyType, propertyId));
   const toggle = useWishlistStore((s) => s.toggle);
@@ -67,7 +71,7 @@ export function WishlistButton({ propertyId, propertyType, variant = "icon", cla
           aria-pressed={wished}
           aria-busy={busy}
           title={error ?? (wished ? "Saved to wishlist" : "Save to wishlist")}
-          className={`inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! text-sm! font-medium! transition-all! shadow-sm! cursor-pointer! ${
+          className={`inline-flex! items-center! gap-2! px-5! py-2! ${radius} border! text-sm! font-medium! transition-all! shadow-sm! cursor-pointer! ${
             wished
               ? "border-red-200! bg-red-50! text-red-600!"
               : "border-gray-200! bg-white! text-gray-600! hover:border-red-200! hover:text-red-600! hover:bg-red-50!"

@@ -14,6 +14,8 @@ import { ProjectAmenitiesSection } from "@/components/site/project/sections/Proj
 import { ProjectFloorPlanSection } from "@/components/site/project/sections/ProjectFloorPlanSection";
 import { ProjectLocalitySection } from "@/components/site/project/sections/ProjectLocalitySection";
 import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
+import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
+import { ProjectShell, ProjectTitleRow } from "@/components/site/project/ProjectShell";
 import { getProjectBySlugUrl, getAllProjectSlugs } from "@/lib/api/projects";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
@@ -588,6 +590,12 @@ export default async function PropertySectionPage({
       { label: project.name, href: `/${project.canonicalSlug}` },
       { label: titlePrefix },
     ];
+    const pageHeading: Record<string, string> = {
+      amenities: `${project.name} amenities`,
+      "floor-plans": `${project.name} ${getFloorPlanLabel(project.projectType).toLowerCase()}s`,
+      locality: `${project.name} locality`,
+      photos: `${project.name} photos and videos`,
+    };
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -622,10 +630,25 @@ export default async function PropertySectionPage({
           projectType={project.projectType}
         />
         <div className="min-h-screen! bg-gray-50! font-manrope-page">
-          <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-5! pb-24!">
-            <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
-            <div className="mt-5!">
-              <ProjectSectionContent sectionKey={sectionKey} project={project} />
+          <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-3! pb-24!">
+            <div className="flex! flex-col! gap-4!">
+              <div className="flex! items-center! justify-between! gap-4! min-w-0!">
+                <div className="min-w-0! flex-1!">
+                  <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
+                </div>
+                <ProjectTopActions project={project} />
+              </div>
+              {/* Full width above the two columns, as on the overview, so the
+                  title sits in the same place on every page of the project. */}
+              <ProjectTitleRow
+                project={project}
+                heading={pageHeading[sectionKey] ?? titlePrefix}
+                eyebrow={`${project.name} overview`}
+                eyebrowHref={`/${project.canonicalSlug}`}
+              />
+              <ProjectShell project={project}>
+                <ProjectSectionContent sectionKey={sectionKey} project={project} />
+              </ProjectShell>
             </div>
           </main>
         </div>

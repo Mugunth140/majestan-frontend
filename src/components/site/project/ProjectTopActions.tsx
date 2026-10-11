@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { Check, ChevronLeft, Share2 } from "lucide-react";
+import { Check, Share2 } from "lucide-react";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import type { ProjectDetail } from "@/lib/api/projects";
 
 /**
- * Back / share / save bar. Lifted out of ProjectDetailsView so the view itself
- * can be a server component — the old one shipped 660 lines of page markup to
- * the browser to hold a single `copied` boolean.
+ * Share / save controls. Rendered in the breadcrumb row by the page rather than
+ * inside the view, so the view can stay a server component — the old one
+ * shipped 660 lines of page markup to the browser to hold a single `copied`
+ * boolean. The label drops on phones so the row doesn't crowd the breadcrumb
+ * trail; the icon and aria-label carry the action there.
  */
 export function ProjectTopActions({ project }: { project: ProjectDetail }) {
   const [copied, setCopied] = useState(false);
@@ -39,34 +40,34 @@ export function ProjectTopActions({ project }: { project: ProjectDetail }) {
   };
 
   return (
-    <div className="flex! flex-wrap! items-center! justify-between! gap-4!">
-      <Link
-        href="/projects"
-        className="inline-flex! items-center! gap-2! text-sm! font-medium! text-gray-500! no-underline! rounded-md! transition-colors! duration-150! ease-out-quint! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+    <div className="flex! items-center! gap-2! shrink-0!">
+      <button
+        type="button"
+        onClick={handleShare}
+        aria-label="Share"
+        className="inline-flex! items-center! gap-2! px-4! py-2! rounded-2xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! shadow-sm! cursor-pointer! transition-[color,border-color,transform]! duration-150! ease-out-quint! hover:border-gray-300! hover:text-gray-900! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
       >
-        <ChevronLeft className="w-4! h-4!" />
-        All projects
-      </Link>
-
-      <div className="flex! items-center! gap-3!">
-        <button
-          type="button"
-          onClick={handleShare}
-          className="inline-flex! items-center! gap-2! px-4! py-2! rounded-xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! shadow-sm! cursor-pointer! transition-[color,border-color,transform]! duration-150! ease-out-quint! hover:border-gray-300! hover:text-gray-900! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
-        >
-          {copied ? (
-            <Check className="w-4! h-4! text-emerald-600!" />
-          ) : (
-            <Share2 className="w-4! h-4!" />
-          )}
-          <span aria-live="polite">{copied ? "Link copied" : "Share"}</span>
-        </button>
-        <WishlistButton
-          propertyId={project.id}
-          propertyType="project"
-          variant="pill"
-        />
-      </div>
+        {copied ? (
+          <Check className="w-4! h-4! text-emerald-600!" />
+        ) : (
+          <Share2 className="w-4! h-4!" />
+        )}
+        <span aria-hidden="true" className="hidden! sm:inline!">
+          {copied ? "Link copied" : "Share"}
+        </span>
+        {/* The visible label is display:none on phones, and a live region
+            inside a hidden element is never announced. This one is always
+            in the accessibility tree and only speaks when the copy lands. */}
+        <span aria-live="polite" className="sr-only!">
+          {copied ? "Link copied" : ""}
+        </span>
+      </button>
+      <WishlistButton
+        propertyId={project.id}
+        propertyType="project"
+        variant="pill"
+        radius="rounded-2xl!"
+      />
     </div>
   );
 }

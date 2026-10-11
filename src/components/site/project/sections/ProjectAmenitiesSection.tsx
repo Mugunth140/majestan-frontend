@@ -1,104 +1,66 @@
-import { Shield, Sparkles } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
-import { getIconForAmenity } from "@/components/site/property/sections/AmenitiesSection";
-import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
-import { connectivityIconFor } from "@/components/site/project/connectivity-icons";
+import { BODY, Card } from "@/components/site/project/project-ui";
+import { AMENITY_GRID, AmenityTile, amenityList, type AmenityItem } from "@/components/site/project/overview/amenity-parts";
 
-type Amenity = {
-  name: string;
-  icon: React.ElementType;
-};
+const OTHER = "Other";
 
-type AmenityCategory = {
-  title: string;
-  description: string;
-  amenities: Amenity[];
-};
+/** "security" becomes "Security", and "multi_purpose" becomes "Multi Purpose". */
+function categoryTitle(raw: string | null): string {
+  const words = (raw ?? "")
+    .replace(/[-_]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return OTHER;
+  return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+}
 
-function getProjectAmenityCategories(project: ProjectDetail): AmenityCategory[] {
-  const backendAmenities = project.projectAmenities ?? [];
-  if (backendAmenities.length === 0) return [];
+/**
+ * Amenities grouped by CRM category, one card per group. The overview shows
+ * only the first eight tiles; this page is where the full list lives.
+ */
+export function ProjectAmenitiesSection({ project }: { project: ProjectDetail }) {
+  const items = amenityList(project);
 
-  const grouped: Record<string, Amenity[]> = {};
-  backendAmenities.forEach((pa: any) => {
-    const am = pa.amenity;
-    if (!am || !am.name) return;
-    const catName = am.category || "other";
-    const title = catName.charAt(0).toUpperCase() + catName.slice(1);
-    if (!grouped[title]) grouped[title] = [];
-    grouped[title].push({
-      name: am.name,
-      icon: am.icon ? connectivityIconFor(am.icon) : getIconForAmenity(am.name),
-    });
+  if (items.length === 0) {
+    return (
+      <Card title="Amenities" id="amenities">
+        <p className={`mt-4! ${BODY}`}>
+          Amenities for this project have not been listed yet. Send an enquiry and our team will
+          share the full list.
+        </p>
+      </Card>
+    );
+  }
+
+  const groups = new Map<string, AmenityItem[]>();
+  for (const item of items) {
+    const title = categoryTitle(item.category);
+    groups.set(title, [...(groups.get(title) ?? []), item]);
+  }
+
+  // Alphabetical, with Other last so the catch-all never leads the page.
+  const ordered = [...groups.entries()].sort(([a], [b]) => {
+    if (a === OTHER) return 1;
+    if (b === OTHER) return -1;
+    return a.localeCompare(b);
   });
 
-  return Object.entries(grouped).map(([title, amenities]) => ({
-    title: title.replace(/-/g, " "),
-    description: `Features in ${title.toLowerCase()}`,
-    amenities,
-  }));
-}
-
-function AmenityCard({ amenity }: { amenity: Amenity }) {
-  const Icon = amenity.icon;
   return (
-    <div className="group flex! items-center! gap-4! p-4! rounded-2xl! bg-white! border! border-gray-200/70! hover:border-[#27427f]/30! hover:shadow-[0_8px_24px_rgba(39,66,127,0.10)]! hover:-translate-y-0.5! transition-all! duration-300!">
-      <div className="w-12! h-12! rounded-xl! bg-[#27427f]/10! flex! items-center! justify-center! shrink-0!">
-        <Icon className="w-5! h-5! text-[#27427f]!" strokeWidth={1.75} />
-      </div>
-      <span className="font-manrope! font-semibold! text-base! text-gray-700! flex-1!">
-        {amenity.name}
-      </span>
-    </div>
-  );
-}
-
-export function ProjectAmenitiesSection({ project }: { project: ProjectDetail }) {
-  const categories = getProjectAmenityCategories(project);
-
-  return (
-    <div className="space-y-8!">
-      {categories.length === 0 ? (
-        <div className="bg-white! rounded-3xl! p-12! border! border-gray-100! text-center!">
-          <div className="w-20! h-20! rounded-2xl! bg-gray-50! flex! items-center! justify-center! mx-auto! mb-6!">
-            <Shield className="w-8! h-8! text-gray-300!" strokeWidth={1.5} />
-          </div>
-          <h3 className="font-manrope! text-xl! font-semibold! text-gray-900! mb-2!">No Amenities Listed</h3>
-          <p className="text-gray-500! max-w-md! mx-auto! leading-relaxed!">
-            Specific amenities and features have not been listed for {project.name} yet. Please contact us for more detailed information.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white! rounded-4xl! p-8! md:p-10! border! border-gray-100! shadow-sm!">
-          <div className="mb-10!">
-            <h2 className="font-manrope! text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-2! tracking-tight!">
-              Amenities &amp; Features
-            </h2>
-            <p className="text-gray-500! text-base! leading-relaxed!">
-              Explore the premium facilities available at <span className="font-medium! text-gray-800!">{project.name}</span>
-            </p>
-          </div>
-
-          <div className="space-y-10!">
-            {categories.map((category) => (
-              <div key={category.title} className="pt-6! border-t! border-gray-200! first:border-0! first:pt-0!">
-                <div className="mb-6!">
-                  <h3 className="font-manrope! text-xl! font-semibold! text-gray-900! capitalize! tracking-relaxed!">
-                    {category.title}
-                  </h3>
-                </div>
-                <div className="grid! grid-cols-2! lg:grid-cols-3! gap-4! md:gap-5!">
-                  {category.amenities.map((amenity) => (
-                    <AmenityCard key={amenity.name} amenity={amenity} />
-                  ))}
-                </div>
-              </div>
+    <div className="flex! flex-col! gap-6!">
+      {ordered.map(([title, list]) => (
+        <Card
+          key={title}
+          title={title}
+          id={`amenities-${title.toLowerCase().replace(/\s+/g, "-")}`}
+        >
+          <div className={`${AMENITY_GRID} mt-6!`}>
+            {list.map((item) => (
+              <AmenityTile key={item.key} name={item.name} Icon={item.Icon} />
             ))}
           </div>
-        </div>
-      )}
-
-      <NeedMoreDetails propertyType={project.projectType} />
+        </Card>
+      ))}
     </div>
   );
 }

@@ -15,7 +15,7 @@ import { ArrowRight } from "lucide-react";
 export const PAGE_CONTAINER = "max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!";
 
 export const CARD =
-  "bg-white! rounded-card! border! border-gray-200/70! shadow-sm! p-6! md:p-8!";
+  "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-6! md:p-8!";
 /* Matches FaqSection and LocalityTeaser, which these pages also render. A
    heavier heading here would make those two look like a different page. */
 export const HEADING = "text-lg! md:text-xl! font-normal! text-gray-900!";

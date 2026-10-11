@@ -7,7 +7,7 @@ import { LABEL } from "@/components/site/project/project-ui";
 import { StickyCenter } from "@/components/site/project/StickyCenter";
 
 const ASIDE_CARD =
-  "bg-white! rounded-card! border! border-gray-200/70! shadow-sm! p-6!";
+  "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-6!";
 
 /**
  * The enquiry card: what it costs, who builds it, and the two actions.

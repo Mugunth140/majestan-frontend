@@ -8,14 +8,6 @@
      Fonts via public/assets/css/styles.css. */
   --font-manrope: "Manrope", sans-serif;
 
-  /* Detail-page card radius. 20px sits between Tailwind's 2xl (16) and 3xl
-     (24) and was already hardcoded as `rounded-[20px]` on every property and
-     project card, including the shared FaqSection and LocalityTeaser. Named
-     here so `rounded-card!` is the one place it is written down, and so the
-     nested-radius arithmetic for anything inside a card (20 − gap) has a
-     fixed outer value to work from. */
-  --radius-card: 20px;
-
   /* Easing. The built-in CSS keywords are too weak to read as deliberate at
      the 150-300ms durations UI wants: `ease-out` barely diverges from linear,
      and `ease-in` delays the first frame, which is the frame the pointer is

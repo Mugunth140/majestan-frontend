@@ -46,7 +46,7 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
           Two up on a phone, one divided row from sm. */}
         <section
           aria-label="Key facts"
-          className="bg-white! rounded-card! border! border-gray-200/70! shadow-sm! overflow-hidden! grid! grid-cols-2! gap-x-6! gap-y-5! p-6! sm:flex! sm:gap-0! sm:p-0! sm:divide-x! sm:divide-gray-200!"
+          className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden! grid! grid-cols-2! gap-x-6! gap-y-5! p-6! sm:flex! sm:gap-0! sm:p-0! sm:divide-x! sm:divide-gray-200!"
         >
           {facts.map((fact) => (
             <div

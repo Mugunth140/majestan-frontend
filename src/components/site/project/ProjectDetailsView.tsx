@@ -254,17 +254,6 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             )}
             <div className="absolute! inset-0! bg-gradient-to-t! from-black/70! via-black/20! to-black/10! pointer-events-none! z-20!" />
 
-            {/* Overlay badges */}
-            <div className="absolute! top-4! right-4! flex! gap-2! z-20!">
-              <span className="inline-flex! items-center! gap-1.5! px-4! py-2! rounded-xl! bg-gray-900/85! backdrop-blur-md! text-white! text-xs! font-semibold!">
-                <Sparkles className="w-3.5! h-3.5!" />
-                {titleCase(project.possessionStatus)}
-              </span>
-              <span className="inline-flex! items-center! px-4! py-2! rounded-xl! bg-white/95! backdrop-blur-md! text-gray-900! text-xs! font-semibold! shadow-sm!">
-                {typeLabel}
-              </span>
-            </div>
-
             {/* Title + location + price overlaid bottom-left */}
             <div className="absolute! left-5! md:left-8! bottom-5! md:bottom-8! z-20! max-w-[70%]!">
               <h1 className="font-manrope! text-2xl! md:text-4xl! font-semibold! text-white! leading-tight! drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]!">

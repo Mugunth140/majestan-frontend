@@ -30,6 +30,11 @@ import {
   Layers,
   Ruler,
   Coins,
+  ExternalLink,
+  Award,
+  CheckCircle2,
+  Clock,
+  Globe,
 } from "lucide-react";
 
 type ProjectDetailsViewProps = {
@@ -98,6 +103,9 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
     .filter(Boolean)
     .join(", ");
 
+  const builderInfo = project.builder;
+  const builderDisplayName = builderInfo?.name || project.builderName;
+
   const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = [
     { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: bhkLabel },
     { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Super Built-Up", value: areaRange },
@@ -128,8 +136,8 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
     ...(project.reraNumber
       ? [{ icon: <ShieldCheck className="w-4.5! h-4.5!" />, label: "Rera No.", value: project.reraNumber }]
       : []),
-    ...(project.builderName
-      ? [{ icon: <Building2 className="w-4.5! h-4.5!" />, label: "Developed By", value: project.builderName }]
+    ...(builderDisplayName
+      ? [{ icon: <Building2 className="w-4.5! h-4.5!" />, label: "Developed By", value: builderDisplayName }]
       : []),
     ...(project.projectCode
       ? [{ icon: <Tag className="w-4.5! h-4.5!" />, label: "Project ID", value: project.projectCode }]
@@ -499,6 +507,115 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
             </div>
           )}
 
+          {/* About Builder */}
+          {(builderInfo || project.builderName) && (
+            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+              <div className="flex! flex-col! sm:flex-row! sm:items-center! justify-between! gap-4! pb-6! border-b! border-gray-100!">
+                <div className="flex! items-center! gap-4!">
+                  {builderInfo?.logoUrl ? (
+                    <div className="relative! w-16! h-16! rounded-2xl! border! border-gray-100! bg-white! p-1.5! shadow-xs! shrink-0! flex! items-center! justify-center! overflow-hidden!">
+                      <img
+                        src={builderInfo.logoUrl}
+                        alt={builderDisplayName || "Builder"}
+                        className="w-full! h-full! object-contain!"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-16! h-16! rounded-2xl! bg-[#27427f]/8! border! border-[#27427f]/15! text-[#27427f]! flex! items-center! justify-center! shrink-0! font-semibold! text-xl!">
+                      {(builderDisplayName || "B").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-[11px]! font-semibold! uppercase! tracking-wider! text-[#27427f]! bg-[#27427f]/8! px-2.5! py-0.5! rounded-full!">
+                      Developer
+                    </span>
+                    <h3 className="text-lg! md:text-xl! font-semibold! text-gray-900! mt-1.5!">
+                      {builderDisplayName}
+                    </h3>
+                  </div>
+                </div>
+
+                {builderInfo?.website && (
+                  <a
+                    href={builderInfo.website.startsWith("http") ? builderInfo.website : `https://${builderInfo.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex! items-center! gap-2! text-[13px]! font-medium! text-[#27427f]! hover:text-[#1e3366]! bg-gray-50! hover:bg-gray-100! px-4! py-2! rounded-xl! transition-all! w-fit!"
+                  >
+                    <Globe className="w-4! h-4!" />
+                    <span>Visit Website</span>
+                    <ExternalLink className="w-3.5! h-3.5! opacity-70!" />
+                  </a>
+                )}
+              </div>
+
+              {/* Builder stats if present */}
+              {builderInfo &&
+                (builderInfo.experienceYears != null ||
+                  builderInfo.completedProjects != null ||
+                  builderInfo.ongoingProjects != null) && (
+                  <div className="mt-6! grid! grid-cols-2! sm:grid-cols-3! gap-3! sm:gap-4!">
+                    {builderInfo.experienceYears != null && builderInfo.experienceYears > 0 && (
+                      <div className="p-4! rounded-xl! border! border-gray-100! bg-gray-50/60! flex! items-center! gap-3!">
+                        <div className="w-10! h-10! rounded-lg! bg-amber-50! text-amber-700! flex! items-center! justify-center! shrink-0!">
+                          <Award className="w-5! h-5!" />
+                        </div>
+                        <div className="min-w-0!">
+                          <p className="text-base! sm:text-lg! font-bold! text-gray-900! leading-tight!">
+                            {builderInfo.experienceYears}+
+                          </p>
+                          <p className="text-xs! text-gray-500! mt-0.5! leading-tight!">
+                            Years Experience
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {builderInfo.completedProjects != null && builderInfo.completedProjects > 0 && (
+                      <div className="p-4! rounded-xl! border! border-gray-100! bg-gray-50/60! flex! items-center! gap-3!">
+                        <div className="w-10! h-10! rounded-lg! bg-emerald-50! text-emerald-700! flex! items-center! justify-center! shrink-0!">
+                          <CheckCircle2 className="w-5! h-5!" />
+                        </div>
+                        <div className="min-w-0!">
+                          <p className="text-base! sm:text-lg! font-bold! text-gray-900! leading-tight!">
+                            {builderInfo.completedProjects}
+                          </p>
+                          <p className="text-xs! text-gray-500! mt-0.5! leading-tight!">
+                            Completed Projects
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {builderInfo.ongoingProjects != null && builderInfo.ongoingProjects > 0 && (
+                      <div className="p-4! rounded-xl! border! border-gray-100! bg-gray-50/60! flex! items-center! gap-3!">
+                        <div className="w-10! h-10! rounded-lg! bg-blue-50! text-blue-700! flex! items-center! justify-center! shrink-0!">
+                          <Clock className="w-5! h-5!" />
+                        </div>
+                        <div className="min-w-0!">
+                          <p className="text-base! sm:text-lg! font-bold! text-gray-900! leading-tight!">
+                            {builderInfo.ongoingProjects}
+                          </p>
+                          <p className="text-xs! text-gray-500! mt-0.5! leading-tight!">
+                            Ongoing Projects
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              {/* Builder description */}
+              {builderInfo?.description ? (
+                <div className="mt-5! prose! max-w-none! text-gray-600! font-normal! text-[14px]! leading-relaxed! whitespace-pre-wrap! break-words!">
+                  {builderInfo.description}
+                </div>
+              ) : !builderInfo ? (
+                <p className="mt-4! text-sm! text-gray-500! font-light!">
+                  Developed by <span className="font-medium! text-gray-800!">{project.builderName}</span>. Contact us for further portfolio and credibility details.
+                </p>
+              ) : null}
+            </div>
+          )}
+
           {/* FAQs */}
           {(project.projectFaqs ?? []).length > 0 && (
             <FaqSection
@@ -600,7 +717,7 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                 </button>
               </div>
 
-              {(project.reraNumber || project.builderName) && (
+              {(project.reraNumber || builderDisplayName) && (
                 <div className="mt-5! pt-5! border-t! border-gray-100! flex! flex-col! gap-4!">
                   {project.reraNumber && (
                     <div className="flex! items-center! gap-3!">
@@ -613,14 +730,24 @@ export function ProjectDetailsView({ project }: ProjectDetailsViewProps) {
                       </div>
                     </div>
                   )}
-                  {project.builderName && (
+                  {builderDisplayName && (
                     <div className="flex! items-center! gap-3!">
-                      <div className="w-10! h-10! rounded-xl! border! border-gray-200! bg-gray-50/60! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
-                        <Building2 className="w-4.5! h-4.5!" />
-                      </div>
+                      {builderInfo?.logoUrl ? (
+                        <div className="w-10! h-10! rounded-xl! border! border-gray-200! bg-white! p-1! flex! items-center! justify-center! shrink-0! overflow-hidden!">
+                          <img
+                            src={builderInfo.logoUrl}
+                            alt={builderDisplayName}
+                            className="w-full! h-full! object-contain!"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-10! h-10! rounded-xl! border! border-gray-200! bg-gray-50/60! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
+                          <Building2 className="w-4.5! h-4.5!" />
+                        </div>
+                      )}
                       <div className="min-w-0!">
                         <p className="text-[12px]! text-gray-400!">Developed By</p>
-                        <p className="text-[13px]! font-semibold! text-gray-900! truncate!">{project.builderName}</p>
+                        <p className="text-[13px]! font-semibold! text-gray-900! truncate!">{builderDisplayName}</p>
                       </div>
                     </div>
                   )}

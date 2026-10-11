@@ -53,6 +53,18 @@ export type ProjectRanges = {
   plotOpenSides: number[];
 };
 
+export type ProjectBuilder = {
+  id?: number;
+  name?: string;
+  slug?: string;
+  logoUrl?: string | null;
+  experienceYears?: number | null;
+  completedProjects?: number | null;
+  ongoingProjects?: number | null;
+  description?: string | null;
+  website?: string | null;
+};
+
 export type ProjectDetail = {
   id: number;
   projectCode: string | null;
@@ -61,6 +73,7 @@ export type ProjectDetail = {
   canonicalSlug: string;
   projectType: string;
   builderName: string | null;
+  builder?: ProjectBuilder | null;
   reraNumber: string | null;
   possessionDate: string | null;
   possessionStatus: string;
@@ -88,6 +101,7 @@ export type ProjectDetail = {
   coverImageUrl: string | null;
   mobileCoverImageUrl?: string | null;
   galleryImageUrls: string[] | null;
+  videoUrls?: string[] | null;
   status: string;
   ranges: ProjectRanges;
   units: ProjectUnit[];

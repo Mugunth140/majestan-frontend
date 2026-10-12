@@ -20,7 +20,6 @@ import { getFloorPlanLabel } from "@/lib/property-sections";
 import {
   summarizeConfigurations,
   unitAreaLabel,
-  type ConfigurationSummary,
 } from "@/lib/project-config-summary";
 import {
   groupUnitsByConfiguration,
@@ -44,10 +43,10 @@ import { StatusChip } from "@/components/site/project/configuration-parts";
  * spec sheet as collapsible categories, closed until asked for.
  */
 
-/* The page's own card: the shared CARD with more room inside, since each
-   of these holds a whole configuration. */
+/* The page's own card: the shared CARD with more room inside, since it
+   holds the active unit's whole detail. */
 const CONFIGURATION_CARD =
-  "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-5! sm:p-8! lg:p-10! scroll-mt-32! min-w-0!";
+  "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-5! sm:p-8! lg:p-10! min-w-0!";
 
 /** "1,910 sq.ft" → "1910 SQ.FT"; plots "4 cents" → "4 CENTS". */
 function unitTabLabel(unit: ProjectUnit, projectType: string): string {
@@ -183,6 +182,21 @@ function UnitCard({
   const groups = unitSpecGroups(unit, project);
   const headingId = `unit-${unit.id}-name`;
 
+  const saleableNum = parseFloat(String(unit.superBuiltupAreaSqft ?? unit.builtupAreaSqft ?? ""));
+  const saleable =
+    Number.isFinite(saleableNum) && saleableNum > 0
+      ? `${Math.round(saleableNum).toLocaleString("en-IN")} sq.ft`
+      : null;
+  const possession = (() => {
+    const raw = (project.possessionDate || "").trim();
+    const dt = raw ? new Date(raw) : null;
+    if (dt && !isNaN(dt.getTime())) {
+      const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.getMonth()];
+      return `${mon}, ${dt.getFullYear()}`;
+    }
+    return project.possessionStatus ? titleCase(project.possessionStatus) : null;
+  })();
+
   return (
     <article aria-labelledby={headingId} className="py-6! first:pt-0! last:pb-0!">
       {/* Name first, as asked of every unit; price and status on the right
@@ -237,39 +251,58 @@ function UnitCard({
           ))}
         </div>
       )}
+
+      {(saleable || project.reraNumber || possession) && (
+        <dl className="mt-6! grid! grid-cols-1! sm:grid-cols-3! gap-4! border-t! border-gray-200! pt-5!">
+          {saleable && (
+            <div className="min-w-0!">
+              <dt className={LABEL}>Saleable Area</dt>
+              <dd className="mb-0! mt-1! text-sm! font-semibold! text-gray-900! tabular-nums!">
+                {saleable}
+              </dd>
+            </div>
+          )}
+          {project.reraNumber && (
+            <div className="min-w-0!">
+              <dt className={LABEL}>Rera ID</dt>
+              <dd className="mb-0! mt-1! text-sm! font-semibold! text-gray-900! break-words!">
+                {project.reraNumber}
+              </dd>
+            </div>
+          )}
+          {possession && (
+            <div className="min-w-0!">
+              <dt className={LABEL}>Possession Status</dt>
+              <dd className="mb-0! mt-1! text-sm! font-semibold! text-gray-900!">
+                {possession}
+              </dd>
+            </div>
+          )}
+        </dl>
+      )}
     </article>
   );
 }
 
-function ConfigurationDetail({
-  group,
-  summary,
+function ActiveUnitPanel({
+  groups,
+  activeUnit,
   project,
 }: {
-  group: ConfigurationGroup;
-  summary: ConfigurationSummary;
+  groups: ConfigurationGroup[];
+  activeUnit: ProjectUnit | null;
   project: ProjectDetail;
 }) {
-  const headingId = `${group.key}-heading`;
-  const count = group.units.length;
-
+  if (!activeUnit) return null;
   return (
-    <section id={group.key} aria-labelledby={headingId} className={CONFIGURATION_CARD}>
-      <div className="flex! flex-wrap! items-baseline! justify-between! gap-x-4! gap-y-1!">
-        <h2 id={headingId} className="text-xl! md:text-2xl! font-normal! text-gray-900!">
-          <span className="font-semibold! text-[#27427f]!">{summary.label}</span>{" "}
-          {summary.typeLabel}
-        </h2>
-        <p className="text-sm! text-gray-500!">
-          {count} {count === 1 ? "unit" : "units"}
-        </p>
-      </div>
-
-      <div className="mt-8! sm:mt-10! divide-y! divide-gray-200!">
-        {group.units.map((unit, index) => (
-          <UnitCard key={unit.id} unit={unit} index={index} group={group} project={project} />
-        ))}
-      </div>
+    <section aria-label="Unit details" className={CONFIGURATION_CARD}>
+      {groups.map((group) =>
+        group.units.map((unit, index) => (
+          <div key={unit.id} hidden={unit.id !== activeUnit.id}>
+            <UnitCard unit={unit} index={index} group={group} project={project} />
+          </div>
+        )),
+      )}
     </section>
   );
 }
@@ -295,7 +328,6 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
   }
 
   const groups = groupUnitsByConfiguration(project);
-  const summaries = new Map(summarizeConfigurations(project).map((s) => [s.key, s]));
   const [activeConfigKey, setActiveConfigKey] = useState(groups[0]?.key ?? "");
   const [activeUnitId, setActiveUnitId] = useState<number | null>(null);
   const stripRef = useRef<HTMLDivElement>(null);
@@ -409,12 +441,9 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
         </div>
       )}
 
-      {groups.map((group) => {
-        const summary = summaries.get(group.key);
-        return summary ? (
-          <ConfigurationDetail key={group.key} group={group} summary={summary} project={project} />
-        ) : null;
-      })}
+      <div className="mt-6!">
+        <ActiveUnitPanel groups={groups} activeUnit={activeUnit} project={project} />
+      </div>
     </>
   );
 }

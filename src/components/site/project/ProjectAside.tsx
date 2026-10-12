@@ -4,7 +4,6 @@ import type { ProjectDetail } from "@/lib/api/projects";
 import { priceRangeLabel, rateFact } from "@/lib/project-overview";
 import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryActions";
 import { LABEL } from "@/components/site/project/project-ui";
-import { StickyCenter } from "@/components/site/project/StickyCenter";
 
 const ASIDE_CARD =
   "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-6!";
@@ -54,41 +53,39 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
 /** Who is selling it. Majestan is the listing agent on every project page. */
 function ListedByCard() {
   return (
-    <div className={`${ASIDE_CARD} flex! items-center! gap-4!`}>
-      <Image
-        src="/assets/images/logo/fav.png"
-        alt=""
-        width={48}
-        height={48}
-        className="w-12! h-12! object-contain! shrink-0!"
-      />
-      <div className="min-w-0!">
-        <p className={LABEL}>Listed by</p>
-        <p className="mt-0.5! text-base! font-semibold! text-gray-900!">
-          Majestan Realty
-        </p>
-        <p className="mt-1! flex! items-center! gap-1.5! text-sm! text-gray-500!">
-          <ShieldCheck className="w-4! h-4! text-emerald-600!" aria-hidden="true" />
-          Verified
-        </p>
+    <div className={ASIDE_CARD}>
+      <p className={LABEL}>Listed by</p>
+      <div className="mt-3! flex! items-center! gap-3!">
+        <Image
+          src="/assets/images/logo/fav.png"
+          alt=""
+          width={40}
+          height={40}
+          className="w-10! h-10! object-contain! shrink-0!"
+        />
+        <p className="text-base! font-semibold! text-gray-900!">Majestan Realty</p>
       </div>
+      <p className="mt-3! flex! items-center! gap-1.5! text-sm! text-gray-600!">
+        <ShieldCheck className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
+        Verified
+      </p>
     </div>
   );
 }
 
 /**
  * The right-hand column on every project page. It starts level with the first
- * section beside it and, once scrolled to the middle of the screen, stays
- * there: centred rather than pinned to the top edge, where it would compete
- * with the section tabs.
+ * section beside it, then stays pinned just below the navbar and section tabs
+ * (64px + 45px, plus a 24px gap) so the enquiry is in reach while the reader
+ * scrolls.
  */
 export function ProjectAside({ project }: { project: ProjectDetail }) {
   return (
     <aside aria-label="Enquire about this project" className="min-w-0!">
-      <StickyCenter className="flex! flex-col! gap-4!">
+      <div className="lg:sticky! lg:top-[133px]! flex! flex-col! gap-4!">
         <EnquiryCard project={project} />
         <ListedByCard />
-      </StickyCenter>
+      </div>
     </aside>
   );
 }

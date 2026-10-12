@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { ProjectFloorPlanSection } from "./ProjectFloorPlanSection";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
@@ -22,7 +22,7 @@ function unit(overrides: Partial<ProjectUnit> = {}): ProjectUnit {
     floorPlanImageUrl: null,
     isPrimary: true,
     ...overrides,
-  };
+  } as ProjectUnit;
 }
 
 function project(units: ProjectUnit[]): ProjectDetail {
@@ -44,33 +44,73 @@ const threeBhk = [unit({ id: 4, unitCode: "C-301", bedrooms: 3, superBuiltupArea
 
 afterEach(cleanup);
 
+function configTabs() {
+  return within(screen.getByRole("tablist", { name: "Configurations" })).getAllByRole("tab");
+}
+
+function unitTabs() {
+  return within(screen.getByRole("tablist", { name: "Units" })).getAllByRole("tab");
+}
+
 describe("ProjectFloorPlanSection", () => {
-  it("opens with jump cards to a section per configuration", () => {
+  it("selects the first configuration and its first unit by default", () => {
     render(<ProjectFloorPlanSection project={project([...twoBhk, ...threeBhk])} />);
-    const jumps = within(screen.getByRole("navigation", { name: "Configurations" })).getAllByRole("link");
-    expect(jumps.map((a) => a.getAttribute("href"))).toEqual(["#bhk-2", "#bhk-3"]);
-    expect(document.getElementById("bhk-2")).not.toBeNull();
-    expect(document.getElementById("bhk-3")).not.toBeNull();
+    const tabs = configTabs();
+    expect(tabs).toHaveLength(2);
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
+    expect(tabs[1]).toHaveAttribute("aria-selected", "false");
+    // Only the active unit is exposed; the rest render hidden.
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("A-101");
   });
 
-  it("heads each unit with its name, then its plan, then its categories, all closed", () => {
+  it("switching configuration resets to that group's first unit", () => {
+    render(<ProjectFloorPlanSection project={project([...twoBhk, ...threeBhk])} />);
+    fireEvent.click(configTabs()[1]);
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("C-301");
+    expect(configTabs()[1]).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(configTabs()[0]);
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("A-101");
+  });
+
+  it("switches units via the area strip and disambiguates duplicate areas", () => {
     render(<ProjectFloorPlanSection project={project(twoBhk)} />);
-    const [first] = within(document.getElementById("bhk-2")!).getAllByRole("article");
-    expect(within(first).getByRole("heading", { level: 3 })).toHaveTextContent("A-101");
-    const plan = within(first).getByRole("button", { name: /A-101 floor plan, 2 BHK/ });
+    const tabs = unitTabs();
+    expect(tabs.map((t) => t.textContent)).toEqual([
+      "1292 SQ.FT",
+      "1292 SQ.FT · A-102",
+      "1292 SQ.FT · B-201",
+    ]);
+    fireEvent.click(tabs[1]);
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("A-102");
+    expect(tabs[1]).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("hides the unit strip for single-unit configurations", () => {
+    render(<ProjectFloorPlanSection project={project(threeBhk)} />);
+    expect(screen.queryByRole("tablist", { name: "Units" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("C-301");
+  });
+
+  it("heads the unit with its name, plan and closed categories", () => {
+    render(<ProjectFloorPlanSection project={project(twoBhk)} />);
+    const article = screen.getByRole("heading", { level: 3 }).closest("article")!;
+    expect(within(article).getByRole("heading", { level: 3 })).toHaveTextContent("A-101");
+    const plan = within(article).getByRole("button", { name: /A-101 floor plan, 2 BHK/ });
     expect(plan).toHaveAttribute("aria-haspopup", "dialog");
-    const categories = [...first.querySelectorAll("details")];
+    const categories = [...article.querySelectorAll("details")];
     expect(categories[0].querySelector("summary")).toHaveTextContent("Price & area");
     expect(categories[0].querySelector("summary")).toHaveTextContent("₹96.9 L · 1,292 sq.ft");
-    expect(within(first).queryByRole("tab")).toBeNull();
     categories.forEach((details) => expect(details).not.toHaveAttribute("open"));
   });
 
-  it("keeps each unit flat: no card inside the configuration card", () => {
+  it("shows the facts row only for data the unit and project have", () => {
     render(<ProjectFloorPlanSection project={project(twoBhk)} />);
-    const section = document.getElementById("bhk-2")!;
-    expect(section.querySelectorAll("article")).toHaveLength(3);
-    expect(section.querySelectorAll("article article")).toHaveLength(0);
+    const article = screen.getByRole("heading", { level: 3 }).closest("article")!;
+    expect(within(article).getByText("Saleable Area")).toBeInTheDocument();
+    // Header area line, Super built-up spec row, and the facts cell.
+    expect(within(article).getAllByText("1,292 sq.ft")).toHaveLength(3);
+    expect(within(article).queryByText("Rera ID")).not.toBeInTheDocument();
+    expect(within(article).queryByText("Possession Status")).not.toBeInTheDocument();
   });
 
   it("uses the unit's CRM title as its name when it has one", () => {

@@ -15,6 +15,7 @@ import {
   hasGroundPlanData,
 } from "@/lib/property-sections";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
+import { emi } from "@/lib/emi";
 import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
 import {
   PROPERTY_TYPES,
@@ -462,6 +463,22 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     return formatPrice(item.posttype === "Sell" ? item.expectedsaleprice : item.monthly_rent);
   })();
 
+  // EMI floor for outright-buy listings only — same 7.25% / 20y basis as
+  // project cards. Rent listings never show it.
+  const emiStarts = (() => {
+    if (typeof item.posttype !== "string" || item.posttype.toLowerCase() !== "sell") return null;
+    let floor: number | null = null;
+    if (item.units && item.units.length > 0) {
+      const prices = item.units.map((u) => Number(u.price)).filter((p) => !isNaN(p) && p > 0);
+      if (prices.length > 0) floor = Math.min(...prices);
+    }
+    if (floor == null) {
+      const p = nzNum((item as any).expectedsaleprice);
+      if (p != null && p > 0) floor = p;
+    }
+    return floor != null && floor > 0 ? emi(floor, 7.25, 20) : null;
+  })();
+
   const [copied, setCopied] = useState(false);
   // External open signal for the enquiry dialog. The backend resolves the
   // property by id and ignores client code/slug, so only id is authoritative.
@@ -576,31 +593,43 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         </div>
 
         {/* Price — dotted divider above, directly under title/location for prominence */}
-        <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-end! gap-3! leading-none!">
-          <span className="text-[22px]! font-semibold! text-[#27427f]!">
-            {priceDisplay}
-            {isRentListing(item.posttype) && (
-              <span className="text-[13px]! font-medium! text-gray-500!"> /mo</span>
-            )}
-          </span>
-          {(() => {
-            const perSqft = getPricePerSqft(item, priceDisplay);
-            return perSqft ? (
-              <span className="text-[13px]! font-medium! text-gray-700!">{perSqft}</span>
-            ) : null;
-          })()}
-          {(() => {
-            // Condition ribbon pinned to the end of the pricing row.
-            const badge = getConditionBadge(item);
-            return badge ? (
-              <span
-                className="ml-auto! shrink-0! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"
-                style={{ clipPath: "polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%)" }}
-              >
-                {badge}
+        <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-end! gap-10! leading-none!">
+          <div className="flex! flex-col! gap-1! min-w-0! shrink-0!">
+            <span className="text-[22px]! font-semibold! text-[#27427f]!">
+              {priceDisplay}
+              {isRentListing(item.posttype) && (
+                <span className="text-[13px]! font-medium! text-gray-500!"> /mo</span>
+              )}
+            </span>
+            {(() => {
+              const perSqft = getPricePerSqft(item, priceDisplay);
+              return perSqft ? (
+                <span className="text-[13px]! font-medium! text-gray-700!">{perSqft}</span>
+              ) : null;
+            })()}
+          </div>
+          {emiStarts ? (
+            <div className="flex! flex-col! gap-1! shrink-0!">
+              <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
+              <span className="text-[15px]! font-semibold! text-gray-800! tabular-nums!">
+                ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
               </span>
-            ) : null;
-          })()}
+            </div>
+          ) : null}
+          <div className="ml-auto! shrink-0! self-center! flex!">
+            {(() => {
+              // Condition ribbon pinned to the end of the pricing row.
+              const badge = getConditionBadge(item);
+              return badge ? (
+                <span
+                  className="inline-flex! items-center! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"
+                  style={{ clipPath: "polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%)" }}
+                >
+                  {badge}
+                </span>
+              ) : null;
+            })()}
+          </div>
         </div>
 
         {/* Spec table */}

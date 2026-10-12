@@ -23,6 +23,7 @@ import {
   getPlotSpecs,
 } from "@/lib/property-sections";
 import { capFirst, formatAddressLines, getPincode, getSublocation, type LocationRecord } from "@/lib/location-display";
+import { emi } from "@/lib/emi";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
 
 type PropertyInfoSidebarProps = {
@@ -191,16 +192,32 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           </div>
         )}
 
-        <div className="mt-5! pt-5! border-t! border-gray-100!">
-          <p className="text-xl! font-manrope! font-medium! text-gray-900! tracking-tight!">
-            {formatPrice(property.price)}
-            {!isSale && (
-              <span className="text-sm! font-normal! text-gray-500!"> / mo</span>
+        <div className="mt-5! pt-5! border-t! border-gray-100! flex! items-end! justify-between! gap-4!">
+          <div className="min-w-0!">
+            <p className="text-xl! font-manrope! font-medium! text-gray-900! tracking-tight!">
+              {formatPrice(property.price)}
+              {!isSale && (
+                <span className="text-sm! font-normal! text-gray-500!"> / mo</span>
+              )}
+            </p>
+            {perSqft && (
+              <p className="text-[13px]! font-manrope! font-normal! text-gray-500! mt-1!">{perSqft}</p>
             )}
-          </p>
-          {perSqft && (
-            <p className="text-[13px]! font-manrope! font-normal! text-gray-500! mt-1!">{perSqft}</p>
-          )}
+          </div>
+          {(() => {
+            // Sale listings only — same 7.25% / 20y basis as cards.
+            const priceNum = parseFloat(property.price);
+            const emiStarts =
+              isSale && Number.isFinite(priceNum) && priceNum > 0 ? emi(priceNum, 7.25, 20) : null;
+            return emiStarts ? (
+              <div className="flex! flex-col! gap-1! shrink-0! text-right!">
+                <span className="text-[11px]! font-manrope! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
+                <span className="text-[15px]! font-manrope! font-semibold! text-gray-800! tabular-nums!">
+                  ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
+                </span>
+              </div>
+            ) : null;
+          })()}
         </div>
 
         <PropertyEnquiryActions

@@ -291,11 +291,10 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   return (
     <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
 
-      {/* Image — full-width square on mobile/tablet; on desktop a fixed
-          300px-wide column that stretches to the content height, so the card
-          hugs the content with no leftover top/bottom whitespace. */}
+      {/* Image — 1:1 square on all breakpoints: full-width on
+          mobile/tablet, fixed 300px square pinned to the top on desktop. */}
       <div
-        className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100! cursor-pointer!"
+        className="relative! w-full! aspect-square! lg:w-[300px]! lg:self-start! shrink-0! overflow-hidden! bg-gray-100! cursor-pointer!"
         onClick={navigateToDetail}
         role="link"
         tabIndex={0}

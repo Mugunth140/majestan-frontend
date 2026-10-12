@@ -5,6 +5,7 @@ import { priceRangeLabel, rateFact } from "@/lib/project-overview";
 import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryActions";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LABEL } from "@/components/site/project/project-ui";
+import { formatAddressLines } from "@/lib/location-display";
 
 const ASIDE_CARD =
   "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-6!";
@@ -17,6 +18,11 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
   const isPlot = project.projectType === "plot";
   const rate = rateFact(project);
   const builderName = project.builder?.name || project.builderName;
+  const locationLines = formatAddressLines(project.address, {
+    sublocation: project.sublocation,
+    city: project.city,
+    pincode: project.pincode,
+  });
 
   return (
     <div className={ASIDE_CARD}>
@@ -30,10 +36,14 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
           className="mt-0.5!"
         />
       </div>
-      {[project.sublocation, project.city].filter(Boolean).length > 0 && (
-        <p className="mt-1.5! flex! items-center! gap-1.5! text-sm! text-gray-500!">
+      {locationLines.length > 0 && (
+        <p className="mt-1.5! flex! items-start! gap-1.5! text-sm! text-gray-500!">
           <MapPin className="w-4! h-4! shrink-0!" aria-hidden="true" />
-          {[project.sublocation, project.city].filter(Boolean).join(", ")}
+          <span className="min-w-0!">
+            {locationLines.map((line, index) => (
+              <span className="block!" key={`${line}-${index}`}>{line}</span>
+            ))}
+          </span>
         </p>
       )}
       <p className={`${LABEL} mt-4!`}>{isPlot ? "Plot price" : "Price"}</p>

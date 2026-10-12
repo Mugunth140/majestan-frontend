@@ -22,6 +22,7 @@ import {
   getLandPricePerUnit,
   getPlotSpecs,
 } from "@/lib/property-sections";
+import { capFirst, formatAddressLines, getPincode, getSublocation, type LocationRecord } from "@/lib/location-display";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
 
 type PropertyInfoSidebarProps = {
@@ -54,32 +55,19 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
     property.propertyType === "individual_portion";
   const isSale = !property.status.toLowerCase().includes("rent");
 
-  const locData = property.locations?.[0]?.localityData;
-  const locRow = property.locations?.[0] as unknown as
-    | { address?: string | null; landmark?: string | null; pincode?: string | null }
-    | undefined;
-  const fullAddress = (
-    locRow?.address ||
-    locRow?.landmark ||
-    (locData as any)?.address ||
-    ""
+  const locRow = property.locations?.[0] as LocationRecord | undefined;
+  const locData = locRow?.localityData as LocationRecord | undefined;
+  const fullAddress = String(
+    locRow?.address || locRow?.landmark || locData?.address || "",
   ).trim();
-  const rawSub =
-    (property as any).sublocation ||
-    (property as any).locality ||
-    (locData as any)?.subLocation ||
-    (locData as any)?.locality ||
-    "";
-  const capFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  const rawSub = (property as any).sublocation || (property as any).locality || getSublocation(locRow);
   const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
-  const pincode = (
-    (locRow as any)?.pincode ||
-    (locData as any)?.pincode ||
-    (locData as any)?.postalCode ||
-    (locData as any)?.postal_code ||
-    ""
-  ).toString().trim();
-  const locationLine2 = [subLocation, property.city, pincode].filter(Boolean).join(", ");
+  const pincode = getPincode(locRow);
+  const locationLines = formatAddressLines(fullAddress, {
+    sublocation: subLocation,
+    city: property.city,
+    pincode,
+  });
 
   const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;
   const priceNum = parseFloat(property.price);
@@ -169,16 +157,18 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           </h1>
         </div>
 
-        {(fullAddress || locationLine2) ? (
+        {locationLines.length > 0 ? (
           <div className="mt-2! flex! items-start! gap-2! text-[13px]! font-manrope! text-gray-500! leading-relaxed!">
             <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
             <span className="min-w-0!">
-              {fullAddress ? (
-                <span className="block! text-gray-700!">{fullAddress}</span>
-              ) : null}
-              {locationLine2 ? (
-                <span className="block!">{locationLine2}</span>
-              ) : null}
+              {locationLines.map((line, index) => (
+                <span
+                  className={`block!${index === 0 && locationLines.length > 1 ? " text-gray-700!" : ""}`}
+                  key={`${line}-${index}`}
+                >
+                  {line}
+                </span>
+              ))}
             </span>
           </div>
         ) : null}

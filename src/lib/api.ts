@@ -1,3 +1,5 @@
+import { getSublocation, type LocationRecord } from "./location-display";
+
 export type Sublocation = {
   id: number;
   sublocation: string;
@@ -198,6 +200,7 @@ export type PropertySearchItem = {
   propertyType: string;
   legacyPropertyType: string;
   propertyname?: string;
+  city?: string;
   sublocation?: string;
   address?: string;
   posttype?: string;
@@ -323,7 +326,14 @@ export async function searchProperties(
       return {
         ...item,
         propertyname: item.title,
-        sublocation: (locations[0]?.name || locations[0]?.address || item.city || "").split(",")[0].trim(),
+        // The address is a street address, not a locality. Prefer an explicit
+        // locality field and fall back to the city rather than showing the
+        // full address in the listing card.
+        sublocation:
+          getSublocation(locations[0] as LocationRecord) ||
+          locations[0]?.name ||
+          item.city ||
+          "",
         address: item.city ? `${item.city}, ${item.state || ''}`.replace(/,\s*$/, '') : '',
         posttype: item.listingType || (item.status === 'rented' || item.status?.toLowerCase().includes('rent') ? 'Rent' : 'Sell'),
         expectedsaleprice: item.price,

@@ -44,6 +44,7 @@ import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSide
 import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
+import { capFirst, getSublocation, type LocationRecord } from "@/lib/location-display";
 
 type PropertyDetailsViewProps = {
   property: SeoProperty;
@@ -78,17 +79,11 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     : "for-sale";
   const isSale = listingType === "for-sale";
 
-  const locData = property.locations?.[0]?.localityData;
-  const locRow = property.locations?.[0] as unknown as
-    | { address?: string | null; landmark?: string | null }
-    | undefined;
+  const locRow = property.locations?.[0] as LocationRecord | undefined;
   const rawSub =
     (property as any).sublocation ||
     (property as any).locality ||
-    (locData as any)?.subLocation ||
-    (locData as any)?.locality ||
-    "";
-  const capFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+    getSublocation(locRow);
   const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
 
   const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;

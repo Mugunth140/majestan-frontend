@@ -24,6 +24,7 @@ import {
 } from "@/lib/seo-urls";
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
 import type { ListingAdapter } from "./listing-adapter";
+import { formatLocationLine } from "@/lib/location-display";
 
 const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
   apartment:          "ap",
@@ -281,16 +282,12 @@ function isReraVerified(item: PropertySearchItem): boolean {
   return t !== "" && t !== "not applicable" && t !== "n/a" && t !== "na" && t !== "none" && t !== "-";
 }
 
-function capFirst(s: string): string {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
-
-function getLocationLabel(item: PropertySearchItem): string {
-  const sub = capFirst((item.sublocation || "").trim());
-  const city = ((item as any).city || "").trim();
-  if (sub && city && sub.toLowerCase() !== city.toLowerCase()) return `${sub}, ${city}`;
-  return sub || city || "";
-}
+  function getLocationLabel(item: PropertySearchItem): string {
+    return formatLocationLine({
+      sublocation: item.sublocation,
+      city: item.city,
+    });
+  }
 
 function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string | null {
   if (priceDisplay.includes("-")) return null;
@@ -479,7 +476,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     title: item.propertyname ?? "Property",
     propertyType: item.propertyType,
     listingType: item.posttype ?? "",
-    city: ((item as any).city as string | undefined) ?? item.sublocation ?? "",
+    city: item.city ?? item.sublocation ?? "",
   };
 
   // Photo with a cached per-type placeholder underneath: instant meaningful

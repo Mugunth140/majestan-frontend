@@ -12,6 +12,7 @@ import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
+import { formatLocationLine } from "@/lib/location-display";
 
 function trimNum(n: number): string {
   return String(parseFloat(n.toFixed(2)));
@@ -244,12 +245,10 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
   const reraVerified = isReraVerified(item.reraNumber);
 
-  const locationLabel = (() => {
-    const sub = (item.sublocation || "").trim();
-    const cityName = (item.city || "").trim();
-    if (sub && cityName && sub.toLowerCase() !== cityName.toLowerCase()) return `${sub}, ${cityName}`;
-    return sub || cityName || "";
-  })();
+  const locationLabel = formatLocationLine({
+    sublocation: item.sublocation,
+    city: item.city,
+  });
 
   const specCells: { label: string; value: React.ReactNode }[] = [];
   const isPlot = item.projectType === "plot";

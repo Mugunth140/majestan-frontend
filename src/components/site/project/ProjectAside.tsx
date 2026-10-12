@@ -1,8 +1,9 @@
 import Image from "next/image";
-import { ShieldCheck } from "lucide-react";
+import { Coins, Download, Info, MapPin, ShieldCheck } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { priceRangeLabel, rateFact } from "@/lib/project-overview";
 import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryActions";
+import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LABEL } from "@/components/site/project/project-ui";
 
 const ASIDE_CARD =
@@ -19,7 +20,23 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
 
   return (
     <div className={ASIDE_CARD}>
-      <p className={LABEL}>{isPlot ? "Plot price" : "Price"}</p>
+      <div className="flex! items-start! justify-between! gap-3!">
+        <h2 className="min-w-0! text-xl! font-semibold! text-gray-900! tracking-tight! text-balance!">
+          {project.name}
+        </h2>
+        <WishlistButton
+          propertyId={project.id}
+          propertyType="project"
+          className="mt-0.5!"
+        />
+      </div>
+      {[project.sublocation, project.city].filter(Boolean).length > 0 && (
+        <p className="mt-1.5! flex! items-center! gap-1.5! text-sm! text-gray-500!">
+          <MapPin className="w-4! h-4! shrink-0!" aria-hidden="true" />
+          {[project.sublocation, project.city].filter(Boolean).join(", ")}
+        </p>
+      )}
+      <p className={`${LABEL} mt-4!`}>{isPlot ? "Plot price" : "Price"}</p>
       <p className="mt-1! text-2xl! font-semibold! text-gray-900! tracking-tight! tabular-nums!">
         {priceRangeLabel(project)}
       </p>
@@ -37,6 +54,19 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
 
       <div className="mt-6!">
         <ProjectEnquiryActions project={project} />
+        {project.brochureUrl && (
+          <a
+            href={project.brochureUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+            title={project.brochureName ?? undefined}
+            className="mt-2! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-white! px-4! py-3! text-base! font-semibold! text-[#27427f]! ring-1! ring-[#27427f]/25! cursor-pointer! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#27427f]/5! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+          >
+            <Download className="w-4! h-4!" aria-hidden="true" />
+            Download brochure
+          </a>
+        )}
       </div>
 
       {project.reraNumber && (
@@ -46,6 +76,19 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
           <span className="sr-only">, registration number {project.reraNumber}</span>
         </p>
       )}
+
+      <div className="mt-6! pt-5! border-t! border-gray-200! flex! flex-col! items-center! gap-1.5! text-center!">
+        <p className="flex! items-center! gap-1.5! text-sm! text-gray-500!">
+          <Coins className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
+          Zero brokerage on this project
+        </p>
+        {project.projectCode && (
+          <p className="flex! items-center! gap-1.5! text-sm! text-gray-500! tabular-nums!">
+            <Info className="w-4! h-4! shrink-0!" aria-hidden="true" />
+            ID: {project.projectCode}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

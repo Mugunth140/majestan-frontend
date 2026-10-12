@@ -53,22 +53,24 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
 /** Who is selling it. Majestan is the listing agent on every project page. */
 function ListedByCard() {
   return (
-    <div className={ASIDE_CARD}>
-      <p className={LABEL}>Listed by</p>
-      <div className="mt-3! flex! items-center! gap-3!">
-        <Image
-          src="/assets/images/logo/fav.png"
-          alt=""
-          width={40}
-          height={40}
-          className="w-10! h-10! object-contain! shrink-0!"
-        />
-        <p className="text-base! font-semibold! text-gray-900!">Majestan Realty</p>
+    <div className={`${ASIDE_CARD} flex! items-center! gap-4!`}>
+      <Image
+        src="/assets/images/logo/fav.png"
+        alt="Majestan Realty"
+        width={48}
+        height={48}
+        className="w-12! h-12! object-contain! shrink-0!"
+      />
+      <div className="min-w-0!">
+        <p className={LABEL}>Listed by</p>
+        <p className="mt-0.5! text-base! font-semibold! text-gray-900!">
+          Majestan Realty
+        </p>
+        <p className="mt-1! flex! items-center! gap-1.5! text-sm! text-gray-500!">
+          <ShieldCheck className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
+          Verified
+        </p>
       </div>
-      <p className="mt-3! flex! items-center! gap-1.5! text-sm! text-gray-600!">
-        <ShieldCheck className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
-        Verified
-      </p>
     </div>
   );
 }

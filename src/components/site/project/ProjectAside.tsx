@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Coins, Download, Info, MapPin, ShieldCheck } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { priceRangeLabel, rateFact } from "@/lib/project-overview";
+import { emi } from "@/lib/emi";
 import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryActions";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LABEL } from "@/components/site/project/project-ui";
@@ -15,9 +16,12 @@ const ASIDE_CARD =
  * The brochure lives in the title row instead, beside the thing it describes.
  */
 function EnquiryCard({ project }: { project: ProjectDetail }) {
-  const isPlot = project.projectType === "plot";
   const rate = rateFact(project);
-  const builderName = project.builder?.name || project.builderName;
+  // Same basis as the listing card: lowest starting rate, 20 years, range floor.
+  const emiStarts =
+    project.ranges.minPrice != null && project.ranges.minPrice > 0
+      ? emi(project.ranges.minPrice, 7.25, 20)
+      : null;
   const locationLines = formatAddressLines(project.address, {
     sublocation: project.sublocation,
     city: project.city,
@@ -46,21 +50,27 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
           </span>
         </p>
       )}
-      <p className={`${LABEL} mt-4!`}>{isPlot ? "Plot price" : "Price"}</p>
-      <p className="mt-1! text-2xl! font-semibold! text-gray-900! tracking-tight! tabular-nums!">
-        {priceRangeLabel(project)}
-      </p>
-      {rate && (
-        <p className="mt-1! text-sm! text-gray-500! tabular-nums!">
-          {rate.value} {rate.label.replace("Rate ", "")}
-          {rate.note ? ` ${rate.note}` : ""}
-        </p>
-      )}
-      {builderName && (
-        <p className="mt-3! text-sm! text-gray-600!">
-          By <span className="font-medium! text-gray-900!">{builderName}</span>
-        </p>
-      )}
+      <div className="mt-4! flex! items-end! justify-between! gap-4! leading-none!">
+        <div className="flex! flex-col! gap-1! min-w-0!">
+          <p className="text-2xl! font-semibold! text-gray-900! tracking-tight! tabular-nums!">
+            {priceRangeLabel(project)}
+          </p>
+          {rate && (
+            <p className="text-sm! text-gray-500! tabular-nums!">
+              {rate.value} {rate.label.replace("Rate ", "")}
+              {rate.note ? ` ${rate.note}` : ""}
+            </p>
+          )}
+        </div>
+        {emiStarts ? (
+          <div className="flex! flex-col! gap-1! shrink-0! text-right!">
+            <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
+            <span className="text-[15px]! font-semibold! text-gray-800! tabular-nums!">
+              ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
+            </span>
+          </div>
+        ) : null}
+      </div>
 
       <div className="mt-6!">
         <ProjectEnquiryActions project={project} />

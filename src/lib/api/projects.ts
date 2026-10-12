@@ -8,7 +8,7 @@ export type ProjectUnit = {
   bedrooms: number | null;
   bathrooms: number | null;
   balconies: number | null;
-  floorNo?: number | null;
+  floorNo?: string | number | null;
   totalFloors?: number | null;
   carpetAreaSqft: string | null;
   builtupAreaSqft: string | null;

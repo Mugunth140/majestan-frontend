@@ -51,12 +51,17 @@ function unitName(unit: ProjectUnit, index: number): string {
 
 /** "U1 · 2 BHK · Floor 12 of 15 · North facing", without repeating the name. */
 function unitMeta(unit: ProjectUnit, name: string, group: ConfigurationGroup): string {
+  const floorText = (() => {
+    if (unit.floorNo == null || String(unit.floorNo).trim() === "") return null;
+    const str = String(unit.floorNo).trim();
+    const prefix = str.includes(",") ? "Floors" : "Floor";
+    return `${prefix} ${str}${unit.totalFloors ? ` of ${unit.totalFloors}` : ""}`;
+  })();
+
   return [
     unit.unitCode && unit.unitCode !== name ? unit.unitCode : null,
     group.label,
-    unit.floorNo != null
-      ? `Floor ${unit.floorNo}${unit.totalFloors ? ` of ${unit.totalFloors}` : ""}`
-      : null,
+    floorText,
     unit.facing ? `${titleCase(unit.facing)} facing` : null,
   ]
     .filter(Boolean)

@@ -103,12 +103,14 @@ export function unitSpecGroups(unit: ProjectUnit, project: ProjectDetail): SpecG
       !!room?.name && room.name !== "Plot" && !!room.dimensions,
   );
   const items = unitFurnishings(unit);
-  const floor =
-    unit.floorNo != null
-      ? unit.totalFloors
-        ? `${unit.floorNo} of ${unit.totalFloors}`
-        : `${unit.floorNo}`
-      : null;
+  const floor = (() => {
+    if (unit.floorNo == null || String(unit.floorNo).trim() === "") return null;
+    const str = String(unit.floorNo).trim();
+    if (unit.totalFloors) {
+      return `${str} of ${unit.totalFloors}`;
+    }
+    return str;
+  })();
   const parkingType = unit.parkingType ? titleCase(String(unit.parkingType)) : null;
   const furnished = unit.furnishedStatus ? titleCase(unit.furnishedStatus) : null;
 

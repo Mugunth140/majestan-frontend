@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BedDouble,
   Building2,
@@ -9,6 +11,7 @@ import {
   LayoutGrid,
   Sofa,
 } from "lucide-react";
+import { useState } from "react";
 import { formatINR } from "@/lib/api/projects";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
@@ -26,7 +29,7 @@ import { unitSpecGroups, type SpecGroup, type SpecGroupKey } from "@/lib/unit-sp
 import { Card, EmptyState, LABEL } from "@/components/site/project/project-ui";
 import { RequestButton } from "@/components/site/project/RequestButton";
 import { FloorPlanLightbox } from "@/components/site/project/FloorPlanLightbox";
-import { ConfigurationTiles } from "@/components/site/project/overview/ConfigurationSummary";
+import { CompactSummaryBody } from "@/components/site/project/configuration-parts";
 import { StatusChip } from "@/components/site/project/configuration-parts";
 
 /**
@@ -284,17 +287,36 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
 
   const groups = groupUnitsByConfiguration(project);
   const summaries = new Map(summarizeConfigurations(project).map((s) => [s.key, s]));
+  const [activeConfigKey, setActiveConfigKey] = useState(groups[0]?.key ?? "");
 
   return (
     <>
-      {/* The jump cards stand on their own, without a wrapping card. The
-          heading is for screen readers; the visible cards carry the names. */}
-      <nav aria-labelledby="floor-plan-jumps-heading">
-        <h2 id="floor-plan-jumps-heading" className="sr-only">
-          Configurations
-        </h2>
-        <ConfigurationTiles project={project} hrefFor={(key) => `#${key}`} compact />
-      </nav>
+      {/* Config tabs: one card per configuration. The heading is visible;
+          the tablist carries the names. */}
+      <h2 className="text-xl! md:text-2xl! font-semibold! text-gray-900!">
+        {getFloorPlanLabel(project.projectType)} & Configurations
+      </h2>
+      <div role="tablist" aria-label="Configurations" className="mt-4! grid! grid-cols-2! sm:grid-cols-3! gap-3!">
+        {summarizeConfigurations(project).map((summary) => {
+          const selected = summary.key === activeConfigKey;
+          return (
+            <button
+              key={summary.key}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              onClick={() => setActiveConfigKey(summary.key)}
+              className={`text-left! rounded-xl! border! overflow-hidden! bg-white! transition-all! duration-150! ease-out-quint! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2! ${
+                selected
+                  ? "border-[#27427f]! ring-2! ring-[#27427f]/30! shadow-sm!"
+                  : "border-[#d3ddf3]! hover:border-[#27427f]/40! hover:shadow-sm!"
+              }`}
+            >
+              <CompactSummaryBody summary={summary} />
+            </button>
+          );
+        })}
+      </div>
 
       {groups.map((group) => {
         const summary = summaries.get(group.key);

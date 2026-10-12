@@ -102,8 +102,12 @@ function getConditionBadge(possessionStatus: string | null | undefined): string 
 export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const router = useRouter();
   const detailPath = `/${item.canonicalSlug}`;
-  const photosPath = `${detailPath}/photos`;
   const placeholderUrl = getPlaceholderImage({ projectType: item.projectType });
+
+  const navigateToDetail = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    router.push(detailPath);
+  };
 
   const projectSections = [
     { hash: "overview", label: "Overview", icon: <LayoutDashboard className="w-3.5! h-3.5!" /> },
@@ -290,15 +294,22 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
       {/* Image — full-width square on mobile/tablet; on desktop a fixed
           300px-wide column that stretches to the content height, so the card
           hugs the content with no leftover top/bottom whitespace. */}
-      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
-        <Link href={photosPath} aria-label={`View photos of ${item.name || "project"}`} className="absolute! inset-0!">
-          <ListingImage
-            src={showImg ? item.coverImageUrl : null}
-            placeholderSrc={placeholderUrl}
-            alt={item.name || "Project"}
-            className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
-          />
-        </Link>
+      <div
+        className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100! cursor-pointer!"
+        onClick={navigateToDetail}
+        role="link"
+        tabIndex={0}
+        aria-label={`View details of ${item.name || "project"}`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") navigateToDetail();
+        }}
+      >
+        <ListingImage
+          src={showImg ? item.coverImageUrl : null}
+          placeholderSrc={placeholderUrl}
+          alt={item.name || "Project"}
+          className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+        />
         {/* RERA verified badge — top-right over image */}
         {reraVerified && (
           <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/90! backdrop-blur-sm! text-[#1d9bf0]! text-[10px]! font-bold! px-2! py-1! rounded-lg! shadow-sm!">
@@ -335,11 +346,11 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
         {/* Title + share */}
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
-            <Link href={detailPath} onClick={(e) => e.stopPropagation()} className="no-underline!">
+            <div onClick={navigateToDetail} className="no-underline! cursor-pointer!">
               <h3 className="font-['Manrope',sans-serif]! text-[17px]! font-semibold! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
                 {item.name}
               </h3>
-            </Link>
+            </div>
             <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-600! min-w-0!">
               <MapPin className="w-3.5! h-3.5! text-gray-500! shrink-0!" />
               <span className="truncate!">{locationLabel}</span>
@@ -390,18 +401,25 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
-          {projectSections.map((s) => (
-            <Link
-              key={s.hash}
-              href={s.hash === "overview" ? detailPath : `${detailPath}/${s.hash}`}
-              className="flex! items-center! gap-1.5! text-[12px]! font-medium! text-gray-500! hover:text-[#27427f]! transition-colors! no-underline! group/link!"
-            >
-              <span className="text-gray-400! group-hover/link:text-[#27427f]! transition-colors!">
-                {s.icon}
-              </span>
-              {s.label}
-            </Link>
-          ))}
+          {projectSections.map((s) => {
+            const sectionHref = s.hash === "overview" ? detailPath : `${detailPath}/${s.hash}`;
+            return (
+              <button
+                key={s.hash}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(sectionHref);
+                }}
+                className="flex! items-center! gap-1.5! text-[12px]! font-medium! text-gray-500! hover:text-[#27427f]! transition-colors! no-underline! group/link! cursor-pointer! bg-transparent! border-none! p-0!"
+              >
+                <span className="text-gray-400! group-hover/link:text-[#27427f]! transition-colors!">
+                  {s.icon}
+                </span>
+                {s.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Actions */}
@@ -432,12 +450,13 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
               {downloadingBrochure ? "Downloading..." : "Brochure"}
             </button>
           ) : (
-            <Link
-              href={detailPath}
-              className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! no-underline!"
+            <button
+              type="button"
+              onClick={navigateToDetail}
+              className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! cursor-pointer!"
             >
               View Details
-            </Link>
+            </button>
           )}
         </div>
       </div>

@@ -167,7 +167,7 @@ describe("summarizeConfigurations", () => {
         units: [unit({ id: 1, price: "9000000" }), unit({ id: 2, price: "12000000" })],
       }),
     );
-    expect(summary.priceLabel).toBe("₹90 L – ₹1.2 Cr");
+    expect(summary.priceLabel).toBe("₹90 L – 1.2 Cr");
   });
 
   it("prices from available units only when any are available", () => {
@@ -192,7 +192,7 @@ describe("summarizeConfigurations", () => {
         ],
       }),
     );
-    expect(summary.priceLabel).toBe("₹60 – 70 L");
+    expect(summary.priceLabel).toBe("₹60 L – 70 L");
     expect(summary.availableCount).toBe(0);
   });
 

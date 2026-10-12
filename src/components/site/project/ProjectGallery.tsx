@@ -15,33 +15,6 @@ import type { ProjectDetail } from "@/lib/api/projects";
  * section nav, so repeating any of it over the image only made it busier. The arrows and the counter
  * remain for the cases where there is more than one photograph to step through.
  */
-/**
- * Fills the banner either side of the 16:9 photo with a soft, blurred copy of
- * the same image, so the frame reads as part of one banner rather than a
- * picture on grey. Decorative and hidden from assistive tech. A failed load
- * (a missing storage object, say) falls back to the type placeholder instead
- * of a broken-image icon blown up to the banner's width.
- */
-function Backdrop({ src, fallback }: { src: string | null; fallback: string }) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const url = src && src !== failedSrc ? src : fallback;
-  return (
-    <div aria-hidden="true" className="hidden! sm:block! absolute! inset-0!">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={url}
-        alt=""
-        decoding="async"
-        onError={() => {
-          if (src) setFailedSrc(src);
-        }}
-        className="w-full! h-full! object-cover! scale-110! blur-xl! opacity-70!"
-      />
-      <div className="absolute! inset-0! bg-gray-900/10!" />
-    </div>
-  );
-}
-
 export function ProjectGallery({ project }: { project: ProjectDetail }) {
   const images = [
     project.coverImageUrl,
@@ -75,35 +48,21 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
   return (
     <section
       aria-label={`${project.name} photos`}
-      /* Edge to edge, so no card chrome: rounded corners and a border only
-         make sense on something that sits inside the page column. */
-      className="@container bg-gray-100! overflow-hidden!"
+      /* In the page column, so it lines up with the title and the facts row
+         below it and carries the same corners as every card on the page. */
+      className="bg-gray-100! rounded-[20px]! overflow-hidden!"
     >
       <div
         role={count > 1 ? "group" : undefined}
         tabIndex={count > 1 ? 0 : undefined}
         onKeyDown={onKeyDown}
         aria-roledescription={count > 1 ? "carousel" : undefined}
-        /* A banner, not a poster: full width, sized so the title and the key
-           facts row still show on the first screen. 167px sits above it
-           (navbar, section tabs, breadcrumb row) and 199px below it to the
-           facts row's bottom edge; 390px leaves 24px of air under that row.
-           Clamped to 70% of very tall screens and 280px on short ones, and
-           never taller than a full-width photo frame: 56.25cqw for 16:9 on
-           tablets, 42.857cqw for 21:9 on laptops and up (cqw is the banner's
-           own width; vw would include the scrollbar and overshoot by ~8px). Phones keep 4:5. */
-        className="relative! overflow-hidden! aspect-[4/5]! sm:aspect-auto! sm:h-[min(56.25cqw,max(280px,min(calc(100svh-390px),70svh)))]! lg:h-[min(42.857cqw,max(280px,min(calc(100svh-390px),70svh)))]! bg-gray-100! group/stage! outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-inset!"
+        /* 21:9 on laptops and up, 16:9 on tablets, 4:5 on phones, where a wide
+           band on a 375px screen is a sliver and the portrait mobile cover
+           crop would go unused. */
+        className="relative! overflow-hidden! aspect-[4/5]! sm:aspect-video! lg:aspect-[21/9]! bg-gray-100! group/stage! outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-inset!"
       >
-        <Backdrop
-          src={count > 0 ? images[active] : null}
-          fallback={placeholder}
-        />
-
-        {/* The photo keeps a fixed cinematic ratio — 21:9 on laptops and up,
-            16:9 on tablets — rather than whatever shape the banner happens to
-            be, which on a wide screen was a ~2.8:1 strip that cut off the top
-            floors of every tower. Phones fill the 4:5 frame. */}
-        <div className="relative! w-full! h-full! sm:w-auto! sm:max-w-full! sm:aspect-video! lg:aspect-[21/9]! sm:mx-auto! sm:shadow-[0_12px_48px_rgba(16,24,40,0.28)]!">
+        <div className="absolute! inset-0!">
           {count > 0 ? (
             images.map((img, index) => (
               <div

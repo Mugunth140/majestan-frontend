@@ -20,10 +20,10 @@ import { FaqOverview } from "@/components/site/project/overview/FaqOverview";
 /**
  * The project overview: the main page for a project.
  *
- * Three bands. The cover runs edge to edge, outside the page column — the one
- * element allowed to. Then, in the column, the title with the brochure and the
- * numbers a buyer decides on, full width. Then sections down the left with the
- * enquiry card beside them, starting level with About.
+ * Three bands, all in the page column. The cover and, under it, the title with
+ * the brochure and the numbers a buyer decides on run the column's full width.
+ * Then sections down the left with the enquiry card beside them, starting
+ * level with About.
  *
  * Every section always renders. Each topic shows its important details here
  * and hands the rest to its sub-page; when the CRM has nothing for a topic,
@@ -35,48 +35,46 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
   const facts = buildFacts(project);
 
   return (
-    <div className="flex! flex-col! gap-6!">
+    <div className={`${PAGE_CONTAINER} w-full! flex! flex-col! gap-6!`}>
       <ProjectGallery project={project} />
 
-      <div className={`${PAGE_CONTAINER} w-full! flex! flex-col! gap-6!`}>
-        <ProjectTitleRow project={project} heading={heading} />
+      <ProjectTitleRow project={project} heading={heading} />
 
-        {/* The decision band. Each of these numbers appears exactly once on the
+      {/* The decision band. Each of these numbers appears exactly once on the
           page — the about section's spec sheet deliberately carries none.
           Two up on a phone, one divided row from sm. */}
-        <section
-          aria-label="Key facts"
-          className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden! grid! grid-cols-2! gap-x-6! gap-y-5! p-6! sm:flex! sm:gap-0! sm:p-0! sm:divide-x! sm:divide-gray-200!"
-        >
-          {facts.map((fact) => (
-            <div
-              key={fact.label}
-              className="min-w-0! sm:flex-1! sm:px-6! sm:py-4!"
-            >
-              <p className={LABEL}>{fact.label}</p>
-              <p className="mt-1! text-base! md:text-lg! font-semibold! text-gray-900! tabular-nums! break-words!">
-                {fact.value}
-              </p>
-              {fact.note && (
-                <p className="mt-1! text-xs! text-gray-500!">{fact.note}</p>
-              )}
-            </div>
-          ))}
-        </section>
+      <section
+        aria-label="Key facts"
+        className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden! grid! grid-cols-2! gap-x-6! gap-y-5! p-6! sm:flex! sm:gap-0! sm:p-0! sm:divide-x! sm:divide-gray-200!"
+      >
+        {facts.map((fact) => (
+          <div
+            key={fact.label}
+            className="min-w-0! sm:flex-1! sm:px-6! sm:py-4!"
+          >
+            <p className={LABEL}>{fact.label}</p>
+            <p className="mt-1! text-base! md:text-lg! font-semibold! text-gray-900! tabular-nums! break-words!">
+              {fact.value}
+            </p>
+            {fact.note && (
+              <p className="mt-1! text-xs! text-gray-500!">{fact.note}</p>
+            )}
+          </div>
+        ))}
+      </section>
 
-        <ProjectShell project={project}>
-          <AboutSection project={project} />
-          <ConfigurationSummary project={project} />
-          <FloorPlanPreview project={project} />
-          <SpecsHighlights project={project} />
-          <MediaPreview project={project} />
-          <LocationOverview project={project} />
-          <AmenitiesPreview project={project} />
-          <FurnishingSection project={project} />
-          <BuilderSection project={project} />
-          <FaqOverview project={project} />
-        </ProjectShell>
-      </div>
+      <ProjectShell project={project}>
+        <AboutSection project={project} />
+        <ConfigurationSummary project={project} />
+        <FloorPlanPreview project={project} />
+        <SpecsHighlights project={project} />
+        <MediaPreview project={project} />
+        <LocationOverview project={project} />
+        <AmenitiesPreview project={project} />
+        <FurnishingSection project={project} />
+        <BuilderSection project={project} />
+        <FaqOverview project={project} />
+      </ProjectShell>
     </div>
   );
 }

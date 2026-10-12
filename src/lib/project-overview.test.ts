@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildDetailRows,
+  possessionLabel,
   buildFacts,
   formatPossession,
   groupUnitsByConfiguration,
@@ -202,14 +203,14 @@ describe("buildDetailRows", () => {
 });
 
 describe("buildFacts", () => {
-  it("qualifies a price range with the number of units it spans", () => {
+  it("prices the range with no unit-count note", () => {
     const fixture = project({
       units: [unit({ id: 1 }), unit({ id: 2, price: "9000000" })],
       ranges: { ...project().ranges, minPrice: 6000000, maxPrice: 9000000 },
     });
     const price = buildFacts(fixture)[0];
-    expect(price.value).toBe("₹60 – 90 L");
-    expect(price.note).toBe("across 2 units");
+    expect(price.value).toBe("₹60 L – 90 L");
+    expect(price.note).toBeUndefined();
   });
 
   it("falls back to the possession status when no date is set", () => {
@@ -391,5 +392,29 @@ describe("fact rail", () => {
     expect(buildFacts(fixture).find((f) => f.label === "Built-up area")?.value).toBe(
       "1,200 – 1,800 sq.ft",
     );
+  });
+});
+
+describe("possession", () => {
+  it("names the three CRM states exactly", () => {
+    expect(possessionLabel("new_launch")).toBe("New Launch");
+    expect(possessionLabel("under_construction")).toBe("Under Construction");
+    expect(possessionLabel("ready_to_move")).toBe("Ready to Move");
+  });
+
+  it("shows only the status in the rail, never the date", () => {
+    const fact = buildFacts(project({ possessionDate: "2027-06-30" })).find(
+      (f) => f.label === "Possession",
+    );
+    expect(fact).toEqual({ label: "Possession", value: "Under Construction" });
+  });
+
+  it("moves the expected date into the details, except for ready stock", () => {
+    const building = buildDetailRows(project({ possessionDate: "2027-06-30" }));
+    expect(building.find((r) => r.label === "Possession date")?.value).toBe("Jun 2027");
+    const ready = buildDetailRows(
+      project({ possessionDate: "2026-10-30", possessionStatus: "ready_to_move" }),
+    );
+    expect(ready.find((r) => r.label === "Possession date")).toBeUndefined();
   });
 });

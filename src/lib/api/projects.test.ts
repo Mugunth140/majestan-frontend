@@ -30,13 +30,13 @@ describe("formatINR", () => {
 });
 
 describe("formatINRRange", () => {
-  it("writes a shared unit once", () => {
-    expect(formatINRRange(13000000, 14600000)).toBe("₹1.3 – 1.46 Cr");
-    expect(formatINRRange(6000000, 9000000)).toBe("₹60 – 90 L");
+  it("writes the unit on both ends and the rupee sign once", () => {
+    expect(formatINRRange(15000000, 22000000)).toBe("₹1.5 Cr – 2.2 Cr");
+    expect(formatINRRange(6000000, 9000000)).toBe("₹60 L – 90 L");
   });
 
-  it("keeps both units when they differ", () => {
-    expect(formatINRRange(9000000, 12000000)).toBe("₹90 L – ₹1.2 Cr");
+  it("keeps each end's own unit when they differ", () => {
+    expect(formatINRRange(9000000, 12000000)).toBe("₹90 L – 1.2 Cr");
   });
 
   it("collapses equal or one-sided ranges to a single price", () => {
@@ -46,7 +46,7 @@ describe("formatINRRange", () => {
   });
 
   it("orders reversed input", () => {
-    expect(formatINRRange(14600000, 13000000)).toBe("₹1.3 – 1.46 Cr");
+    expect(formatINRRange(14600000, 13000000)).toBe("₹1.3 Cr – 1.46 Cr");
   });
 
   it("falls back to price on request", () => {

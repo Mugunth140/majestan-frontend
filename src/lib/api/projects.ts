@@ -225,9 +225,10 @@ export function formatINR(value: string | number | null | undefined): string {
 }
 
 /**
- * A price range with the unit written once when both ends share it:
- * "₹1.3 – 1.46 Cr", "₹60 – 90 L". Mixed units keep both: "₹90 L – ₹1.2 Cr".
- * Equal ends, or a single known end, collapse to one formatted price.
+ * A price range with the unit on both ends and the rupee sign once:
+ * "₹1.5 Cr – 2.2 Cr", "₹90 L – 1.2 Cr". Writing the unit each side keeps
+ * the upper bound readable on its own, so "1.3 – 1.46" is never mistaken
+ * for lakhs. Equal ends, or a single known end, collapse to one price.
  */
 export function formatINRRange(
   min: string | number | null | undefined,
@@ -240,11 +241,5 @@ export function formatINRRange(
   if (!hasLo && !hasHi) return "Price on request";
   if (!hasLo || !hasHi || lo === hi) return formatINR(hasLo ? lo : hi);
   const [a, b] = lo < hi ? [lo, hi] : [hi, lo];
-  const left = formatINR(a);
-  const right = formatINR(b);
-  const unit = (text: string) => text.match(/ (Cr|L)$/)?.[1];
-  if (unit(left) && unit(left) === unit(right)) {
-    return `${left.replace(/ (Cr|L)$/, "")} – ${right.replace(/^₹/, "")}`;
-  }
-  return `${left} – ${right}`;
+  return `${formatINR(a)} – ${formatINR(b).replace(/^₹/, "")}`;
 }

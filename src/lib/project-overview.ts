@@ -41,6 +41,20 @@ export function formatPossession(value: string | null | undefined): string | nul
   return `${month} ${dt.getFullYear()}`;
 }
 
+/**
+ * The CRM has exactly three possession states. Mapped explicitly rather than
+ * title-cased from the enum, which produced "Ready To Move".
+ */
+const POSSESSION_LABEL: Record<string, string> = {
+  new_launch: "New Launch",
+  under_construction: "Under Construction",
+  ready_to_move: "Ready to Move",
+};
+
+export function possessionLabel(status: string): string {
+  return POSSESSION_LABEL[status] ?? titleCase(status);
+}
+
 export type PossessionTone = "ready" | "building" | "launch";
 
 export function possessionTone(status: string): PossessionTone {
@@ -170,16 +184,8 @@ export type Fact = {
  */
 export function buildFacts(project: ProjectDetail): Fact[] {
   const isPlot = project.projectType === "plot";
-  const possession = formatPossession(project.possessionDate);
-  const statusLabel = titleCase(project.possessionStatus);
-  const unitsOpen = project.units.filter((u) => u.status === "available").length;
-
   const facts: Fact[] = [
-    {
-      label: isPlot ? "Plot price" : "Price",
-      value: priceRangeLabel(project),
-      note: unitsOpen > 1 ? `across ${unitsOpen} units` : undefined,
-    },
+    { label: isPlot ? "Plot price" : "Price", value: priceRangeLabel(project) },
   ];
 
   if (isPlot) {
@@ -200,11 +206,9 @@ export function buildFacts(project: ProjectDetail): Fact[] {
     if (area) facts.push({ label: "Built-up area", value: area });
   }
 
-  facts.push(
-    possession
-      ? { label: "Possession", value: possession, note: statusLabel }
-      : { label: "Possession", value: statusLabel },
-  );
+  // The status only. The expected date, when there is one, is in the about
+  // section's details, so the rail stays one value per cell.
+  facts.push({ label: "Possession", value: possessionLabel(project.possessionStatus) });
 
   return facts;
 }
@@ -222,6 +226,11 @@ export function buildDetailRows(project: ProjectDetail): DetailRow[] {
     { label: "Project type", value: projectTypeLabel(project.projectType) },
   ];
 
+  // Ready-to-move stock has no date to wait for.
+  const possessionDate = formatPossession(project.possessionDate);
+  if (possessionDate && project.possessionStatus !== "ready_to_move") {
+    rows.push({ label: "Possession date", value: possessionDate });
+  }
   if (project.totalUnits) {
     rows.push({ label: "Total units", value: `${project.totalUnits}` });
   }

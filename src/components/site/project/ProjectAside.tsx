@@ -21,7 +21,7 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
   return (
     <div className={ASIDE_CARD}>
       <div className="flex! items-start! justify-between! gap-3!">
-        <h2 className="min-w-0! text-xl! font-semibold! text-gray-900! tracking-tight! text-balance!">
+        <h2 className="min-w-0! text-2xl! font-semibold! text-gray-900! tracking-tight! text-balance!">
           {project.name}
         </h2>
         <WishlistButton

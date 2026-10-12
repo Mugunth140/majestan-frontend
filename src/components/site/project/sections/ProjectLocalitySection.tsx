@@ -1,7 +1,6 @@
 import type { ProjectDetail } from "@/lib/api/projects";
 import { LocalityInteractiveMap } from "@/components/site/locality/LocalityInteractiveMap";
 import { getLocalityDescription } from "@/lib/api/localities";
-import { MapPin } from "lucide-react";
 import { BODY, Card, paragraphs } from "@/components/site/project/project-ui";
 import { projectCoordinates } from "@/lib/project-overview";
 import {
@@ -57,14 +56,6 @@ export async function ProjectLocalitySection({ project }: { project: ProjectDeta
 
       {place && (
         <Card title="On the Maps" id="map">
-          {/* With a pin the map centres on it; without one, the sublocation
-              the project is filed under is named instead. */}
-          {!coords && (
-            <p className="mt-4! flex! items-start! gap-2! text-base! text-gray-600!">
-              <MapPin className="w-5! h-5! shrink-0! mt-0.5! text-gray-500!" aria-hidden="true" />
-              <span>{place}</span>
-            </p>
-          )}
           <div className="mt-6! rounded-2xl! overflow-hidden! border! border-gray-200!">
             <LocalityInteractiveMap
               query={coords ? `${coords.lat},${coords.lon}` : place}

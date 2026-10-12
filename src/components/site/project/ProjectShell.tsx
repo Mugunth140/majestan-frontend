@@ -1,4 +1,4 @@
-import { Download, MapPin, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Download, MapPin } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { ProjectAside } from "@/components/site/project/ProjectAside";
 
@@ -64,7 +64,7 @@ export function ProjectTitleRow({
             rel="noopener noreferrer"
             download
             title={project.brochureName ?? undefined}
-            className="order-last! mt-2! justify-self-start! sm:order-none! sm:mt-0! sm:col-start-2! sm:row-start-1! sm:justify-self-end! inline-flex! items-center! gap-2! rounded-2xl! bg-white! px-4! py-2! text-sm! font-semibold! text-[#27427f]! ring-1! ring-[#27427f]/25! shadow-sm! no-underline! whitespace-nowrap! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#27427f]/5! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+            className="order-last! mt-2! justify-self-start! sm:order-none! sm:mt-0! sm:col-start-2! sm:row-start-1! sm:justify-self-end! inline-flex! items-center! gap-2! rounded-md! bg-white! px-4! py-2! text-sm! font-semibold! text-[#27427f]! ring-1! ring-[#27427f]/25! shadow-sm! no-underline! whitespace-nowrap! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#27427f]/5! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
           >
             <Download className="w-4! h-4!" aria-hidden="true" />
             Download brochure
@@ -86,8 +86,8 @@ export function ProjectTitleRow({
         {/* Top-aligned to the location's first line, not centred against a
             two-line address. */}
         <p className="sm:col-start-2! sm:row-start-2! sm:self-start! sm:justify-self-end! sm:mt-0.5! flex! items-center! gap-1.5! text-sm! text-gray-600!">
-          <ShieldCheck
-            className={`w-4! h-4! shrink-0! ${rera ? "text-emerald-600!" : "text-gray-400!"}`}
+          <BadgeCheck
+            className={`w-4! h-4! shrink-0! ${rera ? "text-blue-600!" : "text-gray-400!"}`}
             aria-hidden="true"
           />
           <span className="text-gray-500!">RERA No:</span>

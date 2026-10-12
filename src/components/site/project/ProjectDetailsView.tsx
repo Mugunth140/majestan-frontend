@@ -68,10 +68,10 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
         <ConfigurationSummary project={project} />
         <FloorPlanPreview project={project} />
         <SpecsHighlights project={project} />
-        <MediaPreview project={project} />
-        <LocationOverview project={project} />
         <AmenitiesPreview project={project} />
         <FurnishingSection project={project} />
+        <MediaPreview project={project} />
+        <LocationOverview project={project} />
         <BuilderSection project={project} />
         <FaqOverview project={project} />
       </ProjectShell>

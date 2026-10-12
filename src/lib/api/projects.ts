@@ -102,6 +102,8 @@ export type ProjectDetail = {
   mobileCoverImageUrl?: string | null;
   galleryImageUrls: string[] | null;
   videoUrls?: string[] | null;
+  /** Titled videos from the CRM; legacy link-only projects come back untitled. */
+  videos?: { title: string | null; url: string }[] | null;
   status: string;
   ranges: ProjectRanges;
   units: ProjectUnit[];

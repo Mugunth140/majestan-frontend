@@ -32,6 +32,8 @@ export type ConfigurationSummary = {
   areaSecondary: string | null;
   /** "₹1.3 – 1.46 Cr", or PRICE_ON_REQUEST when no unit is priced. */
   priceLabel: string;
+  /** "₹7,450 – 7,800 / sq.ft", "₹2,50,000 / cent", or null when nothing is priced. */
+  rateLabel: string | null;
   /** Units still on sale in this configuration. Zero means sold out. */
   availableCount: number;
 };
@@ -71,6 +73,24 @@ function rangeText(values: number[], format: (n: number) => string): string {
   const low = format(Math.min(...values));
   const high = format(Math.max(...values));
   return low === high ? low : `${low} – ${high}`;
+}
+
+/**
+ * Price per unit of area across the same units the price is quoted from,
+ * per sq.ft for flats and villas and per cent for plots. A unit missing
+ * either number is left out rather than dragging the range to zero.
+ */
+function rateOf(units: ProjectUnit[], projectType: string): string | null {
+  const isPlot = projectType === "plot";
+  const rates = units
+    .map((u) => {
+      const price = positive(u.price);
+      const area = isPlot ? positive(u.plotAreaCents) : unitAreaSqft(u, projectType);
+      return price > 0 && area > 0 ? price / area : 0;
+    })
+    .filter((n) => n > 0);
+  if (rates.length === 0) return null;
+  return `₹${rangeText(rates, formatSqft)} / ${isPlot ? "cent" : "sq.ft"}`;
 }
 
 const NO_AREA = { areaLabel: null, areaValue: null, areaSecondary: null } as const;
@@ -126,6 +146,7 @@ export function summarizeConfigurations(project: ProjectDetail): ConfigurationSu
         prices.length > 0
           ? formatINRRange(Math.min(...prices), Math.max(...prices))
           : PRICE_ON_REQUEST,
+      rateLabel: rateOf(sellable, project.projectType),
       availableCount: open.length,
     };
   });

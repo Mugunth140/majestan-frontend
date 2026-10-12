@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
-import { getYouTubeVideoId } from "@/lib/youtube";
+import { projectVideos } from "@/lib/youtube";
+import { VideoTile } from "@/components/site/project/overview/VideoTile";
 import { BODY, Card } from "@/components/site/project/project-ui";
-import { YouTubeFacade } from "@/components/site/project/overview/YouTubeFacade";
 
 /**
  * Full photo and video page. The overview only previews these, so everything
@@ -20,13 +20,7 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const videoIds = [
-    ...new Set(
-      (project.videoUrls ?? [])
-        .map((url) => getYouTubeVideoId(url))
-        .filter((id): id is string => Boolean(id)),
-    ),
-  ];
+  const videos = projectVideos(project);
 
   // Cover first, then the gallery, so the lightbox order matches the grid.
   const galleryImages = (project.galleryImageUrls ?? []).filter(Boolean) as string[];
@@ -52,7 +46,7 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
     };
   }, [lightboxOpen, count]);
 
-  if (count === 0 && videoIds.length === 0) {
+  if (count === 0 && videos.length === 0) {
     return (
       <Card title="Photos and videos">
         <p className={`${BODY} mt-6!`}>Photos for this project have not been published yet.</p>
@@ -67,14 +61,14 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
 
   return (
     <>
-      {videoIds.length > 0 && (
+      {videos.length > 0 && (
         <Card title="Videos" id="videos">
-          <div className="grid! grid-cols-1! md:grid-cols-2! gap-4! mt-6!">
-            {videoIds.map((id, i) => (
-              <YouTubeFacade
-                key={id}
-                videoId={id}
-                title={`${project.name} video${videoIds.length > 1 ? ` ${i + 1}` : ""}`}
+          <div className="grid! grid-cols-1! md:grid-cols-2! gap-x-4! gap-y-6! mt-6!">
+            {videos.map((video, i) => (
+              <VideoTile
+                key={video.id}
+                video={video}
+                fallbackTitle={`${project.name} video${videos.length > 1 ? ` ${i + 1}` : ""}`}
               />
             ))}
           </div>

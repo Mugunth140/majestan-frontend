@@ -5,8 +5,8 @@ import { Card, EmptyState, TEXT_LINK, ViewAllLink } from "@/components/site/proj
 import { RequestButton } from "@/components/site/project/RequestButton";
 import { ListingImage } from "@/components/site/listing/ListingImage";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
-import { getYouTubeVideoId } from "@/lib/youtube";
-import { YouTubeFacade } from "@/components/site/project/overview/YouTubeFacade";
+import { projectVideos } from "@/lib/youtube";
+import { VideoTile } from "@/components/site/project/overview/VideoTile";
 
 /** Tiles on a desktop row. Phones show three, so the fourth is hidden below sm. */
 const TILES = 4;
@@ -26,16 +26,10 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 export function MediaPreview({ project }: { project: ProjectDetail }) {
   const slug = project.canonicalSlug;
 
-  const videoIds = [
-    ...new Set(
-      (project.videoUrls ?? [])
-        .map((url) => getYouTubeVideoId(url))
-        .filter((id): id is string => Boolean(id)),
-    ),
-  ];
+  const videos = projectVideos(project);
   const gallery = (project.galleryImageUrls ?? []).filter(Boolean) as string[];
 
-  if (videoIds.length === 0 && gallery.length === 0) {
+  if (videos.length === 0 && gallery.length === 0) {
     const hasCover = Boolean(project.coverImageUrl);
     return (
       <Card
@@ -62,7 +56,11 @@ export function MediaPreview({ project }: { project: ProjectDetail }) {
 
   const photos = [project.coverImageUrl, ...gallery].filter(Boolean) as string[];
   const placeholder = getPlaceholderImage({ projectType: project.projectType });
-  const [leadVideo, ...otherVideos] = videoIds;
+  const [leadVideo, ...otherVideos] = videos;
+  // The lead plays large; up to two more sit beneath it, so a project with a
+  // walkthrough and a couple of amenity clips shows all three here.
+  const shownOthers = otherVideos.slice(0, 2);
+  const hiddenVideos = otherVideos.length - shownOthers.length;
   const showPhotoRow = gallery.length > 0;
   const shown = photos.slice(0, TILES);
 
@@ -73,21 +71,32 @@ export function MediaPreview({ project }: { project: ProjectDetail }) {
       action={<ViewAllLink href={`/${slug}/photos`}>View all</ViewAllLink>}
     >
       {leadVideo && (
-        <div className="mt-6!">
-          <YouTubeFacade videoId={leadVideo} title={`${project.name} video`} />
-          {otherVideos.length > 0 && (
+        <div className="mt-6! flex! flex-col! gap-6!">
+          <VideoTile video={leadVideo} fallbackTitle={`${project.name} video`} size="lead" />
+          {shownOthers.length > 0 && (
+            <div className="grid! grid-cols-1! sm:grid-cols-2! gap-x-4! gap-y-6!">
+              {shownOthers.map((video, index) => (
+                <VideoTile
+                  key={video.id}
+                  video={video}
+                  fallbackTitle={`${project.name} video ${index + 2}`}
+                />
+              ))}
+            </div>
+          )}
+          {hiddenVideos > 0 && (
             <Link
               href={`/${slug}/photos#videos`}
-              className={`mt-2! inline-block! text-sm! font-medium! ${TEXT_LINK}`}
+              className={`self-start! text-sm! font-medium! ${TEXT_LINK}`}
             >
-              +{otherVideos.length} more {plural(otherVideos.length, "video", "videos")}
+              +{hiddenVideos} more {plural(hiddenVideos, "video", "videos")}
             </Link>
           )}
         </div>
       )}
 
       {showPhotoRow && (
-        <div className="grid! grid-cols-3! sm:grid-cols-4! gap-3! mt-4!">
+        <div className="grid! grid-cols-3! sm:grid-cols-4! gap-3! mt-6!">
           {shown.map((src, i) => (
             <Link
               key={`${src}-${i}`}

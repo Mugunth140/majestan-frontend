@@ -55,7 +55,7 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
     <Card
       title={title}
       id="floor-plans"
-      action={<ViewAllLink href={`/${slug}/floor-plans`}>View all</ViewAllLink>}
+      action={<ViewAllLink href={`/${slug}/floor-plans`}>View more</ViewAllLink>}
     >
       <div className="grid! grid-cols-1! sm:grid-cols-2! gap-4! mt-6!">
         {previews.map(({ group, unit, planUrl }) => {

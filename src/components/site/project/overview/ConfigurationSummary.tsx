@@ -1,28 +1,62 @@
 import Link from "next/link";
 import { LayoutGrid } from "lucide-react";
-import { RequestButton } from "@/components/site/project/RequestButton";
 import type { ProjectDetail } from "@/lib/api/projects";
-import {
-  PRICE_ON_REQUEST,
-  summarizeConfigurations,
-} from "@/lib/project-config-summary";
-import {
-  Card,
-  EmptyState,
-  LABEL,
-  ViewAllLink,
-} from "@/components/site/project/project-ui";
+import { summarizeConfigurations } from "@/lib/project-config-summary";
+import { Card, EmptyState, ViewAllLink } from "@/components/site/project/project-ui";
+import { RequestButton } from "@/components/site/project/RequestButton";
+import { CompactSummaryBody, SummaryBody } from "@/components/site/project/configuration-parts";
 
 /**
- * Shared by the floor plan previews, so both kinds of tile lift and ring the
- * same way on hover and focus.
+ * Shared by the configuration cards and the floor plan previews, so both
+ * kinds of tile lift and ring the same way on hover and focus.
  */
-export const CONFIGURATION_TILE =
-  "block! rounded-2xl! border! border-gray-200! overflow-hidden! bg-white! no-underline! transition-[border-color,box-shadow,transform]! duration-150! ease-out-quint! hover:border-[#27427f]/40! hover:shadow-sm! active:scale-[0.99]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!";
+const TILE_INTERACTION =
+  "block! border! overflow-hidden! bg-white! no-underline! transition-[border-color,box-shadow,transform]! duration-150! ease-out-quint! hover:border-[#27427f]/40! hover:shadow-sm! active:scale-[0.99]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!";
 
+export const CONFIGURATION_TILE = `${TILE_INTERACTION} rounded-2xl! border-gray-200!`;
+/* The floor plans page's jump cards: tighter corners, a blue-tinted edge to
+   match their tinted header. */
+const COMPACT_TILE = `${TILE_INTERACTION} rounded-xl! border-[#d3ddf3]!`;
+
+/**
+ * One card per configuration: type, area, price and availability. Each card
+ * opens that configuration's detail on the floor plans page; `hrefFor` lets
+ * that page reuse the cards as in-page jump links, in their compact form.
+ */
+export function ConfigurationTiles({
+  project,
+  hrefFor,
+  compact = false,
+}: {
+  project: ProjectDetail;
+  hrefFor: (key: string) => string;
+  compact?: boolean;
+}) {
+  return (
+    <ul
+      className={`grid! list-none! p-0! m-0! ${
+        compact
+          ? "grid-cols-2! sm:grid-cols-3! gap-3! mt-5!"
+          : "grid-cols-1! sm:grid-cols-2! gap-4! mt-6!"
+      }`}
+    >
+      {summarizeConfigurations(project).map((summary) => (
+        <li key={summary.key} className="min-w-0!">
+          <Link
+            href={hrefFor(summary.key)}
+            className={`${compact ? COMPACT_TILE : CONFIGURATION_TILE} h-full!`}
+          >
+            {compact ? <CompactSummaryBody summary={summary} /> : <SummaryBody summary={summary} />}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The overview's configuration section: the cards, and the way to the detail. */
 export function ConfigurationSummary({ project }: { project: ProjectDetail }) {
-  const summaries = summarizeConfigurations(project);
-  if (summaries.length === 0) {
+  if (project.units.length === 0) {
     return (
       <Card title="Configurations" id="configurations">
         <EmptyState
@@ -41,66 +75,16 @@ export function ConfigurationSummary({ project }: { project: ProjectDetail }) {
   }
 
   const slug = project.canonicalSlug;
-
   return (
     <Card
       title="Configurations"
       id="configurations"
-      action={<ViewAllLink href={`/${slug}/floor-plans`}>All details</ViewAllLink>}
+      action={<ViewAllLink href={`/${slug}/floor-plans`}>View more</ViewAllLink>}
     >
-      <div className="grid! grid-cols-1! sm:grid-cols-2! gap-4! mt-6!">
-        {summaries.map((summary) => {
-          const priced = summary.priceLabel !== PRICE_ON_REQUEST;
-          const available = summary.availableCount;
-          return (
-            <Link
-              key={summary.key}
-              href={`/${slug}/floor-plans#${summary.key}`}
-              className={CONFIGURATION_TILE}
-            >
-              <div className="bg-[#27427f]/5! px-5! py-3!">
-                <p className="text-base!">
-                  <span className="font-semibold! text-[#27427f]!">{summary.label}</span>
-                  <span className="font-normal! text-gray-700!"> {summary.typeLabel}</span>
-                </p>
-              </div>
-
-              <div className="px-5! py-4!">
-                {summary.areaLabel && (
-                  <>
-                    <p className={LABEL}>{summary.areaLabel}</p>
-                    <p className="text-sm! font-semibold! text-gray-900! tabular-nums! mt-1!">
-                      {summary.areaValue}
-                      {summary.areaSecondary && (
-                        <span className="font-normal! text-gray-500!">
-                          {" "}
-                          {summary.areaSecondary}
-                        </span>
-                      )}
-                    </p>
-                  </>
-                )}
-
-                {priced ? (
-                  <p className="text-xl! font-semibold! text-gray-900! tabular-nums! mt-4!">
-                    {summary.priceLabel}
-                  </p>
-                ) : (
-                  <p className="text-base! font-semibold! text-gray-900! mt-4!">
-                    {summary.priceLabel}
-                  </p>
-                )}
-
-                <p className="text-xs! text-gray-500! mt-1!">
-                  {available > 0
-                    ? `${available} unit${available === 1 ? "" : "s"} available`
-                    : "Sold out"}
-                </p>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      <ConfigurationTiles
+        project={project}
+        hrefFor={(key) => `/${slug}/floor-plans#${key}`}
+      />
     </Card>
   );
 }

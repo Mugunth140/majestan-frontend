@@ -232,4 +232,30 @@ describe("unitAreaLabel", () => {
       ),
     ).toBeNull();
   });
+
+  it("writes the rate as a per sq.ft range across the quoted units", () => {
+    const [summary] = summarizeConfigurations(
+      project({
+        units: [
+          unit({ id: 1, price: "7500000", superBuiltupAreaSqft: "1000" }),
+          unit({ id: 2, price: "9600000", superBuiltupAreaSqft: "1200" }),
+          unit({ id: 3, price: null, superBuiltupAreaSqft: "1100" }),
+        ],
+      }),
+    );
+    expect(summary.rateLabel).toBe("₹7,500 – 8,000 / sq.ft");
+  });
+
+  it("quotes a plot's rate per cent, and no rate when nothing is priced", () => {
+    const [plot] = summarizeConfigurations(
+      project({
+        projectType: "plot",
+        units: [unit({ bedrooms: null, price: "1000000", plotAreaCents: "4" })],
+      }),
+    );
+    expect(plot.rateLabel).toBe("₹2,50,000 / cent");
+
+    const [unpriced] = summarizeConfigurations(project({ units: [unit({ price: null })] }));
+    expect(unpriced.rateLabel).toBeNull();
+  });
 });

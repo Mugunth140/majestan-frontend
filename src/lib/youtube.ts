@@ -19,3 +19,29 @@ export function youtubeEmbedUrl(videoId: string, autoplay = false): string {
 export function youtubeThumbnailUrl(videoId: string): string {
   return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 }
+
+export type ProjectVideo = { id: string; title: string | null };
+
+/**
+ * A project's playable videos, in CRM order: titled `videos` when present,
+ * else the legacy `videoUrls`. Links that aren't YouTube, and repeats of the
+ * same video, are dropped.
+ */
+export function projectVideos(project: {
+  videos?: { title: string | null; url: string }[] | null;
+  videoUrls?: string[] | null;
+}): ProjectVideo[] {
+  const source =
+    project.videos && project.videos.length > 0
+      ? project.videos
+      : (project.videoUrls ?? []).map((url) => ({ title: null, url }));
+  const seen = new Set<string>();
+  const out: ProjectVideo[] = [];
+  for (const video of source) {
+    const id = getYouTubeVideoId(video.url);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push({ id, title: video.title?.trim() || null });
+  }
+  return out;
+}

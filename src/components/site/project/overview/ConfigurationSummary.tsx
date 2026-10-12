@@ -83,7 +83,7 @@ export function ConfigurationSummary({ project }: { project: ProjectDetail }) {
     >
       <ConfigurationTiles
         project={project}
-        hrefFor={(key) => `/${slug}/floor-plans#${key}`}
+        hrefFor={() => `/${slug}/floor-plans`}
       />
     </Card>
   );

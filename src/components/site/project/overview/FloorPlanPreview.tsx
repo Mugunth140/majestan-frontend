@@ -63,7 +63,7 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
           return (
             <Link
               key={group.key}
-              href={`/${slug}/floor-plans#${group.key}`}
+              href={`/${slug}/floor-plans`}
               className={CONFIGURATION_TILE}
             >
               <div className="bg-gray-50! aspect-[4/3]!">

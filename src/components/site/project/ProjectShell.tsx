@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft, Download, MapPin } from "lucide-react";
+import { ChevronLeft, Download, MapPin, ShieldCheck } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { ProjectAside } from "@/components/site/project/ProjectAside";
 
@@ -24,9 +24,14 @@ export function ProjectShell({
 }
 
 /**
- * Title, address and the brochure, on one row. The brochure sits here rather
- * than in the aside because it is a document *about* this heading — it reads
- * as part of the project's identity, not as one more call to action.
+ * The project's identity, as a two-by-two grid: the title with the brochure
+ * level beside it, and the location with the RERA number level beside that.
+ * Pairing each fact with its neighbour keeps the right-hand column reading as
+ * "about this heading" rather than as a stray call to action.
+ *
+ * The RERA field always renders. It is the first thing a careful buyer
+ * checks, so its absence is stated ("Not available") rather than silently
+ * omitted, which would read as though the page had simply forgotten it.
  *
  * Sub-pages pass their own `heading` (each page needs its own h1) plus an
  * `eyebrow` linking back to the overview, so the reader never loses which
@@ -47,27 +52,46 @@ export function ProjectTitleRow({
   const region = [project.sublocation, project.city, project.state, project.pincode]
     .filter(Boolean)
     .join(", ");
+  const rera = (project.reraNumber || "").trim();
 
   return (
-    <header className="flex! flex-col! gap-4! sm:flex-row! sm:items-start! sm:justify-between!">
-      <div className="min-w-0!">
-        {eyebrow &&
-          (eyebrowHref ? (
-            <Link
-              href={eyebrowHref}
-              className="mb-1! inline-flex! items-center! gap-1! text-sm! font-medium! text-[#27427f]! no-underline! rounded-md! transition-colors! duration-150! ease-out-quint! hover:text-[#1e3563]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
-            >
-              <ChevronLeft className="w-4! h-4!" aria-hidden="true" />
-              {eyebrow}
-            </Link>
-          ) : (
-            <p className="mb-1! text-sm! font-medium! text-[#27427f]!">{eyebrow}</p>
-          ))}
-        <h1 className="text-3xl! md:text-4xl! font-semibold! text-gray-900! tracking-tight! leading-tight! text-balance!">
+    <header className="flex! flex-col! gap-1!">
+      {eyebrow &&
+        (eyebrowHref ? (
+          <Link
+            href={eyebrowHref}
+            className="self-start! inline-flex! items-center! gap-1! text-sm! font-medium! text-[#27427f]! no-underline! rounded-md! transition-colors! duration-150! ease-out-quint! hover:text-[#1e3563]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+          >
+            <ChevronLeft className="w-4! h-4!" aria-hidden="true" />
+            {eyebrow}
+          </Link>
+        ) : (
+          <p className="text-sm! font-medium! text-[#27427f]!">{eyebrow}</p>
+        ))}
+
+      {/* Phones stack title, location, RERA, then the brochure (order-last);
+          from sm the four sit in a fixed 2×2, each placed explicitly. */}
+      <div className="grid! grid-cols-1! gap-x-6! gap-y-2! sm:grid-cols-[minmax(0,1fr)_auto]! sm:items-center!">
+        <h1 className="sm:col-start-1! sm:row-start-1! text-3xl! md:text-4xl! font-semibold! text-gray-900! tracking-tight! leading-tight! text-balance!">
           {heading}
         </h1>
+
+        {project.brochureUrl && (
+          <a
+            href={project.brochureUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+            title={project.brochureName ?? undefined}
+            className="order-last! mt-2! justify-self-start! sm:order-none! sm:mt-0! sm:col-start-2! sm:row-start-1! sm:justify-self-end! inline-flex! items-center! gap-2! rounded-2xl! bg-white! px-4! py-2! text-sm! font-semibold! text-[#27427f]! ring-1! ring-[#27427f]/25! shadow-sm! no-underline! whitespace-nowrap! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#27427f]/5! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+          >
+            <Download className="w-4! h-4!" aria-hidden="true" />
+            Download brochure
+          </a>
+        )}
+
         {(street || region) && (
-          <p className="mt-2! flex! items-start! gap-2! text-base! text-gray-600!">
+          <p className="sm:col-start-1! sm:row-start-2! flex! items-start! gap-2! text-base! text-gray-600!">
             <MapPin className="w-5! h-5! shrink-0! mt-0.5! text-gray-500!" aria-hidden="true" />
             <span className="min-w-0!">
               {street && <span className="block!">{street}</span>}
@@ -77,21 +101,22 @@ export function ProjectTitleRow({
             </span>
           </p>
         )}
-      </div>
 
-      {project.brochureUrl && (
-        <a
-          href={project.brochureUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          download
-          title={project.brochureName ?? undefined}
-          className="shrink-0! self-start! inline-flex! items-center! gap-2! rounded-2xl! bg-white! px-4! py-2! text-sm! font-semibold! text-[#27427f]! ring-1! ring-[#27427f]/25! shadow-sm! no-underline! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#27427f]/5! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
-        >
-          <Download className="w-4! h-4!" aria-hidden="true" />
-          Download brochure
-        </a>
-      )}
+        {/* Top-aligned to the location's first line, not centred against a
+            two-line address. */}
+        <p className="sm:col-start-2! sm:row-start-2! sm:self-start! sm:justify-self-end! sm:mt-0.5! flex! items-center! gap-1.5! text-sm! text-gray-600!">
+          <ShieldCheck
+            className={`w-4! h-4! shrink-0! ${rera ? "text-emerald-600!" : "text-gray-400!"}`}
+            aria-hidden="true"
+          />
+          <span className="text-gray-500!">RERA No:</span>
+          {rera ? (
+            <span className="font-semibold! text-gray-900! tabular-nums! break-all!">{rera}</span>
+          ) : (
+            <span className="text-gray-500!">Not available</span>
+          )}
+        </p>
+      </div>
     </header>
   );
 }

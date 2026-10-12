@@ -279,9 +279,6 @@ export function buildDetailRows(project: ProjectDetail): DetailRow[] {
   if (project.builderName) {
     rows.push({ label: "Developer", value: project.builderName });
   }
-  if (project.reraNumber) {
-    rows.push({ label: "RERA number", value: project.reraNumber });
-  }
   if (project.projectCode) {
     rows.push({ label: "Project ID", value: project.projectCode });
   }

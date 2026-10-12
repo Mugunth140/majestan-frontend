@@ -5,13 +5,15 @@ import {
   Building2,
   Car,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Compass,
   Grid3X3,
   IndianRupee,
   LayoutGrid,
   Sofa,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { formatINR } from "@/lib/api/projects";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
@@ -46,6 +48,13 @@ import { StatusChip } from "@/components/site/project/configuration-parts";
    of these holds a whole configuration. */
 const CONFIGURATION_CARD =
   "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-5! sm:p-8! lg:p-10! scroll-mt-32! min-w-0!";
+
+/** "1,910 sq.ft" → "1910 SQ.FT"; plots "4 cents" → "4 CENTS". */
+function unitTabLabel(unit: ProjectUnit, projectType: string): string {
+  const area = unitAreaLabel(unit, projectType);
+  if (area) return area.replace(/,/g, "").toUpperCase();
+  return unit.title?.trim() || unit.unitCode || `Unit ${unit.id}`;
+}
 
 /** The title a buyer would use for the unit: its CRM title, else its code. */
 function unitName(unit: ProjectUnit, index: number): string {
@@ -288,6 +297,39 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
   const groups = groupUnitsByConfiguration(project);
   const summaries = new Map(summarizeConfigurations(project).map((s) => [s.key, s]));
   const [activeConfigKey, setActiveConfigKey] = useState(groups[0]?.key ?? "");
+  const [activeUnitId, setActiveUnitId] = useState<number | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  const activeGroup = groups.find((g) => g.key === activeConfigKey) ?? groups[0];
+  const activeUnit =
+    activeGroup?.units.find((u) => u.id === activeUnitId) ?? activeGroup?.units[0] ?? null;
+
+  // Switching configuration resets to that group's first unit.
+  const selectConfig = (key: string) => {
+    setActiveConfigKey(key);
+    setActiveUnitId(null);
+  };
+
+  const scrollStrip = (dir: 1 | -1) => {
+    const el = stripRef.current;
+    if (!el) return;
+    const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollBy({ left: dir * el.clientWidth, behavior: reduce ? "auto" : "smooth" });
+  };
+
+  // Duplicate areas get the unit code appended ("1910 SQ.FT · U2").
+  const unitLabels = (() => {
+    if (!activeGroup) return new Map<number, string>();
+    const seen = new Map<string, number>();
+    const out = new Map<number, string>();
+    for (const u of activeGroup.units) {
+      const base = unitTabLabel(u, project.projectType);
+      const n = (seen.get(base) ?? 0) + 1;
+      seen.set(base, n);
+      out.set(u.id, n > 1 ? `${base} · ${u.unitCode}` : base);
+    }
+    return out;
+  })();
 
   return (
     <>
@@ -305,7 +347,7 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
               type="button"
               role="tab"
               aria-selected={selected}
-              onClick={() => setActiveConfigKey(summary.key)}
+              onClick={() => selectConfig(summary.key)}
               className={`text-left! rounded-xl! border! overflow-hidden! bg-white! transition-all! duration-150! ease-out-quint! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2! ${
                 selected
                   ? "border-[#27427f]! ring-2! ring-[#27427f]/30! shadow-sm!"
@@ -317,6 +359,55 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
           );
         })}
       </div>
+
+      {/* Unit switcher: one tab per unit area. Hidden for single-unit
+          configurations; swipe on touch, arrows elsewhere. */}
+      {activeGroup && activeGroup.units.length > 1 && (
+        <div className="mt-4! flex! items-center! gap-1!">
+          <button
+            type="button"
+            aria-label="Scroll units left"
+            onClick={() => scrollStrip(-1)}
+            className="shrink-0! p-2! rounded-full! text-gray-500! hover:text-[#27427f]! hover:bg-gray-100! transition-colors! cursor-pointer!"
+          >
+            <ChevronLeft className="w-5! h-5!" />
+          </button>
+          <div
+            ref={stripRef}
+            role="tablist"
+            aria-label="Units"
+            className="flex! flex-1! items-stretch! gap-6! overflow-x-auto! scrollbar-hide! border-b! border-gray-200!"
+          >
+            {activeGroup.units.map((u) => {
+              const selected = u.id === activeUnit?.id;
+              return (
+                <button
+                  key={u.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setActiveUnitId(u.id)}
+                  className={`shrink-0! px-1! py-2.5! text-sm! font-semibold! tracking-wide! tabular-nums! whitespace-nowrap! border-b-2! -mb-px! transition-colors! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! ${
+                    selected
+                      ? "text-[#27427f]! border-[#27427f]!"
+                      : "text-gray-500! border-transparent! hover:text-gray-900!"
+                  }`}
+                >
+                  {unitLabels.get(u.id) ?? unitTabLabel(u, project.projectType)}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            aria-label="Scroll units right"
+            onClick={() => scrollStrip(1)}
+            className="shrink-0! p-2! rounded-full! text-gray-500! hover:text-[#27427f]! hover:bg-gray-100! transition-colors! cursor-pointer!"
+          >
+            <ChevronRight className="w-5! h-5!" />
+          </button>
+        </div>
+      )}
 
       {groups.map((group) => {
         const summary = summaries.get(group.key);

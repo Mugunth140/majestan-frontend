@@ -13,6 +13,12 @@ import { useUserAuthStore } from "@/store/userAuthStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
 import { formatLocationLine } from "@/lib/location-display";
+import { emi } from "@/lib/emi";
+
+// "EMI starts at" basis: lowest current starting rate, 20-year tenure,
+// full range-floor price as the loan (no down-payment assumption).
+const EMI_RATE_PCT = 7.25;
+const EMI_YEARS = 20;
 
 function trimNum(n: number): string {
   return String(parseFloat(n.toFixed(2)));
@@ -245,6 +251,12 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
   const reraVerified = isReraVerified(item.reraNumber);
 
+  // EMI floor from the same min price the ₹/sqft figure uses.
+  const emiStarts =
+    item.ranges.minPrice != null && item.ranges.minPrice > 0
+      ? emi(item.ranges.minPrice, EMI_RATE_PCT, EMI_YEARS)
+      : null;
+
   const locationLabel = formatLocationLine({
     sublocation: item.sublocation,
     city: item.city,
@@ -364,22 +376,35 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           </button>
         </div>
 
-        {/* Price — dotted divider above, directly under title/location for prominence */}
-        <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-end! gap-3! leading-none!">
-          <span className="text-[22px]! font-semibold! text-[#27427f]!">
-            {price}
-          </span>
-          {pricePerSqft ? (
-            <span className="text-[13px]! font-medium! text-gray-700!">{pricePerSqft}</span>
-          ) : null}
-          {conditionBadge ? (
-            <span
-              className="ml-auto! shrink-0! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"
-              style={{ clipPath: "polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%)" }}
-            >
-              {conditionBadge}
+        {/* Price — dotted divider above, directly under title/location for prominence.
+            EXPERIMENTAL: price over per-sqft, EMI label over EMI figure. */}
+        <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-center! gap-16! leading-none!">
+          <div className="flex! flex-col! gap-1! min-w-0! shrink-0!">
+            <span className="text-[22px]! font-semibold! text-[#27427f]!">
+              {price}
             </span>
+            {pricePerSqft ? (
+              <span className="text-[13px]! font-medium! text-gray-700!">{pricePerSqft}</span>
+            ) : null}
+          </div>
+          {emiStarts ? (
+            <div className="flex! flex-col! gap-1! shrink-0!">
+              <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
+              <span className="text-[15px]! font-semibold! text-gray-800! tabular-nums!">
+                ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
+              </span>
+            </div>
           ) : null}
+          <div className="ml-auto! shrink-0! self-center! flex!">
+            {conditionBadge ? (
+              <span
+                className="inline-flex! items-center! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"
+                style={{ clipPath: "polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%)" }}
+              >
+                {conditionBadge}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {/* Spec table */}

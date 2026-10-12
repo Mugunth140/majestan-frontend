@@ -47,7 +47,7 @@ afterEach(cleanup);
 describe("ProjectFloorPlanSection", () => {
   it("opens with jump cards to a section per configuration", () => {
     render(<ProjectFloorPlanSection project={project([...twoBhk, ...threeBhk])} />);
-    const jumps = within(document.getElementById("configurations")!).getAllByRole("link");
+    const jumps = within(screen.getByRole("navigation", { name: "Configurations" })).getAllByRole("link");
     expect(jumps.map((a) => a.getAttribute("href"))).toEqual(["#bhk-2", "#bhk-3"]);
     expect(document.getElementById("bhk-2")).not.toBeNull();
     expect(document.getElementById("bhk-3")).not.toBeNull();

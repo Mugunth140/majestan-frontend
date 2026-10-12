@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ChevronLeft, Download, MapPin, ShieldCheck } from "lucide-react";
+import { Download, MapPin, ShieldCheck } from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { ProjectAside } from "@/components/site/project/ProjectAside";
 
@@ -33,20 +32,15 @@ export function ProjectShell({
  * checks, so its absence is stated ("Not available") rather than silently
  * omitted, which would read as though the page had simply forgotten it.
  *
- * Sub-pages pass their own `heading` (each page needs its own h1) plus an
- * `eyebrow` linking back to the overview, so the reader never loses which
- * project they are in or how to get back to it.
+ * The overview's title block: the project name, location, brochure and RERA.
+ * Sub-pages use ProjectSectionTitle instead, which names the section alone.
  */
 export function ProjectTitleRow({
   project,
   heading,
-  eyebrow,
-  eyebrowHref,
 }: {
   project: ProjectDetail;
   heading: string;
-  eyebrow?: string;
-  eyebrowHref?: string;
 }) {
   const street = (project.address || "").trim();
   const region = [project.sublocation, project.city, project.state, project.pincode]
@@ -56,19 +50,6 @@ export function ProjectTitleRow({
 
   return (
     <header className="flex! flex-col! gap-1!">
-      {eyebrow &&
-        (eyebrowHref ? (
-          <Link
-            href={eyebrowHref}
-            className="self-start! inline-flex! items-center! gap-1! text-sm! font-medium! text-[#27427f]! no-underline! rounded-md! transition-colors! duration-150! ease-out-quint! hover:text-[#1e3563]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
-          >
-            <ChevronLeft className="w-4! h-4!" aria-hidden="true" />
-            {eyebrow}
-          </Link>
-        ) : (
-          <p className="text-sm! font-medium! text-[#27427f]!">{eyebrow}</p>
-        ))}
-
       {/* Phones stack title, location, RERA, then the brochure (order-last);
           from sm the four sit in a fixed 2×2, each placed explicitly. */}
       <div className="grid! grid-cols-1! gap-x-6! gap-y-2! sm:grid-cols-[minmax(0,1fr)_auto]! sm:items-center!">
@@ -117,6 +98,20 @@ export function ProjectTitleRow({
           )}
         </p>
       </div>
+    </header>
+  );
+}
+
+/**
+ * A sub-page's title: just the section it holds, such as "Amenities". The
+ * project is named by the breadcrumb, and the tabs show where the reader is.
+ */
+export function ProjectSectionTitle({ title }: { title: string }) {
+  return (
+    <header>
+      <h1 className="text-3xl! md:text-4xl! font-semibold! text-gray-900! tracking-tight! leading-tight! text-balance!">
+        {title}
+      </h1>
     </header>
   );
 }

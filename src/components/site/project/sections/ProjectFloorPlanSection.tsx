@@ -282,18 +282,14 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
 
   return (
     <>
-      <Card
-        title="Configurations"
-        id="configurations"
-        action={
-          <p className="text-sm! text-gray-500!">
-            {groups.length} {groups.length === 1 ? "type" : "types"} · {project.units.length}{" "}
-            {project.units.length === 1 ? "unit" : "units"}
-          </p>
-        }
-      >
+      {/* The jump cards stand on their own, without a wrapping card. The
+          heading is for screen readers; the visible cards carry the names. */}
+      <nav aria-labelledby="floor-plan-jumps-heading">
+        <h2 id="floor-plan-jumps-heading" className="sr-only">
+          Configurations
+        </h2>
         <ConfigurationTiles project={project} hrefFor={(key) => `#${key}`} compact />
-      </Card>
+      </nav>
 
       {groups.map((group) => {
         const summary = summaries.get(group.key);

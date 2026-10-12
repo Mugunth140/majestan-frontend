@@ -36,7 +36,7 @@ export function ConfigurationTiles({
     <ul
       className={`grid! list-none! p-0! m-0! ${
         compact
-          ? "grid-cols-2! sm:grid-cols-3! gap-3! mt-5!"
+          ? "grid-cols-2! sm:grid-cols-3! gap-3!"
           : "grid-cols-1! sm:grid-cols-2! gap-4! mt-6!"
       }`}
     >

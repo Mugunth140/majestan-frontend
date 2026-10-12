@@ -15,7 +15,7 @@ import { ProjectFloorPlanSection } from "@/components/site/project/sections/Proj
 import { ProjectLocalitySection } from "@/components/site/project/sections/ProjectLocalitySection";
 import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
 import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
-import { ProjectShell, ProjectTitleRow } from "@/components/site/project/ProjectShell";
+import { ProjectSectionTitle, ProjectShell } from "@/components/site/project/ProjectShell";
 import { getProjectBySlugUrl, getAllProjectSlugs } from "@/lib/api/projects";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
@@ -161,6 +161,13 @@ const PROJECT_SECTION_META: Record<
     descriptionSuffix:
       "featuring project exteriors, layouts, locality views and videos.",
   },
+};
+
+/** The sub-page titles, named as the overview names its sections. */
+const PROJECT_SECTION_TITLES: Record<string, string> = {
+  amenities: "Amenities",
+  locality: "Location",
+  photos: "Photos and videos",
 };
 
 function projectTypeLabel(projectType: string): string {
@@ -590,12 +597,6 @@ export default async function PropertySectionPage({
       { label: project.name, href: `/${project.canonicalSlug}` },
       { label: titlePrefix },
     ];
-    const pageHeading: Record<string, string> = {
-      amenities: `${project.name} amenities`,
-      "floor-plans": `${project.name} ${getFloorPlanLabel(project.projectType).toLowerCase()}s`,
-      locality: `${project.name} locality`,
-      photos: `${project.name} photos and videos`,
-    };
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -638,13 +639,12 @@ export default async function PropertySectionPage({
                 </div>
                 <ProjectTopActions project={project} />
               </div>
-              {/* Full width above the two columns, as on the overview, so the
-                  title sits in the same place on every page of the project. */}
-              <ProjectTitleRow
-                project={project}
-                heading={pageHeading[sectionKey] ?? titlePrefix}
-                eyebrow={`${project.name} overview`}
-                eyebrowHref={`/${project.canonicalSlug}`}
+              <ProjectSectionTitle
+                title={
+                  sectionKey === "floor-plans"
+                    ? `${getFloorPlanLabel(project.projectType)} & Configurations`
+                    : PROJECT_SECTION_TITLES[sectionKey]
+                }
               />
               <ProjectShell project={project}>
                 <ProjectSectionContent sectionKey={sectionKey} project={project} />

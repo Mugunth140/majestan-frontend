@@ -19,6 +19,7 @@ import { ProjectSectionTitle, ProjectShell } from "@/components/site/project/Pro
 import { getProjectBySlugUrl, getAllProjectSlugs } from "@/lib/api/projects";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
+import { amenitiesPageLabel, hasFurnishing } from "@/lib/project-overview";
 import { getPropertyBySeoSlug, type SeoProperty } from "@/lib/api/property-by-slug";
 import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
@@ -137,6 +138,7 @@ const PROJECT_SECTION_META: Record<
   }
 > = {
   amenities: {
+    // Title prefix is replaced with amenitiesPageLabel(projectType) at use.
     titlePrefix: "Amenities",
     descriptionPrefix: "Discover amenities and facilities available at",
     descriptionSuffix:
@@ -165,10 +167,24 @@ const PROJECT_SECTION_META: Record<
 
 /** The sub-page titles, named as the overview names its sections. */
 const PROJECT_SECTION_TITLES: Record<string, string> = {
-  amenities: "Amenities",
   locality: "Location",
   photos: "Photos and videos",
 };
+
+function projectSectionHeading(sectionKey: string, projectType: string): string {
+  if (sectionKey === "floor-plans") return `${getFloorPlanLabel(projectType)} & Configurations`;
+  if (sectionKey === "amenities") return amenitiesPageLabel(projectType);
+  return PROJECT_SECTION_TITLES[sectionKey];
+}
+
+/** The meta description, which names furnishing where the page holds it. */
+function projectSectionDescription(sectionKey: string, project: ProjectDetail): string {
+  const config = PROJECT_SECTION_META[sectionKey];
+  if (sectionKey === "amenities" && hasFurnishing(project.projectType)) {
+    return `Discover the amenities and furnishing at ${project.name} in ${project.city}, from shared facilities to what comes fitted in each unit.`;
+  }
+  return `${config.descriptionPrefix} ${project.name} in ${project.city}. ${config.descriptionSuffix}`;
+}
 
 function projectTypeLabel(projectType: string): string {
   if (projectType === "villa") return "Villa";
@@ -178,6 +194,7 @@ function projectTypeLabel(projectType: string): string {
 
 function projectSectionTitlePrefix(sectionKey: string, projectType: string): string {
   if (sectionKey === "floor-plans") return getFloorPlanLabel(projectType);
+  if (sectionKey === "amenities") return amenitiesPageLabel(projectType);
   return PROJECT_SECTION_META[sectionKey]?.titlePrefix ?? sectionKey;
 }
 
@@ -352,7 +369,7 @@ export async function generateMetadata({
         : "";
       const titlePrefix = projectSectionTitlePrefix(sectionKey, project.projectType);
       const title = `${titlePrefix} - ${project.name} | ${bhkLabel}${typeLabel} in ${project.city} | Majestan Realty`;
-      const description = `${sectionConfig.descriptionPrefix} ${project.name} in ${project.city}. ${sectionConfig.descriptionSuffix}`;
+      const description = projectSectionDescription(sectionKey, project);
       const ogImage = project.coverImageUrl || undefined;
       return {
         title,
@@ -590,7 +607,6 @@ export default async function PropertySectionPage({
       permanentRedirect(`/${project.canonicalSlug}`);
     }
     const titlePrefix = projectSectionTitlePrefix(sectionKey, project.projectType);
-    const sectionConfig = PROJECT_SECTION_META[sectionKey];
     const breadcrumbItems = [
       { label: "Projects", href: "/projects" },
       { label: project.city, href: "/projects" },
@@ -601,7 +617,7 @@ export default async function PropertySectionPage({
       "@context": "https://schema.org",
       "@type": "WebPage",
       name: `${titlePrefix} - ${project.name}`,
-      description: `${sectionConfig.descriptionPrefix} ${project.name} in ${project.city}. ${sectionConfig.descriptionSuffix}`,
+      description: projectSectionDescription(sectionKey, project),
       url: `https://www.majestanrealty.com/${project.canonicalSlug}/${sectionKey}`,
       isPartOf: {
         "@type": "WebPage",
@@ -640,11 +656,7 @@ export default async function PropertySectionPage({
                 <ProjectTopActions project={project} />
               </div>
               <ProjectSectionTitle
-                title={
-                  sectionKey === "floor-plans"
-                    ? `${getFloorPlanLabel(project.projectType)} & Configurations`
-                    : PROJECT_SECTION_TITLES[sectionKey]
-                }
+                title={projectSectionHeading(sectionKey, project.projectType)}
               />
               <ProjectShell project={project}>
                 <ProjectSectionContent sectionKey={sectionKey} project={project} />

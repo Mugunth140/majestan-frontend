@@ -1,3 +1,5 @@
+export type ProjectFurnishingItem = { id: number; name: string; icon?: string | null };
+
 export type ProjectUnit = {
   id: number;
   unitCode: string;
@@ -24,7 +26,9 @@ export type ProjectUnit = {
   roomDimensions?: { name: string; dimensions: string }[] | null;
   furnishedStatus: string | null;
   facing: string | null;
-  furnishingItems?: { furnishingItemId: number; furnishingItem?: { id: number; name: string; icon?: string } | null }[] | null;
+  /** The API sends the items themselves; read them through unitFurnishingItems,
+      which also accepts the older link-row shape. */
+  furnishingItems?: (ProjectFurnishingItem | { furnishingItemId: number; furnishingItem?: ProjectFurnishingItem | null })[] | null;
   listingMode?: string | null;
   price: string | null;
   monthlyRent?: string | null;

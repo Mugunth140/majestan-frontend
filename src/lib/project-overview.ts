@@ -1,5 +1,5 @@
 import { CENT_TO_SQFT, formatINRRange } from "@/lib/api/projects";
-import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
+import type { ProjectDetail, ProjectFurnishingItem, ProjectUnit } from "@/lib/api/projects";
 
 /**
  * Derivations for the project overview page.
@@ -67,6 +67,16 @@ export function projectTypeLabel(projectType: string): string {
   if (projectType === "villa") return "Villa";
   if (projectType === "plot") return "Plot";
   return "Apartment";
+}
+
+/** Only built homes are furnished; plots come unbuilt, so the CRM records none. */
+export function hasFurnishing(projectType: string): boolean {
+  return projectType === "apartment" || projectType === "villa";
+}
+
+/** The amenities sub-page's name: it also holds furnishing, except for plots. */
+export function amenitiesPageLabel(projectType: string): string {
+  return hasFurnishing(projectType) ? "Amenities & Furnishing" : "Amenities";
 }
 
 /** Saleable area in sq.ft, widest measure first — plots are measured in cents. */
@@ -320,10 +330,25 @@ export function unitLabel(unit: ProjectUnit): string {
   return unit.title || unit.unitCode || "Unit";
 }
 
+/**
+ * A unit's furnishing items. The API sends the items themselves, but the
+ * type once promised link rows wrapping them, so both shapes are read.
+ */
+type FurnishingLink = { furnishingItem?: ProjectFurnishingItem | null };
+
+function isFurnishingLink(entry: ProjectFurnishingItem | FurnishingLink): entry is FurnishingLink {
+  return "furnishingItem" in entry;
+}
+
+export function unitFurnishingItems(unit: ProjectUnit): ProjectFurnishingItem[] {
+  return (unit.furnishingItems ?? []).flatMap((entry) => {
+    const item = entry && isFurnishingLink(entry) ? entry.furnishingItem : entry;
+    return item?.name?.trim() ? [{ ...item, name: item.name.trim() }] : [];
+  });
+}
+
 export function unitFurnishings(unit: ProjectUnit): string[] {
-  return (unit.furnishingItems ?? [])
-    .map((link) => link.furnishingItem?.name)
-    .filter((name): name is string => !!name && name.trim() !== "");
+  return unitFurnishingItems(unit).map((item) => item.name);
 }
 
 export type ConfigurationGroup = {
@@ -431,4 +456,21 @@ export function unitRateLabel(unit: ProjectUnit, projectType: string): string | 
   const area = unitAreaSqft(unit, projectType);
   if (!area) return null;
   return `₹${Math.round(price / area).toLocaleString("en-IN")} / sq.ft`;
+}
+
+export type ProjectCoordinates = { lat: number; lon: number };
+
+/**
+ * The project's pin, when the CRM has one. The API sends decimals as strings,
+ * so they are parsed and range-checked; a half-set or out-of-range pair is
+ * treated as no pin rather than shown.
+ */
+export function projectCoordinates(project: ProjectDetail): ProjectCoordinates | null {
+  if (project.latitude == null || project.longitude == null) return null;
+  const lat = Number(project.latitude);
+  const lon = Number(project.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+  if (lat === 0 && lon === 0) return null;
+  return { lat, lon };
 }

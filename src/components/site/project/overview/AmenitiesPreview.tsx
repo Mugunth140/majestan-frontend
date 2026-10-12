@@ -6,6 +6,7 @@ import { RequestButton } from "@/components/site/project/RequestButton";
 import {
   AMENITY_GRID,
   AmenityTile,
+  CATEGORY_CHIP,
   amenityGroups,
   amenityList,
   categoryAnchor,
@@ -13,9 +14,6 @@ import {
 
 /** Two rows at the widest grid. */
 const PREVIEW_COUNT = 8;
-
-const CHIP =
-  "inline-flex! items-center! gap-1.5! rounded-full! bg-white! px-3! py-1! text-xs! font-medium! text-gray-700! ring-1! ring-gray-200! no-underline! transition-[color,box-shadow]! duration-150! ease-out-quint! hover:text-[#27427f]! hover:ring-[#27427f]/40! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!";
 
 /**
  * Overview preview of the amenities: how many and of what kinds, then the
@@ -67,7 +65,7 @@ export function AmenitiesPreview({ project }: { project: ProjectDetail }) {
         </span>
         {groups.length > 1 &&
           groups.map(([title, list]) => (
-            <Link key={title} href={`/${slug}/amenities#${categoryAnchor(title)}`} className={CHIP}>
+            <Link key={title} href={`/${slug}/amenities#${categoryAnchor(title)}`} className={CATEGORY_CHIP}>
               {title}
               <span className="text-gray-500! tabular-nums!">{list.length}</span>
             </Link>

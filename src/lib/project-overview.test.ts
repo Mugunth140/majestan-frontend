@@ -1,3 +1,4 @@
+import { projectCoordinates } from "./project-overview";
 import { describe, expect, it } from "vitest";
 import {
   buildDetailRows,
@@ -416,5 +417,25 @@ describe("possession", () => {
       project({ possessionDate: "2026-10-30", possessionStatus: "ready_to_move" }),
     );
     expect(ready.find((r) => r.label === "Possession date")).toBeUndefined();
+  });
+});
+
+describe("projectCoordinates", () => {
+  const withPin = (latitude: unknown, longitude: unknown) =>
+    ({ latitude, longitude }) as unknown as ProjectDetail;
+
+  it("parses the string decimals the API sends", () => {
+    expect(projectCoordinates(withPin("11.0796991", "76.9997393"))).toEqual({
+      lat: 11.0796991,
+      lon: 76.9997393,
+    });
+  });
+
+  it("returns null when either half is missing or the pair is out of range", () => {
+    expect(projectCoordinates(withPin(null, null))).toBeNull();
+    expect(projectCoordinates(withPin("11.07", null))).toBeNull();
+    expect(projectCoordinates(withPin("95", "76"))).toBeNull();
+    expect(projectCoordinates(withPin("abc", "76"))).toBeNull();
+    expect(projectCoordinates(withPin("0", "0"))).toBeNull();
   });
 });

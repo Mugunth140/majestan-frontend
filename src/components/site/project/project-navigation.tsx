@@ -9,6 +9,7 @@ import {
   Images,
 } from "lucide-react";
 import { getFloorPlanLabel } from "@/lib/property-sections";
+import { amenitiesPageLabel } from "@/lib/project-overview";
 
 export const PROJECT_SECTIONS = [
   { id: "overview", label: "Overview", icon: <LayoutDashboard className="w-4! h-4!" /> },
@@ -35,6 +36,7 @@ export function ProjectNavigation({
   projectType?: string;
 }) {
   const planLabel = projectType ? getFloorPlanLabel(projectType) : "Floor Plan";
+  const amenitiesLabel = projectType ? amenitiesPageLabel(projectType) : "Amenities";
 
   return (
     <div className="bg-white/95! backdrop-blur-md! sticky! top-[64px]! z-40! border-b! border-gray-200/80! shadow-xs! transition-all! duration-300! font-manrope">
@@ -42,7 +44,8 @@ export function ProjectNavigation({
         <nav className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar!" aria-label="Project sections">
           {PROJECT_SECTIONS.map((s) => {
             const isActive = activeSection === s.id || (s.id === "overview" && activeSection === "");
-            const label = s.id === "floor-plans" ? planLabel : s.label;
+            const label =
+              s.id === "floor-plans" ? planLabel : s.id === "amenities" ? amenitiesLabel : s.label;
             const href = s.id === "overview" ? `/${slug}` : `/${slug}/${s.id}`;
             return (
               <Link

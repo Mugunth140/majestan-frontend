@@ -255,7 +255,7 @@ export function ProjectFilterPanel({ values, onChange, onReset }: { values: Proj
         {values.projectType !== "plot" && (
           <Section title="Bedrooms" value={bhkSummary}>
             <div className="flex! gap-1.5!">
-              {["1", "2", "3", "4", "5"].map((num) => (
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].map((num) => (
                 <button
                   key={num}
                   onClick={() => updateFilter("bhk", values.bhk === num ? "" : num)}

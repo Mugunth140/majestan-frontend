@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Sublocation, UnitType } from "@/lib/api";
-import { MapPin, ChevronDown, Search, Home } from "lucide-react";
+import { Building2, MapPin, ChevronDown, Search, Home } from "lucide-react";
 import {
   buildPseoSlug,
   PROPERTY_TYPES,
@@ -34,6 +34,13 @@ const propertyTypeOptions = [
   ["farmlands", "Farmlands"],
 ] as const;
 
+// Project-mode type options — API values the /projects page understands.
+const projectTypeOptions = [
+  ["apartment", "Apartment"],
+  ["villa", "Villa"],
+  ["plot", "Plot"],
+] as const;
+
 
 export function HomeSearch({
   sublocations,
@@ -44,6 +51,7 @@ export function HomeSearch({
   const router = useRouter();
   const { location: selectedCity } = useLocationContext();
   const [listingType, setListingType] = useState<"Sell" | "Rent">("Sell");
+  const [isProjectMode, setIsProjectMode] = useState(false);
   const [propertyType, setPropertyType] = useState("");
   const [locality, setLocality] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,8 +63,16 @@ export function HomeSearch({
 
   const [isSearching, setIsSearching] = useState(false);
 
+  const typeOptions = isProjectMode ? projectTypeOptions : propertyTypeOptions;
   const selectedPropertyLabel =
-    propertyTypeOptions.find(([value]) => value === propertyType)?.[1] ?? "Select type...";
+    typeOptions.find(([value]) => value === propertyType)?.[1] ?? "Select type...";
+
+  const toggleProjectMode = () => {
+    setIsProjectMode((on) => !on);
+    // Type values differ between modes — never carry a stale selection over.
+    setPropertyType("");
+    setError("");
+  };
 
   const filteredSublocations = useMemo(() => {
     const citySublocations = sublocations.filter(
@@ -139,6 +155,17 @@ export function HomeSearch({
     event.preventDefault();
     setError("");
 
+    // Project mode — the /projects page owns keyword/location/type filtering.
+    if (isProjectMode) {
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) params.set("keyword", searchQuery.trim());
+      if (locality) params.set("location", locality);
+      if (propertyType) params.set("projectType", propertyType);
+      const qs = params.toString();
+      router.push(qs ? `/projects?${qs}` : "/projects");
+      return;
+    }
+
     // Case 1: Property type selected — build canonical PSEO URL from Row 1 filters
     if (propertyType) {
       const ptSlug = HOME_SEARCH_PROPERTY_TYPE_MAP[propertyType] || "apartments";
@@ -210,7 +237,7 @@ export function HomeSearch({
             instead of wrapping. Desktop keeps the original wrap layout. */}
         <div className="flex! flex-nowrap! md:flex-wrap! items-center! gap-3! px-4! py-4! md:px-6! border-b! border-gray-100! overflow-x-auto! md:overflow-visible! [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           
-          {/* Buy / Rent */}
+          {/* Buy / Rent — dimmed and inert in Projects mode */}
           <div className="flex! items-center! gap-2! shrink-0!">
             {[
               { value: "Sell", label: "Buy" },
@@ -219,11 +246,14 @@ export function HomeSearch({
               <button
                 key={tab.value}
                 type="button"
+                disabled={isProjectMode}
                 onClick={() => setListingType(tab.value as "Sell" | "Rent")}
                 className={`px-6! h-[38px]! rounded-full! text-[14px]! font-semibold! leading-none! transition-all! duration-200! whitespace-nowrap! inline-flex! items-center! justify-center! ${
-                  listingType === tab.value
-                    ? "bg-[#27427f]! text-white! shadow-sm! border! border-transparent!"
-                    : "bg-white! text-gray-500! border! border-gray-200! hover:border-gray-300! hover:text-[#27427f]!"
+                  isProjectMode
+                    ? "bg-gray-50! text-gray-300! border! border-gray-100! cursor-not-allowed!"
+                    : listingType === tab.value
+                      ? "bg-[#27427f]! text-white! shadow-sm! border! border-transparent!"
+                      : "bg-white! text-gray-500! border! border-gray-200! hover:border-gray-300! hover:text-[#27427f]!"
                 }`}
               >
                 {tab.label}
@@ -260,7 +290,7 @@ export function HomeSearch({
                 style={{ top: propertyAnchor.top, left: propertyAnchor.left, width: propertyAnchor.width }}
                 className="fixed! z-[60]! max-h-72! overflow-y-auto! overflow-x-hidden! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
               >
-                {propertyTypeOptions.map(([value, label]) => (
+                {typeOptions.map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
@@ -340,6 +370,30 @@ export function HomeSearch({
               document.body,
             )}
           </div>
+
+          {/* Projects mode toggle — searches new projects only */}
+          <div className="relative! shrink-0!">
+            <button
+              type="button"
+              aria-pressed={isProjectMode}
+              title={isProjectMode ? "Searching projects — click for properties" : "Search new projects only"}
+              className={`flex! items-center! gap-2! rounded-full! px-5! h-[38px]! transition-colors! border! ${
+                isProjectMode
+                  ? "bg-[#27427f]! border-transparent! text-white! shadow-sm!"
+                  : "bg-white! border-gray-200! hover:border-gray-300! text-gray-500! hover:text-[#27427f]!"
+              }`}
+              onClick={toggleProjectMode}
+            >
+              <Building2
+                className={`shrink-0! ${isProjectMode ? "text-white!" : "text-[#27427f]!"}`}
+                size={16}
+                strokeWidth={2}
+              />
+              <span className="text-[14px]! font-medium! leading-none! whitespace-nowrap!">
+                Projects
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* ── ROW 2: Search Bar ──────────────────────────────────
@@ -351,7 +405,7 @@ export function HomeSearch({
             <Search className="hidden! md:block! text-gray-400! shrink-0!" size={22} strokeWidth={2} />
             <input
               type="text"
-              placeholder="Search by Project or Builder..."
+              placeholder={isProjectMode ? "Search by Project or Builder..." : "Search by area, landmark or keyword..."}
               className="w-full! min-w-0! outline-none! bg-transparent! text-gray-800! placeholder-gray-400! font-medium! text-[16px]! border-none! p-0! m-0! shadow-none! focus:ring-0! truncate!"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

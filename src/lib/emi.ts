@@ -67,3 +67,37 @@ export function loanTotals(principal: number, annualRatePct: number, years: numb
   const totalPayable = monthlyEmi * months;
   return { monthlyEmi, totalInterest: Math.max(totalPayable - principal, 0), totalPayable };
 }
+
+/** Inverse EMI formula: biggest principal a given monthly payment supports. */
+export function maxLoanForEmi(emiAmount: number, annualRatePct: number, years: number): number {
+  const months = Math.round(years * 12);
+  if (!(emiAmount > 0) || !(months > 0)) return 0;
+  if (!(annualRatePct > 0)) return emiAmount * months;
+  const r = monthlyRate(annualRatePct);
+  const growth = Math.pow(1 + r, months);
+  return (emiAmount * (growth - 1)) / (r * growth);
+}
+
+/**
+ * What home value an income supports. Banks cap total EMIs around FOIR
+ * (50%) of income; the home value backs out the down payment.
+ */
+export function affordableHome({
+  monthlyIncome,
+  monthlyObligations,
+  annualRatePct,
+  years,
+  downPaymentPct,
+}: {
+  monthlyIncome: number;
+  monthlyObligations: number;
+  annualRatePct: number;
+  years: number;
+  downPaymentPct: number;
+}): { emiCapacity: number; maxLoan: number; maxHomeValue: number } {
+  const emiCapacity = Math.max(monthlyIncome * 0.5 - Math.max(monthlyObligations, 0), 0);
+  const maxLoan = maxLoanForEmi(emiCapacity, annualRatePct, years);
+  const downPaymentFraction = Math.min(Math.max(downPaymentPct, 0), 90) / 100;
+  const maxHomeValue = downPaymentFraction >= 1 ? 0 : maxLoan / (1 - downPaymentFraction);
+  return { emiCapacity, maxLoan, maxHomeValue };
+}

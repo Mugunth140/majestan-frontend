@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { amortizationSchedule, emi, loanTotals } from "./emi";
+import { affordableHome, amortizationSchedule, emi, loanTotals, maxLoanForEmi } from "./emi";
 
 describe("emi math", () => {
   it("matches the published vector: 50L @ 7% x 20y = Rs.38,765/mo", () => {
@@ -24,5 +24,31 @@ describe("emi math", () => {
     const { monthlyEmi, totalInterest, totalPayable } = loanTotals(5_000_000, 7, 20);
     expect(totalPayable).toBeCloseTo(monthlyEmi * 240, 0);
     expect(totalInterest).toBeCloseTo(totalPayable - 5_000_000, 0);
+  });
+
+  it("maxLoanForEmi inverts emi", () => {
+    expect(maxLoanForEmi(emi(5_000_000, 7, 20), 7, 20)).toBeCloseTo(5_000_000, 0);
+    expect(maxLoanForEmi(100000, 0, 1)).toBe(1200000);
+    expect(maxLoanForEmi(0, 7, 20)).toBe(0);
+  });
+
+  it("affordability floors at zero when obligations eat the capacity", () => {
+    const full = affordableHome({
+      monthlyIncome: 100000,
+      monthlyObligations: 0,
+      annualRatePct: 7.25,
+      years: 20,
+      downPaymentPct: 20,
+    });
+    expect(full.maxLoan).toBeGreaterThan(0);
+    expect(full.maxHomeValue).toBeCloseTo(full.maxLoan / 0.8, 0);
+    const none = affordableHome({
+      monthlyIncome: 100000,
+      monthlyObligations: 60000,
+      annualRatePct: 7.25,
+      years: 20,
+      downPaymentPct: 20,
+    });
+    expect(none).toEqual({ emiCapacity: 0, maxLoan: 0, maxHomeValue: 0 });
   });
 });

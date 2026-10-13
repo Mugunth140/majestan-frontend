@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { EmiCalculator } from "@/components/site/emi/EmiCalculator";
 import { BANK_RATES, BANK_RATES_UPDATED } from "@/lib/emi-bank-rates";
 
@@ -16,7 +17,10 @@ export default function EmiCalculatorPage() {
       </h1>
       <p className="mt-2! max-w-2xl! text-base! text-gray-600!">
         Move the sliders to see your monthly EMI, total interest, and how each year&apos;s
-        payment splits between principal and interest.
+        payment splits between principal and interest.{" "}
+        <Link href="/affordability-calculator" className="font-semibold! text-[#27427f]! hover:underline!">
+          Starting from your salary? Check what you can afford.
+        </Link>
       </p>
 
       <section aria-label="EMI calculator" className="mt-8! md:p-8!">

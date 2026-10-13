@@ -1,0 +1,228 @@
+.gallery {
+  --opg-blue: var(--brand, #245caa);
+  --opg-blue-dark: #1d4ed8;
+  --opg-blue-wash: #eff6ff;
+  --opg-ink: #202b3a;
+  --opg-muted: #677489;
+  --opg-line: #dce4ef;
+  color: var(--opg-ink);
+  width: 100%;
+  margin-top: 24px;
+  min-width: 0;
+  isolation: isolate;
+}
+.gallery *, .progressCard * { box-sizing: border-box; }
+.galleryHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 16px;
+}
+.galleryHeading h2 {
+  margin: 0;
+  color: var(--opg-ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -.015em;
+}
+.galleryHeading p {
+  margin: 4px 0 0;
+  color: var(--opg-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.photoCount {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: var(--opg-blue-wash);
+  color: var(--opg-blue-dark);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 188px), 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tile {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--opg-line);
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 2px 7px rgb(20 42 74 / 4%);
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+.tile:hover { border-color: #adc8f8; box-shadow: 0 8px 20px rgb(31 78 148 / 10%); }
+.tile.dragging {
+  z-index: 2;
+  border-color: var(--opg-blue);
+  box-shadow: 0 18px 38px rgb(25 57 100 / 25%);
+  pointer-events: none;
+  transition: none;
+}
+.imageFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.42;
+  overflow: hidden;
+  background: #eef2f7;
+}
+.image { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; }
+.placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  color: #65748a;
+  background: linear-gradient(145deg, #f4f7fb, #e7edf5);
+  font-size: 11px;
+  text-align: center;
+}
+.placeholderMark { color: #8fa4bd; font-size: 28px; line-height: 1; }
+.coverBadge {
+  position: absolute;
+  left: 9px;
+  top: 9px;
+  z-index: 1;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: #fff;
+  background: var(--opg-blue);
+  box-shadow: 0 2px 8px rgb(17 46 91 / 25%);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1;
+}
+.dragHandle {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 75%);
+  border-radius: 8px;
+  padding: 0;
+  color: #26364b;
+  background: rgb(255 255 255 / 93%);
+  box-shadow: 0 2px 8px rgb(18 38 67 / 15%);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.dragHandle:active { cursor: grabbing; }
+.dragHandle:focus-visible, .moveButton:focus-visible, .removeButton:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 2px;
+}
+.grip { font-size: 20px; line-height: 1; }
+.tileFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 56px;
+  padding: 8px 9px 8px 11px;
+}
+.photoDetails { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.photoNumber { color: #314158; font-size: 11px; font-weight: 700; line-height: 1.2; }
+.fileName { max-width: 124px; overflow: hidden; color: var(--opg-muted); font-size: 10px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.tileActions { display: flex; align-items: center; flex: 0 0 auto; gap: 3px; }
+.moveButton, .removeButton {
+  display: inline-grid;
+  min-width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0 5px;
+  color: #48586d;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.moveButton:hover:not(:disabled) { border-color: #c8d9f5; color: var(--opg-blue-dark); background: var(--opg-blue-wash); }
+.moveButton:disabled { color: #b4bdc9; cursor: not-allowed; }
+.removeButton { border-color: #e3e8ef; color: #58667a; background: #fff; }
+.removeButton:hover:not(:disabled) { border-color: #fecaca; color: #b42318; background: #fff7f6; }
+.removeButton:disabled { opacity: .55; cursor: not-allowed; }
+.srOnly {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.progressCard {
+  --opg-blue: var(--brand, #245caa);
+  --opg-ink: #202b3a;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #b7d1fb;
+  border-radius: 12px;
+  color: var(--opg-ink);
+  background: linear-gradient(110deg, #f0f6ff 0%, #fff 88%);
+  box-shadow: 0 5px 18px rgb(37 99 235 / 8%);
+}
+.progressIcon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 9px;
+  color: #fff;
+  background: var(--opg-blue);
+  font-size: 17px;
+  font-weight: 700;
+}
+.progressContent { min-width: 0; flex: 1; padding-top: 1px; }
+.progressTopline { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.progressTopline strong { color: var(--opg-ink); font-size: 12px; line-height: 1.45; }
+.progressCount { flex: 0 0 auto; color: #43536a; font-size: 11px; font-variant-numeric: tabular-nums; font-weight: 700; }
+.progressTrack { position: relative; width: 100%; height: 7px; overflow: hidden; margin-top: 9px; border-radius: 999px; background: #dce9fb; }
+.progressFill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #60a5fa, #2563eb); transition: width 200ms ease; }
+.indeterminate .progressFill { width: 36%; animation: ownerPhotoProgress 1.3s ease-in-out infinite alternate; }
+.currentFile { margin: 7px 0 0; overflow: hidden; color: #687991; font-size: 10px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes ownerPhotoProgress { from { transform: translateX(0); } to { transform: translateX(180%); } }
+@media (max-width: 520px) {
+  .galleryHeading { margin-bottom: 12px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .tileFooter { min-height: 52px; gap: 4px; padding: 7px; }
+  .fileName { max-width: 70px; }
+  .tileActions { gap: 0; }
+  .moveButton { min-width: 24px; height: 25px; }
+  .removeButton { min-width: 0; height: 25px; padding: 0 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile, .progressFill { transition: none; }
+  .indeterminate .progressFill { animation-duration: 4s; }
+}

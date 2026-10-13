@@ -21,41 +21,80 @@ export function parseIndianCurrency(val: string | number | undefined | null): nu
   return num * multiplier;
 }
 
+const INDIAN_ONES = [
+  "",
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six",
+  "Seven",
+  "Eight",
+  "Nine",
+  "Ten",
+  "Eleven",
+  "Twelve",
+  "Thirteen",
+  "Fourteen",
+  "Fifteen",
+  "Sixteen",
+  "Seventeen",
+  "Eighteen",
+  "Nineteen",
+];
+const INDIAN_TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+function underHundred(value: number): string {
+  if (value < 20) return INDIAN_ONES[value];
+  const tens = Math.floor(value / 10);
+  const ones = value % 10;
+  return ones ? `${INDIAN_TENS[tens]} ${INDIAN_ONES[ones]}` : INDIAN_TENS[tens];
+}
+
+function underThousand(value: number): string {
+  const hundreds = Math.floor(value / 100);
+  const remainder = value % 100;
+  if (!hundreds) return underHundred(remainder);
+  return remainder
+    ? `${INDIAN_ONES[hundreds]} Hundred and ${underHundred(remainder)}`
+    : `${INDIAN_ONES[hundreds]} Hundred`;
+}
+
+/** Converts a rupee amount into Indian number words, including paise. */
 export function numberToIndianWords(num: number): string {
-    if (isNaN(num) || num === 0) return "";
-    
-    const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  if (!Number.isFinite(num) || num <= 0) return "";
 
-    const formatDecimals = (n: number, suffix: string) => {
-        if (n === 0) return '';
-        if (n < 20) return a[n] + suffix;
-        return b[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + a[n % 10] : '') + ' ' + suffix;
-    };
+  const totalPaise = Math.round(num * 100);
+  const rupees = Math.floor(totalPaise / 100);
+  const paise = totalPaise % 100;
+  const parts: string[] = [];
+  let remaining = rupees;
 
-    let words = '';
-    let temp = Math.floor(num);
-    
-    const cr = Math.floor(temp / 10000000);
-    temp -= cr * 10000000;
-    const lk = Math.floor(temp / 100000);
-    temp -= lk * 100000;
-    const th = Math.floor(temp / 1000);
-    temp -= th * 1000;
-    const h = Math.floor(temp / 100);
-    temp -= h * 100;
+  const crore = Math.floor(remaining / 10_000_000);
+  remaining -= crore * 10_000_000;
+  const lakh = Math.floor(remaining / 100_000);
+  remaining -= lakh * 100_000;
+  const thousand = Math.floor(remaining / 1_000);
+  remaining -= thousand * 1_000;
+  const hundredGroup = Math.floor(remaining / 100);
+  const lastTwo = remaining % 100;
 
-    if (cr > 0) words += formatDecimals(cr, 'Crore ');
-    if (lk > 0) words += formatDecimals(lk, 'Lakh ');
-    if (th > 0) words += formatDecimals(th, 'Thousand ');
-    if (h > 0) words += formatDecimals(h, 'Hundred ');
-    
-    if (temp > 0) {
-        if (words !== '') words += 'and ';
-        words += formatDecimals(temp, '');
-    }
-    
-    return words.replace(/\s+/g, ' ').trim() + " Rupees";
+  if (crore) parts.push(`${underThousand(crore)} Crore`);
+  if (lakh) parts.push(`${underHundred(lakh)} Lakh`);
+  if (thousand) parts.push(`${underHundred(thousand)} Thousand`);
+  if (hundredGroup) parts.push(`${INDIAN_ONES[hundredGroup]} Hundred`);
+  if (lastTwo) {
+    if (parts.length) parts.push("and");
+    parts.push(underHundred(lastTwo));
+  }
+
+  let words = parts.length ? `${parts.join(" ")} Rupees` : "";
+  if (paise) {
+    const paiseWords = underHundred(paise);
+    words = words ? `${words} and ${paiseWords} Paise` : `${paiseWords} Paise`;
+  }
+  return words;
 }
 
 export function formatToShortIndianCurrency(val: number | string | null | undefined): string {

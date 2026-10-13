@@ -220,6 +220,11 @@ describe("getFarmlandSpecs", () => {
     expect(rows).toMatchObject([{ label: "Fencing", value: "Available" }]);
   });
 
+  it("preserves the selected display unit alongside derived cents", () => {
+    expect(getFarmlandSpecs({ plotArea: "2", areaUnit: "Acres", areaSqft: "87120", plotSizeCents: "200" })).toMatchObject([{ label: "Farm Area", value: "2 acres" }]);
+    expect(getFarmlandSpecs({ plotArea: "2", areaUnit: "Grounds", areaSqft: "4800", plotSizeCents: "11.0193" })).toMatchObject([{ label: "Farm Area", value: "2 grounds" }]);
+  });
+
   it("falls back to area in cents when only areaSqft-in-cents is stored", () => {
     const rows = getFarmlandSpecs({ areaSqft: "6.00", areaUnit: "Cents" });
     expect(rows).toMatchObject([{ label: "Farm Area", value: "6 cents" }]);
@@ -470,6 +475,10 @@ describe("hasGroundPlanData", () => {
 describe("formatPlotArea", () => {
   it("uses cents when the area unit is cents", () => {
     expect(formatPlotArea("5.5", "Cents")).toBe("5.5 cents");
+  });
+
+  it("uses grounds when the selected land unit is grounds", () => {
+    expect(formatPlotArea("2", "Grounds")).toBe("2 grounds");
   });
 
   it("uses acres when the area unit is acres", () => {

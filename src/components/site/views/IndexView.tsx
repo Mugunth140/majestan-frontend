@@ -327,7 +327,7 @@ export function IndexView(): React.JSX.Element {
     },
     {
       image: "/assets/images/section/section-realty.jpg",
-      href: "/rent-or-sell-your-property",
+      href: "/post-property",
     },
   ];
 
@@ -1072,7 +1072,7 @@ function FeaturedProjectCard({ card }: { card: FeaturedCard }): React.JSX.Elemen
                     </p>
                   </div>
                   <a
-                    href="/rent-or-sell-your-property"
+                    href="/post-property"
                     className="tf-btn bg-color-primary pd-12 mx-auto fw-7 wow animate__fadeInUp animate__animated"
                     data-wow-duration="1.5s"
                     data-wow-delay="0s"
@@ -1099,10 +1099,10 @@ function FeaturedProjectCard({ card }: { card: FeaturedCard }): React.JSX.Elemen
                         <img src={service.icon} alt={service.title} />
                       </div>
                       <h4 className="title text-center">
-                        <a href="/rent-or-sell-your-property">{service.title}</a>
+                        <a href="/post-property">{service.title}</a>
                       </h4>
                       <p className="text-center text-1">{service.description}</p>
-                      <a href="/rent-or-sell-your-property" className="tf-btn style-border pd-6 fw-7 mx-auto">
+                      <a href="/post-property" className="tf-btn style-border pd-6 fw-7 mx-auto">
                         Find out more
                       </a>
                     </div>

@@ -165,6 +165,7 @@ export function formatPlotArea(value: unknown, areaUnit?: string | null): string
   const n = nzNum(value);
   if (n == null) return null;
   if (/cent/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} cents`;
+  if (/ground/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} grounds`;
   if (/acre/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} acres`;
   return `${n.toLocaleString("en-IN")} sq.ft`;
 }
@@ -182,6 +183,9 @@ function plotAreaRow(d: LandDetails): LandSpecRow | null {
 }
 
 function farmAreaRow(d: LandDetails): LandSpecRow | null {
+  // Preserve the chosen display unit while retaining cents for unit pricing.
+  const area = d.areaUnit ? formatPlotArea(d.plotArea, d.areaUnit) : null;
+  if (area != null) return { label: "Farm Area", value: area, icon: Maximize2 };
   const cents = nzNum(d.plotSizeCents) ?? areaSqftInCents(d);
   if (cents != null) {
     return { label: "Farm Area", value: `${trimNum(cents)} cents`, icon: Maximize2 };

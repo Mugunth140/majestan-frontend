@@ -23,7 +23,6 @@ const STATIC_ROUTE_MAP: Record<string, LegacyViewName> = {
   "/buy-rent": "buy_rent.php",
   "/rent": "rent.php",
   "/property": "property.php",
-  "/rent-or-sell-your-property": "rent_sell_property.php",
   "/testimonials": "testimonials.php",
   "/services/property-management": "property_management.php",
   "/services/professional-brokerage-service": "professional_brokerage_service.php",

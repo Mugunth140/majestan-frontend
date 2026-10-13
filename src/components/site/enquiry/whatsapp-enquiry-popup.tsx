@@ -285,11 +285,11 @@ export function WhatsAppPopup({
   );
 }
 
-const HIDDEN_PREFIXES = ["/admin", "/login", "/register"];
+const HIDDEN_PREFIXES = ["/admin", "/login", "/register", "/post-property"];
 
 /**
  * Site-wide floating WhatsApp enquiry button. Render once in the root layout.
- * Skips auth/admin screens, and skips PSEO listing pages because ListingShell
+ * Skips auth/admin/posting screens, and skips PSEO listing pages because ListingShell
  * already renders its own contextual instance (with listing filters) there —
  * so exactly one icon is ever on screen.
  */

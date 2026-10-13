@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
   output: "standalone",
   async redirects() {
     return [
+      // ── 0. Retired legacy post-property page → owner self-post wizard ────
+      {
+        source: "/rent-or-sell-your-property",
+        destination: "/post-property",
+        permanent: true,
+      },
       // ── 1. Stale SEO redirect entries ────────────────────────────────────
       // These pointed at old intermediary pages; send directly to new PSEO URLs.
       {

@@ -324,9 +324,9 @@ export function SiteHeader(): React.JSX.Element {
               </div>
 
               {/* Post Property */}
-              <Link href="/rent-or-sell-your-property"
+              <Link href="/post-property"
                 className="hidden! relative items-center! gap-2 rounded-full bg-[#ffc900] px-6! py-3 text-[13px]! font-bold! text-black/80! leading-none no-underline transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white! lg:inline-flex!"
-               onClick={(e) => { handleProtectedRoute(e, "/rent-or-sell-your-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}>
+               onClick={(e) => { handleProtectedRoute(e, "/post-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}>
                 Post Property
                 <span className="absolute! -right-2.5 -top-1.5 rounded-lg bg-[#22c55e] px-3! py-0.2! text-[10px]! font-black leading-none tracking-widest text-white shadow-sm">FREE</span>
               </Link>
@@ -532,8 +532,8 @@ export function SiteHeader(): React.JSX.Element {
               {/* Bottom CTAs — pinned */}
               <div className="shrink-0 border-t border-[#27427f]/20 bg-[#27427f]/[0.03] px-5 py-4 grid gap-3">
                 <Link 
-                  href="/rent-or-sell-your-property"
-                  onClick={(e) => { handleProtectedRoute(e, "/rent-or-sell-your-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}
+                  href="/post-property"
+                  onClick={(e) => { handleProtectedRoute(e, "/post-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}
                   className="relative w-full rounded-xl bg-[#ffc900] py-3 text-[13px]! font-semibold! leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline text-center transition-colors hover:bg-[#27427f] hover:text-white"
                 >
                   Post Property

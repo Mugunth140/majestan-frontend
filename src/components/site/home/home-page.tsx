@@ -60,8 +60,8 @@ export function HomePage({ data, banners }: { data: HomePageData; banners: AdHer
 
   const serviceCards = [
     ["Property Management", "/services/property-management", "Residential and commercial leasing support from tenant search to ongoing care.", Home],
-    ["Rent a Property", "/rent-or-sell-your-property", "Guided leasing support for homes, offices, warehouses, and commercial spaces.", BadgePercent],
-    ["Sell a Property", "/rent-or-sell-your-property", "Market pricing, qualified leads, and hands-on support through closure.", Store],
+    ["Rent a Property", "/post-property", "Guided leasing support for homes, offices, warehouses, and commercial spaces.", BadgePercent],
+    ["Sell a Property", "/post-property", "Market pricing, qualified leads, and hands-on support through closure.", Store],
   ] as const;
 
   return (
@@ -214,7 +214,7 @@ export function HomePage({ data, banners }: { data: HomePageData; banners: AdHer
               </p>
               
               <Link 
-                href="/rent-or-sell-your-property" 
+                href="/post-property"
                 className="inline-flex! items-center! justify-center! bg-[#ffc900]! text-slate-900! font-semibold! px-10! py-4! rounded-full! transition-all! duration-300! hover:bg-[#1e3465]! hover:text-white! hover:shadow-[0_10px_20px_-10px_rgba(39,66,127,0.4)]!"
               >
                 <span className="text-md! font-normal! tracking-relaxed!">Meet Our Team</span>

@@ -42,7 +42,6 @@ import { Property1View } from "@/components/site/views/Property1View";
 import { PropertyManagementView } from "@/components/site/views/PropertyManagementView";
 import { RentView } from "@/components/site/views/RentView";
 import { Rent1View } from "@/components/site/views/Rent1View";
-import { RentSellPropertyView } from "@/components/site/views/RentSellPropertyView";
 import { ResidentailView } from "@/components/site/views/ResidentailView";
 import { TestimonialsView } from "@/components/site/views/TestimonialsView";
 import { VillaDetailsView } from "@/components/site/views/VillaDetailsView";
@@ -95,7 +94,6 @@ export const VIEW_COMPONENTS = {
   "property_management.php": PropertyManagementView,
   "rent.php": RentView,
   "rent1.php": Rent1View,
-  "rent_sell_property.php": RentSellPropertyView,
   "residentail.php": ResidentailView,
   "testimonials.php": TestimonialsView,
   "villa-details.php": VillaDetailsView,

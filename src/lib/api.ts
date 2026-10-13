@@ -127,7 +127,8 @@ export async function fetchApi<T>(
     }
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      const method = (init?.method || "GET").toUpperCase();
+      throw new Error(`API request failed: ${response.status} ${response.statusText} for ${method} ${path}`);
     }
 
     const payload = (await response.json()) as ApiEnvelope<T> | T;

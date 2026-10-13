@@ -5,7 +5,7 @@ const API_BASE = process.env.API_BASE_URL || "http://localhost:5000/api/v1";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { q, city, listingType, propertyType, locality } = body;
+    const { q, city, listingType, propertyType, locality, scope } = body;
 
     if (!q && !locality && !propertyType) {
       return NextResponse.json({ hits: [], total: 0 });
@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     if (listingType) params.set("listingType", listingType);
     if (propertyType) params.set("propertyType", propertyType);
     if (locality) params.set("locality", locality);
+    if (scope === "projects") params.set("scope", "projects");
     params.set("limit", "5");
     params.set("hybrid", "true");
 

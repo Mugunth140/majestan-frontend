@@ -155,14 +155,42 @@ export function HomeSearch({
     event.preventDefault();
     setError("");
 
-    // Project mode — the /projects page owns keyword/location/type filtering.
+    // Project mode — Meili-first text search, direct /projects fallback.
     if (isProjectMode) {
       const params = new URLSearchParams();
       if (searchQuery.trim()) params.set("keyword", searchQuery.trim());
       if (locality) params.set("location", locality);
       if (propertyType) params.set("projectType", propertyType);
       const qs = params.toString();
-      router.push(qs ? `/projects?${qs}` : "/projects");
+      const fallback = () => router.push(qs ? `/projects?${qs}` : "/projects");
+
+      if (searchQuery.trim()) {
+        setIsSearching(true);
+        try {
+          const res = await fetch("/api/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              q: searchQuery.trim(),
+              city: selectedCity,
+              locality: locality || undefined,
+              propertyType: propertyType || undefined,
+              scope: "projects",
+            }),
+          });
+          const data = await res.json();
+          const topHit = data?.hits?.[0];
+          if (topHit?.canonicalUrl) {
+            router.push(topHit.canonicalUrl);
+            return;
+          }
+        } catch {
+          // Fall through to fallback
+        } finally {
+          setIsSearching(false);
+        }
+      }
+      fallback();
       return;
     }
 

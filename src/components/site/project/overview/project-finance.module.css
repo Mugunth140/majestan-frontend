@@ -24,10 +24,21 @@
 }
 .widget { display: grid; gap: 16px; margin-top: 24px; min-width: 0; }
 .label { display: block; margin: 0 0 8px !important; font-size: 14px !important; line-height: 20px; font-weight: 500; color: var(--finance-muted); }
-.unitTypes { display: flex; flex-wrap: wrap; gap: 8px; }
+.picker { min-width: 0; }
+.unitTypes {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 4px;
+  margin: -4px;
+  scrollbar-width: thin;
+  scrollbar-color: #a9c1ec transparent;
+}
 .unitButton {
   display: flex !important;
-  flex: 1 1 128px;
+  flex: 1 0 128px;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
@@ -48,7 +59,7 @@
 .unitButton:focus-visible, .configuration:has(input:focus-visible), .links a:focus-visible, .assumptions summary:focus-visible { outline: 2px solid var(--finance-accent); outline-offset: 4px; }
 .section button::before, .section button::after { content: none !important; }
 .configurations { min-width: 0; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-.configurationChoices { display: flex; gap: 8px; overflow-x: auto; padding: 4px; margin: -4px; scrollbar-width: thin; scrollbar-color: #a9c1ec transparent; }
+.configurationChoices { display: flex; gap: 8px; overflow-x: auto; overscroll-behavior-inline: contain; padding: 4px; margin: -4px; scrollbar-width: thin; scrollbar-color: #a9c1ec transparent; }
 .configuration {
   position: relative;
   display: flex;
@@ -71,7 +82,7 @@
 .configurationPrice { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 .main { display: grid; gap: 16px; min-width: 0; }
 .payment { min-width: 0; }
-.emi { display: block; font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.emi { display: block; font-size: 36px; line-height: 40px; font-weight: 600; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
 .selectedPrice { margin: 8px 0 0 !important; color: var(--finance-muted); font-size: 14px !important; line-height: 20px; }
 .controls { display: grid; gap: 16px; align-content: center; min-width: 0; }
 .sliderLabel { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: 14px; line-height: 20px; }
@@ -114,9 +125,11 @@
 .empty { margin-top: 24px; font-size: 16px; line-height: 24px; }
 .empty strong { font-size: 20px; font-weight: 500; }
 .empty p { margin: 8px 0 0 !important; font-size: 16px !important; }
+@container (min-width: 420px) {
+  .main { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; }
+}
 @container (min-width: 520px) {
-  .main { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
-  .emi { font-size: 36px; line-height: 40px; }
+  .emi { font-size: 48px; line-height: 1; }
   .repaymentNumbers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .repaymentNumbers > div:last-child { grid-column: auto; }
 }

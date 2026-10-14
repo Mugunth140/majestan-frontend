@@ -36,7 +36,9 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
 
   return (
     <div className={`${PAGE_CONTAINER} w-full! flex! flex-col! gap-6!`}>
-      <ProjectGallery project={project} />
+      {/* Keyed by project: the gallery's position must not ride along
+          across client-side project-to-project navigation. */}
+      <ProjectGallery key={project.canonicalSlug} project={project} />
 
       <ProjectTitleRow project={project} heading={heading} />
 

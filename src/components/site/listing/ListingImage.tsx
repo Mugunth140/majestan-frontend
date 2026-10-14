@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Progressive listing photo with a cached type placeholder.
@@ -63,12 +63,24 @@ export function ListingImage({
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [prevSrc, setPrevSrc] = useState(src);
+  // One delayed retry before the placeholder becomes final: transient
+  // blips must not permanently swap a tile. The remount key refetches the
+  // identical URL (failures are not HTTP-cached), so signed URLs keep working.
+  const RETRY_MS = 1500;
+  const attemptsRef = useRef(0);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   // Reset on src change during render (React-endorsed pattern — no effect).
   if (prevSrc !== src) {
     setPrevSrc(src);
     setLoaded(false);
     setFailed(false);
+    attemptsRef.current = 0;
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+    }
   }
 
   useEffect(() => {
@@ -76,6 +88,13 @@ export function ListingImage({
     // instance's own onLoad so the fade never plays over a broken image.
     if (src) void prefetchReal(src);
   }, [src]);
+
+  useEffect(
+    () => () => {
+      if (retryTimer.current) clearTimeout(retryTimer.current);
+    },
+    [],
+  );
 
   const showReal = Boolean(src) && !failed;
   // Blur-up only while a real photo is still loading. When the placeholder
@@ -98,6 +117,7 @@ export function ListingImage({
       )}
       {showReal && (
         <img
+          key={attempt}
           src={src as string}
           alt={alt}
           loading={eager ? "eager" : "lazy"}
@@ -106,10 +126,15 @@ export function ListingImage({
           draggable={false}
           onLoad={() => setLoaded(true)}
           onError={(e) => {
-            // One-shot guard: a broken placeholder must not ping-pong.
+            // One-shot guard per node: a broken placeholder must not ping-pong.
             const el = e.currentTarget;
             if (el.dataset.listingFallback === "1") return;
             el.dataset.listingFallback = "1";
+            if (attemptsRef.current < 1) {
+              attemptsRef.current += 1;
+              retryTimer.current = setTimeout(() => setAttempt((a) => a + 1), RETRY_MS);
+              return;
+            }
             setFailed(true);
           }}
           className={`${className ?? ""} transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}

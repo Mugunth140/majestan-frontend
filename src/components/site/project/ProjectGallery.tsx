@@ -65,8 +65,10 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
         <div className="absolute! inset-0!">
           {count > 0 ? (
             images.map((img, index) => (
+              // Position in the key: the cover often repeats inside the
+              // gallery, and same-key slides would merge into one.
               <div
-                key={img}
+                key={`${img}-${index}`}
                 aria-hidden={index !== active}
                 className={`absolute! inset-0! transition-opacity! duration-250! ease-out-quint! ${
                   index === active ? "opacity-100! z-10!" : "opacity-0! z-0!"

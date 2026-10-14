@@ -21,7 +21,8 @@ import { RequestButton } from "@/components/site/project/RequestButton";
  * with just one of them reads as a single list, not a heading over nothing.
  */
 export function SpecsHighlights({ project }: { project: ProjectDetail }) {
-  const [expanded, setExpanded] = useState(false);
+  const [highlightsExpanded, setHighlightsExpanded] = useState(false);
+  const [specsExpanded, setSpecsExpanded] = useState(false);
   const highlights = bulletLines(project.highlights);
   const specs = (project.specifications ?? []).flatMap((spec) => {
     const label = spec?.label?.trim();
@@ -49,19 +50,21 @@ export function SpecsHighlights({ project }: { project: ProjectDetail }) {
 
   const both = highlights.length > 0 && specs.length > 0;
   const headingGap = both ? "mt-4!" : "";
-  /* Collapsed preview mirrors the About section: the first row(s) of each
-     block, the rest behind one toggle. Both grids run 2-up, so one visual
-     row is 2 items. */
+  /* Collapsed previews mirror the About section: the first row(s) of each
+     block, the rest behind its own toggle. Both grids run 2-up, so one
+     visual row is 2 items. */
   const HIGHLIGHTS_PREVIEW = 6;
   const SPECS_PREVIEW = 2;
-  const collapsible =
-    highlights.length > HIGHLIGHTS_PREVIEW || specs.length > SPECS_PREVIEW;
+  const highlightsCollapsible = highlights.length > HIGHLIGHTS_PREVIEW;
+  const specsCollapsible = specs.length > SPECS_PREVIEW;
   const visibleHighlights =
-    collapsible && !expanded
+    highlightsCollapsible && !highlightsExpanded
       ? highlights.slice(0, HIGHLIGHTS_PREVIEW)
       : highlights;
   const visibleSpecs =
-    collapsible && !expanded ? specs.slice(0, SPECS_PREVIEW) : specs;
+    specsCollapsible && !specsExpanded
+      ? specs.slice(0, SPECS_PREVIEW)
+      : specs;
 
   return (
     <Card title="Specifications and highlights" id="specifications">
@@ -89,6 +92,17 @@ export function SpecsHighlights({ project }: { project: ProjectDetail }) {
           </div>
         )}
 
+        {highlightsCollapsible && (
+          <button
+            type="button"
+            onClick={() => setHighlightsExpanded((value) => !value)}
+            aria-expanded={highlightsExpanded}
+            className={`mt-4! inline-flex! cursor-pointer! items-center! border-0! bg-transparent! p-0! text-sm! font-medium! ${TEXT_LINK}`}
+          >
+            {highlightsExpanded ? "View less" : "View more"}
+          </button>
+        )}
+
         {both && <Divider />}
 
         {visibleSpecs.length > 0 && (
@@ -100,14 +114,14 @@ export function SpecsHighlights({ project }: { project: ProjectDetail }) {
           </div>
         )}
 
-        {collapsible && (
+        {specsCollapsible && (
           <button
             type="button"
-            onClick={() => setExpanded((value) => !value)}
-            aria-expanded={expanded}
+            onClick={() => setSpecsExpanded((value) => !value)}
+            aria-expanded={specsExpanded}
             className={`mt-4! inline-flex! cursor-pointer! items-center! border-0! bg-transparent! p-0! text-sm! font-medium! ${TEXT_LINK}`}
           >
-            {expanded ? "View less" : "View more"}
+            {specsExpanded ? "View less" : "View more"}
           </button>
         )}
       </div>

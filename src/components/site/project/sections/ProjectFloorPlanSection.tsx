@@ -365,11 +365,8 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
 
   return (
     <>
-      {/* Config tabs: one card per configuration. The heading is visible;
-          the tablist carries the names. */}
-      <h2 className="text-xl! md:text-2xl! font-semibold! text-gray-900!">
-        {getFloorPlanLabel(project.projectType)} & Configurations
-      </h2>
+      {/* Config tabs: one card per configuration. The page h1 names the
+          section; the tablist carries the names. */}
       <div role="tablist" aria-label="Configurations" className="mt-4! grid! grid-cols-2! sm:grid-cols-3! gap-3!">
         {summarizeConfigurations(project).map((summary) => {
           const selected = summary.key === activeConfigKey;

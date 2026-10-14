@@ -7,7 +7,7 @@ export const PROJECT_ENQUIRE_EVENT = "project:enquire";
 
 export type ProjectEnquireDetail = {
   intent?: "enquire" | "visit";
-  /** Pre-fills the "Anything specific?" field so the lead says what was asked for. */
+  /** Invisible note sent in the payload (no visible field) so the lead says what was asked for. */
   message?: string;
 };
 

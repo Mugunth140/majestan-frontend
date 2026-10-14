@@ -1,5 +1,5 @@
 // site/majestan-frontend/src/components/site/project/ProjectEnquiryActions.test.tsx
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { act, render, screen, cleanup, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectEnquiryActions } from "./ProjectEnquiryActions";
@@ -130,5 +130,42 @@ describe("ProjectEnquiryActions", () => {
       new CustomEvent(PROJECT_ENQUIRE_EVENT, { detail: { message: "hi" } }),
     );
     expect(await screen.findByText(/enter your mobile number/i)).toBeInTheDocument();
+  });
+
+  it("resumes the pending event message after OTP login and sends it", async () => {
+    const user = userEvent.setup();
+    vi.mocked(createProjectEnquiry).mockResolvedValue({ id: 79, submitted: true });
+    render(<ProjectEnquiryActions project={PROJECT} />);
+    fireEvent(
+      window,
+      new CustomEvent(PROJECT_ENQUIRE_EVENT, {
+        detail: { intent: "enquire", message: "Need the floor plan" },
+      }),
+    );
+    expect(await screen.findByText(/enter your mobile number/i)).toBeInTheDocument();
+
+    act(() => {
+      useUserAuthStore.setState({
+        token: "tok",
+        isAuthenticated: true,
+        user: { id: 7, name: "Rahul", email: "r@x.com", phone: "9876543210", role: "user" },
+      });
+    });
+
+    expect(await screen.findByText("Rahul")).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/anything specific/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /submit enquiry/i }));
+    expect(createProjectEnquiry).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: 6, message: "Need the floor plan", intent: "enquiry" }),
+      "tok",
+    );
+  });
+
+  it("opens from externalOpen while logged in", async () => {
+    logIn();
+    render(<ProjectEnquiryActions project={PROJECT} hideTriggers externalOpen={{ intent: "enquire", token: 1 }} />);
+    expect(await screen.findByText("Rahul")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /enquire now/i })).not.toBeInTheDocument();
   });
 });

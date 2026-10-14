@@ -195,6 +195,11 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
   }
 
   async function handleSubmit(intent: "enquiry" | "site_visit") {
+    if (!token) {
+      setErrorMsg("Please log in again before submitting.");
+      setStatus("error");
+      return;
+    }
     const trimmedName = name.trim();
     if (trimmedName.length < 2) {
       setErrorMsg("Please enter your name before submitting.");

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Phone, X, Loader2, CheckCircle2, Pencil, Check, Lock } from "lucide-react";
+import { Calendar, Phone, X, Loader2, CheckCircle2, Pencil, Check, Lock, ChevronDown } from "lucide-react";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { createPropertyEnquiry } from "@/lib/api";
@@ -59,6 +59,7 @@ export function ContactCard({
   nameInputRef,
   displayPhone,
   email,
+  bare,
 }: {
   name: string;
   setName: (v: string) => void;
@@ -67,13 +68,11 @@ export function ContactCard({
   nameInputRef: React.RefObject<HTMLInputElement | null>;
   displayPhone: string;
   email: string | undefined | null;
+  /** Render rows only, for embedding in another card (collapsible section). */
+  bare?: boolean;
 }) {
-  return (
-    <div className="rounded-[14px]! bg-white! border! border-[#dae4f3]! p-4! space-y-3! mb-5!">
-      <p className="text-sm! font-medium! text-[#586579]!">
-        Your contact details
-      </p>
-
+  const rows = (
+    <>
       {/* Name row */}
       <div>
         <p className={labelClass}>Name</p>
@@ -143,6 +142,76 @@ export function ContactCard({
           </span>
         </div>
       )}
+    </>
+  );
+  if (bare) return <div className="space-y-3!">{rows}</div>;
+  return (
+    <div className="rounded-[14px]! bg-white! border! border-[#dae4f3]! p-4! space-y-3! mb-5!">
+      <p className="text-sm! font-medium! text-[#586579]!">
+        Your contact details
+      </p>
+      {rows}
+    </div>
+  );
+}
+
+/**
+ * Contact details as one collapsible card for the visit dialogs, where date
+ * and slots are the primary task. Starts open when contact is incomplete,
+ * reopens whenever attention is needed (alertOpen), otherwise stays as the
+ * reader left it. The expand animation is motion-gated: instant under
+ * reduced motion.
+ */
+export function ContactDetailsSection({
+  summary,
+  defaultOpen,
+  alertOpen,
+  children,
+}: {
+  summary: string;
+  defaultOpen: boolean;
+  alertOpen: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const panelId = useId();
+  useEffect(() => {
+    if (alertOpen) setOpen(true);
+  }, [alertOpen]);
+  return (
+    <div className="rounded-[14px]! border! border-[#dae4f3]! bg-white! mb-5! overflow-hidden!">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="flex! w-full! items-center! gap-3! p-4! text-left! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-inset! focus-visible:ring-[#2563eb]!"
+      >
+        <span className="min-w-0! flex-1!">
+          <span className="block! text-sm! font-medium! text-[#586579]!">
+            Your contact details
+          </span>
+          <span className="block! truncate! text-[15px]! font-medium! text-[#111827]!">
+            {summary}
+          </span>
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`w-4! h-4! shrink-0! text-gray-500! transition-transform! duration-200! motion-safe:ease-out-quint! ${
+            open ? "rotate-180!" : ""
+          }`}
+        />
+      </button>
+      <div
+        id={panelId}
+        className={`grid! transition-[grid-template-rows]! duration-200! motion-safe:ease-out-quint! ${
+          open ? "grid-rows-[1fr]!" : "grid-rows-[0fr]!"
+        }`}
+      >
+        <div className="min-h-0! overflow-hidden!">
+          <div className="px-4! pb-4!">{children}</div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -192,7 +261,11 @@ export function DialogShell({
         onClick={(e) => e.stopPropagation()}
         // Finance-card look ("Your home. Your EMI."): light blue gradient,
         // 16px radius, bright-blue accents instead of flat navy.
-        className="relative! w-full! max-w-md! rounded-2xl! bg-[linear-gradient(135deg,#fff_0%,#fff_40%,#edf4ff_100%)]! border! border-[#dfe7f4]! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
+        // font-manrope-page (plain class): legacy styles force Lexend on
+        // button/input/select/textarea at element level, which beats
+        // inheritance — without this the controls render in Lexend while
+        // everything else is Manrope.
+        className="font-manrope-page relative! w-full! max-w-md! rounded-2xl! bg-[linear-gradient(135deg,#fff_0%,#fff_40%,#edf4ff_100%)]! border! border-[#dfe7f4]! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
       >
         <motion.button
           whileHover={{ scale: 1.1, rotate: 90 }}
@@ -445,6 +518,28 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
     />
   );
 
+  // Collapsible contact for the visit dialog, where date and slots come
+  // first. Summary keeps name and phone visible while collapsed.
+  const contactSummary = [name.trim(), displayPhone()].filter(Boolean).join(" · ");
+  const contactCardCollapsed = (
+    <ContactDetailsSection
+      summary={contactSummary || "Add your contact details"}
+      defaultOpen={!(isRealName(name) && displayPhone())}
+      alertOpen={editingName}
+    >
+      <ContactCard
+        name={name}
+        setName={setName}
+        editingName={editingName}
+        setEditingName={setEditingName}
+        nameInputRef={nameInputRef}
+        displayPhone={displayPhone()}
+        email={authedUser?.email}
+        bare
+      />
+    </ContactDetailsSection>
+  );
+
   return (
     <>
       {/* Trigger buttons */}
@@ -502,7 +597,7 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
                 <SuccessState name={name} message="Your site visit is booked. We will confirm shortly." />
               ) : (
                 <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
-                  {contactCard}
+                  {contactCardCollapsed}
 
                   {/* Date */}
                   <div>

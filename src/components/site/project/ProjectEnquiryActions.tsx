@@ -10,6 +10,7 @@ import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { VISIT_SLOTS, formatSlot, isValidVisitDate, maxVisitDate, todayYmd } from "@/lib/visit-slots";
 import {
   ContactCard,
+  ContactDetailsSection,
   DialogShell,
   SuccessState,
   SubmitBtn,
@@ -254,6 +255,28 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
     />
   );
 
+  // Collapsible contact for the visit dialog, where date and slots come
+  // first. Summary keeps name and phone visible while collapsed.
+  const contactSummary = [name.trim(), displayPhone()].filter(Boolean).join(" · ");
+  const contactCardCollapsed = (
+    <ContactDetailsSection
+      summary={contactSummary || "Add your contact details"}
+      defaultOpen={!(isRealName(name) && displayPhone())}
+      alertOpen={editingName}
+    >
+      <ContactCard
+        name={name}
+        setName={setName}
+        editingName={editingName}
+        setEditingName={setEditingName}
+        nameInputRef={nameInputRef}
+        displayPhone={displayPhone()}
+        email={authedUser?.email}
+        bare
+      />
+    </ContactDetailsSection>
+  );
+
   return (
     <>
       {/* Trigger buttons */}
@@ -311,7 +334,7 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
                 <SuccessState name={name} message="Your site visit is booked. We will confirm shortly." />
               ) : (
                 <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
-                  {contactCard}
+                  {contactCardCollapsed}
 
                   {/* Date */}
                   <div>

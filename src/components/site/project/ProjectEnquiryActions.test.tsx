@@ -168,4 +168,32 @@ describe("ProjectEnquiryActions", () => {
     expect(await screen.findByText("Rahul")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /enquire now/i })).not.toBeInTheDocument();
   });
+
+  it("collapses contact details on the visit dialog when contact is complete", async () => {
+    const user = userEvent.setup();
+    logIn();
+    render(<ProjectEnquiryActions project={PROJECT} />);
+    await user.click(screen.getByRole("button", { name: /schedule visit/i }));
+
+    // Summary line stands in for the full card:
+    const toggle = await screen.findByRole("button", { name: /your contact details/i });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByPlaceholderText(/your full name/i)).not.toBeInTheDocument();
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Rahul")).toBeInTheDocument();
+  });
+
+  it("leaves contact open on the visit dialog when the name is missing", async () => {
+    const user = userEvent.setup();
+    useUserAuthStore.setState({
+      token: "tok",
+      isAuthenticated: true,
+      user: { id: 8, name: "Majestan User", email: "", phone: "9876543210", role: "user" },
+    });
+    render(<ProjectEnquiryActions project={PROJECT} />);
+    await user.click(screen.getByRole("button", { name: /schedule visit/i }));
+    expect(await screen.findByPlaceholderText(/your full name/i)).toBeInTheDocument();
+  });
 });

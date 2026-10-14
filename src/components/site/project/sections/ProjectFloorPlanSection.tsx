@@ -29,7 +29,7 @@ import {
 import { unitSpecGroups, type SpecGroup, type SpecGroupKey } from "@/lib/unit-spec-groups";
 import { Card, EmptyState, LABEL } from "@/components/site/project/project-ui";
 import { RequestButton } from "@/components/site/project/RequestButton";
-import { FloorPlanLightbox } from "@/components/site/project/FloorPlanLightbox";
+import { FloorPlanLightbox, type FloorPlanSlide } from "@/components/site/project/FloorPlanLightbox";
 import { CompactSummaryBody } from "@/components/site/project/configuration-parts";
 import { StatusChip } from "@/components/site/project/configuration-parts";
 
@@ -168,11 +168,16 @@ function UnitCard({
   index,
   group,
   project,
+  slides,
+  slideIndex,
 }: {
   unit: ProjectUnit;
   index: number;
   group: ConfigurationGroup;
   project: ProjectDetail;
+  /** Every plan in the project; this card's trigger opens at slideIndex. */
+  slides: FloorPlanSlide[];
+  slideIndex: number;
 }) {
   const name = unitName(unit, index);
   const meta = unitMeta(unit, name, group);
@@ -219,12 +224,7 @@ function UnitCard({
 
       <div className="mt-5!">
         {unit.floorPlanImageUrl ? (
-          <FloorPlanLightbox
-            src={unit.floorPlanImageUrl}
-            alt={`${name} ${planNoun}, ${group.label}, ${project.name}`}
-            title={`${name} ${planNoun}`}
-            subtitle={meta}
-          />
+          <FloorPlanLightbox items={slides} index={slideIndex} />
         ) : (
           <div className="flex! flex-col! items-center! justify-center! gap-3! rounded-xl! bg-gray-50! px-6! py-8! text-center!">
             <span
@@ -294,12 +294,37 @@ function ActiveUnitPanel({
   project: ProjectDetail;
 }) {
   if (!activeUnit) return null;
+  const planNoun = getFloorPlanLabel(project.projectType).toLowerCase();
+  // The viewer steps through every plan in the project, opening at the
+  // unit it was tapped on. Units without an image are skipped.
+  const slides: FloorPlanSlide[] = [];
+  const slideIndexByUnit = new Map<number, number>();
+  for (const group of groups) {
+    group.units.forEach((unit, unitIndex) => {
+      if (!unit.floorPlanImageUrl) return;
+      const name = unitName(unit, unitIndex);
+      slideIndexByUnit.set(unit.id, slides.length);
+      slides.push({
+        src: unit.floorPlanImageUrl,
+        alt: `${name} ${planNoun}, ${group.label}, ${project.name}`,
+        title: `${name} ${planNoun}`,
+        subtitle: unitMeta(unit, name, group),
+      });
+    });
+  }
   return (
     <section aria-label="Unit details" className={CONFIGURATION_CARD}>
       {groups.map((group) =>
         group.units.map((unit, index) => (
           <div key={unit.id} hidden={unit.id !== activeUnit.id}>
-            <UnitCard unit={unit} index={index} group={group} project={project} />
+            <UnitCard
+              unit={unit}
+              index={index}
+              group={group}
+              project={project}
+              slides={slides}
+              slideIndex={slideIndexByUnit.get(unit.id) ?? 0}
+            />
           </div>
         )),
       )}

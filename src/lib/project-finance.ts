@@ -1,5 +1,5 @@
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
-import { emi } from "@/lib/emi";
+import { loanTotals } from "@/lib/emi";
 
 /** Illustrative inputs, matching the existing calculator defaults, not a lender quote. */
 export const PROJECT_FINANCE_ASSUMPTIONS = {
@@ -16,26 +16,37 @@ export type ProjectFinanceEstimate = {
   loanAmount: number;
   monthlyEmi: number;
   monthlyIncome: number;
+  totalInterest: number;
+  totalPayable: number;
 };
 
-export function projectFinanceEstimate(project: Pick<ProjectDetail, "units">): ProjectFinanceEstimate | null {
-  const candidates = (project.units ?? []).filter((unit) => {
+export function projectFinanceUnits(project: Pick<ProjectDetail, "units">): ProjectUnit[] {
+  return (project.units ?? []).filter((unit) => {
     const mode = unit.listingMode?.toLowerCase();
     const price = Number(unit.price);
     return unit.status?.toLowerCase() === "available" &&
       (!mode || mode === "sale" || mode === "both") &&
       Number.isFinite(price) && price > 0;
-  });
-  const unit = candidates.reduce<ProjectUnit | null>((lowest, current) =>
-    !lowest || Number(current.price) < Number(lowest.price) ? current : lowest, null);
+  }).sort((a, b) => Number(a.price) - Number(b.price));
+}
+
+export type ProjectFinanceOptions = { unitId?: number; annualRatePct?: number; years?: number };
+
+export function projectFinanceEstimate(project: Pick<ProjectDetail, "units">, options: ProjectFinanceOptions = {}): ProjectFinanceEstimate | null {
+  const candidates = projectFinanceUnits(project);
+  const unit = candidates.find((candidate) => candidate.id === options.unitId) ?? candidates[0];
   if (!unit) return null;
 
   const propertyPrice = Number(unit.price);
   const downPayment = propertyPrice * PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct / 100;
   const loanAmount = propertyPrice - downPayment;
-  const monthlyEmi = emi(loanAmount, PROJECT_FINANCE_ASSUMPTIONS.annualRatePct, PROJECT_FINANCE_ASSUMPTIONS.years);
+  const annualRatePct = Number.isFinite(options.annualRatePct) && Number(options.annualRatePct) >= 0
+    ? Number(options.annualRatePct) : PROJECT_FINANCE_ASSUMPTIONS.annualRatePct;
+  const years = Number.isFinite(options.years) && Number(options.years) > 0
+    ? Number(options.years) : PROJECT_FINANCE_ASSUMPTIONS.years;
+  const { monthlyEmi, totalInterest, totalPayable } = loanTotals(loanAmount, annualRatePct, years);
   return {
-    unit, propertyPrice, downPayment, loanAmount, monthlyEmi,
+    unit, propertyPrice, downPayment, loanAmount, monthlyEmi, totalInterest, totalPayable,
     // Existing calculator's income model, with no other monthly obligations.
     monthlyIncome: monthlyEmi / PROJECT_FINANCE_ASSUMPTIONS.emiIncomeShare,
   };

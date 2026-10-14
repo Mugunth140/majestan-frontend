@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ProjectUnit } from "@/lib/api/projects";
 import { affordableHome } from "@/lib/emi";
-import { projectFinanceEstimate } from "./project-finance";
+import { projectFinanceEstimate, projectFinanceUnits } from "./project-finance";
 
 const unit = (id: number, price: string | null, status = "available", listingMode: string | null = "sale") => ({ id, price, status, listingMode }) as ProjectUnit;
 
@@ -24,5 +24,22 @@ describe("project finance estimate", () => {
     const units = [unit(1, "9000000"), unit(2, "5000000", "available", null)];
     expect(projectFinanceEstimate({ units })?.unit.id).toBe(2);
     expect(units.map((u) => u.id)).toEqual([1, 2]);
+  });
+
+  it("recalculates loan, EMI and interest for the selected configuration and slider inputs", () => {
+    const project = { units: [unit(1, "5000000"), unit(2, "9000000"), unit(3, "2000000", "booked")] };
+    expect(projectFinanceUnits(project).map((u) => u.id)).toEqual([1, 2]);
+    const baseline = projectFinanceEstimate(project)!;
+    const selected = projectFinanceEstimate(project, { unitId: 2 })!;
+    expect(selected.loanAmount).toBe(7200000);
+    expect(selected.monthlyEmi).toBeGreaterThan(baseline.monthlyEmi);
+    const higherRate = projectFinanceEstimate(project, { unitId: 2, annualRatePct: 10 })!;
+    expect(higherRate.monthlyEmi).toBeGreaterThan(selected.monthlyEmi);
+    expect(higherRate.totalInterest).toBeGreaterThan(selected.totalInterest);
+    const shorterTerm = projectFinanceEstimate(project, { unitId: 2, years: 10 })!;
+    expect(shorterTerm.monthlyEmi).toBeGreaterThan(selected.monthlyEmi);
+    expect(shorterTerm.totalInterest).toBeLessThan(selected.totalInterest);
+    expect(selected.totalPayable).toBeCloseTo(selected.loanAmount + selected.totalInterest);
+    expect(projectFinanceEstimate(project, { unitId: 3 })?.unit.id).toBe(1);
   });
 });

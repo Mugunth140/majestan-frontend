@@ -1,7 +1,7 @@
-import { Building2, ExternalLink, Globe } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { RequestButton } from "@/components/site/project/RequestButton";
 import type { ProjectDetail } from "@/lib/api/projects";
-import { BODY, Card, EmptyState, LABEL, TEXT_LINK, paragraphs } from "@/components/site/project/project-ui";
+import { BODY, Card, EmptyState, LABEL, paragraphs } from "@/components/site/project/project-ui";
 
 /**
  * The developer behind the project: logo, track record and their own words.
@@ -41,31 +41,10 @@ export function BuilderSection({ project }: { project: ProjectDetail }) {
       : null,
   ].filter((stat): stat is { value: string; label: string } => stat !== null);
 
-  const website = builder?.website
-    ? builder.website.startsWith("http")
-      ? builder.website
-      : `https://${builder.website}`
-    : null;
-
   return (
     <Card
       title={`About ${name}`}
       id="builder"
-      action={
-        website ? (
-          <a
-            href={website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`shrink-0! inline-flex! items-center! gap-1.5! text-sm! font-medium! ${TEXT_LINK}`}
-          >
-            <Globe className="w-4! h-4!" aria-hidden="true" />
-            Website
-            <ExternalLink className="w-3! h-3!" aria-hidden="true" />
-            <span className="sr-only">(opens in a new tab)</span>
-          </a>
-        ) : undefined
-      }
     >
       {builder?.logoUrl && (
         /* Raw <img>, as everywhere else storage-backed assets are rendered:

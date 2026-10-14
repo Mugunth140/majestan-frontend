@@ -89,14 +89,6 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
         )}
       </div>
 
-      {project.reraNumber && (
-        <p className="mt-6! pt-6! border-t! border-gray-200! flex! items-center! gap-2! text-sm! text-gray-600!">
-          <ShieldCheck className="w-4! h-4! shrink-0! text-emerald-600!" />
-          RERA registered
-          <span className="sr-only">, registration number {project.reraNumber}</span>
-        </p>
-      )}
-
       <div className="mt-6! pt-5! border-t! border-gray-200! flex! flex-col! items-center! gap-1.5! text-center!">
         <p className="flex! items-center! gap-1.5! text-sm! text-gray-500!">
           <Coins className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />

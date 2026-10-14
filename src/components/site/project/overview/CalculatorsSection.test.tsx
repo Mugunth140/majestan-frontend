@@ -1,50 +1,45 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+import type { ProjectDetail } from "@/lib/api/projects";
 import { CalculatorsSection } from "./CalculatorsSection";
 
 afterEach(cleanup);
 
+const project = (units: unknown[]) => ({
+  projectType: "apartment",
+  units,
+} as ProjectDetail);
+
+const pricedUnit = {
+  id: 1,
+  title: "",
+  unitType: "apartment_unit",
+  bedrooms: 2,
+  price: "5000000",
+  listingMode: "sale",
+  status: "available",
+  superBuiltupAreaSqft: "1200",
+};
+
 describe("CalculatorsSection", () => {
-  it("keeps both calculators mounted and preserves slider values when switching tabs", () => {
-    const { container } = render(<CalculatorsSection />);
+  it("shows a concise estimate and links to both customization calculators", () => {
+    const { container } = render(<CalculatorsSection project={project([pricedUnit])} />);
 
-    const emiTab = screen.getByRole("tab", { name: "Monthly EMI" });
-    expect(emiTab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tabpanel", { name: "Monthly EMI" })).toBeVisible();
-
-    const amount = container.querySelector<HTMLInputElement>(
-      '#emi-calculator-panel input[aria-label="Loan amount"]',
-    );
-    expect(amount).not.toBeNull();
-    fireEvent.change(amount!, { target: { value: "6200000" } });
-    expect(amount).toHaveValue("6200000");
-
-    fireEvent.click(screen.getByRole("tab", { name: "Home budget" }));
-    expect(screen.getByRole("tabpanel", { name: "Home budget" })).toBeVisible();
-    expect(container.querySelector("#emi-calculator-panel")).not.toBeVisible();
-    expect(container.querySelector("#affordability-calculator-panel input[aria-label='Gross monthly income']")).not.toBeNull();
-    expect(screen.getByRole("link", { name: "Open the full affordability calculator" })).toHaveAttribute(
-      "href",
-      "/affordability-calculator",
-    );
-
-    fireEvent.click(emiTab);
-    expect(amount).toHaveValue("6200000");
-    expect(screen.getByRole("link", { name: "Open the full EMI calculator" })).toHaveAttribute(
-      "href",
-      "/emi-calculator",
-    );
+    expect(screen.getByText("Estimated monthly EMI")).toBeInTheDocument();
+    expect(screen.getByText("Indicative monthly income")).toBeInTheDocument();
+    expect(screen.getByText(/From ₹50 L · 2 BHK · 1,200 sq\.ft/)).toBeInTheDocument();
+    expect(screen.getByText(/20% down/)).toBeInTheDocument();
+    expect(screen.getByText(/₹10 L down payment · ₹40 L loan/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Customize with EMI calculator" })).toHaveAttribute("href", "/emi-calculator");
+    expect(screen.getByRole("link", { name: "Customize with affordability calculator" })).toHaveAttribute("href", "/affordability-calculator");
+    expect(container.querySelector("input, [role=tab], input[type=range]")).toBeNull();
   });
 
-  it("supports arrow key navigation between calculator tabs", () => {
-    render(<CalculatorsSection />);
-    const emiTab = screen.getByRole("tab", { name: "Monthly EMI" });
-    emiTab.focus();
-    fireEvent.keyDown(emiTab, { key: "ArrowRight" });
+  it("does not invent a price or display estimates when no available unit is priced", () => {
+    render(<CalculatorsSection project={project([{ ...pricedUnit, price: null }])} />);
 
-    const budgetTab = screen.getByRole("tab", { name: "Home budget" });
-    expect(budgetTab).toHaveFocus();
-    expect(budgetTab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tabpanel", { name: "Home budget" })).toBeVisible();
+    expect(screen.getByText("Price on request")).toBeInTheDocument();
+    expect(screen.queryByText("Estimated monthly EMI")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Customize with EMI calculator" })).toBeInTheDocument();
   });
 });

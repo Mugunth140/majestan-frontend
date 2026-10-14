@@ -76,7 +76,7 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
         <MediaPreview project={project} />
         <LocationOverview project={project} />
         <BuilderSection project={project} />
-        <CalculatorsSection />
+        <CalculatorsSection project={project} />
         <FaqOverview project={project} />
       </ProjectShell>
     </div>

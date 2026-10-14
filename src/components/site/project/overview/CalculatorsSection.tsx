@@ -1,95 +1,68 @@
-"use client";
-
 import Link from "next/link";
-import { useRef, useState, type KeyboardEvent } from "react";
-import { AffordabilityCalculator } from "@/components/site/emi/AffordabilityCalculator";
-import { EmiCalculator } from "@/components/site/emi/EmiCalculator";
+import { formatINR, type ProjectDetail } from "@/lib/api/projects";
+import { projectFinanceEstimate, PROJECT_FINANCE_ASSUMPTIONS } from "@/lib/project-finance";
+import { unitAreaLabel } from "@/lib/project-config-summary";
 import { Card, TEXT_LINK } from "@/components/site/project/project-ui";
 
-const calculators = [
-  { id: "emi", label: "Monthly EMI" },
-  {
-    id: "affordability",
-    label: "Home budget",
-  },
-] as const;
+const money = (amount: number) =>
+  `₹${Math.round(amount).toLocaleString("en-IN")}`;
 
-/** Inline finance tools for buyers comparing this project with their budget. */
-export function CalculatorsSection() {
-  const [active, setActive] = useState<(typeof calculators)[number]["id"]>("emi");
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+function configurationLabel(unit: NonNullable<ReturnType<typeof projectFinanceEstimate>>["unit"]) {
+  if (unit.bedrooms != null && unit.bedrooms > 0) return `${unit.bedrooms} BHK`;
+  const type = unit.unitType.replace(/[_-]+/g, " ").trim();
+  return type ? type.replace(/\b\w/g, (letter) => letter.toUpperCase()) : unit.title;
+}
 
-  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    let nextIndex: number | undefined;
-    if (event.key === "ArrowRight") nextIndex = (index + 1) % calculators.length;
-    if (event.key === "ArrowLeft") nextIndex = (index - 1 + calculators.length) % calculators.length;
-    if (event.key === "Home") nextIndex = 0;
-    if (event.key === "End") nextIndex = calculators.length - 1;
-    if (nextIndex === undefined) return;
-
-    event.preventDefault();
-    const next = calculators[nextIndex];
-    setActive(next.id);
-    tabRefs.current[nextIndex]?.focus();
-  }
+/** A compact estimate based on the project's cheapest priced available unit. */
+export function CalculatorsSection({ project }: { project: ProjectDetail }) {
+  const estimate = projectFinanceEstimate(project);
 
   return (
     <Card title="Plan your finances" id="calculators">
-      <div
-        role="tablist"
-        aria-label="Project finance calculators"
-        className="mt-6! inline-flex! rounded-xl! bg-gray-100! p-1!"
-      >
-        {calculators.map((calculator, index) => (
-          <button
-            key={calculator.id}
-            ref={(element) => { tabRefs.current[index] = element; }}
-            id={`${calculator.id}-calculator-tab`}
-            type="button"
-            role="tab"
-            aria-selected={active === calculator.id}
-            aria-controls={`${calculator.id}-calculator-panel`}
-            tabIndex={active === calculator.id ? 0 : -1}
-            onClick={() => setActive(calculator.id)}
-            onKeyDown={(event) => onTabKeyDown(event, index)}
-            className={`rounded-lg! px-4! py-2! text-sm! font-semibold! transition-colors! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2! ${
-              active === calculator.id
-                ? "bg-white! text-[#27427f]! shadow-sm!"
-                : "text-gray-600! hover:text-gray-900!"
-            }`}
-          >
-            {calculator.label}
-          </button>
-        ))}
-      </div>
-
-      <div
-        id="emi-calculator-panel"
-        role="tabpanel"
-        aria-labelledby="emi-calculator-tab"
-        tabIndex={0}
-        hidden={active !== "emi"}
-        className="mt-6! rounded-lg! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
-      >
-        <EmiCalculator />
-        <Link href="/emi-calculator" className={`mt-6! inline-flex! text-sm! font-semibold! ${TEXT_LINK}`}>
-          Open the full EMI calculator
+      {!estimate ? (
+        <div className="mt-6! rounded-xl! bg-gray-50! p-4! text-sm! text-gray-600!">
+          <p className="font-semibold! text-gray-900!">Price on request</p>
+          <p className="mt-1!">A finance estimate will appear when an available unit price is shared.</p>
+        </div>
+      ) : (
+        <>
+          <div className="mt-6! rounded-xl! bg-gray-50! p-4! sm:p-6!">
+            <p className="text-sm! text-gray-600!">
+              From {formatINR(estimate.propertyPrice)} · {configurationLabel(estimate.unit)}
+              {unitAreaLabel(estimate.unit, project.projectType)
+                ? ` · ${unitAreaLabel(estimate.unit, project.projectType)}`
+                : ""}
+            </p>
+            <div className="mt-4! grid! grid-cols-1! gap-4! sm:grid-cols-2!">
+              <Metric label="Estimated monthly EMI" value={money(estimate.monthlyEmi)} />
+              <Metric label="Indicative monthly income" value={money(estimate.monthlyIncome)} />
+            </div>
+            <p className="mt-4! text-sm! text-gray-600!">
+              {formatINR(estimate.downPayment)} down payment · {formatINR(estimate.loanAmount)} loan
+            </p>
+            <p className="mt-4! text-xs! leading-5! text-gray-500!">
+              Illustration: {PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct}% down, {PROJECT_FINANCE_ASSUMPTIONS.years} years at {PROJECT_FINANCE_ASSUMPTIONS.annualRatePct}%. Income assumes no existing EMIs and payments at 50% of income.
+            </p>
+          </div>
+        </>
+      )}
+      <div className="mt-4! flex! flex-wrap! gap-x-6! gap-y-2!">
+        <Link href="/emi-calculator" className={`text-sm! font-semibold! ${TEXT_LINK}`}>
+          Customize with EMI calculator
         </Link>
-      </div>
-
-      <div
-        id="affordability-calculator-panel"
-        role="tabpanel"
-        aria-labelledby="affordability-calculator-tab"
-        tabIndex={0}
-        hidden={active !== "affordability"}
-        className="mt-6! rounded-lg! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
-      >
-        <AffordabilityCalculator />
-        <Link href="/affordability-calculator" className={`mt-6! inline-flex! text-sm! font-semibold! ${TEXT_LINK}`}>
-          Open the full affordability calculator
+        <Link href="/affordability-calculator" className={`text-sm! font-semibold! ${TEXT_LINK}`}>
+          Customize with affordability calculator
         </Link>
       </div>
     </Card>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs! font-medium! text-gray-500!">{label}</p>
+      <p className="mt-1! text-xl! font-semibold! tabular-nums! text-[#27427f]!">{value}</p>
+    </div>
   );
 }

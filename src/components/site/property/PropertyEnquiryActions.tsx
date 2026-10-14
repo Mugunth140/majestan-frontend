@@ -168,7 +168,10 @@ export function DialogShell({
       transition={{ duration: 0.22 }}
       role="presentation"
       onClick={onClose}
-      className="fixed! inset-0! z-50! flex! items-end! sm:items-center! justify-center! bg-gray-900/40! backdrop-blur-sm! p-4!"
+      // Above the fixed site header (z-1000) and every sticky tab bar and
+      // gallery control: an open modal owns the screen. The auth modal
+      // (z-9999) stays on top for the rare re-auth-while-open case.
+      className="fixed! inset-0! z-[1200]! flex! items-end! sm:items-center! justify-center! bg-gray-900/40! backdrop-blur-sm! p-4!"
     >
       <motion.div
         key={`${id}-card`}

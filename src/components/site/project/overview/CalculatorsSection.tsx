@@ -2,7 +2,7 @@
 
 import { useId, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Check } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { formatINR, type ProjectDetail, type ProjectUnit } from "@/lib/api/projects";
 import { projectFinanceEstimate, projectFinanceUnits, PROJECT_FINANCE_ASSUMPTIONS } from "@/lib/project-finance";
 import { unitAreaLabel } from "@/lib/project-config-summary";
@@ -84,7 +84,7 @@ function FinanceWidget({ project }: { project: ProjectDetail }) {
                 <input type="radio" name={configurationGroupId} value={unit.id} checked={estimate.unit.id === unit.id}
                   onChange={() => setUnitId(unit.id)} aria-label={`${selectedType}, ${name}${duplicate ? `, ${unit.title || unit.unitCode}` : ""}, ${formatINR(Number(unit.price))}`} />
                 <span className={styles.configurationName}>{name}{duplicate && <span>{unit.title || unit.unitCode}</span>}</span>
-                <span className={styles.configurationPrice}>{formatINR(Number(unit.price))}{estimate.unit.id === unit.id && <Check size={18} aria-hidden="true" />}</span>
+                <span className={styles.configurationPrice}>{formatINR(Number(unit.price))}</span>
               </label>
             );
           })}

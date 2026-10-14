@@ -106,11 +106,13 @@
 .slider input::-moz-range-thumb { width: 14px; height: 14px; border: 3px solid var(--finance-accent); border-radius: 50%; background: #fff; }
 .slider input:focus-visible { outline: 2px solid var(--finance-accent); outline-offset: 4px; border-radius: 8px; }
 .breakdown { min-width: 0; }
-.repaymentBar { display: flex; gap: 4px; overflow: hidden; height: 12px; border-radius: 9999px; }
+.repaymentBar { display: flex; gap: 4px; overflow: hidden; height: 12px; margin: 8px 0 16px; border-radius: 9999px; }
 .repaymentBar span { display: block; min-width: 0; }
 .principal { background: linear-gradient(90deg, #2563eb, #1645bf); }
 .interest { background: var(--finance-interest); }
-.repaymentNumbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 12px 0 0 !important; }
+.repaymentNumbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 !important; }
+.repaymentNumbers > div:nth-child(2) { text-align: right; }
+.repaymentNumbers > div:nth-child(2) dt { justify-content: flex-end; }
 .repaymentNumbers > div:last-child { grid-column: 1 / -1; }
 .repaymentNumbers dt { display: flex; align-items: center; gap: 8px; color: var(--finance-muted); font-size: 14px; line-height: 20px; }
 .repaymentNumbers dd { margin: 4px 0 0 !important; font-size: 20px; line-height: 28px; font-weight: 500; font-variant-numeric: tabular-nums; }
@@ -130,8 +132,6 @@
 }
 @container (min-width: 520px) {
   .emi { font-size: 48px; line-height: 1; }
-  .repaymentNumbers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .repaymentNumbers > div:last-child { grid-column: auto; }
 }
 @media (max-width: 540px) {
   .section { padding: 16px; border-radius: 16px; }

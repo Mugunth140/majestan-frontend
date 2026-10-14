@@ -1,5 +1,5 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { act, render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { ListingImage } from "./ListingImage";
 
 afterEach(() => {
@@ -7,38 +7,68 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("ListingImage", () => {
-  it("retries once before settling on the placeholder", () => {
-    vi.useFakeTimers();
-    render(
-      <ListingImage
-        src="https://cdn.test/broken.png"
-        placeholderSrc="https://cdn.test/placeholder.webp"
-        alt="Test photo"
-      />,
-    );
+const PLACEHOLDER = "/assets/placeholder/Apartment.webp";
+const PHOTO = "https://example.com/photo.jpg";
 
+function imgs(container: HTMLElement): HTMLImageElement[] {
+  return Array.from(container.querySelectorAll("img"));
+}
+
+describe("ListingImage", () => {
+  it("shows the placeholder instantly before the real photo loads", () => {
+    const { container } = render(
+      <ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />
+    );
+    const [placeholder, real] = imgs(container);
+    expect(placeholder).toHaveAttribute("src", PLACEHOLDER);
+    expect(real).toHaveAttribute("src", PHOTO);
+    expect(real.className).toContain("opacity-0");
+  });
+
+  it("fades the real photo in on load and drops the placeholder", () => {
+    const { container } = render(
+      <ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />
+    );
+    fireEvent.load(screen.getByAltText("Listing"));
+    expect(screen.getByAltText("Listing").className).toContain("opacity-100");
+    expect(imgs(container)).toHaveLength(1);
+  });
+
+  it("retries once, then settles on the placeholder when the real photo fails", () => {
+    vi.useFakeTimers();
+    const { container } = render(
+      <ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />
+    );
     // First failure only schedules the retry — the real image stays mounted.
-    fireEvent.error(screen.getByAltText("Test photo"));
-    expect(screen.getByAltText("Test photo")).toBeInTheDocument();
+    fireEvent.error(screen.getByAltText("Listing"));
+    expect(screen.getByAltText("Listing")).toBeInTheDocument();
 
     act(() => {
       vi.runAllTimers();
     });
 
     // Second failure on the retried node falls back to the placeholder.
-    fireEvent.error(screen.getByAltText("Test photo"));
-    expect(screen.queryByAltText("Test photo")).not.toBeInTheDocument();
+    fireEvent.error(screen.getByAltText("Listing"));
+    expect(screen.queryByAltText("Listing")).toBeNull();
+    const [only] = imgs(container);
+    expect(only).toHaveAttribute("src", PLACEHOLDER);
   });
 
-  it("shows only the placeholder when there is no photo", () => {
-    render(
-      <ListingImage
-        src={null}
-        placeholderSrc="https://cdn.test/placeholder.webp"
-        alt="Test photo"
-      />,
+  it("renders placeholder only when there is no photo", () => {
+    const { container } = render(
+      <ListingImage src={null} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />
     );
-    expect(screen.queryByAltText("Test photo")).not.toBeInTheDocument();
+    expect(screen.queryByAltText("Listing")).toBeNull();
+    const [only] = imgs(container);
+    expect(only).toHaveAttribute("src", PLACEHOLDER);
+  });
+
+  it("loads eagerly with high priority when asked", () => {
+    render(
+      <ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" eager />
+    );
+    const real = screen.getByAltText("Listing");
+    expect(real).toHaveAttribute("loading", "eager");
+    expect(real).toHaveAttribute("fetchpriority", "high");
   });
 });

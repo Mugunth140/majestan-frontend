@@ -31,6 +31,7 @@ import {
 } from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
 import { ProjectDetailsView } from "@/components/site/project/ProjectDetailsView";
+import { projectFaqItems } from "@/components/site/project/overview/FaqOverview";
 import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
 import { PAGE_CONTAINER } from "@/components/site/project/project-ui";
 import { batchHasPseoInventory, type PseoCheckParams } from "@/lib/pseo-inventory";
@@ -610,6 +611,12 @@ export default async function SlugPage({
       const prices = units
         .map((u: any) => Number(u.price))
         .filter((n: number) => Number.isFinite(n) && n > 0);
+      // The overview shows exactly one FAQ block (overview FAQs at the end),
+      // so only those are marked up.
+      const faqJsonLd = buildFaqPageJsonLd(
+        projectFaqItems(project).filter((f) => f.section === "overview"),
+        `https://www.majestanrealty.com/${project.canonicalSlug}`,
+      );
       return (
         <>
           <SiteHeader />
@@ -658,6 +665,14 @@ export default async function SlugPage({
                     }),
                   }}
                 />
+                {faqJsonLd && (
+                  <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                      __html: JSON.stringify(faqJsonLd),
+                    }}
+                  />
+                )}
                 <div id="overview" className="scroll-mt-40!">
                   <ProjectDetailsView project={project} />
                 </div>

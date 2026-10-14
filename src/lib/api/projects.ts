@@ -100,7 +100,7 @@ export type ProjectDetail = {
   specifications?: { label: string; value: string }[] | null;
   connectivity?: { icon?: string; label?: string; detail?: string }[] | null;
   nearbyCategories?: { title?: string; icon?: string; places?: { name?: string; distance?: string }[] }[] | null;
-  projectFaqs?: { id: number; question: string; answer: string; sortOrder?: number }[] | null;
+  projectFaqs?: { id: number; question: string; answer: string; sortOrder?: number; section?: string | null }[] | null;
   brochureUrl?: string | null;
   brochureName?: string | null;
   projectAmenities?: { amenityId: number; availability?: string; notes?: string | null; amenity?: { id: number; name: string; icon?: string; category?: string | null } | null }[] | null;

@@ -5,11 +5,25 @@ import { Card, EmptyState } from "@/components/site/project/project-ui";
 import { RequestButton } from "@/components/site/project/RequestButton";
 
 /**
+ * Every stored row normalized to the shape the shared accordion reads.
+ * Rows without a section predate per-page FAQs and belong to overview.
+ */
+export function projectFaqItems(project: ProjectDetail) {
+  return (project.projectFaqs ?? []).map((faq, index) => ({
+    id: faq.id,
+    question: faq.question,
+    answer: faq.answer,
+    section: faq.section || "overview",
+    sortOrder: faq.sortOrder ?? index,
+  }));
+}
+
+/**
  * The shared FAQ accordion when the project has answers; otherwise the same
  * slot, so the last thing on the page is still a way to ask.
  */
 export function FaqOverview({ project }: { project: ProjectDetail }) {
-  const faqs = project.projectFaqs ?? [];
+  const faqs = projectFaqItems(project).filter((faq) => faq.section === "overview");
 
   if (faqs.length === 0) {
     return (
@@ -26,15 +40,7 @@ export function FaqOverview({ project }: { project: ProjectDetail }) {
 
   return (
     <div id="faq" className="scroll-mt-32!">
-      <FaqSection
-        faqs={faqs.map((faq, index) => ({
-          id: faq.id,
-          question: faq.question,
-          answer: faq.answer,
-          section: "overview",
-          sortOrder: faq.sortOrder ?? index,
-        }))}
-      />
+      <FaqSection faqs={faqs} />
     </div>
   );
 }

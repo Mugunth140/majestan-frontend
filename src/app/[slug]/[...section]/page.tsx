@@ -16,6 +16,7 @@ import { ProjectLocalitySection } from "@/components/site/project/sections/Proje
 import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
 import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
 import { ProjectSectionTitle, ProjectShell } from "@/components/site/project/ProjectShell";
+import { projectFaqItems } from "@/components/site/project/overview/FaqOverview";
 import { getProjectBySlugUrl, getAllProjectSlugs } from "@/lib/api/projects";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
@@ -613,6 +614,14 @@ export default async function PropertySectionPage({
       { label: project.name, href: `/${project.canonicalSlug}` },
       { label: titlePrefix },
     ];
+    // Only FAQs filed under this section are shown and marked up.
+    const sectionFaqs = projectFaqItems(project).filter(
+      (f) => f.section === sectionKey,
+    );
+    const faqJsonLd = buildFaqPageJsonLd(
+      sectionFaqs,
+      `https://www.majestanrealty.com/${project.canonicalSlug}/${sectionKey}`,
+    );
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -660,6 +669,7 @@ export default async function PropertySectionPage({
               />
               <ProjectShell project={project}>
                 <ProjectSectionContent sectionKey={sectionKey} project={project} />
+                {sectionFaqs.length > 0 && <FaqSection faqs={sectionFaqs} />}
               </ProjectShell>
             </div>
           </main>
@@ -670,6 +680,14 @@ export default async function PropertySectionPage({
             __html: JSON.stringify(structuredData),
           }}
         />
+        {faqJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(faqJsonLd),
+            }}
+          />
+        )}
         <SiteFooter />
       </>
     );

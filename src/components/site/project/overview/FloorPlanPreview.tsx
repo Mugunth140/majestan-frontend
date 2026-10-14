@@ -3,7 +3,7 @@ import { Grid3X3 } from "lucide-react";
 import { RequestButton } from "@/components/site/project/RequestButton";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
-import { groupUnitsByConfiguration } from "@/lib/project-overview";
+import { groupUnitsByConfiguration, projectFloorPlanHref, unitFloorPlans } from "@/lib/project-overview";
 import { unitAreaLabel } from "@/lib/project-config-summary";
 import { Card, EmptyState, ViewAllLink } from "@/components/site/project/project-ui";
 import { CONFIGURATION_TILE } from "@/components/site/project/overview/ConfigurationSummary";
@@ -16,10 +16,15 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
   // than whichever flats happen to have a plan uploaded first.
   const previews = groupUnitsByConfiguration(project)
     .flatMap((group) => {
-      const unit = group.units.find((u) => u.floorPlanImageUrl);
-      return unit?.floorPlanImageUrl
-        ? [{ group, unit, planUrl: unit.floorPlanImageUrl }]
-        : [];
+      const seenConfigurations = new Set<string>();
+      return group.units.flatMap((unit) => {
+        const area = unitAreaLabel(unit, project.projectType);
+        const configuration = area || unit.title?.trim() || unit.unitCode || String(unit.id);
+        if (seenConfigurations.has(configuration)) return [];
+        const floor = unitFloorPlans(unit)[0];
+        if (floor) seenConfigurations.add(configuration);
+        return floor ? [{ group, unit, floor, configuration }] : [];
+      });
     })
     .slice(0, MAX_PREVIEWS);
 
@@ -58,19 +63,19 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
       action={<ViewAllLink href={`/${slug}/floor-plans`}>View more</ViewAllLink>}
     >
       <div className="grid! grid-cols-1! sm:grid-cols-2! gap-4! mt-6!">
-        {previews.map(({ group, unit, planUrl }) => {
+        {previews.map(({ group, unit, floor, configuration }) => {
           const area = unitAreaLabel(unit, project.projectType);
           return (
             <Link
-              key={group.key}
-              href={`/${slug}/floor-plans`}
+              key={`${group.key}-${unit.id}`}
+              href={projectFloorPlanHref(slug, unit.id, floor.floorName)}
               className={CONFIGURATION_TILE}
             >
               <div className="bg-gray-50! aspect-[4/3]!">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={planUrl}
-                  alt={`${group.label} ${planNoun} for ${project.name}`}
+                  src={floor.imageUrl}
+                  alt={`${group.label} ${configuration} ${floor.floorName} ${planNoun} for ${project.name}`}
                   loading="lazy"
                   decoding="async"
                   className="w-full! h-full! object-contain! p-4!"
@@ -78,8 +83,9 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
               </div>
 
               <div className="px-4! py-3!">
-                <p className="text-sm! font-semibold! text-gray-900!">{group.label}</p>
+                <p className="text-sm! font-semibold! text-gray-900!">{group.label} · {configuration}</p>
                 {area && <p className="text-sm! text-gray-500! tabular-nums!">{area}</p>}
+                <p className="mt-1! text-xs! font-medium! text-[#27427f]!">{floor.floorName}</p>
               </div>
             </Link>
           );

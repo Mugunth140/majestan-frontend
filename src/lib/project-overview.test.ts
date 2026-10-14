@@ -9,6 +9,8 @@ import {
   rateFact,
   unitAreaCell,
   unitRateLabel,
+  unitFloorPlans,
+  projectFloorPlanHref,
 } from "./project-overview";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
 
@@ -437,5 +439,34 @@ describe("projectCoordinates", () => {
     expect(projectCoordinates(withPin("95", "76"))).toBeNull();
     expect(projectCoordinates(withPin("abc", "76"))).toBeNull();
     expect(projectCoordinates(withPin("0", "0"))).toBeNull();
+  });
+});
+
+describe("unitFloorPlans", () => {
+  it("uses resolved named floors and falls back only when the modern field is absent", () => {
+    expect(unitFloorPlans(unit({
+      floorPlans: [
+        { floorName: "Ground floor", imageKey: "ground", imageUrl: "/ground.png" },
+        { floorName: "First floor", imageKey: "first", imageUrl: "/first.png" },
+      ],
+      floorPlanImageUrl: "/legacy.png",
+    }))).toEqual([
+      { floorName: "Ground floor", imageUrl: "/ground.png" },
+      { floorName: "First floor", imageUrl: "/first.png" },
+    ]);
+    expect(unitFloorPlans(unit({ floorPlanImageUrl: "/legacy.png" }))).toEqual([
+      { floorName: "Floor plan", imageUrl: "/legacy.png" },
+    ]);
+    expect(unitFloorPlans(unit({ floorPlans: [], floorPlanImageUrl: "/legacy.png" }))).toEqual([]);
+    expect(unitFloorPlans(unit({
+      floorPlans: [{ floorName: "Ground floor", imageKey: "removed", imageUrl: null }],
+      floorPlanImageUrl: "/legacy.png",
+    }))).toEqual([]);
+  });
+
+  it("links a preview to its exact unit and named floor", () => {
+    expect(projectFloorPlanHref("emerald-heights", 12, "Ground floor")).toBe(
+      "/emerald-heights/floor-plans?unitId=12&floor=Ground+floor",
+    );
   });
 });

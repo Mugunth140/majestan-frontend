@@ -362,6 +362,32 @@ export type ConfigurationGroup = {
   units: ProjectUnit[];
 };
 
+export type UnitFloorPlan = { floorName: string; imageUrl: string };
+
+/** Prefer named floor plans; older project units still expose one unnamed plan. */
+export function unitFloorPlans(unit: ProjectUnit): UnitFloorPlan[] {
+  if (unit.floorPlans != null) {
+    return unit.floorPlans.flatMap((plan) => {
+      const imageUrl = plan.imageUrl?.trim();
+      const floorName = plan.floorName?.trim();
+      return imageUrl ? [{ floorName: floorName || "Floor plan", imageUrl }] : [];
+    });
+  }
+  return unit.floorPlanImageUrl
+    ? [{ floorName: "Floor plan", imageUrl: unit.floorPlanImageUrl }]
+    : [];
+}
+
+/** Overview teasers link back to the exact unit and floor they preview. */
+export function projectFloorPlanHref(
+  slug: string,
+  unitId: number,
+  floorName: string,
+): string {
+  const query = new URLSearchParams({ unitId: String(unitId), floor: floorName });
+  return `/${slug}/floor-plans?${query.toString()}`;
+}
+
 type ConfigurationSlot = { key: string; label: string; sortValue: number | null };
 
 /**

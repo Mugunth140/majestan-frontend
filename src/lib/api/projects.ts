@@ -36,6 +36,9 @@ export type ProjectUnit = {
   maintenanceFee?: string | null;
   availableFrom?: string | null;
   status: string;
+  /** Named unit floor plans, with image URLs resolved by the project API. */
+  floorPlans?: { floorName: string; imageKey: string; imageUrl?: string | null }[] | null;
+  /** Legacy single-plan fields, used while older project records are migrated. */
   floorPlanImageUrl: string | null;
   floorPlanImageKey?: string | null;
   isPrimary: boolean;

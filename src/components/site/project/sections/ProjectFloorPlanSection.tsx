@@ -13,7 +13,7 @@ import {
   LayoutGrid,
   Sofa,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatINR } from "@/lib/api/projects";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
@@ -24,6 +24,7 @@ import {
 import {
   groupUnitsByConfiguration,
   titleCase,
+  unitFloorPlans,
   type ConfigurationGroup,
 } from "@/lib/project-overview";
 import { unitSpecGroups, type SpecGroup, type SpecGroupKey } from "@/lib/unit-spec-groups";
@@ -170,6 +171,8 @@ function UnitCard({
   project,
   slides,
   slideIndex,
+  floorIndex,
+  onFloorChange,
 }: {
   unit: ProjectUnit;
   index: number;
@@ -177,7 +180,9 @@ function UnitCard({
   project: ProjectDetail;
   /** Every plan in the project; this card's trigger opens at slideIndex. */
   slides: FloorPlanSlide[];
-  slideIndex: number;
+  slideIndex: (unitId: number, floorIndex: number) => number | undefined;
+  floorIndex: number;
+  onFloorChange: (index: number) => void;
 }) {
   const name = unitName(unit, index);
   const meta = unitMeta(unit, name, group);
@@ -186,6 +191,8 @@ function UnitCard({
   const planNoun = getFloorPlanLabel(project.projectType).toLowerCase();
   const groups = unitSpecGroups(unit, project);
   const headingId = `unit-${unit.id}-name`;
+  const floorPlans = unitFloorPlans(unit);
+  const selectedFloor = floorPlans[Math.min(floorIndex, Math.max(floorPlans.length - 1, 0))];
 
   const saleableNum = parseFloat(String(unit.superBuiltupAreaSqft ?? unit.builtupAreaSqft ?? ""));
   const saleable =
@@ -223,8 +230,32 @@ function UnitCard({
       </header>
 
       <div className="mt-5!">
-        {unit.floorPlanImageUrl ? (
-          <FloorPlanLightbox items={slides} index={slideIndex} />
+        {selectedFloor ? (
+          <>
+            {floorPlans.length > 1 && (
+              <div role="group" aria-label={`Choose a floor for ${name}`} className="mb-3! flex! flex-wrap! gap-2!">
+                {floorPlans.map((floor, index) => (
+                  <button
+                    key={`${floor.floorName}-${index}`}
+                    type="button"
+                    aria-pressed={index === floorIndex}
+                    onClick={() => onFloorChange(index)}
+                    className={`rounded-full! border! px-3! py-1.5! text-sm! font-medium! transition-colors! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! ${
+                      index === floorIndex
+                        ? "border-[#27427f]! bg-[#27427f]! text-white!"
+                        : "border-gray-200! bg-white! text-gray-700! hover:border-[#27427f]/40! hover:text-[#27427f]!"
+                    }`}
+                  >
+                    {floor.floorName}
+                  </button>
+                ))}
+              </div>
+            )}
+            <FloorPlanLightbox
+              items={slides}
+              index={slideIndex(unit.id, Math.min(floorIndex, floorPlans.length - 1)) ?? 0}
+            />
+          </>
         ) : (
           <div className="flex! flex-col! items-center! justify-center! gap-3! rounded-xl! bg-gray-50! px-6! py-8! text-center!">
             <span
@@ -288,27 +319,32 @@ function ActiveUnitPanel({
   groups,
   activeUnit,
   project,
+  floorIndex,
+  onFloorChange,
 }: {
   groups: ConfigurationGroup[];
   activeUnit: ProjectUnit | null;
   project: ProjectDetail;
+  floorIndex: number;
+  onFloorChange: (index: number) => void;
 }) {
   if (!activeUnit) return null;
   const planNoun = getFloorPlanLabel(project.projectType).toLowerCase();
   // The viewer steps through every plan in the project, opening at the
   // unit it was tapped on. Units without an image are skipped.
   const slides: FloorPlanSlide[] = [];
-  const slideIndexByUnit = new Map<number, number>();
+  const slideIndexByUnitFloor = new Map<string, number>();
   for (const group of groups) {
     group.units.forEach((unit, unitIndex) => {
-      if (!unit.floorPlanImageUrl) return;
       const name = unitName(unit, unitIndex);
-      slideIndexByUnit.set(unit.id, slides.length);
-      slides.push({
-        src: unit.floorPlanImageUrl,
-        alt: `${name} ${planNoun}, ${group.label}, ${project.name}`,
-        title: `${name} ${planNoun}`,
-        subtitle: unitMeta(unit, name, group),
+      unitFloorPlans(unit).forEach((floor, floorIndex) => {
+        slideIndexByUnitFloor.set(`${unit.id}:${floorIndex}`, slides.length);
+        slides.push({
+          src: floor.imageUrl,
+          alt: `${name}${floor.floorName === "Floor plan" ? "" : ` ${floor.floorName}`} ${planNoun}, ${group.label}, ${project.name}`,
+          title: floor.floorName === "Floor plan" ? `${name} ${planNoun}` : `${name} · ${floor.floorName} ${planNoun}`,
+          subtitle: unitMeta(unit, name, group),
+        });
       });
     });
   }
@@ -323,7 +359,9 @@ function ActiveUnitPanel({
               group={group}
               project={project}
               slides={slides}
-              slideIndex={slideIndexByUnit.get(unit.id) ?? 0}
+              slideIndex={(unitId, floorIndex) => slideIndexByUnitFloor.get(`${unitId}:${floorIndex}`)}
+              floorIndex={floorIndex}
+              onFloorChange={onFloorChange}
             />
           </div>
         )),
@@ -355,16 +393,38 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
   const groups = groupUnitsByConfiguration(project);
   const [activeConfigKey, setActiveConfigKey] = useState(groups[0]?.key ?? "");
   const [activeUnitId, setActiveUnitId] = useState<number | null>(null);
+  const [activeFloorIndex, setActiveFloorIndex] = useState(0);
   const stripRef = useRef<HTMLDivElement>(null);
+  const querySelectionApplied = useRef(false);
 
   const activeGroup = groups.find((g) => g.key === activeConfigKey) ?? groups[0];
   const activeUnit =
     activeGroup?.units.find((u) => u.id === activeUnitId) ?? activeGroup?.units[0] ?? null;
 
+  // Overview teasers can point directly to the unit and floor they show.
+  // Read the query after hydration so the server and first client render agree.
+  useEffect(() => {
+    if (querySelectionApplied.current) return;
+    querySelectionApplied.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const unitId = Number(params.get("unitId"));
+    const floorName = params.get("floor");
+    if (!Number.isInteger(unitId)) return;
+    const group = groups.find((candidate) => candidate.units.some((unit) => unit.id === unitId));
+    const unit = group?.units.find((candidate) => candidate.id === unitId);
+    if (!group || !unit) return;
+    setActiveConfigKey(group.key);
+    setActiveUnitId(unit.id);
+    const plans = unitFloorPlans(unit);
+    const requestedIndex = plans.findIndex((plan) => plan.floorName === floorName);
+    setActiveFloorIndex(requestedIndex >= 0 ? requestedIndex : 0);
+  }, [groups]);
+
   // Switching configuration resets to that group's first unit.
   const selectConfig = (key: string) => {
     setActiveConfigKey(key);
     setActiveUnitId(null);
+    setActiveFloorIndex(0);
   };
 
   const scrollStrip = (dir: 1 | -1) => {
@@ -440,7 +500,10 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
                   type="button"
                   role="tab"
                   aria-selected={selected}
-                  onClick={() => setActiveUnitId(u.id)}
+                  onClick={() => {
+                    setActiveUnitId(u.id);
+                    setActiveFloorIndex(0);
+                  }}
                   className={`shrink-0! px-1! py-2.5! text-sm! font-semibold! tracking-wide! tabular-nums! whitespace-nowrap! border-b-2! -mb-px! transition-colors! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! ${
                     selected
                       ? "text-[#27427f]! border-[#27427f]!"
@@ -464,7 +527,13 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
       )}
 
       <div className="mt-6!">
-        <ActiveUnitPanel groups={groups} activeUnit={activeUnit} project={project} />
+        <ActiveUnitPanel
+          groups={groups}
+          activeUnit={activeUnit}
+          project={project}
+          floorIndex={activeFloorIndex}
+          onFloorChange={setActiveFloorIndex}
+        />
       </div>
     </>
   );

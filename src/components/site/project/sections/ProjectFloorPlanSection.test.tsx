@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ProjectFloorPlanSection } from "./ProjectFloorPlanSection";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
 
@@ -43,6 +43,16 @@ const twoBhk = [
 const threeBhk = [unit({ id: 4, unitCode: "C-301", bedrooms: 3, superBuiltupAreaSqft: "1444" })];
 
 afterEach(cleanup);
+
+beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  });
+});
 
 function configTabs() {
   return within(screen.getByRole("tablist", { name: "Configurations" })).getAllByRole("tab");
@@ -127,6 +137,50 @@ describe("ProjectFloorPlanSection", () => {
     render(<ProjectFloorPlanSection project={project(threeBhk)} />);
     expect(screen.getByText("Request floor plan")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /floor plan,/ })).not.toBeInTheDocument();
+  });
+
+  it("keeps each same-BHK configuration's ground plan distinct and navigates its floors", () => {
+    const flats = [
+      unit({
+        id: 11,
+        unitCode: "A-1200",
+        superBuiltupAreaSqft: "1200",
+        floorPlans: [
+          { floorName: "Ground floor", imageKey: "a-ground", imageUrl: "https://cdn.test/a-ground.png" },
+          { floorName: "First floor", imageKey: "a-first", imageUrl: "https://cdn.test/a-first.png" },
+        ],
+      }),
+      unit({
+        id: 12,
+        unitCode: "B-1200",
+        superBuiltupAreaSqft: "1250",
+        floorPlans: [
+          { floorName: "Ground floor", imageKey: "b-ground", imageUrl: "https://cdn.test/b-ground.png" },
+        ],
+      }),
+    ];
+    render(<ProjectFloorPlanSection project={project(flats)} />);
+
+    const planButton = () => screen.getByRole("button", { name: /A-1200 .* floor plan/ });
+    expect(planButton().querySelector("img")).toHaveAttribute("src", "https://cdn.test/a-ground.png");
+    const floors = screen.getByRole("group", { name: "Choose a floor for A-1200" });
+    fireEvent.click(within(floors).getByRole("button", { name: "First floor" }));
+    expect(planButton().querySelector("img")).toHaveAttribute("src", "https://cdn.test/a-first.png");
+    fireEvent.click(within(floors).getByRole("button", { name: "Ground floor" }));
+    fireEvent.click(planButton());
+    fireEvent.click(screen.getByRole("button", { name: "Next floor plan" }));
+    expect(screen.getByRole("dialog")).toHaveTextContent("A-1200 · First floor floor plan");
+
+    fireEvent.click(unitTabs()[1]);
+    const second = screen.getByRole("button", { name: /B-1200 Ground floor floor plan/ });
+    expect(second.querySelector("img")).toHaveAttribute("src", "https://cdn.test/b-ground.png");
+  });
+
+  it("uses the legacy image when no named floors are present", () => {
+    render(<ProjectFloorPlanSection project={project([unit({ floorPlanImageUrl: "/legacy-plan.png" })])} />);
+    const trigger = screen.getByRole("button", { name: /A-101 floor plan, 2 BHK/ });
+    expect(trigger.querySelector("img")).toHaveAttribute("src", "/legacy-plan.png");
+    expect(screen.queryByRole("group", { name: /Choose a floor/ })).not.toBeInTheDocument();
   });
 
   it("shows an empty state when there are no units", () => {

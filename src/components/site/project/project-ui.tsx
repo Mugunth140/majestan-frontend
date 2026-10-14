@@ -14,18 +14,19 @@ import { ArrowRight } from "lucide-react";
     cover is the one thing that deliberately sits outside it. */
 export const PAGE_CONTAINER = "max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!";
 
+/* Matches the overview's Panel: plain white, a hairline, 16px corners. */
 export const CARD =
-  "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-6! md:p-8!";
+  "bg-white! rounded-2xl! border! border-[#e6ebf2]! p-6! md:p-8!";
 /* Matches FaqSection and LocalityTeaser, which these pages also render. A
    heavier heading here would make those two look like a different page. */
-export const HEADING = "text-lg! md:text-xl! font-normal! text-gray-900!";
+export const HEADING = "m-0! text-xl! md:text-2xl! font-semibold! tracking-[-0.025em]! leading-tight! text-[#0a0f1c]!";
 /* gray-400 fails 4.5:1 on white at this size; gray-500 clears it at 4.6:1. */
 export const LABEL = "text-xs! font-medium! uppercase! tracking-wide! text-gray-500!";
-export const VALUE = "text-sm! font-semibold! text-gray-900!";
-export const BODY = "text-base! text-gray-600! leading-relaxed!";
+export const VALUE = "text-sm! font-semibold! text-[#0a0f1c]!";
+export const BODY = "text-[15px]! md:text-base! text-[#465066]! leading-[1.7]!";
 /** Inline text link in the brand colour, with a visible focus ring. */
 export const TEXT_LINK =
-  "text-[#27427f]! no-underline! rounded-md! transition-colors! duration-150! ease-out-quint! hover:text-[#1e3563]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!";
+  "text-[#1645bf]! underline! decoration-[#bcd0f7]! underline-offset-4! rounded-sm! transition-[text-decoration-color]! duration-150! ease-out-quint! hover:decoration-[#1645bf]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]!";
 
 /** CRM free text arrives newline separated. Blank lines are paragraph breaks. */
 export function paragraphs(text: string | null | undefined): string[] {
@@ -78,11 +79,11 @@ export function Card({
 
 /** Full-bleed hairline, so dividers never read as a half-bordered block. */
 export function Divider() {
-  return <div className="my-6! h-px! bg-gray-200!" aria-hidden="true" />;
+  return <div className="my-6! h-px! bg-[#e6ebf2]!" aria-hidden="true" />;
 }
 
 export function Subheading({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-base! font-semibold! text-gray-900!">{children}</h3>;
+  return <h3 className="m-0! text-base! font-semibold! text-[#0a0f1c]!">{children}</h3>;
 }
 
 export function DefinitionGrid({
@@ -124,7 +125,7 @@ export function ViewAllLink({
   return (
     <Link
       href={href}
-      className={`group/viewall shrink-0! inline-flex! items-center! gap-1.5! text-sm! font-medium! ${TEXT_LINK}`}
+      className="group/viewall shrink-0! inline-flex! items-center! gap-1.5! rounded-sm! text-sm! font-semibold! text-[#0a0f1c]! no-underline! hover:underline! underline-offset-4! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]!"
     >
       {children}
       <ArrowRight
@@ -153,16 +154,16 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mt-6! flex! flex-col! gap-4! rounded-2xl! bg-gray-50! ring-1! ring-gray-200/70! px-5! py-4! sm:flex-row! sm:items-center!">
+    <div className="mt-6! flex! flex-col! gap-4! sm:flex-row! sm:items-center!">
       <div className="flex! items-start! gap-4! min-w-0! flex-1!">
         <span
           aria-hidden="true"
-          className="w-10! h-10! shrink-0! rounded-xl! bg-white! ring-1! ring-gray-200! grid! place-items-center!"
+          className="w-11! h-11! shrink-0! rounded-xl! bg-[linear-gradient(145deg,#f3f7ff,#e1ebff)]! grid! place-items-center!"
         >
-          <Icon className="w-5! h-5! text-gray-500!" strokeWidth={1.75} />
+          <Icon className="w-5! h-5! text-[#2563eb]!" strokeWidth={1.75} />
         </span>
         <div className="min-w-0!">
-          <p className="text-sm! font-semibold! text-gray-900!">{title}</p>
+          <p className="m-0! text-[15px]! font-semibold! text-[#0a0f1c]!">{title}</p>
           {body && <p className="mt-0.5! text-sm! text-gray-500! text-pretty!">{body}</p>}
         </div>
       </div>

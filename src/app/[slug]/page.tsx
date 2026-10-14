@@ -31,7 +31,7 @@ import {
 } from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
 import { ProjectDetailsView } from "@/components/site/project/ProjectDetailsView";
-import { projectFaqItems } from "@/components/site/project/overview/FaqOverview";
+import { projectFaqItems } from "@/components/site/project/overview/faq-items";
 import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
 import { PAGE_CONTAINER } from "@/components/site/project/project-ui";
 import { batchHasPseoInventory, type PseoCheckParams } from "@/lib/pseo-inventory";
@@ -620,7 +620,7 @@ export default async function SlugPage({
       return (
         <>
           <SiteHeader />
-          <div className="min-h-screen! bg-gray-50! font-manrope-page">
+          <div className="min-h-screen! bg-[#f4f6f9]! font-manrope-page">
             {/* Spacer matching fixed header height (64px) */}
             <div className="h-[64px]!" aria-hidden="true" />
             <ProjectNavigation

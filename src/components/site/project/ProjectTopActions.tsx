@@ -45,7 +45,7 @@ export function ProjectTopActions({ project }: { project: ProjectDetail }) {
         type="button"
         onClick={handleShare}
         aria-label="Share"
-        className="inline-flex! items-center! gap-2! px-4! py-2! rounded-2xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! shadow-sm! cursor-pointer! transition-[color,border-color,transform]! duration-150! ease-out-quint! hover:border-gray-300! hover:text-gray-900! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+        className="inline-flex! items-center! gap-2! px-4! py-2! rounded-2xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! shadow-sm! cursor-pointer! transition-[color,border-color,transform]! duration-150! ease-out-quint! hover:border-gray-300! hover:text-gray-900! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-offset-2!"
       >
         {copied ? (
           <Check className="w-4! h-4! text-emerald-600!" />

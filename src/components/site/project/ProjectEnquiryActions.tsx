@@ -7,15 +7,13 @@ import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { createProjectEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
-import { VISIT_SLOTS, formatSlot, isValidVisitDate, maxVisitDate, todayYmd } from "@/lib/visit-slots";
+import { isValidVisitDate } from "@/lib/visit-slots";
+import { ProjectDialogShell, VisitPicker, firstBookableDate } from "@/components/site/project/ProjectEnquiryDialog";
 import {
   ContactCard,
   ContactDetailsSection,
-  DialogShell,
   SuccessState,
   SubmitBtn,
-  inputClass,
-  labelClass,
   type EnquiryIntent,
 } from "@/components/site/property/PropertyEnquiryActions";
 import {
@@ -82,7 +80,7 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
   const [pendingMessage, setPendingMessage] = useState("");
 
   // Visit form state
-  const [visitDate, setVisitDate] = useState(todayYmd());
+  const [visitDate, setVisitDate] = useState(firstBookableDate);
   const [visitSlot, setVisitSlot] = useState("");
 
   // Shared
@@ -109,8 +107,15 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
     setStatus("idle");
     setErrorMsg("");
     setVisitSlot("");
-    setVisitDate(todayYmd());
+    setVisitDate(firstBookableDate());
     setMessage(withMessage ?? "");
+    setDialog(which);
+  }
+
+  /** Flips the open dialog between enquiry and visit, keeping the contact details. */
+  function switchIntent(which: Intent) {
+    setStatus("idle");
+    setErrorMsg("");
     setDialog(which);
   }
 
@@ -121,7 +126,7 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
       setStatus("idle");
       setErrorMsg("");
       setVisitSlot("");
-      setVisitDate(todayYmd());
+      setVisitDate(firstBookableDate());
       setMessage(pendingMessage);
       setDialog(pendingIntent);
       setPendingIntent(null);
@@ -284,14 +289,14 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
       <div className="mt-4! flex! flex-col! gap-2.5!">
         <button
           onClick={() => openIntent("enquire")}
-          className="w-full! bg-[#27427f]! text-white! font-manrope! font-normal! text-base! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!"
+          className="cta-shimmer w-full! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! font-manrope! font-semibold! text-base! py-3! rounded-xl! border-0! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! flex! items-center! justify-center! gap-2! cursor-pointer!"
         >
           <Phone className="w-4! h-4!" />
           Enquire Now
         </button>
         <button
           onClick={() => openIntent("visit")}
-          className="w-full! bg-white! text-[#27427f]! font-manrope! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!"
+          className="w-full! bg-white! text-[#0a0f1c]! font-manrope! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! font-semibold! text-base! py-3! rounded-xl! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! flex! items-center! justify-center! gap-2! cursor-pointer!"
         >
           <Calendar className="w-4! h-4!" />
           Schedule Visit
@@ -302,15 +307,33 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
       {/* Auth modal */}
       <UserAuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
 
-      {/* ── Enquiry dialog ── */}
+      {/* ── One dialog for both intents: the switch inside flips the form
+          without closing and reopening the sheet. ── */}
       <AnimatePresence>
-        {dialog === "enquire" && (
-          <DialogShell id="enquire" eyebrow="Project Enquiry" title={project.name} onClose={closeDialog}>
-            <AnimatePresence mode="wait">
+        {dialog && (
+          <ProjectDialogShell
+            id="project-enquiry"
+            intent={dialog}
+            projectName={project.name}
+            city={project.city}
+            onClose={closeDialog}
+            onSwitch={status === "success" ? undefined : switchIntent}
+          >
+            <AnimatePresence mode="wait" initial={false}>
               {status === "success" ? (
-                <SuccessState name={name} message="We will contact you shortly." />
-              ) : (
-                <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
+                <SuccessState
+                  name={name}
+                  message={dialog === "visit" ? "Your site visit is booked. We will confirm shortly." : "We will contact you shortly."}
+                />
+              ) : dialog === "enquire" ? (
+                <motion.div
+                  key="enquire"
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-[14px]!"
+                >
                   {contactCard}
 
                   {status === "error" && errorMsg && (
@@ -319,56 +342,26 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
 
                   <SubmitBtn label="Submit Enquiry" onClick={() => handleSubmit("enquiry")} submitting={status === "submitting"} />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </DialogShell>
-        )}
-      </AnimatePresence>
-
-      {/* ── Visit dialog ── */}
-      <AnimatePresence>
-        {dialog === "visit" && (
-          <DialogShell id="visit" eyebrow="Schedule a Site Visit" title={project.name} onClose={closeDialog}>
-            <AnimatePresence mode="wait">
-              {status === "success" ? (
-                <SuccessState name={name} message="Your site visit is booked. We will confirm shortly." />
               ) : (
-                <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
+                <motion.div
+                  key="visit"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 12 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-[14px]!"
+                >
                   {contactCardCollapsed}
 
-                  {/* Date */}
-                  <div>
-                    <label className={labelClass}>Preferred Date</label>
-                      <input
-                        type="date"
-                        min={todayYmd()}
-                        max={maxVisitDate()}
-                        value={visitDate}
-                      onChange={(e) => setVisitDate(e.target.value)}
-                      className={inputClass}
-                    />
-                  </div>
-
-                    {/* Time slot picker: one compact select instead of a wall
-                        of pills. Native control, fully keyboard-operable. */}
-                    <div>
-                      <label htmlFor="project-visit-slot" className={labelClass}>
-                        Preferred Time
-                      </label>
-                      <select
-                        id="project-visit-slot"
-                        value={visitSlot}
-                        onChange={(e) => setVisitSlot(e.target.value)}
-                        className={inputClass}
-                      >
-                        <option value="">Select a time</option>
-                        {VISIT_SLOTS.map((slot) => (
-                          <option key={slot} value={slot}>
-                            {formatSlot(slot)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <VisitPicker
+                    date={visitDate}
+                    slot={visitSlot}
+                    onDate={(value) => {
+                      setVisitDate(value);
+                      setVisitSlot("");
+                    }}
+                    onSlot={setVisitSlot}
+                  />
 
                   {status === "error" && errorMsg && (
                     <p className="text-[13px]! text-red-600!">{errorMsg}</p>
@@ -378,7 +371,7 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
                 </motion.div>
               )}
             </AnimatePresence>
-          </DialogShell>
+          </ProjectDialogShell>
         )}
       </AnimatePresence>
     </>

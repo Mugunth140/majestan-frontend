@@ -232,10 +232,10 @@ export function FurnishingStatus({ furnishing }: { furnishing: Furnishing }) {
       {rows.map((row) => (
         <div
           key={row.key}
-          className="inline-flex! items-center! gap-2! rounded-full! bg-[#27427f]/5! px-3! py-1! text-sm!"
+          className="inline-flex! items-center! gap-2! rounded-full! bg-[#1645bf]/5! px-3! py-1! text-sm!"
         >
           <dt className="font-normal! text-gray-600!">{row.label}</dt>
-          <dd className="mb-0! font-medium! text-[#27427f]!">{row.status}</dd>
+          <dd className="mb-0! font-medium! text-[#1645bf]!">{row.status}</dd>
         </div>
       ))}
     </dl>

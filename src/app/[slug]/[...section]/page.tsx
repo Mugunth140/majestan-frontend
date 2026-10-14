@@ -16,7 +16,10 @@ import { ProjectLocalitySection } from "@/components/site/project/sections/Proje
 import { ProjectPhotosSection } from "@/components/site/project/sections/ProjectPhotosSection";
 import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
 import { ProjectSectionTitle, ProjectShell } from "@/components/site/project/ProjectShell";
-import { projectFaqItems } from "@/components/site/project/overview/FaqOverview";
+import { projectFaqItems } from "@/components/site/project/overview/faq-items";
+import { FaqOverview } from "@/components/site/project/overview/FaqOverview";
+import { ProjectHelpSection } from "@/components/site/project/overview/ProjectHelpSection";
+import { OV_ROOT } from "@/components/site/project/overview/overview-ui";
 import { getProjectBySlugUrl, getAllProjectSlugs } from "@/lib/api/projects";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
@@ -655,7 +658,7 @@ export default async function PropertySectionPage({
           activeSection={sectionKey}
           projectType={project.projectType}
         />
-        <div className="min-h-screen! bg-gray-50! font-manrope-page">
+        <div className={`${OV_ROOT} min-h-screen! bg-[#f4f6f9]! font-manrope-page`}>
           <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-3! pb-24!">
             <div className="flex! flex-col! gap-4!">
               <div className="flex! items-center! justify-between! gap-4! min-w-0!">
@@ -669,7 +672,8 @@ export default async function PropertySectionPage({
               />
               <ProjectShell project={project}>
                 <ProjectSectionContent sectionKey={sectionKey} project={project} />
-                {sectionFaqs.length > 0 && <FaqSection faqs={sectionFaqs} />}
+                <FaqOverview project={project} section={sectionKey} hideWhenEmpty />
+                <ProjectHelpSection projectName={project.name} />
               </ProjectShell>
             </div>
           </main>

@@ -14,7 +14,7 @@ import { BODY, Card } from "@/components/site/project/project-ui";
  * through the set with the arrow keys as well as the buttons.
  */
 const FOCUS_RING =
-  "focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!";
+  "focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-offset-2!";
 
 export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);

@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { ProjectAmenitiesSection } from "./ProjectAmenitiesSection";
 import type { ProjectDetail, ProjectUnit } from "@/lib/api/projects";
@@ -75,18 +75,14 @@ describe("ProjectAmenitiesSection", () => {
 
   it("merges the CRM's singular and plural categories into one group", () => {
     render(<ProjectAmenitiesSection project={project({ amenities })} />);
-    const chips = within(screen.getByRole("navigation", { name: "Amenity categories" })).getAllByRole("link");
-    expect(chips.map((a) => a.getAttribute("href"))).toEqual([
-      "#amenities-features",
-      "#amenities-security",
-      "#amenities-utilities",
-    ]);
+    const chips = within(screen.getByRole("group", { name: "Amenity categories" })).getAllByRole("button");
+    expect(chips.map((chip) => chip.textContent)).toEqual(["All4", "Features1", "Security1", "Utilities2"]);
     const utilities = document.getElementById("amenities-utilities")!;
     expect(within(utilities).getByText("Power Backup")).toBeInTheDocument();
     expect(within(utilities).getByText("Generator")).toBeInTheDocument();
   });
 
-  it("names the configurations each item comes with when units differ", () => {
+  it("names the configurations each item comes with, and compares them on demand", () => {
     render(
       <ProjectAmenitiesSection
         project={project({
@@ -95,10 +91,18 @@ describe("ProjectAmenitiesSection", () => {
       />,
     );
     const card = document.getElementById("furnishing")!;
-    expect(within(card).getByText("All configurations")).toBeInTheDocument();
-    expect(within(card).getAllByText("3 BHK")).toHaveLength(3); // status pill + two tiles
+    expect(within(card).getAllByText("3 BHK").length).toBeGreaterThan(0);
     expect(within(card).getByText("Fully Furnished")).toBeInTheDocument();
     expect(within(card).getByText(/Furnishing differs between units/)).toBeInTheDocument();
+    fireEvent.click(within(card).getByRole("button", { name: "2 BHK" }));
+    expect(within(card).getAllByText("Not in 2 BHK")).toHaveLength(2);
+  });
+
+  it("filters amenities by category and by search", () => {
+    render(<ProjectAmenitiesSection project={project({ amenities })} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Security/ }));
+    expect(screen.getByText("CCTV")).toBeInTheDocument();
+    expect(screen.queryByText("Lift")).not.toBeInTheDocument();
   });
 
   it("shows one status and no configuration notes when every unit matches", () => {

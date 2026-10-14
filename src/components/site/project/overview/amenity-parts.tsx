@@ -68,7 +68,7 @@ export function AmenityTile({
         aria-hidden="true"
         className="w-10! h-10! rounded-xl! bg-white! ring-1! ring-gray-200/80! grid! place-items-center! shrink-0!"
       >
-        <Icon className="w-5! h-5! text-[#27427f]!" strokeWidth={1.75} />
+        <Icon className="w-5! h-5! text-[#1645bf]!" strokeWidth={1.75} />
       </span>
       <span className="min-w-0! max-w-full!">
         <span className="block! text-sm! font-medium! text-gray-900! leading-snug! text-pretty! break-words!">
@@ -89,7 +89,7 @@ export const AMENITY_GRID = "grid! grid-cols-2! sm:grid-cols-3! lg:grid-cols-4! 
 
 /** A category chip: links a category name and its count to that group. */
 export const CATEGORY_CHIP =
-  "inline-flex! items-center! gap-1.5! rounded-full! bg-white! px-3! py-1! text-xs! font-medium! text-gray-700! ring-1! ring-gray-200! no-underline! transition-[color,box-shadow]! duration-150! ease-out-quint! hover:text-[#27427f]! hover:ring-[#27427f]/40! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!";
+  "inline-flex! items-center! gap-1.5! rounded-full! bg-white! px-3! py-1! text-xs! font-medium! text-gray-700! ring-1! ring-gray-200! no-underline! transition-[color,box-shadow]! duration-150! ease-out-quint! hover:text-[#1645bf]! hover:ring-[#1645bf]/40! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!";
 
 const OTHER = "Other";
 

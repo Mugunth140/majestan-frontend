@@ -30,7 +30,7 @@ export function YouTubeFacade({ videoId, title }: { videoId: string; title: stri
           type="button"
           onClick={() => setPlaying(true)}
           aria-label={`Play video: ${title}`}
-          className="group absolute! inset-0! w-full! h-full! cursor-pointer! transition-transform! duration-150! ease-out-quint! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-inset! focus-visible:ring-[#27427f]!"
+          className="group absolute! inset-0! w-full! h-full! cursor-pointer! transition-transform! duration-150! ease-out-quint! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-inset! focus-visible:ring-[#1645bf]!"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

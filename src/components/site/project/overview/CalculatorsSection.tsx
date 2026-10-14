@@ -19,7 +19,7 @@ function unitTypeLabel(unit: ProjectUnit): string {
 export function CalculatorsSection({ project }: { project: ProjectDetail }) {
   return (
     <section id="calculators" aria-labelledby="project-finance-title" className={`font-manrope-page ${styles.section}`}>
-      <h2 id="project-finance-title" className={styles.title}>Your home. Your EMI.</h2>
+      <h2 id="project-finance-title" className={styles.title}>Plan your EMI</h2>
       {projectFinanceUnits(project).length ? (
         <FinanceWidget key={project.id} project={project} />
       ) : (
@@ -41,8 +41,10 @@ function FinanceWidget({ project }: { project: ProjectDetail }) {
   const [unitId, setUnitId] = useState(units[0]?.id);
   const [rate, setRate] = useState<number>(PROJECT_FINANCE_ASSUMPTIONS.annualRatePct);
   const [years, setYears] = useState<number>(PROJECT_FINANCE_ASSUMPTIONS.years);
+  // The loan as a share of the price; the rest is the down payment.
+  const [loanPct, setLoanPct] = useState<number>(100 - PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct);
   const configurationGroupId = useId();
-  const estimate = projectFinanceEstimate(project, { unitId, annualRatePct: rate, years });
+  const estimate = projectFinanceEstimate(project, { unitId, annualRatePct: rate, years, downPaymentPct: 100 - loanPct });
   if (!estimate) return null;
 
   const groups = new Map<string, ProjectUnit[]>();
@@ -60,7 +62,7 @@ function FinanceWidget({ project }: { project: ProjectDetail }) {
         <p className={styles.label}>Choose your unit</p>
         <div className={styles.unitTypes} role="group" aria-label="Unit types">
           {[...groups].map(([name, group]) => {
-            const starting = projectFinanceEstimate(project, { unitId: group[0].id, annualRatePct: rate, years })!;
+            const starting = projectFinanceEstimate(project, { unitId: group[0].id, annualRatePct: rate, years, downPaymentPct: 100 - loanPct })!;
             return (
               <button key={name} type="button" className={`${styles.unitButton} ${selectedType === name ? styles.selected : ""}`}
                 aria-pressed={selectedType === name} onClick={() => setUnitId(group[0].id)}>
@@ -98,6 +100,8 @@ function FinanceWidget({ project }: { project: ProjectDetail }) {
           <p className={styles.selectedPrice}>{formatINR(estimate.propertyPrice)} home · {formatINR(estimate.downPayment)} down</p>
         </div>
         <div className={styles.controls}>
+          <FinanceSlider label="Loan amount" min={10} max={90} step={5} value={loanPct}
+            display={`${formatINR(estimate.loanAmount)} · ${loanPct}%`} onChange={setLoanPct} />
           <FinanceSlider label="Interest rate" min={5} max={15} step={0.25} value={rate} display={`${rate.toFixed(2)}% p.a.`} onChange={setRate} />
           <FinanceSlider label="Loan tenure" min={5} max={30} step={1} value={years} display={`${years} years`} onChange={setYears} />
         </div>
@@ -111,13 +115,12 @@ function FinanceWidget({ project }: { project: ProjectDetail }) {
         <dl className={styles.repaymentNumbers}>
           <div><dt><span className={styles.loanDot} />Loan amount</dt><dd>{formatINR(estimate.loanAmount)}</dd></div>
           <div><dt><span className={styles.interestDot} />Interest over {years} years</dt><dd>{formatINR(estimate.totalInterest)}</dd></div>
-          <div><dt>Indicative monthly income</dt><dd>{money(estimate.monthlyIncome)}</dd></div>
         </dl>
       </div>
 
       <details className={styles.assumptions}>
-        <summary>{PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct}% down payment · View assumptions</summary>
-        <p>Illustrative estimate at {rate.toFixed(2)}% over {years} years. Income assumes no existing EMIs and payments at 50% of income. Lender terms and purchase costs may differ.</p>
+        <summary>{100 - loanPct}% down payment · View assumptions</summary>
+        <p>Illustrative estimate: {formatINR(estimate.loanAmount)} borrowed at {rate.toFixed(2)}% over {years} years. Lender terms and purchase costs may differ.</p>
       </details>
     </div>
   );

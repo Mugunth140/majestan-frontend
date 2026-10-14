@@ -500,3 +500,82 @@ export function projectCoordinates(project: ProjectDetail): ProjectCoordinates |
   if (lat === 0 && lon === 0) return null;
   return { lat, lon };
 }
+
+/** "2", "2 – 3": a whole-number range across the units, or null when none set it. */
+function countRange(values: (number | null | undefined)[]): string | null {
+  const set = [...new Set(values.filter((v): v is number => typeof v === "number" && v > 0))].sort((a, b) => a - b);
+  if (set.length === 0) return null;
+  return set.length === 1 ? `${set[0]}` : `${set[0]} – ${set[set.length - 1]}`;
+}
+
+function sqftRange(values: number[]): string | null {
+  const set = values.filter((v) => v > 0);
+  if (set.length === 0) return null;
+  const lo = Math.min(...set);
+  const hi = Math.max(...set);
+  const fmt = (v: number) => Math.round(v).toLocaleString("en-IN");
+  return lo === hi ? `${fmt(lo)} sq.ft` : `${fmt(lo)} – ${fmt(hi)} sq.ft`;
+}
+
+/** "All units", "Some units", or null when no unit has the room. */
+function roomPresence(units: ProjectUnit[], has: (unit: ProjectUnit) => boolean | null | undefined): string | null {
+  const count = units.filter((unit) => has(unit)).length;
+  if (count === 0) return null;
+  return count === units.length ? "In every unit" : "In select units";
+}
+
+/**
+ * The about section's full spec sheet: the project-level details, then what
+ * the units add up to — rooms, parking, carpet and UDS area, floors and
+ * maintenance. Nothing here repeats the key-facts band (price, BHK mix,
+ * built-up area, possession status).
+ */
+export function buildAboutRows(project: ProjectDetail): DetailRow[] {
+  const rows = buildDetailRows(project);
+  const isPlot = project.projectType === "plot";
+  const units = project.units ?? [];
+  const add = (label: string, value: string | null) => {
+    if (value) rows.push({ label, value });
+  };
+
+  const available = units.filter((unit) => unit.status === "available").length;
+  if (units.length > 0) add("Units on sale", `${available} of ${units.length} listed`);
+
+  if (!isPlot && units.length > 0) {
+    add("Bathrooms", countRange(units.map((u) => u.bathrooms)));
+    add("Balconies", countRange(units.map((u) => u.balconies)));
+    add("Carpet area", sqftRange(units.map((u) => num(u.carpetAreaSqft))));
+    add("UDS area", sqftRange(units.map((u) => num(u.udsAreaSqft))));
+
+    const parking = countRange(units.map((u) => u.parking));
+    const parkingTypes = [...new Set(units.map((u) => u.parkingType?.trim()).filter(Boolean))].map((t) => titleCase(t!));
+    if (parking) {
+      add("Car parking", `${parking} ${parking === "1" ? "slot" : "slots"}${parkingTypes.length ? ` · ${parkingTypes.join(", ")}` : ""}`);
+    }
+    if (units.some((u) => u.unitGuestParking)) add("Guest parking", "Available");
+    add("Pooja room", roomPresence(units, (u) => u.poojaRoom));
+    add("Study room", roomPresence(units, (u) => u.studyRoom));
+
+    const furnished = [...new Set(units.map((u) => u.furnishedStatus).filter(Boolean))].map((s) => titleCase(s!));
+    if (furnished.length > 0) add("Furnishing", furnished.join(" or "));
+
+    const floors = [...new Set(units.map((u) => `${u.floorNo ?? ""}`.trim()).filter(Boolean))];
+    if (floors.length > 0 && floors.length <= 4) add(floors.length === 1 ? "Floor" : "Floors", floors.join(", "));
+  }
+
+  const maintenance = units.map((u) => num(u.maintenanceFee)).filter((v) => v > 0);
+  if (maintenance.length > 0) {
+    const lo = Math.min(...maintenance);
+    const hi = Math.max(...maintenance);
+    const fmt = (v: number) => `₹${Math.round(v).toLocaleString("en-IN")}`;
+    add("Maintenance", lo === hi ? fmt(lo) : `${fmt(lo)} – ${fmt(hi)}`);
+  }
+
+  const availableFrom = units
+    .map((u) => u.availableFrom)
+    .filter((d): d is string => Boolean(d))
+    .sort()[0];
+  if (availableFrom) add("Available from", formatPossession(availableFrom));
+
+  return rows;
+}

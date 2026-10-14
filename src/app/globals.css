@@ -513,3 +513,29 @@ body {
   }
 }
 
+
+/* A light sweep across the primary enquiry button, every few seconds, so the
+   one call to action on a project page catches the eye without flashing.
+   Unlayered like the rules above; skipped for reduced motion. */
+.cta-shimmer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.cta-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.32) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: cta-shimmer 6s cubic-bezier(0.45, 0, 0.25, 1) 1.2s infinite;
+  pointer-events: none;
+}
+@keyframes cta-shimmer {
+  0% { transform: translateX(-120%); }
+  35%, 100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-shimmer::after { display: none; }
+}

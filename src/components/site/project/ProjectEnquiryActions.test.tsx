@@ -1,5 +1,5 @@
 // site/majestan-frontend/src/components/site/project/ProjectEnquiryActions.test.tsx
-import { act, render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { act, render, screen, cleanup, fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectEnquiryActions } from "./ProjectEnquiryActions";
@@ -62,9 +62,12 @@ describe("ProjectEnquiryActions", () => {
     render(<ProjectEnquiryActions project={PROJECT} />);
     await user.click(screen.getByRole("button", { name: /schedule visit/i }));
 
-    const picker = await screen.findByLabelText(/preferred time/i);
-    await user.selectOptions(picker, "08:00");
-    expect(picker).toHaveValue("08:00");
+    // Tomorrow, so no slot is already past.
+    const dates = within(await screen.findByRole("radiogroup", { name: /visit date/i })).getAllByRole("radio");
+    await user.click(dates[1]);
+    const slot = within(screen.getByRole("radiogroup", { name: /visit time/i })).getByRole("radio", { name: "8:00 AM" });
+    await user.click(slot);
+    expect(slot).toHaveAttribute("aria-checked", "true");
 
     await user.click(screen.getByRole("button", { name: /book visit/i }));
     expect(createProjectEnquiry).toHaveBeenCalledWith(

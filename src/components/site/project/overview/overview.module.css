@@ -1,0 +1,89 @@
+/*
+ * The overview's palette and surfaces. Shades of white, ink and one clear
+ * blue — deliberately not the navy brand colour, which stays on the header,
+ * footer and the rest of the site. The light surface is the one the EMI
+ * section introduced: white that drifts into a pale blue at one corner.
+ */
+.root {
+  --ov-ink: #0a0f1c;
+  --ov-ink-2: #1c2433;
+  --ov-body: #465066;
+  --ov-muted: #5f6b80;
+  --ov-line: #e2e9f4;
+  --ov-line-strong: #cfdcf0;
+  --ov-sky: #eef4ff;
+  --ov-sky-2: #dce8ff;
+  --ov-blue: #2563eb;
+  --ov-blue-deep: #1645bf;
+}
+
+/* The default surface: plain white with a hairline. The blue-tinted
+   gradient is kept for the few places that should stand out (the EMI
+   section and the enquiry card), so it stays an accent. */
+.panel {
+  position: relative;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #e6ebf2;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ov-ink);
+  scroll-margin-top: 128px;
+}
+
+/* The EMI section's white-into-pale-blue drift, for the few sections that
+   carry numbers a buyer compares: configurations and location. */
+.tint {
+  border-color: #dfe7f4;
+  background: linear-gradient(135deg, #fff 0%, #fff 40%, #edf4ff 100%);
+}
+
+@media (min-width: 768px) {
+  .panel { padding: 32px; }
+}
+
+/* Sections settle in as they scroll into view, where the browser can tie
+   the animation to scroll. Elsewhere they simply render. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: ov-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+@keyframes ov-reveal {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Crossfade for swapped content: a floor plan, a filtered grid. */
+.swap { animation: ov-swap 220ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+@keyframes ov-swap {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .swap { animation: none; }
+}
+
+/* Accordion body: grid rows animate from 0fr to 1fr, so the height follows
+   the content without measuring it. */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.collapse[data-open="true"] { grid-template-rows: 1fr; }
+.collapse > div { overflow: hidden; min-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .collapse { transition: none; }
+}
+
+/* The distance bar under each nearby place grows in when its tab opens. */
+.bar { transform-origin: left; animation: ov-bar 480ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+@keyframes ov-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .bar { animation: none; }
+}

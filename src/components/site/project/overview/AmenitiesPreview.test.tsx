@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { AmenitiesPreview } from "./AmenitiesPreview";
 import type { ProjectDetail } from "@/lib/api/projects";
@@ -32,13 +32,13 @@ describe("AmenitiesPreview", () => {
     expect(screen.getByText("View all 11")).toBeInTheDocument();
   });
 
-  it("links each category chip to its group on the amenities page", () => {
+  it("filters the preview by category chip", () => {
     render(<AmenitiesPreview project={project(many)} />);
     expect(screen.getByText("11 amenities in 2 categories")).toBeInTheDocument();
-    expect(screen.getByText("Security").closest("a")).toHaveAttribute(
-      "href",
-      "/casa-grand-pp0007/amenities#amenities-security",
-    );
+    fireEvent.click(screen.getByRole("button", { name: /^Security/ }));
+    expect(screen.getByRole("button", { name: /^Security/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Amenity 1")).toBeInTheDocument();
+    expect(screen.queryByText("Amenity 2")).not.toBeInTheDocument();
   });
 
   it("shows every tile and no +N tile at eight or fewer", () => {

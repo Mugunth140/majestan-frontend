@@ -8,8 +8,10 @@ import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LABEL } from "@/components/site/project/project-ui";
 import { formatAddressLines } from "@/lib/location-display";
 
+/* The overview's light surface, spelled out in hex: the aside also renders on
+   sub-pages, outside the overview's colour tokens. */
 const ASIDE_CARD =
-  "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-6!";
+  "rounded-2xl! border! border-[#dfe7f4]! bg-[linear-gradient(160deg,#fff_0%,#fff_55%,#edf4ff_100%)]! p-6! shadow-[0_1px_2px_rgba(10,15,28,0.04),0_24px_48px_-28px_rgba(22,69,191,0.35)]!";
 
 /**
  * The enquiry card: what it costs, who builds it, and the two actions.
@@ -31,7 +33,7 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
   return (
     <div className={ASIDE_CARD}>
       <div className="flex! items-start! justify-between! gap-3!">
-        <h2 className="min-w-0! text-2xl! font-semibold! text-gray-900! tracking-tight! text-balance!">
+        <h2 className="m-0! min-w-0! text-xl! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]! text-balance!">
           {project.name}
         </h2>
         <WishlistButton
@@ -41,8 +43,8 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
         />
       </div>
       {locationLines.length > 0 && (
-        <p className="mt-1.5! flex! items-start! gap-1.5! text-sm! text-gray-500!">
-          <MapPin className="w-4! h-4! shrink-0!" aria-hidden="true" />
+        <p className="mt-1.5! flex! items-start! gap-1.5! text-sm! text-[#1c2433]!">
+          <MapPin className="w-4! h-4! shrink-0! mt-0.5! text-[#0a0f1c]!" aria-hidden="true" />
           <span className="min-w-0!">
             {locationLines.map((line, index) => (
               <span className="block!" key={`${line}-${index}`}>{line}</span>
@@ -50,13 +52,13 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
           </span>
         </p>
       )}
-      <div className="mt-4! flex! items-end! justify-between! gap-4! leading-none!">
-        <div className="flex! flex-col! gap-1! min-w-0!">
-          <p className="text-2xl! font-semibold! text-gray-900! tracking-tight! tabular-nums!">
+      <div className="mt-5! pt-5! border-t! border-[#e2e9f4]! flex! items-end! justify-between! gap-4! leading-none!">
+        <div className="flex! flex-col! gap-1.5! min-w-0!">
+          <p className="m-0! text-[28px]! font-semibold! text-[#0a0f1c]! tracking-[-0.03em]! tabular-nums!">
             {priceRangeLabel(project)}
           </p>
           {rate && (
-            <p className="text-sm! text-gray-500! tabular-nums!">
+            <p className="m-0! text-sm! text-[#5f6b80]! tabular-nums!">
               {rate.value} {rate.label.replace("Rate ", "")}
               {rate.note ? ` ${rate.note}` : ""}
             </p>
@@ -64,10 +66,10 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
         </div>
         {emiStarts ? (
           <div className="flex! flex-col! gap-1! shrink-0! text-right!">
-            <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
-            <span className="text-[15px]! font-semibold! text-gray-800! tabular-nums!">
+            <span className="text-[11px]! font-semibold! uppercase! tracking-[0.08em]! text-[#5f6b80]!">EMI from</span>
+            <a href="#calculators" className="text-[15px]! font-semibold! text-[#0a0f1c]! no-underline! tabular-nums! hover:underline! underline-offset-4!">
               ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
-            </span>
+            </a>
           </div>
         ) : null}
       </div>
@@ -81,7 +83,7 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
             rel="noopener noreferrer"
             download
             title={project.brochureName ?? undefined}
-            className="mt-2! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-white! px-4! py-3! text-base! font-semibold! text-[#27427f]! ring-1! ring-[#27427f]/25! cursor-pointer! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#27427f]/5! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+            className="mt-2.5! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-transparent! px-4! py-3! text-base! font-semibold! text-[#0a0f1c]! no-underline! cursor-pointer! transition-[color,background-color,transform]! duration-150! ease-out-quint! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]!"
           >
             <Download className="w-4! h-4!" aria-hidden="true" />
             Download brochure
@@ -89,13 +91,13 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
         )}
       </div>
 
-      <div className="mt-6! pt-5! border-t! border-gray-200! flex! flex-col! items-center! gap-1.5! text-center!">
-        <p className="flex! items-center! gap-1.5! text-sm! text-gray-500!">
+      <div className="mt-4! pt-4! border-t! border-[#e2e9f4]! flex! flex-col! items-center! gap-1.5! text-center!">
+        <p className="m-0! flex! items-center! gap-1.5! text-[13px]! text-[#465066]!">
           <Coins className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
           Zero brokerage on this project
         </p>
         {project.projectCode && (
-          <p className="flex! items-center! gap-1.5! text-sm! text-gray-500! tabular-nums!">
+          <p className="m-0! flex! items-center! gap-1.5! text-[13px]! text-[#5f6b80]! tabular-nums!">
             <Info className="w-4! h-4! shrink-0!" aria-hidden="true" />
             ID: {project.projectCode}
           </p>
@@ -108,7 +110,7 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
 /** Who is selling it. Majestan is the listing agent on every project page. */
 function ListedByCard() {
   return (
-    <div className={`${ASIDE_CARD} flex! items-center! gap-4!`}>
+    <div className="rounded-2xl! border! border-[#e6ebf2]! bg-white! p-5! flex! items-center! gap-4!">
       <Image
         src="/assets/images/logo/fav.png"
         alt="Majestan Realty"
@@ -118,10 +120,10 @@ function ListedByCard() {
       />
       <div className="min-w-0!">
         <p className={LABEL}>Listed by</p>
-        <p className="mt-0.5! text-base! font-semibold! text-gray-900!">
+        <p className="m-0! mt-0.5! text-base! font-semibold! text-[#0a0f1c]!">
           Majestan Realty
         </p>
-        <p className="mt-1! flex! items-center! gap-1.5! text-sm! text-gray-500!">
+        <p className="m-0! mt-1! flex! items-center! gap-1.5! text-sm! text-[#5f6b80]!">
           <ShieldCheck className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
           Verified
         </p>

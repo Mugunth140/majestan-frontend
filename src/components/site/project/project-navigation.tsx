@@ -50,17 +50,17 @@ export function ProjectNavigation({
                 href={href}
                 className={`group! relative! flex! items-center! gap-2! whitespace-nowrap! py-3.5! text-[14px]! font-medium! transition-colors! duration-300! shrink-0! no-underline! ${
                   isActive
-                    ? "text-[#27427f]!"
+                    ? "text-[#1645bf]!"
                     : "text-gray-500! hover:text-gray-900!"
                 }`}
                 aria-current={isActive ? "page" : undefined}
               >
-                <span className={`transition-colors! duration-300! ${isActive ? "text-[#27427f]!" : "text-gray-400! group-hover:text-gray-500!"}`}>
+                <span className={`transition-colors! duration-300! ${isActive ? "text-[#1645bf]!" : "text-gray-400! group-hover:text-gray-500!"}`}>
                   {s.icon}
                 </span>
                 {label}
                 {isActive && (
-                  <div className="absolute! bottom-0! left-0! right-0! h-0.5! bg-[#27427f]! rounded-t-full!" />
+                  <div className="absolute! bottom-0! left-0! right-0! h-0.5! bg-[#1645bf]! rounded-t-full!" />
                 )}
               </Link>
             );

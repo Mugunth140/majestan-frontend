@@ -50,7 +50,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
       aria-label={`${project.name} photos`}
       /* In the page column, so it lines up with the title and the facts row
          below it and carries the same corners as every card on the page. */
-      className="bg-gray-100! rounded-[20px]! overflow-hidden!"
+      className="bg-gray-100! rounded-2xl! overflow-hidden!"
     >
       <div
         role={count > 1 ? "group" : undefined}
@@ -60,7 +60,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
         /* 21:9 on laptops and up, 16:9 on tablets, 4:5 on phones, where a wide
            band on a 375px screen is a sliver and the portrait mobile cover
            crop would go unused. */
-        className="relative! overflow-hidden! aspect-[4/5]! sm:aspect-video! lg:aspect-[21/9]! bg-gray-100! group/stage! outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-inset!"
+        className="relative! overflow-hidden! aspect-[4/5]! sm:aspect-video! lg:aspect-[21/9]! bg-gray-100! group/stage! outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-inset!"
       >
         <div className="absolute! inset-0!">
           {count > 0 ? (
@@ -124,7 +124,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
               type="button"
               onClick={() => go(active - 1)}
               aria-label="Previous photo"
-              className="absolute! left-4! md:left-6! top-1/2! -translate-y-1/2! z-20! grid! place-items-center! h-10! w-10! rounded-full! bg-white/90! text-gray-900! backdrop-blur-sm! ring-1! ring-black/5! cursor-pointer! transition-[opacity,transform,background-color]! duration-150! ease-out-quint! hover:bg-white! active:scale-95! focus-visible:ring-2! focus-visible:ring-[#27427f]! md:opacity-0! md:group-hover/stage:opacity-100! md:focus-visible:opacity-100!"
+              className="absolute! left-4! md:left-6! top-1/2! -translate-y-1/2! z-20! grid! place-items-center! h-10! w-10! rounded-full! bg-white/90! text-gray-900! backdrop-blur-sm! ring-1! ring-black/5! cursor-pointer! transition-[opacity,transform,background-color]! duration-150! ease-out-quint! hover:bg-white! active:scale-95! focus-visible:ring-2! focus-visible:ring-[#1645bf]! md:opacity-0! md:group-hover/stage:opacity-100! md:focus-visible:opacity-100!"
             >
               <ChevronLeft className="w-5! h-5!" />
             </button>
@@ -132,7 +132,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
               type="button"
               onClick={() => go(active + 1)}
               aria-label="Next photo"
-              className="absolute! right-4! md:right-6! top-1/2! -translate-y-1/2! z-20! grid! place-items-center! h-10! w-10! rounded-full! bg-white/90! text-gray-900! backdrop-blur-sm! ring-1! ring-black/5! cursor-pointer! transition-[opacity,transform,background-color]! duration-150! ease-out-quint! hover:bg-white! active:scale-95! focus-visible:ring-2! focus-visible:ring-[#27427f]! md:opacity-0! md:group-hover/stage:opacity-100! md:focus-visible:opacity-100!"
+              className="absolute! right-4! md:right-6! top-1/2! -translate-y-1/2! z-20! grid! place-items-center! h-10! w-10! rounded-full! bg-white/90! text-gray-900! backdrop-blur-sm! ring-1! ring-black/5! cursor-pointer! transition-[opacity,transform,background-color]! duration-150! ease-out-quint! hover:bg-white! active:scale-95! focus-visible:ring-2! focus-visible:ring-[#1645bf]! md:opacity-0! md:group-hover/stage:opacity-100! md:focus-visible:opacity-100!"
             >
               <ChevronRight className="w-5! h-5!" />
             </button>

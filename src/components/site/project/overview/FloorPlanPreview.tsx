@@ -1,15 +1,14 @@
-import Link from "next/link";
 import { Grid3X3 } from "lucide-react";
 import { RequestButton } from "@/components/site/project/RequestButton";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
 import { groupUnitsByConfiguration, projectFloorPlanHref, unitFloorPlans } from "@/lib/project-overview";
 import { unitAreaLabel } from "@/lib/project-config-summary";
-import { Card, EmptyState, ViewAllLink } from "@/components/site/project/project-ui";
-import { CONFIGURATION_TILE } from "@/components/site/project/overview/ConfigurationSummary";
+import { Panel, PanelEmpty, PanelLink } from "@/components/site/project/overview/overview-ui";
+import { FloorPlanViewer, type PlanPreview } from "@/components/site/project/overview/FloorPlanViewer";
 
 /** Enough to show the range of plans without turning the overview into a gallery. */
-const MAX_PREVIEWS = 4;
+const MAX_PREVIEWS = 6;
 
 export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
   // One plan per configuration, so the preview shows each type once rather
@@ -36,8 +35,8 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
   if (previews.length === 0) {
     const isPlot = project.projectType === "plot";
     return (
-      <Card title={title} id="floor-plans">
-        <EmptyState
+      <Panel title={title} id="floor-plans">
+        <PanelEmpty
           icon={Grid3X3}
           title={`${title} aren't published yet`}
           body={
@@ -52,45 +51,28 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
             />
           }
         />
-      </Card>
+      </Panel>
     );
   }
 
+  const plans: PlanPreview[] = previews.map(({ group, unit, floor, configuration }) => ({
+    key: `${group.key}-${unit.id}`,
+    label: group.label,
+    configuration,
+    area: unitAreaLabel(unit, project.projectType),
+    floorName: floor.floorName,
+    src: floor.imageUrl,
+    href: projectFloorPlanHref(slug, unit.id, floor.floorName),
+    alt: `${group.label} ${configuration} ${floor.floorName} ${planNoun} for ${project.name}`,
+  }));
+
   return (
-    <Card
+    <Panel
       title={title}
       id="floor-plans"
-      action={<ViewAllLink href={`/${slug}/floor-plans`}>View more</ViewAllLink>}
+      action={<PanelLink href={`/${slug}/floor-plans`}>All {plural}</PanelLink>}
     >
-      <div className="grid! grid-cols-1! sm:grid-cols-2! gap-4! mt-6!">
-        {previews.map(({ group, unit, floor, configuration }) => {
-          const area = unitAreaLabel(unit, project.projectType);
-          return (
-            <Link
-              key={`${group.key}-${unit.id}`}
-              href={projectFloorPlanHref(slug, unit.id, floor.floorName)}
-              className={CONFIGURATION_TILE}
-            >
-              <div className="bg-gray-50! aspect-[4/3]!">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={floor.imageUrl}
-                  alt={`${group.label} ${configuration} ${floor.floorName} ${planNoun} for ${project.name}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full! h-full! object-contain! p-4!"
-                />
-              </div>
-
-              <div className="px-4! py-3!">
-                <p className="text-sm! font-semibold! text-gray-900!">{group.label} · {configuration}</p>
-                {area && <p className="text-sm! text-gray-500! tabular-nums!">{area}</p>}
-                <p className="mt-1! text-xs! font-medium! text-[#27427f]!">{floor.floorName}</p>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </Card>
+      <FloorPlanViewer plans={plans} />
+    </Panel>
   );
 }

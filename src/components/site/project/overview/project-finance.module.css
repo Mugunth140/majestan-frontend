@@ -3,7 +3,7 @@
   --finance-accent: #2563eb;
   --finance-muted: #586579;
   --finance-line: #dae4f3;
-  --finance-interest: #93baf8;
+  --finance-interest: #c9dafb;
   container-type: inline-size;
   min-width: 0;
   padding: 24px;
@@ -36,9 +36,12 @@
   scrollbar-width: thin;
   scrollbar-color: #a9c1ec transparent;
 }
+/* A third of the row each, fixed, so one or two units don't stretch across
+   the section; past three the row scrolls sideways. */
 .unitButton {
   display: flex !important;
-  flex: 1 0 128px;
+  flex: 0 0 calc((100% - 16px) / 3);
+  min-width: 136px;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
@@ -55,7 +58,7 @@
 .unitButton strong { font-size: 16px; line-height: 24px; font-weight: 600; }
 .unitButton span { font-size: 14px; line-height: 20px; }
 .unitButton:hover { background: #eef4ff !important; }
-.unitButton.selected { background: linear-gradient(115deg, #2563eb, #1645bf) !important; border-color: var(--finance-accent) !important; color: #fff !important; }
+.unitButton.selected { background: #eef4ff !important; border-color: #9dbbf3 !important; color: #1645bf !important; box-shadow: inset 0 0 0 1px #9dbbf3; }
 .unitButton:focus-visible, .configuration:has(input:focus-visible), .links a:focus-visible, .assumptions summary:focus-visible { outline: 2px solid var(--finance-accent); outline-offset: 4px; }
 .section button::before, .section button::after { content: none !important; }
 .configurations { min-width: 0; margin: 0 !important; padding: 0 !important; border: 0 !important; }
@@ -108,12 +111,11 @@
 .breakdown { min-width: 0; }
 .repaymentBar { display: flex; gap: 4px; overflow: hidden; height: 12px; margin: 8px 0 16px; border-radius: 9999px; }
 .repaymentBar span { display: block; min-width: 0; }
-.principal { background: linear-gradient(90deg, #2563eb, #1645bf); }
-.interest { background: var(--finance-interest); }
+.principal { background: #3b6fe0; }
+.interest { background: #c9dafb; }
 .repaymentNumbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 !important; }
 .repaymentNumbers > div:nth-child(2) { text-align: right; }
 .repaymentNumbers > div:nth-child(2) dt { justify-content: flex-end; }
-.repaymentNumbers > div:last-child { grid-column: 1 / -1; }
 .repaymentNumbers dt { display: flex; align-items: center; gap: 8px; color: var(--finance-muted); font-size: 14px; line-height: 20px; }
 .repaymentNumbers dd { margin: 4px 0 0 !important; font-size: 20px; line-height: 28px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .loanDot, .interestDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--finance-accent); }
@@ -137,5 +139,5 @@
   .section { padding: 16px; border-radius: 16px; }
   .title { font-size: 20px !important; line-height: 28px !important; }
   .widget { gap: 16px; margin-top: 16px; }
-  .unitButton { flex-basis: 128px; padding: 12px !important; }
+  .unitButton { padding: 12px !important; }
 }

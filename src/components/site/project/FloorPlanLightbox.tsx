@@ -147,7 +147,7 @@ export function FloorPlanLightbox({
         type="button"
         onClick={show}
         aria-haspopup="dialog"
-        className="group/plan relative! block! w-full! rounded-xl! bg-gray-50! ring-1! ring-gray-200/70! overflow-hidden! aspect-[16/10]! cursor-zoom-in! transition-shadow! duration-150! ease-out-quint! hover:ring-[#27427f]/40! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+        className="group/plan relative! block! w-full! rounded-xl! bg-gray-50! ring-1! ring-gray-200/70! overflow-hidden! aspect-[16/10]! cursor-zoom-in! transition-shadow! duration-150! ease-out-quint! hover:ring-[#1645bf]/40! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -157,7 +157,7 @@ export function FloorPlanLightbox({
           decoding="async"
           className="w-full! h-full! object-contain! p-4! sm:p-6!"
         />
-        <span className="absolute! bottom-3! right-3! inline-flex! items-center! gap-1.5! rounded-full! bg-white/95! px-3! py-1.5! text-xs! font-medium! text-[#27427f]! ring-1! ring-gray-200! shadow-sm! group-hover/plan:text-[#1e3563]!">
+        <span className="absolute! bottom-3! right-3! inline-flex! items-center! gap-1.5! rounded-full! bg-white/95! px-3! py-1.5! text-xs! font-medium! text-[#1645bf]! ring-1! ring-gray-200! shadow-sm! group-hover/plan:text-[#0f3596]!">
           <Maximize2 className="w-3.5! h-3.5!" aria-hidden="true" />
           View floor plan
         </span>
@@ -192,7 +192,7 @@ export function FloorPlanLightbox({
                 href={slide.src}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex! items-center! gap-1.5! rounded-lg! px-3! py-2! text-sm! font-medium! text-[#27427f]! no-underline! hover:bg-gray-100! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                className="inline-flex! items-center! gap-1.5! rounded-lg! px-3! py-2! text-sm! font-medium! text-[#1645bf]! no-underline! hover:bg-gray-100! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
               >
                 <ExternalLink className="w-4! h-4!" aria-hidden="true" />
                 <span className="hidden! sm:inline!">Original</span>
@@ -205,7 +205,7 @@ export function FloorPlanLightbox({
                 onClick={close}
                 autoFocus
                 aria-label="Close floor plan"
-                className="grid! place-items-center! w-10! h-10! rounded-lg! text-gray-600! hover:bg-gray-100! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                className="grid! place-items-center! w-10! h-10! rounded-lg! text-gray-600! hover:bg-gray-100! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
               >
                 <X className="w-5! h-5!" aria-hidden="true" />
               </button>
@@ -290,7 +290,7 @@ export function FloorPlanLightbox({
                   type="button"
                   onClick={() => go(current - 1)}
                   aria-label="Previous floor plan"
-                  className="absolute! left-3! top-1/2! -translate-y-1/2! grid! place-items-center! w-11! h-11! rounded-full! bg-white/95! text-gray-700! ring-1! ring-gray-200! shadow-sm! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                  className="absolute! left-3! top-1/2! -translate-y-1/2! grid! place-items-center! w-11! h-11! rounded-full! bg-white/95! text-gray-700! ring-1! ring-gray-200! shadow-sm! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
                 >
                   <ChevronLeft className="w-5! h-5!" aria-hidden="true" />
                 </button>
@@ -298,7 +298,7 @@ export function FloorPlanLightbox({
                   type="button"
                   onClick={() => go(current + 1)}
                   aria-label="Next floor plan"
-                  className="absolute! right-3! top-1/2! -translate-y-1/2! grid! place-items-center! w-11! h-11! rounded-full! bg-white/95! text-gray-700! ring-1! ring-gray-200! shadow-sm! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                  className="absolute! right-3! top-1/2! -translate-y-1/2! grid! place-items-center! w-11! h-11! rounded-full! bg-white/95! text-gray-700! ring-1! ring-gray-200! shadow-sm! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
                 >
                   <ChevronRight className="w-5! h-5!" aria-hidden="true" />
                 </button>
@@ -315,7 +315,7 @@ export function FloorPlanLightbox({
                 onClick={() => zoomBy(1 / 1.5)}
                 disabled={!zoomed}
                 aria-label="Zoom out"
-                className="grid! place-items-center! w-8! h-8! rounded-full! text-gray-700! hover:bg-gray-100! disabled:opacity-40! disabled:hover:bg-transparent! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                className="grid! place-items-center! w-8! h-8! rounded-full! text-gray-700! hover:bg-gray-100! disabled:opacity-40! disabled:hover:bg-transparent! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
               >
                 <Minus className="w-4! h-4!" aria-hidden="true" />
               </button>
@@ -330,7 +330,7 @@ export function FloorPlanLightbox({
                 onClick={() => zoomBy(1.5)}
                 disabled={zoom.scale >= MAX_ZOOM}
                 aria-label="Zoom in"
-                className="grid! place-items-center! w-8! h-8! rounded-full! text-gray-700! hover:bg-gray-100! disabled:opacity-40! disabled:hover:bg-transparent! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                className="grid! place-items-center! w-8! h-8! rounded-full! text-gray-700! hover:bg-gray-100! disabled:opacity-40! disabled:hover:bg-transparent! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
               >
                 <Plus className="w-4! h-4!" aria-hidden="true" />
               </button>
@@ -339,7 +339,7 @@ export function FloorPlanLightbox({
                 onClick={() => setZoom(FIT)}
                 disabled={!zoomed}
                 aria-label="Reset zoom to fit"
-                className="grid! place-items-center! w-8! h-8! rounded-full! text-gray-700! hover:bg-gray-100! disabled:opacity-40! disabled:hover:bg-transparent! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
+                className="grid! place-items-center! w-8! h-8! rounded-full! text-gray-700! hover:bg-gray-100! disabled:opacity-40! disabled:hover:bg-transparent! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
               >
                 <Maximize className="w-4! h-4!" aria-hidden="true" />
               </button>
@@ -360,9 +360,9 @@ export function FloorPlanLightbox({
                     onClick={() => go(thumbIndex)}
                     aria-label={`Show ${item.title}`}
                     aria-current={thumbIndex === current || undefined}
-                    className={`h-14! w-20! shrink-0! overflow-hidden! rounded-lg! bg-gray-50! ring-2! transition-all! focus-visible:outline-none! focus-visible:ring-[#27427f]! ${
+                    className={`h-14! w-20! shrink-0! overflow-hidden! rounded-lg! bg-gray-50! ring-2! transition-all! focus-visible:outline-none! focus-visible:ring-[#1645bf]! ${
                       thumbIndex === current
-                        ? "ring-[#27427f]!"
+                        ? "ring-[#1645bf]!"
                         : "ring-gray-200! opacity-60! hover:opacity-100!"
                     }`}
                   >

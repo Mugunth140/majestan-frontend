@@ -30,7 +30,13 @@ export function projectFinanceUnits(project: Pick<ProjectDetail, "units">): Proj
   }).sort((a, b) => Number(a.price) - Number(b.price));
 }
 
-export type ProjectFinanceOptions = { unitId?: number; annualRatePct?: number; years?: number };
+export type ProjectFinanceOptions = {
+  unitId?: number;
+  annualRatePct?: number;
+  years?: number;
+  /** Share of the price paid upfront, 0–100. Defaults to the 20% assumption. */
+  downPaymentPct?: number;
+};
 
 export function projectFinanceEstimate(project: Pick<ProjectDetail, "units">, options: ProjectFinanceOptions = {}): ProjectFinanceEstimate | null {
   const candidates = projectFinanceUnits(project);
@@ -38,7 +44,9 @@ export function projectFinanceEstimate(project: Pick<ProjectDetail, "units">, op
   if (!unit) return null;
 
   const propertyPrice = Number(unit.price);
-  const downPayment = propertyPrice * PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct / 100;
+  const downPaymentPct = Number.isFinite(options.downPaymentPct) && Number(options.downPaymentPct) >= 0 && Number(options.downPaymentPct) <= 100
+    ? Number(options.downPaymentPct) : PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct;
+  const downPayment = propertyPrice * downPaymentPct / 100;
   const loanAmount = propertyPrice - downPayment;
   const annualRatePct = Number.isFinite(options.annualRatePct) && Number(options.annualRatePct) >= 0
     ? Number(options.annualRatePct) : PROJECT_FINANCE_ASSUMPTIONS.annualRatePct;

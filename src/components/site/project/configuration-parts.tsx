@@ -40,8 +40,8 @@ export function SummaryBody({ summary }: { summary: ConfigurationSummary }) {
   const priced = summary.priceLabel !== PRICE_ON_REQUEST;
   return (
     <>
-      <span className="block! px-5! py-3! text-base! bg-[#27427f]/5! text-gray-700!">
-        <span className="font-semibold! text-[#27427f]!">{summary.label}</span>{" "}
+      <span className="block! px-5! py-3! text-base! bg-[#1645bf]/5! text-gray-700!">
+        <span className="font-semibold! text-[#1645bf]!">{summary.label}</span>{" "}
         {summary.typeLabel}
       </span>
       <span className="block! px-5! py-4!">
@@ -81,8 +81,8 @@ export function SummaryBody({ summary }: { summary: ConfigurationSummary }) {
 export function CompactSummaryBody({ summary }: { summary: ConfigurationSummary }) {
   return (
     <>
-      <span className="block! px-4! py-2! text-sm! bg-[#e8eefb]! border-b! border-[#d3ddf3]! text-[#27427f]/80!">
-        <span className="font-semibold! text-[#27427f]!">{summary.label}</span>{" "}
+      <span className="block! px-4! py-2! text-sm! bg-[#e8eefb]! border-b! border-[#d3ddf3]! text-[#1645bf]/80!">
+        <span className="font-semibold! text-[#1645bf]!">{summary.label}</span>{" "}
         {summary.typeLabel}
       </span>
       <span className="block! px-4! py-3!">

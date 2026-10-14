@@ -47,7 +47,7 @@ import { StatusChip } from "@/components/site/project/configuration-parts";
 /* The page's own card: the shared CARD with more room inside, since it
    holds the active unit's whole detail. */
 const CONFIGURATION_CARD =
-  "bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! p-5! sm:p-8! lg:p-10! min-w-0!";
+  "bg-white! rounded-2xl! border! border-[#e6ebf2]! p-5! sm:p-8! lg:p-10! min-w-0!";
 
 /** "1,910 sq.ft" → "1910 SQ.FT"; plots "4 cents" → "4 CENTS". */
 function unitTabLabel(unit: ProjectUnit, projectType: string): string {
@@ -98,8 +98,8 @@ function SpecCategory({ group }: { group: SpecGroup }) {
   const Icon = GROUP_ICON[group.key];
   return (
     <details className="group/spec">
-      <summary className="list-none! [&::-webkit-details-marker]:hidden! cursor-pointer! flex! items-center! gap-3! py-3.5! rounded-md! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!">
-        <Icon className="w-4! h-4! shrink-0! text-[#27427f]!" strokeWidth={1.75} aria-hidden="true" />
+      <summary className="list-none! [&::-webkit-details-marker]:hidden! cursor-pointer! flex! items-center! gap-3! py-3.5! rounded-md! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!">
+        <Icon className="w-4! h-4! shrink-0! text-[#1645bf]!" strokeWidth={1.75} aria-hidden="true" />
         <span className="min-w-0! flex-1! sm:flex! sm:items-baseline! sm:justify-between! sm:gap-4!">
           <span className="block! text-sm! font-semibold! text-gray-900!">{group.title}</span>
           {group.preview && (
@@ -240,10 +240,10 @@ function UnitCard({
                     type="button"
                     aria-pressed={index === floorIndex}
                     onClick={() => onFloorChange(index)}
-                    className={`rounded-full! border! px-3! py-1.5! text-sm! font-medium! transition-colors! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! ${
+                    className={`rounded-full! border! px-3! py-1.5! text-sm! font-medium! transition-colors! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! ${
                       index === floorIndex
-                        ? "border-[#27427f]! bg-[#27427f]! text-white!"
-                        : "border-gray-200! bg-white! text-gray-700! hover:border-[#27427f]/40! hover:text-[#27427f]!"
+                        ? "border-[#1645bf]! bg-[#1645bf]! text-white!"
+                        : "border-gray-200! bg-white! text-gray-700! hover:border-[#1645bf]/40! hover:text-[#1645bf]!"
                     }`}
                   >
                     {floor.floorName}
@@ -462,10 +462,10 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
               role="tab"
               aria-selected={selected}
               onClick={() => selectConfig(summary.key)}
-              className={`text-left! rounded-xl! border! overflow-hidden! bg-white! transition-all! duration-150! ease-out-quint! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2! ${
+              className={`text-left! rounded-xl! border! overflow-hidden! bg-white! transition-all! duration-150! ease-out-quint! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-offset-2! ${
                 selected
-                  ? "border-[#27427f]! ring-2! ring-[#27427f]/30! shadow-sm!"
-                  : "border-[#d3ddf3]! hover:border-[#27427f]/40! hover:shadow-sm!"
+                  ? "border-[#1645bf]! ring-2! ring-[#1645bf]/30!"
+                  : "border-[#d3ddf3]! hover:border-[#1645bf]/40! hover:shadow-sm!"
               }`}
             >
               <CompactSummaryBody summary={summary} />
@@ -482,7 +482,7 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
             type="button"
             aria-label="Scroll units left"
             onClick={() => scrollStrip(-1)}
-            className="shrink-0! p-2! rounded-full! text-gray-500! hover:text-[#27427f]! hover:bg-gray-100! transition-colors! cursor-pointer!"
+            className="shrink-0! p-2! rounded-full! text-gray-500! hover:text-[#1645bf]! hover:bg-gray-100! transition-colors! cursor-pointer!"
           >
             <ChevronLeft className="w-5! h-5!" />
           </button>
@@ -504,9 +504,9 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
                     setActiveUnitId(u.id);
                     setActiveFloorIndex(0);
                   }}
-                  className={`shrink-0! px-1! py-2.5! text-sm! font-semibold! tracking-wide! tabular-nums! whitespace-nowrap! border-b-2! -mb-px! transition-colors! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! ${
+                  className={`shrink-0! px-1! py-2.5! text-sm! font-semibold! tracking-wide! tabular-nums! whitespace-nowrap! border-b-2! -mb-px! transition-colors! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! ${
                     selected
-                      ? "text-[#27427f]! border-[#27427f]!"
+                      ? "text-[#1645bf]! border-[#1645bf]!"
                       : "text-gray-500! border-transparent! hover:text-gray-900!"
                   }`}
                 >
@@ -519,7 +519,7 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
             type="button"
             aria-label="Scroll units right"
             onClick={() => scrollStrip(1)}
-            className="shrink-0! p-2! rounded-full! text-gray-500! hover:text-[#27427f]! hover:bg-gray-100! transition-colors! cursor-pointer!"
+            className="shrink-0! p-2! rounded-full! text-gray-500! hover:text-[#1645bf]! hover:bg-gray-100! transition-colors! cursor-pointer!"
           >
             <ChevronRight className="w-5! h-5!" />
           </button>

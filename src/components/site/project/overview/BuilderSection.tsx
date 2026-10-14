@@ -1,7 +1,8 @@
 import { Building2 } from "lucide-react";
 import { RequestButton } from "@/components/site/project/RequestButton";
 import type { ProjectDetail } from "@/lib/api/projects";
-import { BODY, Card, EmptyState, LABEL, paragraphs } from "@/components/site/project/project-ui";
+import { paragraphs } from "@/components/site/project/project-ui";
+import { HAIRLINE, INK, MUTED, PROSE, Panel, PanelEmpty } from "@/components/site/project/overview/overview-ui";
 
 /**
  * The developer behind the project: logo, track record and their own words.
@@ -13,8 +14,8 @@ export function BuilderSection({ project }: { project: ProjectDetail }) {
   const name = builder?.name || project.builderName;
   if (!name) {
     return (
-      <Card title="About the developer" id="builder">
-        <EmptyState
+      <Panel title="About the developer" id="builder">
+        <PanelEmpty
           icon={Building2}
           title="Developer details aren't published yet"
           body="Ask for the developer's track record and the projects they've delivered."
@@ -25,7 +26,7 @@ export function BuilderSection({ project }: { project: ProjectDetail }) {
             />
           }
         />
-      </Card>
+      </Panel>
     );
   }
 
@@ -42,56 +43,59 @@ export function BuilderSection({ project }: { project: ProjectDetail }) {
   ].filter((stat): stat is { value: string; label: string } => stat !== null);
 
   return (
-    <Card
-      title={`About ${name}`}
-      id="builder"
-    >
-      {builder?.logoUrl && (
-        /* Raw <img>, as everywhere else storage-backed assets are rendered:
-           generateReadUrl hands back a signed URL whose query string rotates,
-           so next/image would miss its cache on every request. */
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-          src={builder.logoUrl}
-          alt={`${name} logo`}
-          loading="lazy"
-          decoding="async"
-          className="mt-6! h-10! w-auto! max-w-40! object-contain! object-left!"
-        />
-      )}
-
-      {stats.length > 0 && (
-        <dl className="mt-6! flex! flex-col! divide-y! divide-gray-200! sm:flex-row! sm:divide-y-0! sm:divide-x! border-y! border-gray-200!">
-          {stats.map((stat) => (
-            /* dt must precede dd inside a dl group; column-reverse puts the
-               number on top visually without breaking that order. */
-            <div
-              key={stat.label}
-              className="flex-1! flex! flex-col-reverse! gap-1! py-4! sm:px-6! sm:first:pl-0!"
-            >
-              <dt className={LABEL}>{stat.label}</dt>
-              <dd className="text-xl! font-semibold! text-gray-900! tabular-nums!">
-                {stat.value}
-              </dd>
+    <Panel title={`About ${name}`} id="builder">
+      <div className={`mt-6! grid! grid-cols-1! gap-8! ${stats.length > 0 ? "md:grid-cols-[minmax(0,1fr)_auto]! md:gap-12!" : ""}`}>
+        <div className="min-w-0!">
+          {builder?.logoUrl && (
+            /* Raw <img>, as everywhere else storage-backed assets are rendered:
+               generateReadUrl hands back a signed URL whose query string rotates,
+               so next/image would miss its cache on every request. */
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={builder.logoUrl}
+              alt={`${name} logo`}
+              loading="lazy"
+              decoding="async"
+              className="mb-5! h-12! w-auto! max-w-44! object-contain! object-left! rounded-lg!"
+            />
+          )}
+          {builder?.description && builder.description.trim() ? (
+            <div className="flex! flex-col! gap-4!">
+              {paragraphs(builder.description).map((block, index) => (
+                <p key={index} className={`m-0! ${PROSE} whitespace-pre-line!`}>
+                  {block}
+                </p>
+              ))}
             </div>
-          ))}
-        </dl>
-      )}
-
-      {builder?.description && builder.description.trim() ? (
-        <div className="mt-6! flex! flex-col! gap-4!">
-          {paragraphs(builder.description).map((block, index) => (
-            <p key={index} className={`${BODY} text-pretty! whitespace-pre-line!`}>
-              {block}
+          ) : (
+            <p className={`m-0! ${PROSE}`}>
+              {name} is the developer of record for this project. Ask us for their
+              delivery history and ongoing projects.
             </p>
-          ))}
+          )}
         </div>
-      ) : (
-        <p className={`mt-6! ${BODY}`}>
-          {name} is the developer of record for this project. Ask us for their
-          delivery history and ongoing projects.
-        </p>
-      )}
-    </Card>
+
+        {/* The track record as three large numbers, ruled like a ledger. */}
+        {stats.length > 0 && (
+          <dl className={`m-0! grid! grid-cols-3! md:grid-cols-1! md:min-w-48! border-t! md:border-t-0! md:border-l! ${HAIRLINE}`}>
+            {stats.map((stat, index) => (
+              /* dt must precede dd inside a dl group; column-reverse puts the
+                 number on top visually without breaking that order. */
+              <div
+                key={stat.label}
+                className={`flex! flex-col-reverse! gap-1! pt-4! md:pt-0! md:pl-8! ${index > 0 ? "md:pt-5!" : ""} ${
+                  index < stats.length - 1 ? `md:pb-5! md:border-b! ${HAIRLINE}` : ""
+                }`}
+              >
+                <dt className={`text-[13px]! ${MUTED}`}>{stat.label}</dt>
+                <dd className={`m-0! text-3xl! md:text-4xl! font-semibold! tracking-[-0.04em]! leading-none! tabular-nums! ${INK}`}>
+                  {stat.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+    </Panel>
   );
 }

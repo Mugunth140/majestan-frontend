@@ -41,9 +41,9 @@ export function IconTile({ Icon }: { Icon: React.ElementType }) {
   return (
     <div
       aria-hidden="true"
-      className="w-10! h-10! rounded-lg! bg-[#27427f]/5! grid! place-items-center! shrink-0!"
+      className="w-10! h-10! rounded-lg! bg-[#1645bf]/5! grid! place-items-center! shrink-0!"
     >
-      <Icon className="w-5! h-5! text-[#27427f]!" strokeWidth={1.75} />
+      <Icon className="w-5! h-5! text-[#1645bf]!" strokeWidth={1.75} />
     </div>
   );
 }
@@ -103,7 +103,7 @@ export function NearbyPlaces({
         return (
           <div key={`${cat.title ?? ""}-${i}`} className="rounded-xl! border! border-gray-200! p-4!">
             <div className="flex! items-center! gap-2!">
-              <Icon className="w-4! h-4! text-[#27427f]! shrink-0!" strokeWidth={1.75} />
+              <Icon className="w-4! h-4! text-[#1645bf]! shrink-0!" strokeWidth={1.75} />
               {cat.title && <p className="text-sm! font-semibold! text-gray-900!">{cat.title}</p>}
             </div>
             <ul className="mt-3! list-none! p-0!">

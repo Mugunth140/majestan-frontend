@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
 import { Reveal } from "@/components/site/shared/reveal";
+import { DETAILS } from "./content";
 
 /**
  * Factual only. Deliberately avoids any response-time or "we'll call you back
@@ -39,46 +40,50 @@ export function ContactFaq() {
   const reduceMotion = usePrefersReducedMotion();
 
   return (
-    <section className="py-[52px]! md:py-[72px]!" aria-labelledby="contact-faq-heading">
-      <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
+    <section className="mt-16! md:mt-24!" aria-labelledby="contact-faq-heading">
+      <div className="grid! grid-cols-1! gap-8! lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]! lg:gap-16!">
         <Reveal>
           <h2
             id="contact-faq-heading"
-            className="text-[clamp(21px,2.4vw,26px)]! font-medium! text-[#161e2d]! leading-[1.18]! tracking-[-0.018em]!"
+            className="m-0! text-[clamp(24px,2.6vw,32px)]! font-semibold! text-[#0a0f1c]! leading-tight! tracking-[-0.03em]!"
           >
             Before you write
           </h2>
+          <p className="m-0! mt-3! max-w-[36ch]! text-[15px]! leading-[1.65]! text-[#465066]!">
+            Quick answers to what people usually ask first. Anything else, call us on{" "}
+            <a href={DETAILS.phone.href} className="font-semibold! text-[#0a0f1c]! no-underline! hover:underline! underline-offset-4!">
+              {DETAILS.phone.value}
+            </a>
+            .
+          </p>
         </Reveal>
 
-        <ul className="mt-[26px]! max-w-3xl! border-t! border-gray-200!">
+        <ul className="m-0! list-none! rounded-2xl! border! border-[#e6ebf2]! bg-white! px-5! md:px-7!">
           {ITEMS.map((item, index) => {
             const isOpen = openIndex === index;
             return (
-              <li
-                key={item.q}
-                className={`border-b! transition-colors! duration-200! bg-white! ${
-                  isOpen ? "border-[#27427f]/30!" : "border-gray-200! hover:border-gray-300!"
-                }`}
-              >
-                <h3>
+              <li key={item.q} className={index > 0 ? "border-t! border-[#eef1f6]!" : ""}>
+                <h3 className="m-0!">
                   <button
                     type="button"
                     aria-expanded={isOpen}
                     aria-controls={`contact-faq-panel-${index}`}
                     id={`contact-faq-btn-${index}`}
                     onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="flex! w-full! items-center! justify-between! gap-4! px-[20px]! md:px-[24px]! py-[18px]! text-left! transition-colors! duration-150! hover:bg-[#f7f9fc]!"
+                    className="group/faq flex! w-full! items-center! justify-between! gap-4! border-0! bg-transparent! py-[18px]! text-left! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]! rounded-md!"
                   >
-                    <span className="text-[14px]! md:text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
-                      {item.q}
-                    </span>
+                    <span className="text-[15px]! font-semibold! text-[#0a0f1c]! leading-snug!">{item.q}</span>
                     <motion.span
                       aria-hidden="true"
                       animate={{ rotate: isOpen ? 45 : 0 }}
                       transition={reduceMotion ? { duration: 0 } : HEIGHT_SPRING}
-                      className="flex! shrink-0! items-center! justify-center! w-[32px]! h-[32px]! rounded-full! bg-[#27427f]/[0.07]! text-[#27427f]!"
+                      className={`flex! h-[30px]! w-[30px]! shrink-0! items-center! justify-center! rounded-full! transition-colors! duration-150! ${
+                        isOpen
+                          ? "bg-[#dce8ff]! text-[#1645bf]!"
+                          : "bg-[#f2f4f8]! text-[#1c2433]! group-hover/faq:bg-[#eef4ff]! group-hover/faq:text-[#2563eb]!"
+                      }`}
                     >
-                      <Plus className="w-[16px]! h-[16px]!" />
+                      <Plus className="h-[16px]! w-[16px]!" />
                     </motion.span>
                   </button>
                 </h3>
@@ -90,15 +95,13 @@ export function ContactFaq() {
                       id={`contact-faq-panel-${index}`}
                       role="region"
                       aria-labelledby={`contact-faq-btn-${index}`}
-                      initial={
-                        reduceMotion ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }
-                      }
+                      initial={reduceMotion ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={reduceMotion ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
                       transition={reduceMotion ? { duration: 0 } : HEIGHT_SPRING}
                       className="overflow-hidden!"
                     >
-                      <p className="px-[20px]! md:px-[24px]! pb-[20px]! max-w-2xl! text-[14px]! leading-[1.7]! text-gray-600!">
+                      <p className="m-0! max-w-2xl! pb-[20px]! pr-10! text-[14px]! leading-[1.7]! text-[#465066]!">
                         {item.a}
                       </p>
                     </motion.div>

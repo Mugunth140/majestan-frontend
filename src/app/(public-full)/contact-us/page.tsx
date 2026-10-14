@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { ContactHero } from "@/components/site/contact/ContactHero";
-import { ContactDetails } from "@/components/site/contact/ContactDetails";
 import { ContactEnquiryForm } from "@/components/site/contact/ContactEnquiryForm";
-import { ContactMap } from "@/components/site/contact/ContactMap";
+import { ContactVisit } from "@/components/site/contact/ContactVisit";
 import { ContactFaq } from "@/components/site/contact/ContactFaq";
-import { CONTACT_SEO, DETAILS, INTRO_DESCRIPTION } from "@/components/site/contact/content";
-import { Reveal } from "@/components/site/shared/reveal";
+import { CONTACT_SEO, DETAILS } from "@/components/site/contact/content";
 
 const CANONICAL_URL = `https://www.majestanrealty.com${CONTACT_SEO.canonical}`;
 
@@ -88,42 +86,27 @@ export default function ContactUsPage() {
       the absolute top"), which leaves fixed-header content underneath it — so the
       offset is applied on <main> with the measured --site-header-h instead.
     */
-    <main className="font-manrope-page pt-[var(--site-header-h)]! bg-[#f2f5f9]!">
-      <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-6!">
-        <Breadcrumbs items={BREADCRUMBS} />
-      </div>
-
-      <ContactHero />
-
+    <main className="font-manrope-page pt-[var(--site-header-h)]! pb-20! md:pb-28! bg-[#f4f6f9]!">
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
-        {/* The INTRO copy stands alone here rather than under its own heading:
-            the H1 directly above already says "Let's Get in Touch", and a second
-            "Get in touch" heading immediately beneath it read as a mistake. */}
-        <Reveal>
-          <p className="mt-[34px]! max-w-[54ch]! text-[15px]! md:text-[16px]! leading-[1.65]! text-gray-600!">
-            {INTRO_DESCRIPTION}
-          </p>
-        </Reveal>
+        <div className="pt-6!">
+          <Breadcrumbs items={BREADCRUMBS} />
+        </div>
 
-        {/* Details and form side by side, divided by a single vertical rule
-            rather than each sitting in its own card. */}
-        <div className="mt-[30px]! grid! grid-cols-1! lg:grid-cols-2! gap-10! lg:gap-16! pb-[56px]! md:pb-[72px]! items-start!">
-          <ContactDetails />
-          <div className="lg:border-l! lg:border-gray-200! lg:pl-16!">
+        {/* First screen: every way to reach the office on the left, the
+            message form on the right, so nothing important is below the fold. */}
+        <section
+          aria-labelledby="contact-hero-heading"
+          className="mt-8! grid! grid-cols-1! gap-10! md:mt-12! lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]! lg:gap-16! lg:items-start!"
+        >
+          <ContactHero />
+          <div className="rounded-3xl! border! border-[#dfe7f4]! bg-[linear-gradient(160deg,#fff_0%,#fff_55%,#edf4ff_100%)]! p-6! shadow-[0_1px_2px_rgba(10,15,28,0.04),0_30px_60px_-36px_rgba(22,69,191,0.35)]! sm:p-8!">
             <ContactEnquiryForm />
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div className="bg-white! border-y! border-gray-200!">
-        <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-[52px]! md:py-[64px]!">
-          <Reveal>
-            <ContactMap />
-          </Reveal>
-        </div>
+        <ContactVisit />
+        <ContactFaq />
       </div>
-
-      <ContactFaq />
 
       <script
         type="application/ld+json"

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { buildDetailRows } from "@/lib/project-overview";
 import {
@@ -7,6 +10,7 @@ import {
   Divider,
   LABEL,
   Subheading,
+  TEXT_LINK,
   paragraphs,
 } from "@/components/site/project/project-ui";
 
@@ -34,15 +38,21 @@ function towerRows(project: ProjectDetail): TowerRow[] {
 const HEAD_CELL = `${LABEL} py-2! pr-4!`;
 
 export function AboutSection({ project }: { project: ProjectDetail }) {
+  const [expanded, setExpanded] = useState(false);
   const descriptionParagraphs = paragraphs(project.description);
   const rows = buildDetailRows(project);
   const towers = towerRows(project);
+  const collapsible = descriptionParagraphs.length > 1;
+  const visibleParagraphs =
+    collapsible && !expanded
+      ? descriptionParagraphs.slice(0, 1)
+      : descriptionParagraphs;
 
   return (
     <Card title={`About ${project.name}`} id="about">
       <div className="mt-6! flex! flex-col! gap-4!">
-        {descriptionParagraphs.length > 0 ? (
-          descriptionParagraphs.map((text, index) => (
+        {visibleParagraphs.length > 0 ? (
+          visibleParagraphs.map((text, index) => (
             <p key={index} className={`${BODY} text-pretty!`}>
               {text}
             </p>
@@ -51,6 +61,17 @@ export function AboutSection({ project }: { project: ProjectDetail }) {
           <p className={`${BODY} text-pretty!`}>{NO_DESCRIPTION}</p>
         )}
       </div>
+
+      {collapsible && (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+          className={`mt-3! inline-flex! cursor-pointer! items-center! border-0! bg-transparent! p-0! text-sm! font-medium! ${TEXT_LINK}`}
+        >
+          {expanded ? "View less" : "View more"}
+        </button>
+      )}
 
       {rows.length > 0 && (
         <>

@@ -62,14 +62,6 @@ function fmtOrdinalDate(v: string | null | undefined): string | null {
   return `${day}${suffix} ${mon} ${dt.getFullYear()}`;
 }
 
-// "north_east" → "North-East", matching the property facing vocabulary.
-function formatFacing(v: string): string {
-  return v
-    .split("_")
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
-    .join("-");
-}
-
 // Consecutive integer sets collapse to a range ("4 - 5 Cents", "2 - 4 BHK");
 // anything else lists out ("4, 6, 7 Cents") so non-sequential unit mixes
 // never read as a continuous range.
@@ -227,11 +219,13 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     return "Ready to Move";
   })();
 
-  const facingLabel = (() => {
-    const facings = (item.ranges.facings ?? []).filter(Boolean);
-    if (facings.length === 0) return null;
-    const shown = facings.slice(0, 2).map(formatFacing).join(", ");
-    return facings.length > 2 ? `${shown} +${facings.length - 2}` : shown;
+  // Total unit count from the range summary; a card without a countable
+  // stock (zero or missing) shows no cell rather than a zero.
+  const totalUnits = (() => {
+    const n = item.ranges.unitsCount;
+    return Number.isFinite(n) && (n as number) > 0
+      ? (n as number).toLocaleString("en-IN")
+      : null;
   })();
 
   // Representative per-sqft rate from the range floor (min price / min area),
@@ -289,7 +283,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     }
     if (area) specCells.push({ label: "Built-Up Area", value: area });
   }
-  if (facingLabel) specCells.push({ label: "Facing", value: facingLabel });
+  if (totalUnits) specCells.push({ label: "Total Units", value: totalUnits });
   if (isPlot) {
     if (item.ranges.plotDimensions.length > 0)
       specCells.push({ label: "Dimension", value: item.ranges.plotDimensions.join(", ") });

@@ -52,26 +52,43 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
           </span>
         </p>
       )}
-      <div className="mt-5! pt-5! border-t! border-[#e2e9f4]! flex! items-end! justify-between! gap-4! leading-none!">
-        <div className="flex! flex-col! gap-1.5! min-w-0!">
-          <p className="m-0! text-[28px]! font-semibold! text-[#0a0f1c]! tracking-[-0.03em]! tabular-nums!">
-            {priceRangeLabel(project)}
-          </p>
-          {rate && (
-            <p className="m-0! text-sm! text-[#5f6b80]! tabular-nums!">
-              {rate.value} {rate.label.replace("Rate ", "")}
-              {rate.note ? ` ${rate.note}` : ""}
-            </p>
-          )}
-        </div>
-        {emiStarts ? (
-          <div className="flex! flex-col! gap-1! shrink-0! text-right!">
-            <span className="text-[11px]! font-semibold! uppercase! tracking-[0.08em]! text-[#5f6b80]!">EMI from</span>
-            <a href="#calculators" className="text-[15px]! font-semibold! text-[#0a0f1c]! no-underline! tabular-nums! hover:underline! underline-offset-4!">
-              ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
-            </a>
-          </div>
-        ) : null}
+      {/* The price takes its own line: a range like "₹3.6 Cr – 4.86 Cr" or
+          "₹85.5 L – 99.75 L" is too wide to share a row with the EMI. The
+          rate and the EMI then sit beneath it on one baseline. */}
+      <div className="mt-5! pt-5! border-t! border-[#e2e9f4]!">
+        <p className="m-0! whitespace-nowrap! text-[clamp(22px,1.9vw,28px)]! font-semibold! leading-none! text-[#0a0f1c]! tracking-[-0.03em]! tabular-nums!">
+          {priceRangeLabel(project)}
+        </p>
+        {/* Two aligned rows, label left and figure right, so they line up
+            however long the price range or the rate is. */}
+        {(rate || emiStarts) && (
+          <dl className="m-0! mt-3.5! flex! flex-col! gap-1.5! text-[13px]!">
+            {rate && (
+              <div className="flex! items-baseline! justify-between! gap-4!">
+                <dt className="text-[13px]! font-normal! text-[#5f6b80]!">
+                  {rate.label.replace("Rate ", "").replace(/^./, (c) => c.toUpperCase())}
+                </dt>
+                <dd className="m-0! text-[13px]! font-semibold! text-[#1c2433]! tabular-nums! text-right!">
+                  {rate.value}
+                  {rate.note ? <span className="text-[13px]! font-normal! text-[#5f6b80]!"> {rate.note}</span> : null}
+                </dd>
+              </div>
+            )}
+            {emiStarts ? (
+              <div className="flex! items-baseline! justify-between! gap-4!">
+                <dt className="text-[13px]! font-normal! text-[#5f6b80]!">EMI from</dt>
+                <dd className="m-0! text-[13px]!">
+                  <a
+                    href="#calculators"
+                    className="text-[13px]! font-semibold! text-[#1c2433]! no-underline! tabular-nums! whitespace-nowrap! hover:underline! underline-offset-4!"
+                  >
+                    ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        )}
       </div>
 
       <div className="mt-6!">

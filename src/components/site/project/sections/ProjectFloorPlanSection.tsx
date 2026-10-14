@@ -131,11 +131,15 @@ function SpecCategory({ group }: { group: SpecGroup }) {
         {group.rooms.length > 0 && (
           <div className={group.rows.length > 0 ? "mt-5!" : ""}>
             <p className={LABEL}>Room sizes</p>
-            <dl className="mb-0! mt-2! grid! grid-cols-2! sm:grid-cols-3! gap-x-6! gap-y-3!">
+            {/* One small card per room: the name, then its size large enough to compare. */}
+            <dl className="mb-0! mt-2.5! grid! grid-cols-2! sm:grid-cols-3! gap-2.5!">
               {group.rooms.map((room, index) => (
-                <div key={`${room.name}-${index}`} className="min-w-0!">
-                  <dt className="text-sm! text-gray-600!">{room.name}</dt>
-                  <dd className="mb-0! text-sm! font-semibold! text-gray-900! tabular-nums! break-words!">
+                <div
+                  key={`${room.name}-${index}`}
+                  className="flex! min-w-0! flex-col! gap-1! rounded-xl! bg-[#f7f9fc]! px-3.5! py-3! ring-1! ring-[#e6ebf2]!"
+                >
+                  <dt className="text-[13px]! leading-snug! text-[#5f6b80]! break-words!">{room.name}</dt>
+                  <dd className="m-0! text-[15px]! font-semibold! leading-tight! text-[#0a0f1c]! tabular-nums! break-words!">
                     {room.dimensions}
                   </dd>
                 </div>

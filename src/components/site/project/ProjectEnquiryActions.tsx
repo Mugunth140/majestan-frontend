@@ -1,447 +1,359 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import {
-  CalendarDays,
-  CheckCircle2,
-  Loader2,
-  Phone,
-  Send,
-  TriangleAlert,
-  X,
-} from "lucide-react";
-import { createEnquiry } from "@/lib/api";
+import { AnimatePresence, motion } from "framer-motion";
+import { Calendar, Phone } from "lucide-react";
+import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
+import { useUserAuthStore } from "@/store/userAuthStore";
+import { createProjectEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
-import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
+import { VISIT_SLOTS, formatSlot, isValidVisitDate, maxVisitDate, todayYmd } from "@/lib/visit-slots";
 import {
-  VISIT_SLOTS,
-  formatSlot,
-  isValidVisitDate,
-  maxVisitDate,
-  todayYmd,
-} from "@/lib/visit-slots";
-import { projectTypeLabel } from "@/lib/project-overview";
-import type { ProjectDetail } from "@/lib/api/projects";
+  ContactCard,
+  DialogShell,
+  SuccessState,
+  SubmitBtn,
+  inputClass,
+  labelClass,
+  type EnquiryIntent,
+} from "@/components/site/property/PropertyEnquiryActions";
 import {
   PROJECT_ENQUIRE_EVENT,
   type ProjectEnquireDetail,
 } from "@/components/site/project/enquiry-events";
 
-type Intent = "enquire" | "visit";
-type Status = "idle" | "submitting" | "success" | "error";
-type FieldErrors = { name?: string; phone?: string; date?: string; slot?: string };
+/** Minimal project identity. Accepts ProjectDetail and ProjectListItem as-is. */
+export type EnquiryProjectRef = {
+  id: number;
+  projectCode: string | null;
+  slug: string | null;
+  name: string;
+  projectType: string;
+  city: string;
+};
 
-/**
- * Project enquiry and site-visit capture.
- *
- * The buttons on the old overview had no handler at all — the primary action
- * of a lead-generation page did nothing when clicked. This posts to the public
- * `POST /leads/enquiry` endpoint rather than `/leads/property-enquiry`: the
- * latter takes a `propertyId` foreign key, and passing a project id to it
- * would file the lead against an unrelated property. The generic endpoint
- * carries the project identity in `message` and `pageUrl` instead, and needs
- * no signed-in session, so there is no OTP wall in front of an enquiry.
- */
-export function ProjectEnquiryActions({ project }: { project: ProjectDetail }) {
-  const [intent, setIntent] = useState<Intent | null>(null);
+type Intent = EnquiryIntent;
+type Status = "idle" | "submitting" | "success" | "error";
+
+/** The backend sets this placeholder for OTP-login users who skipped name entry. */
+const PLACEHOLDER_NAME = "Majestan User";
+
+function isRealName(name: string | undefined | null): boolean {
+  return !!name && name.trim().length > 0 && name.trim() !== PLACEHOLDER_NAME;
+}
+
+/** The backend synthesises fake emails for OTP-only users; don't send those. */
+function isRealEmail(email: string | undefined | null): boolean {
+  if (!email || !email.includes("@")) return false;
+  const lower = email.toLowerCase();
+  return !lower.endsWith("@user.majestan.local") && !lower.endsWith("@majestan.local");
+}
+
+interface ProjectEnquiryActionsProps {
+  project: EnquiryProjectRef;
+  /** Hide the island's own trigger buttons (parent opens the dialog). */
+  hideTriggers?: boolean;
+  /**
+   * External open request. Parent sets a fresh `{ intent, token }` object per
+   * click; the island opens that dialog. Used by listing cards that keep
+   * their own styled Enquire button.
+   */
+  externalOpen?: { intent: EnquiryIntent; token: number } | null;
+}
+
+export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: ProjectEnquiryActionsProps) {
+  const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
+  const authedUser = useUserAuthStore((s) => s.user);
+  const token = useUserAuthStore((s) => s.token);
+
+  const [authOpen, setAuthOpen] = useState(false);
+  const [pendingIntent, setPendingIntent] = useState<Intent | null>(null);
+  const [dialog, setDialog] = useState<Intent | null>(null);
+
+  // Contact details — phone is always locked (it's the auth identity)
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  // Event-provided note (e.g. from RequestButton). No visible textarea —
+  // parity with the property dialog — but still sent in the payload.
   const [message, setMessage] = useState("");
+  const [pendingMessage, setPendingMessage] = useState("");
+
+  // Visit form state
   const [visitDate, setVisitDate] = useState(todayYmd());
   const [visitSlot, setVisitSlot] = useState("");
+
+  // Shared
   const [status, setStatus] = useState<Status>("idle");
-  const [errors, setErrors] = useState<FieldErrors>({});
   const [errorMsg, setErrorMsg] = useState("");
-  const firstFieldRef = useRef<HTMLInputElement>(null);
-  const reduceMotion = usePrefersReducedMotion();
 
-  const isVisit = intent === "visit";
+  function seedFromUser() {
+    if (authedUser) {
+      const storedName = authedUser.name || "";
+      setName(isRealName(storedName) ? storedName : "");
+      // Start in edit mode if we don't have a real name
+      setEditingName(!isRealName(storedName));
+    }
+  }
 
-  function open(which: Intent) {
-    setIntent(which);
+  function openIntent(which: Intent, withMessage?: string) {
+    if (!useUserAuthStore.getState().isAuthenticated) {
+      setPendingIntent(which);
+      setPendingMessage(withMessage ?? "");
+      setAuthOpen(true);
+      return;
+    }
+    seedFromUser();
     setStatus("idle");
-    setErrors({});
     setErrorMsg("");
-    setVisitDate(todayYmd());
     setVisitSlot("");
+    setVisitDate(todayYmd());
+    setMessage(withMessage ?? "");
+    setDialog(which);
   }
 
-  function close() {
-    setIntent(null);
-  }
+  // After OTP login, resume the pending intent (with its event message)
+  useEffect(() => {
+    if (isAuthenticated && pendingIntent) {
+      seedFromUser();
+      setStatus("idle");
+      setErrorMsg("");
+      setVisitSlot("");
+      setVisitDate(todayYmd());
+      setMessage(pendingMessage);
+      setDialog(pendingIntent);
+      setPendingIntent(null);
+      setPendingMessage("");
+    }
+    // intentional: re-seed only when auth state or pending intent changes,
+    // not on every profile update (seedFromUser reads auth store imperatively)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, pendingIntent]);
+
+  // Focus name input when edit mode activates
+  useEffect(() => {
+    if (editingName && nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+  }, [editingName]);
 
   // Sections elsewhere on the page open this same form with a pre-filled
-  // note (see enquiry-events.ts). Only state setters are touched, and those
-  // are stable, so subscribing once is safe.
+  // note (see enquiry-events.ts). Reads auth state imperatively so the
+  // once-subscribed handler never goes stale.
   useEffect(() => {
     const onRequest = (event: Event) => {
       const detail = (event as CustomEvent<ProjectEnquireDetail>).detail ?? {};
-      setIntent(detail.intent ?? "enquire");
-      setStatus("idle");
-      setErrors({});
-      setErrorMsg("");
-      setVisitDate(todayYmd());
-      setVisitSlot("");
-      setMessage(detail.message ?? "");
+      openIntent(detail.intent ?? "enquire", detail.message ?? "");
     };
     window.addEventListener(PROJECT_ENQUIRE_EVENT, onRequest);
     return () => window.removeEventListener(PROJECT_ENQUIRE_EVENT, onRequest);
+    // intentional: subscribe once (openIntent reads auth store imperatively)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Escape to dismiss, and hold the page still behind the dialog.
+  // External open request from a parent with its own trigger button.
+  // Each click carries a fresh token, so repeated clicks re-open reliably.
+  const externalToken = externalOpen?.token;
+  const externalIntent = externalOpen?.intent;
   useEffect(() => {
-    if (!intent) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-    };
-    document.addEventListener("keydown", onKey);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const focusTimer = window.setTimeout(() => firstFieldRef.current?.focus(), 60);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
-      window.clearTimeout(focusTimer);
-    };
-  }, [intent]);
+    if (externalToken != null && externalIntent) {
+      openIntent(externalIntent);
+    }
+    // intentional: fire only when the parent issues a new token, not on
+    // every render (openIntent reads auth store imperatively)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalToken]);
 
-  function validate(field: keyof FieldErrors): string | undefined {
-    if (field === "name") {
-      return name.trim().length < 2 ? "Please tell us your name." : undefined;
-    }
-    if (field === "phone") {
-      return normalizeIndianPhone(phone)
-        ? undefined
-        : "Enter a valid 10 digit Indian mobile number.";
-    }
-    if (field === "date") {
-      if (!isVisit) return undefined;
-      return isValidVisitDate(visitDate)
-        ? undefined
-        : "Pick a date within the next three months.";
-    }
-    if (field === "slot") {
-      if (!isVisit) return undefined;
-      return visitSlot ? undefined : "Choose a time that suits you.";
-    }
-    return undefined;
+  // Escape closes open dialog
+  useEffect(() => {
+    if (!dialog) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeDialog();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dialog]);
+
+  function closeDialog() {
+    setDialog(null);
+    setStatus("idle");
+    setErrorMsg("");
+    setEditingName(false);
   }
 
-  const onBlur = (field: keyof FieldErrors) =>
-    setErrors((prev) => ({ ...prev, [field]: validate(field) }));
+  function getPhone(): string {
+    return normalizeIndianPhone(authedUser?.phone || "") || authedUser?.phone || "";
+  }
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    const next: FieldErrors = {
-      name: validate("name"),
-      phone: validate("phone"),
-      date: validate("date"),
-      slot: validate("slot"),
-    };
-    setErrors(next);
-    if (next.name || next.phone || next.date || next.slot) return;
+  function displayPhone(): string {
+    const raw = authedUser?.phone || "";
+    // Already has +91 prefix → show as-is; otherwise prefix it
+    if (raw.startsWith("+")) return raw;
+    if (raw.length === 10) return `+91 ${raw.slice(0, 5)} ${raw.slice(5)}`;
+    return raw;
+  }
 
+  async function handleSubmit(intent: "enquiry" | "site_visit") {
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) {
+      setErrorMsg("Please enter your name before submitting.");
+      setStatus("error");
+      setEditingName(true);
+      return;
+    }
+    const normalized = getPhone();
+    if (!normalized) {
+      setErrorMsg("Could not read your phone number. Please log out and log in again.");
+      setStatus("error");
+      return;
+    }
+    if (intent === "site_visit" && (!isValidVisitDate(visitDate) || !visitSlot)) {
+      setErrorMsg("Please pick a date and time slot.");
+      setStatus("error");
+      return;
+    }
     setStatus("submitting");
     setErrorMsg("");
-
-    const identity = [project.name, project.projectCode]
-      .filter(Boolean)
-      .join(" · ");
-    const intro = isVisit
-      ? `Site visit request for ${identity} on ${visitDate} at ${formatSlot(visitSlot)}.`
-      : `Enquiry about ${identity}.`;
-
     try {
-      await createEnquiry({
-        name: name.trim(),
-        phone: normalizeIndianPhone(phone) ?? phone.trim(),
-        propertyType: project.projectType,
-        listingType: "Sell",
-        location: [project.sublocation, project.city].filter(Boolean).join(", "),
-        message: message.trim() ? `${intro}\n\n${message.trim()}` : intro,
-        source: isVisit ? "project_site_visit" : "project_enquiry",
-        pageUrl: typeof window === "undefined" ? undefined : window.location.href,
-      });
+      await createProjectEnquiry(
+        {
+          projectId: project.id,
+          projectCode: project.projectCode,
+          slug: project.slug,
+          name: trimmedName,
+          phone: normalized,
+          ...(isRealEmail(authedUser?.email) ? { email: authedUser!.email } : {}),
+          ...(message.trim() ? { message: message.trim() } : {}),
+          intent,
+          ...(intent === "site_visit" ? { visitDate, visitSlot } : {}),
+        },
+        token!,
+      );
       setStatus("success");
     } catch {
-      setErrorMsg("We could not send that. Please try again, or call us directly.");
+      setErrorMsg("Something went wrong. Please try again.");
       setStatus("error");
     }
   }
 
+  const contactCard = (
+    <ContactCard
+      name={name}
+      setName={setName}
+      editingName={editingName}
+      setEditingName={setEditingName}
+      nameInputRef={nameInputRef}
+      displayPhone={displayPhone()}
+      email={authedUser?.email}
+    />
+  );
+
   return (
     <>
-      <div className="flex! flex-col! gap-2!">
+      {/* Trigger buttons */}
+      {!hideTriggers && (
+      <div className="mt-4! flex! flex-col! gap-2.5!">
         <button
-          type="button"
-          onClick={() => open("enquire")}
-          className="w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-[#27427f]! px-4! py-3! text-base! font-semibold! text-white! cursor-pointer! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#1e3563]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+          onClick={() => openIntent("enquire")}
+          className="w-full! bg-[#27427f]! text-white! font-manrope! font-normal! text-base! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!"
         >
           <Phone className="w-4! h-4!" />
-          Enquire now
+          Enquire Now
         </button>
         <button
-          type="button"
-          onClick={() => open("visit")}
-          className="w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-white! px-4! py-3! text-base! font-semibold! text-[#27427f]! ring-1! ring-[#27427f]/25! cursor-pointer! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#27427f]/5! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
+          onClick={() => openIntent("visit")}
+          className="w-full! bg-white! text-[#27427f]! font-manrope! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!"
         >
-          <CalendarDays className="w-4! h-4!" />
-          Schedule a visit
+          <Calendar className="w-4! h-4!" />
+          Schedule Visit
         </button>
       </div>
+      )}
 
+      {/* Auth modal */}
+      <UserAuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+
+      {/* ── Enquiry dialog ── */}
       <AnimatePresence>
-        {intent && (
-          <motion.div
-            key="backdrop"
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.15, ease: [0.23, 1, 0.32, 1] }}
-            onClick={close}
-            className="fixed! inset-0! z-[100]! bg-gray-900/55! backdrop-blur-sm! flex! items-end! sm:items-center! justify-center! p-0! sm:p-4!"
-          >
-            <motion.div
-              key="panel"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="project-enquiry-title"
-              onClick={(event) => event.stopPropagation()}
-              initial={reduceMotion ? false : { opacity: 0, scale: 0.97, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              // Exit is faster than entry: once dismissed, the dialog is in the
-              // way of whatever the person wants to look at next.
-              exit={{ opacity: 0, scale: 0.98, transition: { duration: reduceMotion ? 0 : 0.12 } }}
-              transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.23, 1, 0.32, 1] }}
-              className="relative! w-full! sm:max-w-md! max-h-[92vh]! overflow-y-auto! bg-white! rounded-t-3xl! sm:rounded-3xl! p-6!"
-            >
-              <button
-                type="button"
-                onClick={close}
-                aria-label="Close"
-                className="absolute! top-4! right-4! grid! place-items-center! h-8! w-8! rounded-lg! text-gray-500! cursor-pointer! transition-colors! duration-150! ease-out-quint! hover:bg-gray-100! hover:text-gray-900! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]!"
-              >
-                <X className="w-4! h-4!" />
-              </button>
-
+        {dialog === "enquire" && (
+          <DialogShell id="enquire" eyebrow="Project Enquiry" title={project.name} onClose={closeDialog}>
+            <AnimatePresence mode="wait">
               {status === "success" ? (
-                <div className="pt-2! pb-2! flex! flex-col! items-start! gap-3!">
-                  <CheckCircle2 className="w-6! h-6! text-emerald-600!" />
-                  <h2
-                    id="project-enquiry-title"
-                    className="text-xl! font-semibold! text-gray-900! tracking-tight!"
-                  >
-                    {isVisit ? "Your visit is requested" : "We have your enquiry"}
-                  </h2>
-                  <p className="text-sm! leading-relaxed! text-gray-600!">
-                    {isVisit
-                      ? `Our team will confirm ${formatSlot(visitSlot)} on ${visitDate} for ${project.name} by phone.`
-                      : `Our team will call you back about ${project.name} shortly.`}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={close}
-                    className="mt-2! inline-flex! items-center! justify-center! rounded-xl! bg-[#27427f]! px-4! py-2! text-sm! font-semibold! text-white! cursor-pointer! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#1e3563]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
-                  >
-                    Done
-                  </button>
-                </div>
+                <SuccessState name={name} message="We will contact you shortly." />
               ) : (
-                <form onSubmit={handleSubmit} noValidate className="pr-8!">
-                  <h2
-                    id="project-enquiry-title"
-                    className="text-xl! font-semibold! text-gray-900! tracking-tight!"
-                  >
-                    {isVisit ? "Schedule a visit" : "Enquire about this project"}
-                  </h2>
-                  <p className="mt-1! text-sm! text-gray-600!">
-                    {project.name} ·{" "}
-                    {[project.sublocation, project.city].filter(Boolean).join(", ")}
-                  </p>
+                <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
+                  {contactCard}
 
-                  <div className="mt-5! flex! flex-col! gap-4!">
-                    <Field
-                      id="project-enquiry-name"
-                      label="Name"
-                      error={errors.name}
-                    >
-                      <input
-                        ref={firstFieldRef}
-                        id="project-enquiry-name"
-                        type="text"
-                        autoComplete="name"
-                        maxLength={120}
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                        onBlur={() => onBlur("name")}
-                        aria-invalid={Boolean(errors.name)}
-                        aria-describedby={errors.name ? "project-enquiry-name-error" : undefined}
-                        placeholder="Your name"
-                        className={fieldClass}
-                      />
-                    </Field>
-
-                    <Field
-                      id="project-enquiry-phone"
-                      label="Mobile number"
-                      error={errors.phone}
-                    >
-                      <input
-                        id="project-enquiry-phone"
-                        type="tel"
-                        inputMode="numeric"
-                        autoComplete="tel"
-                        value={phone}
-                        onChange={(event) => setPhone(event.target.value)}
-                        onBlur={() => onBlur("phone")}
-                        aria-invalid={Boolean(errors.phone)}
-                        aria-describedby={errors.phone ? "project-enquiry-phone-error" : undefined}
-                        placeholder="10 digit mobile number"
-                        className={fieldClass}
-                      />
-                    </Field>
-
-                    {isVisit && (
-                      <div className="grid! grid-cols-2! gap-3!">
-                        <Field
-                          id="project-enquiry-date"
-                          label="Date"
-                          error={errors.date}
-                        >
-                          <input
-                            id="project-enquiry-date"
-                            type="date"
-                            value={visitDate}
-                            min={todayYmd()}
-                            max={maxVisitDate()}
-                            onChange={(event) => setVisitDate(event.target.value)}
-                            onBlur={() => onBlur("date")}
-                            aria-invalid={Boolean(errors.date)}
-                            aria-describedby={errors.date ? "project-enquiry-date-error" : undefined}
-                            className={fieldClass}
-                          />
-                        </Field>
-                        <Field
-                          id="project-enquiry-slot"
-                          label="Time"
-                          error={errors.slot}
-                        >
-                          <select
-                            id="project-enquiry-slot"
-                            value={visitSlot}
-                            onChange={(event) => setVisitSlot(event.target.value)}
-                            onBlur={() => onBlur("slot")}
-                            aria-invalid={Boolean(errors.slot)}
-                            aria-describedby={errors.slot ? "project-enquiry-slot-error" : undefined}
-                            className={fieldClass}
-                          >
-                            <option value="">Select</option>
-                            {VISIT_SLOTS.map((slot) => (
-                              <option key={slot} value={slot}>
-                                {formatSlot(slot)}
-                              </option>
-                            ))}
-                          </select>
-                        </Field>
-                      </div>
-                    )}
-
-                    <Field
-                      id="project-enquiry-message"
-                      label="Anything specific? (optional)"
-                    >
-                      <textarea
-                        id="project-enquiry-message"
-                        rows={3}
-                        /* CreateEnquiryDto caps `message` at 2000 and the
-                           prefix below adds ~120, so an unbounded textarea
-                           turns a long note into a 400 at submit time. */
-                        maxLength={1800}
-                        value={message}
-                        onChange={(event) => setMessage(event.target.value)}
-                        placeholder={
-                          project.projectType === "plot"
-                            ? "e.g. looking for a corner plot, east facing"
-                            : `e.g. interested in a ${projectTypeLabel(project.projectType).toLowerCase()} on a higher floor`
-                        }
-                        className={`${fieldClass} resize-none!`}
-                      />
-                    </Field>
-                  </div>
-
-                  {errorMsg && (
-                    <p
-                      role="alert"
-                      className="mt-4! flex! items-start! gap-2! text-xs! text-red-600!"
-                    >
-                      <TriangleAlert className="w-4! h-4! shrink-0!" />
-                      {errorMsg}
-                    </p>
+                  {status === "error" && errorMsg && (
+                    <p className="text-[13px]! text-red-600!">{errorMsg}</p>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={status === "submitting"}
-                    className="mt-5! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-[#27427f]! px-4! py-3! text-base! font-semibold! text-white! cursor-pointer! transition-[background-color,transform]! duration-150! ease-out-quint! hover:bg-[#1e3563]! active:scale-[0.98]! disabled:opacity-60! disabled:pointer-events-none! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2!"
-                  >
-                    {status === "submitting" ? (
-                      <>
-                        <Loader2 className="w-4! h-4! animate-spin!" />
-                        Sending
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4! h-4!" />
-                        {isVisit ? "Request this slot" : "Send enquiry"}
-                      </>
-                    )}
-                  </button>
-
-                  <p className="mt-3! text-xs! leading-relaxed! text-gray-500!">
-                    We use your number only to respond to this enquiry.
-                  </p>
-                </form>
+                  <SubmitBtn label="Submit Enquiry" onClick={() => handleSubmit("enquiry")} submitting={status === "submitting"} />
+                </motion.div>
               )}
-            </motion.div>
-          </motion.div>
+            </AnimatePresence>
+          </DialogShell>
+        )}
+      </AnimatePresence>
+
+      {/* ── Visit dialog ── */}
+      <AnimatePresence>
+        {dialog === "visit" && (
+          <DialogShell id="visit" eyebrow="Schedule a Site Visit" title={project.name} onClose={closeDialog}>
+            <AnimatePresence mode="wait">
+              {status === "success" ? (
+                <SuccessState name={name} message="Your site visit is booked. We will confirm shortly." />
+              ) : (
+                <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
+                  {contactCard}
+
+                  {/* Date */}
+                  <div>
+                    <label className={labelClass}>Preferred Date</label>
+                      <input
+                        type="date"
+                        min={todayYmd()}
+                        max={maxVisitDate()}
+                        value={visitDate}
+                      onChange={(e) => setVisitDate(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  {/* Time slot grid */}
+                  <div>
+                    <label className={labelClass}>Preferred Time</label>
+                    <div className="grid! grid-cols-4! gap-2!">
+                      {VISIT_SLOTS.map((slot) => (
+                        <button
+                          key={slot}
+                          type="button"
+                          onClick={() => setVisitSlot(slot)}
+                          className={
+                            "py-2! text-[12px]! rounded-lg! border! transition-colors! " +
+                            (visitSlot === slot
+                              ? "bg-[#27427f]! text-white! border-[#27427f]!"
+                              : "bg-white! text-gray-700! border-gray-300! hover:border-[#27427f]!")
+                          }
+                        >
+                          {formatSlot(slot)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {status === "error" && errorMsg && (
+                    <p className="text-[13px]! text-red-600!">{errorMsg}</p>
+                  )}
+
+                  <SubmitBtn label="Book Visit" onClick={() => handleSubmit("site_visit")} submitting={status === "submitting"} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </DialogShell>
         )}
       </AnimatePresence>
     </>
-  );
-}
-
-const fieldClass =
-  "w-full! px-3! py-2.5! rounded-xl! bg-white! border! border-gray-300! text-sm! text-gray-900! " +
-  "outline-none! transition-colors! duration-150! ease-out-quint! placeholder:text-gray-400! " +
-  "focus:border-[#27427f]! focus-visible:ring-2! focus-visible:ring-[#27427f]/20! " +
-  "aria-[invalid=true]:border-red-400!";
-
-function Field({
-  id,
-  label,
-  error,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="block! text-xs! font-medium! text-gray-600! mb-1!"
-      >
-        {label}
-      </label>
-      {children}
-      {error && (
-        <p id={`${id}-error`} className="mt-1! text-xs! text-red-600!">
-          {error}
-        </p>
-      )}
-    </div>
   );
 }

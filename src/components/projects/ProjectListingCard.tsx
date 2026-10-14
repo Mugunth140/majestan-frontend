@@ -11,7 +11,7 @@ import { ListingImage } from "@/components/site/listing/ListingImage";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
-import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
+import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryActions";
 import { formatLocationLine } from "@/lib/location-display";
 import { emi } from "@/lib/emi";
 
@@ -122,13 +122,12 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
   const [authOpen, setAuthOpen] = useState(false);
   const hasBrochure = Boolean(item.brochureUrl);
-  const enquiryRef: EnquiryPropertyRef = {
+  const enquiryRef = {
     id: item.id,
-    propertyCode: item.projectCode ?? null,
-    slug: item.canonicalSlug ?? null,
-    title: item.name ?? "Project",
-    propertyType: "project",
-    listingType: "",
+    projectCode: item.projectCode ?? null,
+    slug: item.canonicalSlug ?? item.slug ?? null,
+    name: item.name ?? "Project",
+    projectType: item.projectType ?? "",
     city: item.city ?? "",
   };
 
@@ -451,8 +450,8 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
             <Phone className="w-4! h-4!" />
             Enquire
           </button>
-          <PropertyEnquiryActions
-            property={enquiryRef}
+          <ProjectEnquiryActions
+            project={enquiryRef}
             hideTriggers
             externalOpen={enquireToken != null ? { intent: "enquire", token: enquireToken } : null}
           />

@@ -37,19 +37,19 @@ function isRealEmail(email: string | undefined | null): boolean {
   return !lower.endsWith("@user.majestan.local") && !lower.endsWith("@majestan.local");
 }
 
-const inputClass =
+export const inputClass =
   "w-full! px-[13px]! py-[10px]! rounded-[10px]! bg-white! border! border-gray-300! " +
   "text-[14px]! text-[#161e2d]! outline-none! transition-colors! duration-150! " +
   "placeholder:text-gray-400! focus:border-[#27427f]!";
 
-const labelClass = "block! text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400! mb-[4px]!";
+export const labelClass = "block! text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400! mb-[4px]!";
 
 // ─── Contact card ───────────────────────────────────────────────────────────
 // NOTE: module scope, NOT nested inside PropertyEnquiryActions. A nested
 // component definition creates a new function identity on every parent render,
 // which makes React unmount and remount the whole subtree on each keystroke —
 // the input loses focus, and a Backspace with focus lost triggers browser-back.
-function ContactCard({
+export function ContactCard({
   name,
   setName,
   editingName,
@@ -146,7 +146,7 @@ function ContactCard({
 }
 
 // ─── Dialog shell ────────────────────────────────────────────────────────────
-function DialogShell({
+export function DialogShell({
   id,
   eyebrow,
   title,
@@ -213,7 +213,7 @@ function DialogShell({
 }
 
 // ─── Success state ───────────────────────────────────────────────────────────
-function SuccessState({ name, message }: { name: string; message: string }) {
+export function SuccessState({ name, message }: { name: string; message: string }) {
   return (
     <motion.div
       key="ok"
@@ -234,7 +234,7 @@ function SuccessState({ name, message }: { name: string; message: string }) {
 }
 
 // ─── Submit button ───────────────────────────────────────────────────────────
-function SubmitBtn({
+export function SubmitBtn({
   label,
   onClick,
   submitting,

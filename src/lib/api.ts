@@ -359,6 +359,32 @@ export async function getPropertyBySlug(slug: string): Promise<any> {
   });
 }
 
+export async function createProjectEnquiry(
+  payload: {
+    projectId: number;
+    projectCode?: string | null;
+    slug?: string | null;
+    name: string;
+    email?: string;
+    phone: string;
+    message?: string;
+    intent: "enquiry" | "site_visit";
+    visitDate?: string;
+    visitSlot?: string;
+  },
+  token: string,
+) {
+  // Same session requirement as the property endpoint: the OTP wall on the
+  // client guarantees a live token, and fetchApi's 401 handling (redirect to
+  // /login) is the desired behavior on expiry.
+  return fetchApi<{ id: number; submitted: boolean }>("/leads/project-enquiry", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+}
+
 export async function createPropertyEnquiry(
   payload: {
     propertyId: number;

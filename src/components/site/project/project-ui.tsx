@@ -98,8 +98,8 @@ export function DefinitionGrid({
         columns === 3 ? "sm:grid-cols-3!" : "sm:grid-cols-2!"
       } gap-x-6! gap-y-6!`}
     >
-      {rows.map((row) => (
-        <div key={row.label} className="min-w-0!">
+      {rows.map((row, index) => (
+        <div key={`${row.label}-${index}`} className="min-w-0!">
           <dt className={LABEL}>{row.label}</dt>
           <dd className={`${VALUE} mt-1! break-words!`}>{row.value}</dd>
         </div>

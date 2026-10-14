@@ -15,6 +15,7 @@ import { LocationOverview } from "@/components/site/project/overview/LocationOve
 import { AmenitiesPreview } from "@/components/site/project/overview/AmenitiesPreview";
 import { FurnishingSection } from "@/components/site/project/overview/FurnishingSection";
 import { BuilderSection } from "@/components/site/project/overview/BuilderSection";
+import { CalculatorsSection } from "@/components/site/project/overview/CalculatorsSection";
 import { FaqOverview } from "@/components/site/project/overview/FaqOverview";
 
 /**
@@ -75,6 +76,7 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
         <MediaPreview project={project} />
         <LocationOverview project={project} />
         <BuilderSection project={project} />
+        <CalculatorsSection />
         <FaqOverview project={project} />
       </ProjectShell>
     </div>

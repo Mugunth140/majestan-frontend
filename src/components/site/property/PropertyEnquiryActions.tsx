@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, Phone, X, Loader2, CheckCircle2, Pencil, Check, Lock } from "lucide-react";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { createPropertyEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
+import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
 import { VISIT_SLOTS, formatSlot, isValidVisitDate, maxVisitDate, todayYmd } from "@/lib/visit-slots";
 
 export type EnquiryPropertyRef = {
@@ -146,6 +148,9 @@ export function ContactCard({
 }
 
 // ─── Dialog shell ────────────────────────────────────────────────────────────
+// Portalled to document.body: anything between the trigger and the root
+// (sticky columns, transformed ancestors) would otherwise trap the fixed
+// layer and let page chrome paint above the modal.
 export function DialogShell({
   id,
   eyebrow,
@@ -159,7 +164,9 @@ export function DialogShell({
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  return (
+  useLockBodyScroll();
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <motion.div
       key={`${id}-backdrop`}
       initial={{ opacity: 0 }}
@@ -211,7 +218,8 @@ export function DialogShell({
 
         {children}
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }
 

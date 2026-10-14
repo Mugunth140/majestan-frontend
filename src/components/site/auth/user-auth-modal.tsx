@@ -12,6 +12,7 @@ import {
   verifyRegisterOtp,
   type OtpMode,
 } from "@/lib/otp-auth";
+import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
 
 interface UserAuthModalProps {
   isOpen: boolean;
@@ -47,6 +48,10 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const login = useUserAuthStore((state) => state.login);
+
+  // The modal owns the screen while open; the auth flow opens first and
+  // the enquiry dialog only after it closes, so they never lock together.
+  useLockBodyScroll(isOpen);
 
   // 60s resend countdown while on step 2
   useEffect(() => {

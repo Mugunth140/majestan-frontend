@@ -57,6 +57,13 @@ export type Photo = {
   previewUrl?: string;
   localPreviewUrl?: string;
 };
+export type FloorPlan = {
+  key: string;
+  name: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  previewUrl?: string;
+};
 export type OwnerDraft = {
   version: 2;
   category: Category | "";
@@ -67,6 +74,7 @@ export type OwnerDraft = {
   amenityIds: number[];
   furnishingIds: number[];
   photos: Photo[];
+  floorPlans: FloorPlan[];
 };
 export type FormData = {
   cities: { id: number; city_name: string; state_name: string }[];
@@ -137,7 +145,7 @@ export const STEPS = [
   { label: "Location" },
   { label: "Property profile" },
   { label: "Pricing" },
-  { label: "Photos" },
+  { label: "Photos & plans" },
   { label: "Review" },
 ];
 const residential = (d: OwnerDraft) =>
@@ -515,6 +523,7 @@ export const emptyDraft = (): OwnerDraft => ({
   amenityIds: [],
   furnishingIds: [],
   photos: [],
+  floorPlans: [],
 });
 export function visibleFields(draft: OwnerDraft, step?: number): Field[] {
   return FIELDS.filter(
@@ -612,6 +621,30 @@ export function restoreDraft(input: unknown): OwnerDraft | null {
             ? p.previewUrl
             : undefined,
       }));
+  if (Array.isArray(raw.floorPlans))
+    draft.floorPlans = raw.floorPlans
+      .filter(
+        (p) =>
+          p &&
+          typeof p.key === "string" &&
+          typeof p.name === "string" &&
+          ["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(p.mimeType) &&
+          typeof p.fileSizeBytes === "number" &&
+          Number.isInteger(p.fileSizeBytes) &&
+          p.fileSizeBytes > 0 &&
+          p.fileSizeBytes <= 15 * 1024 * 1024,
+      )
+      .slice(0, 5)
+      .map((p) => ({
+        key: p.key,
+        name: p.name,
+        mimeType: p.mimeType,
+        fileSizeBytes: p.fileSizeBytes,
+        previewUrl:
+          typeof p.previewUrl === "string" && /^https?:\/\//.test(p.previewUrl)
+            ? p.previewUrl
+            : undefined,
+      }));
   return cleanDraft(draft);
 }
 export function hasProgress(d: OwnerDraft): boolean {
@@ -619,7 +652,8 @@ export function hasProgress(d: OwnerDraft): boolean {
     !!d.category ||
     !!d.cityId ||
     Object.values(d.values).some((v) => v !== "" && v !== false) ||
-    d.photos.length > 0
+    d.photos.length > 0 ||
+    d.floorPlans.length > 0
   );
 }
 export function validateStep(
@@ -741,6 +775,12 @@ export function buildPayload(draft: OwnerDraft) {
       furnishingItemId,
     })),
     files: d.photos.map((p) => ({ fileKey: p.key })),
+    floorPlans: d.floorPlans.map((p) => ({
+      fileKey: p.key,
+      fileName: p.name,
+      mimeType: p.mimeType,
+      fileSizeBytes: p.fileSizeBytes,
+    })),
   };
 }
 export function money(value: FieldValue | undefined): string {
@@ -758,5 +798,14 @@ export function persistableDraft(draft: OwnerDraft): OwnerDraft {
       name,
       previewUrl: previewUrl?.startsWith("blob:") ? undefined : previewUrl,
     })),
+    floorPlans: draft.floorPlans.map(
+      ({ key, name, mimeType, fileSizeBytes, previewUrl }) => ({
+        key,
+        name,
+        mimeType,
+        fileSizeBytes,
+        previewUrl: previewUrl?.startsWith("blob:") ? undefined : previewUrl,
+      }),
+    ),
   };
 }

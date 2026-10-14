@@ -30,6 +30,14 @@ const property = {
 } as unknown as SeoProperty;
 
 describe("FloorPlanSection gallery", () => {
+  it("opens PDF plans as documents instead of rendering broken images", () => {
+    render(<FloorPlanSection property={{ ...property, floorPlanFiles: [
+      { title: "First floor", imageUrl: "/plan.PDF?token=example", imageKey: "uploads/plan.PDF" },
+    ] }} embedded />);
+    expect(screen.getByRole("link", { name: "Open First floor (PDF)" }).getAttribute("href")).toBe("/plan.PDF?token=example");
+    expect(screen.queryByRole("img", { name: "First floor" })).toBeNull();
+    expect(screen.getByRole("img", { name: "Detail plan" })).toBeDefined();
+  });
   it("shows every source — uploaded files first, then detail plans, then unit plans", () => {
     render(<FloorPlanSection property={property} />);
 

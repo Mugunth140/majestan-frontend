@@ -7,6 +7,7 @@ import {
   cleanDraft,
   emptyDraft,
   restoreDraft,
+  persistableDraft,
   validateStep,
   visibleFields,
 } from "./owner-post-model";
@@ -72,6 +73,45 @@ describe("owner posting branches and payloads", () => {
       areaUnit: "Sq Ft",
       plotSizeCents: Number((2400 / 435.6).toFixed(10)),
     });
+  });
+  it("keeps floor plans separate from cover photos in payloads and drafts", () => {
+    const draft = {
+      ...base(),
+      photos: [{ key: "photo-key", name: "front.jpg" }],
+      floorPlans: Array.from({ length: 5 }, (_, index) => ({
+        key: `plan-${index}`,
+        name: `layout-${index}.pdf`,
+        mimeType: "application/pdf",
+        fileSizeBytes: 1000 + index,
+        previewUrl: "https://media.example/plan.pdf",
+      })),
+    };
+    const payload = buildPayload(draft);
+    expect(payload.files).toEqual([{ fileKey: "photo-key" }]);
+    expect(payload.floorPlans).toHaveLength(5);
+    expect(payload.floorPlans[0]).toEqual({
+      fileKey: "plan-0",
+      fileName: "layout-0.pdf",
+      mimeType: "application/pdf",
+      fileSizeBytes: 1000,
+    });
+
+    const restored = restoreDraft(persistableDraft(draft));
+    expect(restored?.photos).toHaveLength(1);
+    expect(restored?.floorPlans).toHaveLength(5);
+    expect(restored?.floorPlans[0]).toMatchObject({ key: "plan-0", mimeType: "application/pdf" });
+  });
+  it("caps restored floor plans at five", () => {
+    const restored = restoreDraft({
+      ...emptyDraft(),
+      floorPlans: Array.from({ length: 6 }, (_, index) => ({
+        key: `plan-${index}`,
+        name: `${index}.png`,
+        mimeType: "image/png",
+        fileSizeBytes: 100,
+      })),
+    });
+    expect(restored?.floorPlans).toHaveLength(5);
   });
   it("validates the selected amount against the canonical land-area range", () => {
     const tooSmall = {

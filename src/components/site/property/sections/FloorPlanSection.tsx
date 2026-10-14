@@ -5,6 +5,7 @@ import {
   Building2,
   Square,
   DoorOpen,
+  FileText,
 } from "lucide-react";
 
 type FloorPlanSectionProps = {
@@ -76,12 +77,24 @@ export function FloorPlanSection({ property, embedded = false }: FloorPlanSectio
                 className="rounded-[20px]! overflow-hidden! border! border-gray-200! bg-white! shadow-sm!"
               >
                 <div className="relative! w-full! h-[60vh]! overflow-hidden! bg-gray-50!">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={fp.imageUrl!}
-                    alt={fp.title ?? "Floor Plan"}
-                    className="w-full! h-full! object-contain!"
-                  />
+                  {/\.pdf(?:$|[?#])/i.test(fp.imageKey || fp.imageUrl || "") ? (
+                    <a
+                      href={fp.imageUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex! h-full! flex-col! items-center! justify-center! gap-4! p-6! text-blue-700! hover:bg-blue-50! focus-visible:outline-2! focus-visible:outline-blue-600! focus-visible:outline-offset-[-4px]!"
+                    >
+                      <FileText className="h-12! w-12!" aria-hidden="true" />
+                      <span className="text-base! font-semibold!">Open {fp.title || "floor plan"} (PDF)</span>
+                    </a>
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={fp.imageUrl!}
+                      alt={fp.title ?? "Floor Plan"}
+                      className="w-full! h-full! object-contain!"
+                    />
+                  )}
                 </div>
                 {fp.title && (
                   <div className="p-4! border-t! border-gray-100! flex! items-center! justify-between! gap-4!">

@@ -499,6 +499,92 @@
   width: 100%;
   cursor: pointer;
 }
+.floorPlanUpload {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.floorPlanHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.floorPlanHeading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+.floorPlanHeading p,
+.floorPlanFormats {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 20px;
+}
+.floorPlanButton {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  overflow: hidden;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: var(--brand);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.floorPlanButton:focus-within { outline: 2px solid #6b9adb; outline-offset: 3px; }
+.floorPlanButton:hover { background: #e2edfc; }
+.floorPlanButton:active { background: #d7e7fb; }
+.floorPlanButton:has(input:disabled) { opacity: 0.55; cursor: not-allowed; }
+.floorPlanButton input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0 !important;
+  cursor: pointer;
+}
+.floorPlanButton input:disabled { cursor: not-allowed; }
+.floorPlanList {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.floorPlanList li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  font-size: 12px;
+}
+.floorPlanFileType {
+  display: grid;
+  flex: 0 0 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+}
+.floorPlanName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.floorPlanList a { color: var(--brand); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 540px) {
+  .floorPlanHeading { flex-direction: column; }
+}
 .photoGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

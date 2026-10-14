@@ -254,9 +254,10 @@ export type OwnerPhotoUploadProgressProps = {
   fileNames?: string[];
   message?: string;
   loading?: boolean;
+  progressLabel?: string;
 };
 
-export function OwnerPhotoUploadProgress({ current = 0, total, fileNames = [], message, loading = true }: OwnerPhotoUploadProgressProps) {
+export function OwnerPhotoUploadProgress({ current = 0, total, fileNames = [], message, loading = true, progressLabel = "Photo upload progress" }: OwnerPhotoUploadProgressProps) {
   if (!loading && !message) return null;
   const hasCount = typeof total === "number" && total > 0;
   const completed = hasCount ? Math.max(0, Math.min(total, current)) : 0;
@@ -275,7 +276,7 @@ export function OwnerPhotoUploadProgress({ current = 0, total, fileNames = [], m
           <div
             className={styles.progressTrack}
             role="progressbar"
-            aria-label="Photo upload progress"
+            aria-label={progressLabel}
             aria-valuemin={0}
             aria-valuemax={total}
             aria-valuenow={completed}

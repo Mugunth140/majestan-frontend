@@ -24,6 +24,7 @@ import {
   type Category,
   type FormData,
   type Photo,
+  type FloorPlan,
 } from "./owner-post-model";
 import styles from "./owner-post.module.css";
 
@@ -55,6 +56,7 @@ export function OwnerPostWizard({ data }: Props) {
   }, [token]);
   const uploadBusy = useRef(false);
   const pendingFiles = useRef<File[]>([]);
+  const pendingFileKind = useRef<"photo" | "floorPlan">("photo");
   const previewUrls = useRef(new Set<string>());
   const authenticated = !!token && isAuthenticated;
   const currentStep = STEPS[step];
@@ -83,6 +85,12 @@ export function OwnerPostWizard({ data }: Props) {
     (photo) =>
       !/^(uploads|local)\/temp\/[0-9]+-owner-[0-9]+-[a-f0-9-]{36}-[A-Za-z0-9._-]+$/.test(
         photo.key,
+      ),
+  );
+  const outdatedFloorPlans = draft.floorPlans.filter(
+    (plan) =>
+      !/^(uploads|local)\/temp\/[0-9]+-owner-[0-9]+-[a-f0-9-]{36}-[A-Za-z0-9._-]+$/.test(
+        plan.key,
       ),
   );
   const isLand = ["plot", "farmland"].includes(draft.category);
@@ -120,7 +128,10 @@ export function OwnerPostWizard({ data }: Props) {
     });
   };
 
-  async function uploadFiles(files: File[]) {
+  async function uploadFiles(
+    files: File[],
+    kind: "photo" | "floorPlan" = "photo",
+  ) {
     if (!token || uploadBusy.current) return;
     uploadBusy.current = true;
     setUploading(true);
@@ -128,12 +139,15 @@ export function OwnerPostWizard({ data }: Props) {
     const failures: string[] = [];
     try {
       for (const [index, file] of files.entries()) {
-        setUploadProgress(`Uploading photo ${index + 1} of ${files.length}`);
+        setUploadProgress(
+          `Uploading ${kind === "photo" ? "photo" : "floor plan"} ${index + 1} of ${files.length}`,
+        );
         setUploadCounts({ current: index + 1, total: files.length });
         try {
           const query = new URLSearchParams({
             fileName: file.name,
             fileType: file.type,
+            fileSizeBytes: String(file.size),
           });
           const signed = await ownerApi.request<{
             url: string;
@@ -157,15 +171,24 @@ export function OwnerPostWizard({ data }: Props) {
           );
           if (!response.ok) throw new Error("Upload failed");
           if (session.current !== token) throw new Error("Account changed");
-          const previewUrl = URL.createObjectURL(file);
-          previewUrls.current.add(previewUrl);
-          const photo: Photo = {
+          const uploaded = {
             key: signed.key,
             name: file.name,
             previewUrl: signed.previewUrl,
-            localPreviewUrl: previewUrl,
           };
-          update((d) => ({ ...d, photos: [...d.photos, photo] }));
+          if (kind === "photo") {
+            const previewUrl = URL.createObjectURL(file);
+            previewUrls.current.add(previewUrl);
+            const photo: Photo = { ...uploaded, localPreviewUrl: previewUrl };
+            update((d) => ({ ...d, photos: [...d.photos, photo] }));
+          } else {
+            const plan: FloorPlan = {
+              ...uploaded,
+              mimeType: file.type,
+              fileSizeBytes: file.size,
+            };
+            update((d) => ({ ...d, floorPlans: [...d.floorPlans, plan] }));
+          }
         } catch (err) {
           if (
             (err as { status?: number }).status === 403 ||
@@ -177,7 +200,7 @@ export function OwnerPostWizard({ data }: Props) {
       }
       if (failures.length)
         setError(
-          `Could not upload ${failures.join(", ")}. Your other photos are kept. Please try those files again.`,
+          `Could not upload ${failures.join(", ")}. Your other ${kind === "photo" ? "photos" : "floor plans"} are kept. Please try those files again.`,
         );
     } finally {
       uploadBusy.current = false;
@@ -190,14 +213,21 @@ export function OwnerPostWizard({ data }: Props) {
   useEffect(() => {
     if (!authenticated || !ready || !pendingFiles.current.length) return;
     const files = pendingFiles.current;
+    const kind = pendingFileKind.current;
     pendingFiles.current = [];
     setAuthOpen(false);
-    const room = 20 - draft.photos.length;
+    const room =
+      (kind === "photo" ? 20 : 5) -
+      (kind === "photo" ? draft.photos.length : draft.floorPlans.length);
     if (files.length > room) {
-      setError("You can add up to 20 photos. Choose fewer photos.");
+      setError(
+        kind === "photo"
+          ? "You can add up to 20 photos. Choose fewer photos."
+          : "You can add up to 5 floor plans. Choose fewer files.",
+      );
       return;
     }
-    void uploadFiles(files);
+    void uploadFiles(files, kind);
     // Upload runs once for the queued selection, not after each draft change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, ready]);
@@ -220,10 +250,37 @@ export function OwnerPostWizard({ data }: Props) {
     }
     if (!authenticated) {
       pendingFiles.current = files;
+      pendingFileKind.current = "photo";
       setAuthOpen(true);
       return;
     }
     void uploadFiles(files);
+  }
+  function selectFloorPlans(files: File[]) {
+    if (!files.length) return;
+    if (draft.floorPlans.length + files.length > 5) {
+      setError("You can add up to 5 floor plans.");
+      return;
+    }
+    const bad = files.find(
+      (f) =>
+        !["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(
+          f.type,
+        ) ||
+        f.size > 15 * 1024 * 1024 ||
+        !f.size,
+    );
+    if (bad) {
+      setError(`${bad.name}: choose a PDF, JPG, PNG or WebP file under 15 MB.`);
+      return;
+    }
+    if (!authenticated) {
+      pendingFiles.current = files;
+      pendingFileKind.current = "floorPlan";
+      setAuthOpen(true);
+      return;
+    }
+    void uploadFiles(files, "floorPlan");
   }
   async function continueStep(e: FormEvent) {
     e.preventDefault();
@@ -248,10 +305,10 @@ export function OwnerPostWizard({ data }: Props) {
         return;
       }
     }
-    if (outdatedPhotos.length) {
+    if (outdatedPhotos.length || outdatedFloorPlans.length) {
       go(4);
       setError(
-        "Some photos were uploaded with an earlier version. Remove those photos and upload them again before sending for review.",
+        "Some files were uploaded with an earlier version. Remove those files and upload them again before sending for review.",
       );
       return;
     }
@@ -823,11 +880,14 @@ export function OwnerPostWizard({ data }: Props) {
                         : undefined
                     }
                     loading={uploading}
+                    progressLabel={uploadProgress.includes("floor plan") ? "Floor plan upload progress" : "Photo upload progress"}
                   />
-                  {outdatedPhotos.length > 0 && (
+                  {(outdatedPhotos.length > 0 || outdatedFloorPlans.length > 0) && (
                     <p className={styles.fieldError} role="status">
                       Upload again:{" "}
-                      {outdatedPhotos.map((photo) => photo.name).join(", ")}
+                      {[...outdatedPhotos, ...outdatedFloorPlans]
+                        .map((file) => file.name)
+                        .join(", ")}
                     </p>
                   )}
                   <OwnerPhotoGallery
@@ -845,6 +905,70 @@ export function OwnerPostWizard({ data }: Props) {
                       }));
                     }}
                   />
+                  <section
+                    className={styles.floorPlanUpload}
+                    aria-labelledby="floor-plan-upload-title"
+                  >
+                    <div className={styles.floorPlanHeading}>
+                      <div>
+                        <h2 id="floor-plan-upload-title">
+                          Floor plans <span className={styles.optional}>Optional</span>
+                        </h2>
+                        <p>Add plans that help buyers understand the layout. Up to 5 files, 15 MB each.</p>
+                      </div>
+                      <label className={styles.floorPlanButton}>
+                        <span>{uploading ? "Uploading…" : "Add floor plans"}</span>
+                        <input
+                          aria-label="Choose floor plans"
+                          type="file"
+                          accept="application/pdf,image/jpeg,image/png,image/webp"
+                          multiple
+                          disabled={uploading || submitting || draft.floorPlans.length >= 5}
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            e.target.value = "";
+                            selectFloorPlans(files);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <p className={styles.floorPlanFormats}>
+                      PDF, JPG, PNG or WebP · {draft.floorPlans.length} of 5 added
+                    </p>
+                    {draft.floorPlans.length > 0 && (
+                      <ul className={styles.floorPlanList}>
+                        {draft.floorPlans.map((plan) => (
+                          <li key={plan.key}>
+                            <span className={styles.floorPlanFileType} aria-hidden="true">
+                              {plan.mimeType === "application/pdf" ? "PDF" : "IMG"}
+                            </span>
+                            <span className={styles.floorPlanName} title={plan.name}>
+                              {plan.name}
+                            </span>
+                            {plan.previewUrl && (
+                              <a href={plan.previewUrl} target="_blank" rel="noreferrer" aria-label={`Preview ${plan.name}`}>
+                                Preview
+                              </a>
+                            )}
+                            <button
+                              type="button"
+                              aria-label={`Remove ${plan.name}`}
+                              className={styles.textButton}
+                              disabled={uploading || submitting}
+                              onClick={() =>
+                                update((d) => ({
+                                  ...d,
+                                  floorPlans: d.floorPlans.filter((p) => p.key !== plan.key),
+                                }))
+                              }
+                            >
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
                 </>
               )}
               {step === 5 && (
@@ -971,11 +1095,18 @@ export function OwnerPostWizard({ data }: Props) {
                   {review(
                     4,
                     "Photos",
-                    <p>
-                      {draft.photos.length
-                        ? `${draft.photos.length} photo${draft.photos.length === 1 ? "" : "s"} added. First photo is your cover.`
-                        : "No photos added yet."}
-                    </p>,
+                    <>
+                      <p>
+                        {draft.photos.length
+                          ? `${draft.photos.length} photo${draft.photos.length === 1 ? "" : "s"} added. First photo is your cover.`
+                          : "No photos added yet."}
+                      </p>
+                      <p>
+                        {draft.floorPlans.length
+                          ? `${draft.floorPlans.length} floor plan${draft.floorPlans.length === 1 ? "" : "s"} added.`
+                          : "No floor plans added."}
+                      </p>
+                    </>,
                   )}
                   <div className={styles.contactNote}>
                     <strong>
@@ -1023,7 +1154,7 @@ export function OwnerPostWizard({ data }: Props) {
             <div className={styles.actions}>
               <p>
                 {step === 4
-                  ? "Photos are optional"
+                  ? "Photos and floor plans are optional"
                   : step === 5
                     ? "Subject to review"
                     : "* Required"}
@@ -1039,8 +1170,8 @@ export function OwnerPostWizard({ data }: Props) {
                     ? authenticated
                       ? "Send for review"
                       : "Sign in and send for review"
-                    : step === 4 && !draft.photos.length
-                      ? "Continue without photos"
+                    : step === 4 && !draft.photos.length && !draft.floorPlans.length
+                      ? "Continue without files"
                       : "Continue"}
                 {!submitting && <span aria-hidden="true"> →</span>}
               </button>

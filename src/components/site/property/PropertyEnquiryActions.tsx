@@ -178,14 +178,16 @@ export function ContactDetailsSection({
   useEffect(() => {
     if (alertOpen) setOpen(true);
   }, [alertOpen]);
+  // Flat accordion row, deliberately not a card: the dialog panel is
+  // already the card, and a box inside a box reads as clutter.
   return (
-    <div className="rounded-[14px]! border! border-[#dae4f3]! bg-white! mb-5! overflow-hidden!">
+    <div>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="flex! w-full! items-center! gap-3! p-4! text-left! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-inset! focus-visible:ring-[#2563eb]!"
+        className="flex! w-full! items-center! gap-3! py-1! text-left! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]! rounded-lg!"
       >
         <span className="min-w-0! flex-1!">
           <span className="block! text-sm! font-medium! text-[#586579]!">
@@ -209,7 +211,7 @@ export function ContactDetailsSection({
         }`}
       >
         <div className="min-h-0! overflow-hidden!">
-          <div className="px-4! pb-4!">{children}</div>
+          <div className="pt-3!">{children}</div>
         </div>
       </div>
     </div>
@@ -265,7 +267,7 @@ export function DialogShell({
         // button/input/select/textarea at element level, which beats
         // inheritance — without this the controls render in Lexend while
         // everything else is Manrope.
-        className="font-manrope-page relative! w-full! max-w-md! rounded-2xl! bg-[linear-gradient(135deg,#fff_0%,#fff_40%,#edf4ff_100%)]! border! border-[#dfe7f4]! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
+        className="font-manrope-page relative! w-full! max-w-md! rounded-2xl! bg-[linear-gradient(135deg,#fff_0%,#fff_40%,#edf4ff_100%)]! border! border-[#dfe7f4]! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-5! sm:p-6!"
       >
         <motion.button
           whileHover={{ scale: 1.1, rotate: 90 }}
@@ -336,7 +338,7 @@ export function SubmitBtn({
       type="button"
       disabled={submitting}
       onClick={onClick}
-      className="w-full! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! font-manrope! font-semibold! text-[15px]! py-3! rounded-xl! hover:brightness-95! transition-all! flex! items-center! justify-center! gap-2! disabled:opacity-70! disabled:cursor-not-allowed!"
+      className="w-full! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! font-manrope! font-semibold! text-base! py-3! rounded-xl! hover:brightness-95! transition-all! flex! items-center! justify-center! gap-2! disabled:opacity-70! disabled:cursor-not-allowed!"
     >
       {submitting ? <Loader2 size={20} className="animate-spin!" /> : label}
     </motion.button>
@@ -612,27 +614,25 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
                     />
                   </div>
 
-                  {/* Time slot pills, finance-picker style */}
+                  {/* Time slot picker: one compact select instead of a wall
+                      of pills. Native control, fully keyboard-operable. */}
                   <div>
-                    <label className={labelClass}>Preferred Time</label>
-                    <div className="grid! grid-cols-4! gap-2!">
+                    <label htmlFor="property-visit-slot" className={labelClass}>
+                      Preferred Time
+                    </label>
+                    <select
+                      id="property-visit-slot"
+                      value={visitSlot}
+                      onChange={(e) => setVisitSlot(e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="">Select a time</option>
                       {VISIT_SLOTS.map((slot) => (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => setVisitSlot(slot)}
-                          aria-pressed={visitSlot === slot}
-                          className={
-                            "py-2! px-1! text-[12px]! font-medium! rounded-full! border! transition-colors! whitespace-nowrap! " +
-                            (visitSlot === slot
-                              ? "bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! border-[#2563eb]!"
-                              : "bg-white! text-gray-700! border-[#dae4f3]! hover:border-[#2563eb]!")
-                          }
-                        >
+                        <option key={slot} value={slot}>
                           {formatSlot(slot)}
-                        </button>
+                        </option>
                       ))}
-                    </div>
+                    </select>
                   </div>
 
                   {status === "error" && errorMsg && (

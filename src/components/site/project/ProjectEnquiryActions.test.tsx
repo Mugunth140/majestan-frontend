@@ -55,17 +55,16 @@ describe("ProjectEnquiryActions", () => {
     expect(await screen.findByText(/enter your mobile number/i)).toBeInTheDocument();
   });
 
-  it("selects a time slot from the pill grid and posts intent site_visit", async () => {
+  it("selects a time slot from the picker and posts intent site_visit", async () => {
     const user = userEvent.setup();
     logIn();
     vi.mocked(createProjectEnquiry).mockResolvedValue({ id: 78, submitted: true });
     render(<ProjectEnquiryActions project={PROJECT} />);
     await user.click(screen.getByRole("button", { name: /schedule visit/i }));
 
-    const pills = await screen.findAllByRole("button", { name: /\d{1,2}:\d{2}\s?(AM|PM)/ });
-    expect(pills.length).toBeGreaterThan(0);
-    await user.click(pills[0]);
-    expect(pills[0]).toHaveAttribute("aria-pressed", "true");
+    const picker = await screen.findByLabelText(/preferred time/i);
+    await user.selectOptions(picker, "08:00");
+    expect(picker).toHaveValue("08:00");
 
     await user.click(screen.getByRole("button", { name: /book visit/i }));
     expect(createProjectEnquiry).toHaveBeenCalledWith(

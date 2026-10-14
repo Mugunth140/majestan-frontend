@@ -349,28 +349,25 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
                     />
                   </div>
 
-                    {/* Time slot pills, finance-picker style: outline pills,
-                        selected turns bright-blue gradient. */}
+                    {/* Time slot picker: one compact select instead of a wall
+                        of pills. Native control, fully keyboard-operable. */}
                     <div>
-                      <label className={labelClass}>Preferred Time</label>
-                      <div className="grid! grid-cols-4! gap-2!">
+                      <label htmlFor="project-visit-slot" className={labelClass}>
+                        Preferred Time
+                      </label>
+                      <select
+                        id="project-visit-slot"
+                        value={visitSlot}
+                        onChange={(e) => setVisitSlot(e.target.value)}
+                        className={inputClass}
+                      >
+                        <option value="">Select a time</option>
                         {VISIT_SLOTS.map((slot) => (
-                          <button
-                            key={slot}
-                            type="button"
-                            onClick={() => setVisitSlot(slot)}
-                            aria-pressed={visitSlot === slot}
-                            className={
-                              "py-2! px-1! text-[12px]! font-medium! rounded-full! border! transition-colors! whitespace-nowrap! " +
-                              (visitSlot === slot
-                                ? "bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! border-[#2563eb]!"
-                                : "bg-white! text-gray-700! border-[#dae4f3]! hover:border-[#2563eb]!")
-                            }
-                          >
+                          <option key={slot} value={slot}>
                             {formatSlot(slot)}
-                          </button>
+                          </option>
                         ))}
-                      </div>
+                      </select>
                     </div>
 
                   {status === "error" && errorMsg && (

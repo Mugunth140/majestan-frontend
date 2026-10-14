@@ -49,17 +49,19 @@ export function SpecsHighlights({ project }: { project: ProjectDetail }) {
 
   const both = highlights.length > 0 && specs.length > 0;
   const headingGap = both ? "mt-4!" : "";
-  /* Collapsed preview mirrors the About section: first few rows of each
-     block, the rest behind one toggle. Limit 4 matches the other previews. */
-  const PREVIEW_LIMIT = 4;
+  /* Collapsed preview mirrors the About section: the first row(s) of each
+     block, the rest behind one toggle. Both grids run 2-up, so one visual
+     row is 2 items. */
+  const HIGHLIGHTS_PREVIEW = 6;
+  const SPECS_PREVIEW = 2;
   const collapsible =
-    highlights.length > PREVIEW_LIMIT || specs.length > PREVIEW_LIMIT;
+    highlights.length > HIGHLIGHTS_PREVIEW || specs.length > SPECS_PREVIEW;
   const visibleHighlights =
     collapsible && !expanded
-      ? highlights.slice(0, PREVIEW_LIMIT)
+      ? highlights.slice(0, HIGHLIGHTS_PREVIEW)
       : highlights;
   const visibleSpecs =
-    collapsible && !expanded ? specs.slice(0, PREVIEW_LIMIT) : specs;
+    collapsible && !expanded ? specs.slice(0, SPECS_PREVIEW) : specs;
 
   return (
     <Card title="Specifications and highlights" id="specifications">

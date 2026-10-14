@@ -734,6 +734,7 @@ export function createPropertyAdapter(init: {
     getItemKey: (item) => item.id,
 
     renderCard: (item) => <PropertyListingCard key={item.id} item={item} />,
+    adAudience: (filters) => (filters.listingType === "Rent" ? "rent" : "buy"),
 
     renderFilters: ({ values, onChange, onReset }) => (
       <PropertySearchFilters

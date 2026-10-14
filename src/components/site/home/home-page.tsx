@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { Search, Handshake, TrendingUp, BarChart3, Home, BadgePercent, Store, ArrowUpRight } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
-import { FeatureCarousel } from "./property-carousel";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
 import { HeroSection } from "./hero-section";
+import { OffersCarousel } from "@/components/site/ads/offers-carousel";
 import { LocalityOverviewSection } from "./locality-overview-section";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
@@ -18,7 +18,7 @@ import { toLocationSlug } from "@/lib/seo-urls";
 
 
 
-export function HomePage({ data, banners }: { data: HomePageData; banners: AdHeroBanner[] }) {
+export function HomePage({ data, banners, offers }: { data: HomePageData; banners: AdHeroBanner[]; offers: AdHeroBanner[] }) {
   const { location } = useLocationContext();
   const citySlug = toLocationSlug(location);
   
@@ -102,15 +102,7 @@ export function HomePage({ data, banners }: { data: HomePageData; banners: AdHer
                 text="Discover the latest premium updates, exclusive deals, and featured communities."
             />
             <div className="mt-12! group!">
-              <FeatureCarousel
-                banners={[
-                  { id: 1, image: "/assets/images/banners/banner_1.jpeg", href: "" },
-                  { id: 2, image: "/assets/images/banners/banner_2.jpeg", href: "" },
-                  { id: 3, image: "/assets/images/banners/banner_3.jpeg", href: "" },
-                ]}
-                emptyMessage="Banner images will appear here soon."
-                variant="banner"
-              />
+              <OffersCarousel ads={offers} />
             </div>
           </div>
         </section>

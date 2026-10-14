@@ -17,6 +17,10 @@ import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { WhatsAppPopup } from "@/components/site/enquiry/whatsapp-enquiry-popup";
 import { MobileFilterBar } from "./MobileFilterBar";
 import type { ListingAdapter, ListingPageData } from "./listing-adapter";
+import { AdBanner } from "@/components/site/ads/ad-banner";
+import { interleaveAds } from "@/components/site/ads/listing-feed";
+import { useAds } from "@/components/site/ads/use-ads";
+import { adsForAudience } from "@/lib/ads";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -262,6 +266,10 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
     ...initialFilters,
     ...(adapter.filtersFromParams(searchParams) as TFilters),
   });
+
+  // CRM "Listing pages" ads between cards, targeted by buy / rent / projects.
+  const listingAds = useAds("listing_feed", !!adapter.adAudience);
+  const feedAds = adapter.adAudience ? adsForAudience(listingAds, adapter.adAudience(filters)) : [];
 
   // Snapshot the mount-time key once. initialData/initialDataUpdatedAt must
   // only seed the query for that exact key: passing them on every render
@@ -612,7 +620,19 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                 ) : (
                   <>
                     <div className={refreshing ? "flex! flex-col! gap-3! opacity-40! pointer-events-none! select-none! transition-opacity! duration-300!" : "flex! flex-col! gap-3! transition-opacity! duration-300!"}>
-                      {data?.items.map((item) => adapter.renderCard(item))}
+                      {interleaveAds(data?.items ?? [], feedAds).map((entry) =>
+                        entry.kind === "item" ? (
+                          adapter.renderCard(entry.item)
+                        ) : (
+                          <AdBanner
+                            key={`ad-${entry.slot}-${entry.ad.id}`}
+                            ad={entry.ad}
+                            aspectClass="aspect-[16/9] md:aspect-[4/1]"
+                            desktopOnlyAspectClass="aspect-[4/1]"
+                            className="rounded-xl! border! border-gray-100!"
+                          />
+                        )
+                      )}
                     </div>
 
                     {/* Pagination */}

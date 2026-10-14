@@ -24,4 +24,6 @@ export interface ListingAdapter<TFilters extends Record<string, string>, TItem> 
   countNounPlural?: string;
   syncUrl: (args: { filters: TFilters; sort: string; pathname: string; searchParams: URLSearchParams }) => string;
   filtersFromParams: (searchParams: URLSearchParams) => Partial<TFilters>;
+  /** Audience for CRM "Listing pages" ads between cards (buy / rent / projects). Omit for no ads. */
+  adAudience?: (filters: TFilters) => string;
 }

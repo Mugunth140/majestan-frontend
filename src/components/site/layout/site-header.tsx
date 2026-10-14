@@ -11,6 +11,8 @@ import { LogOut } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
 import Image from "next/image";
 import { toLocationSlug } from "@/lib/seo-urls";
+import { adsForAudience, resolveAdHref } from "@/lib/ads";
+import { useAds } from "@/components/site/ads/use-ads";
 
 type MegaMenuLink = {
   text: string;
@@ -29,13 +31,13 @@ const SERVICE_LINKS: MegaMenuLink[] = [
 type Category = "Buy" | "Rent" | "Services" | null;
 
 /**
- * TODO(art): the mega-menu promo image has not been supplied yet. `null` means
- * "no art", which renders the empty tinted panel and issues no request — setting
- * it to a path (e.g. "/assets/images/mega-menu/buy.jpg") turns the image on.
- * The art is rendered bare: no overlay copy, icon or button. Keep the artwork
- * close to 6:5 (288x236) or `object-cover` will crop it.
+ * Mega-menu promo art comes from the CRM Advertisement module (placement
+ * "Navigation menu", 3:2). Each dropdown shows the ad targeted at its audience
+ * (buy / rent / services), else an untargeted "All" ad. When nothing is
+ * published, this static art is the last fallback — `null` renders the empty
+ * tinted panel and issues no request.
  */
-const MEGA_MENU_ART: string | null = null;
+const MEGA_MENU_FALLBACK_ART: string | null = null;
 
 export function SiteHeader(): React.JSX.Element {
   const {
@@ -57,11 +59,12 @@ export function SiteHeader(): React.JSX.Element {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
   /**
-   * Set when the mega-menu promo art fails to load. The final image has not been
-   * supplied yet, so without this the dropdown shows a broken-image glyph until
-   * the file lands; instead we fall back to the empty tinted panel.
+   * Art URLs that failed to load, so a broken creative degrades to the next
+   * fallback (or the empty tinted panel) instead of a broken-image glyph.
    */
-  const [artFailed, setArtFailed] = useState(false);
+  const [failedArt, setFailedArt] = useState<ReadonlySet<string>>(() => new Set());
+  // One small request per page load, so the art is ready before the first hover.
+  const menuAds = useAds("mega_menu");
   const cityDropdownRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -167,6 +170,16 @@ export function SiteHeader(): React.JSX.Element {
       case "Services": return SERVICE_LINKS;
       default: return [];
     }
+  };
+
+  const getMenuArt = (cat: Category): { src: string; href: string | null; alt: string } | null => {
+    if (!cat) return null;
+    const ad = adsForAudience(menuAds, cat.toLowerCase()).find((a) => !failedArt.has(a.desktopImage));
+    if (ad) return { src: ad.desktopImage, href: resolveAdHref(ad, toLocationSlug(location)), alt: ad.title || "" };
+    if (MEGA_MENU_FALLBACK_ART && !failedArt.has(MEGA_MENU_FALLBACK_ART)) {
+      return { src: MEGA_MENU_FALLBACK_ART, href: null, alt: "" };
+    }
+    return null;
   };
 
   const getFeatured = (cat: Category) => {
@@ -382,22 +395,29 @@ export function SiteHeader(): React.JSX.Element {
                     badge, no button — so the panel reads as navigation plus one
                     picture rather than a promo card bolted onto a menu.
 
-                    `artFailed` covers the case where the path is set but the file
-                    is missing or fails to decode: the <img> is dropped and the
-                    tinted panel stands in, so a bad path degrades to an empty
-                    slot rather than a broken-image glyph. */}
-                <div className="relative! w-[288px]! shrink-0! self-stretch! min-h-[236px]! overflow-hidden! rounded-[14px]! border! border-gray-200/80! bg-[#f5f7fc]!">
-                  {MEGA_MENU_ART && !artFailed && (
-                    <Image
-                      src={MEGA_MENU_ART}
-                      alt=""
-                      fill
-                      sizes="288px"
-                      className="object-cover!"
-                      onError={() => setArtFailed(true)}
+                    3:2 art from the CRM (see getMenuArt). A creative that fails
+                    to load is skipped for the next fallback, ending at the empty
+                    tinted panel rather than a broken-image glyph. */}
+                {(() => {
+                  const art = getMenuArt(hoveredCategory);
+                  const img = art && (
+                    // Plain <img>: ad art is served from R2, which next/image isn't configured for.
+                    <img
+                      src={art.src}
+                      alt={art.alt}
+                      className="absolute! inset-0! w-full! h-full! object-cover!"
+                      onError={() => setFailedArt((prev) => new Set(prev).add(art.src))}
                     />
-                  )}
-                </div>
+                  );
+                  const box = "relative! block! w-[300px]! shrink-0! self-start! aspect-[3/2]! overflow-hidden! rounded-[14px]! border! border-gray-200/80! bg-[#f5f7fc]!";
+                  return art?.href ? (
+                    <Link href={art.href} aria-label={art.alt || "Promotion"} className={box} onClick={() => setHoveredCategory(null)}>
+                      {img}
+                    </Link>
+                  ) : (
+                    <div className={box}>{img}</div>
+                  );
+                })()}
               </div>
             </motion.div>
           )}

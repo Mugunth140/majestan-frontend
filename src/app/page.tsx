@@ -31,7 +31,10 @@ export default async function Page() {
     homeData = emptyHomeData;
   }
 
-  const banners = await getAdsBanners("hero").catch(() => []);
+  const [banners, offers] = await Promise.all([
+    getAdsBanners("hero").catch(() => []),
+    getAdsBanners("offers").catch(() => []),
+  ]);
 
-  return <HomePage data={homeData} banners={banners} />;
+  return <HomePage data={homeData} banners={banners} offers={offers} />;
 }

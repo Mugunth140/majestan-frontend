@@ -40,11 +40,11 @@ function isRealEmail(email: string | undefined | null): boolean {
 }
 
 export const inputClass =
-  "w-full! px-[13px]! py-[10px]! rounded-[10px]! bg-white! border! border-gray-300! " +
-  "text-[14px]! text-[#161e2d]! outline-none! transition-colors! duration-150! " +
-  "placeholder:text-gray-400! focus:border-[#27427f]!";
+  "w-full! px-[13px]! py-[10px]! rounded-[10px]! bg-white! border! border-[#dae4f3]! " +
+  "text-[14px]! text-[#111827]! outline-none! transition-colors! duration-150! " +
+  "placeholder:text-gray-400! focus:border-[#2563eb]!";
 
-export const labelClass = "block! text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400! mb-[4px]!";
+export const labelClass = "block! text-sm! font-medium! text-[#586579]! mb-[4px]!";
 
 // ─── Contact card ───────────────────────────────────────────────────────────
 // NOTE: module scope, NOT nested inside PropertyEnquiryActions. A nested
@@ -69,8 +69,8 @@ export function ContactCard({
   email: string | undefined | null;
 }) {
   return (
-    <div className="rounded-[14px]! bg-gray-50! border! border-gray-100! p-4! space-y-3! mb-5!">
-      <p className="text-[11px]! font-semibold! uppercase! tracking-[0.1em]! text-gray-400!">
+    <div className="rounded-[14px]! bg-white! border! border-[#dae4f3]! p-4! space-y-3! mb-5!">
+      <p className="text-sm! font-medium! text-[#586579]!">
         Your contact details
       </p>
 
@@ -96,7 +96,7 @@ export function ContactCard({
                 if (name.trim().length >= 2) setEditingName(false);
               }}
               disabled={name.trim().length < 2}
-              className="shrink-0! w-8! h-8! rounded-lg! bg-[#27427f]! text-white! flex! items-center! justify-center! disabled:opacity-40! transition-opacity!"
+              className="shrink-0! w-8! h-8! rounded-lg! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! flex! items-center! justify-center! disabled:opacity-40! transition-opacity!"
               aria-label="Save name"
             >
               <Check size={14} />
@@ -104,13 +104,13 @@ export function ContactCard({
           </div>
         ) : (
           <div className="flex! items-center! justify-between! gap-2!">
-            <span className="text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
+            <span className="text-[15px]! font-medium! text-[#111827]! leading-snug!">
               {name || <span className="text-gray-400 italic">Not provided</span>}
             </span>
             <button
               type="button"
               onClick={() => setEditingName(true)}
-              className="shrink-0! flex! items-center! gap-1! text-[12px]! text-[#27427f]! hover:underline! transition-colors!"
+              className="shrink-0! flex! items-center! gap-1! text-[12px]! text-[#2563eb]! hover:underline! transition-colors!"
               aria-label="Edit name"
             >
               <Pencil size={12} />
@@ -124,7 +124,7 @@ export function ContactCard({
       <div>
         <p className={labelClass}>Mobile</p>
         <div className="flex! items-center! gap-2!">
-          <span className="text-[15px]! font-medium! text-[#161e2d]! flex-1! leading-snug!">
+          <span className="text-[15px]! font-medium! text-[#111827]! flex-1! leading-snug!">
             {displayPhone}
           </span>
           <span className="flex! items-center! gap-1! text-[11px]! text-gray-400!">
@@ -138,7 +138,7 @@ export function ContactCard({
       {isRealEmail(email) && (
         <div>
           <p className={labelClass}>Email</p>
-          <span className="text-[15px]! font-medium! text-[#161e2d]! leading-snug!">
+          <span className="text-[15px]! font-medium! text-[#111827]! leading-snug!">
             {email}
           </span>
         </div>
@@ -190,7 +190,9 @@ export function DialogShell({
         aria-modal="true"
         aria-labelledby={`${id}-title`}
         onClick={(e) => e.stopPropagation()}
-        className="relative! w-full! max-w-md! rounded-[2rem]! bg-white! border! border-gray-100! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
+        // Finance-card look ("Your home. Your EMI."): light blue gradient,
+        // 16px radius, bright-blue accents instead of flat navy.
+        className="relative! w-full! max-w-md! rounded-2xl! bg-[linear-gradient(135deg,#fff_0%,#fff_40%,#edf4ff_100%)]! border! border-[#dfe7f4]! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
       >
         <motion.button
           whileHover={{ scale: 1.1, rotate: 90 }}
@@ -205,12 +207,12 @@ export function DialogShell({
         </motion.button>
 
         <div className="mb-5!">
-          <span className="block! mb-1.5! text-[10px]! font-semibold! uppercase! tracking-[0.14em]! text-[#27427f]!">
+          <span className="block! mb-1.5! text-[10px]! font-semibold! uppercase! tracking-[0.14em]! text-[#2563eb]!">
             {eyebrow}
           </span>
           <h4
             id={`${id}-title`}
-            className="pr-8! text-[20px]! font-semibold! leading-snug! tracking-tight! text-[#161e2d]!"
+            className="pr-8! text-2xl! font-semibold! leading-[32px]! tracking-[-0.025em]! text-[#111827]!"
           >
             {title}
           </h4>
@@ -236,10 +238,10 @@ export function SuccessState({ name, message }: { name: string; message: string 
       <div className="mx-auto! mb-4! flex! h-12! w-12! items-center! justify-center! rounded-full! bg-emerald-50!">
         <CheckCircle2 className="h-6! w-6! text-emerald-600!" aria-hidden="true" />
       </div>
-      <p className="text-[15px]! font-medium! text-[#161e2d]!">
+      <p className="text-[15px]! font-medium! text-[#111827]!">
         Thank you, {name.trim() || ""}!
       </p>
-      <p className="mt-[5px]! text-[14px]! leading-[1.6]! text-gray-600!">{message}</p>
+      <p className="mt-[5px]! text-[14px]! leading-[1.6]! text-[#586579]!">{message}</p>
     </motion.div>
   );
 }
@@ -261,7 +263,7 @@ export function SubmitBtn({
       type="button"
       disabled={submitting}
       onClick={onClick}
-      className="w-full! bg-[#27427f]! text-white! font-manrope! font-semibold! text-[15px]! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! disabled:opacity-70! disabled:cursor-not-allowed!"
+      className="w-full! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! font-manrope! font-semibold! text-[15px]! py-3! rounded-xl! hover:brightness-95! transition-all! flex! items-center! justify-center! gap-2! disabled:opacity-70! disabled:cursor-not-allowed!"
     >
       {submitting ? <Loader2 size={20} className="animate-spin!" /> : label}
     </motion.button>
@@ -515,7 +517,7 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
                     />
                   </div>
 
-                  {/* Time slot grid */}
+                  {/* Time slot pills, finance-picker style */}
                   <div>
                     <label className={labelClass}>Preferred Time</label>
                     <div className="grid! grid-cols-4! gap-2!">
@@ -524,11 +526,12 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
                           key={slot}
                           type="button"
                           onClick={() => setVisitSlot(slot)}
+                          aria-pressed={visitSlot === slot}
                           className={
-                            "py-2! text-[12px]! rounded-lg! border! transition-colors! " +
+                            "py-2! px-1! text-[12px]! font-medium! rounded-full! border! transition-colors! whitespace-nowrap! " +
                             (visitSlot === slot
-                              ? "bg-[#27427f]! text-white! border-[#27427f]!"
-                              : "bg-white! text-gray-700! border-gray-300! hover:border-[#27427f]!")
+                              ? "bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! border-[#2563eb]!"
+                              : "bg-white! text-gray-700! border-[#dae4f3]! hover:border-[#2563eb]!")
                           }
                         >
                           {formatSlot(slot)}

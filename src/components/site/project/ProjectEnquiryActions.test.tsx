@@ -65,7 +65,7 @@ describe("ProjectEnquiryActions", () => {
     const pills = await screen.findAllByRole("button", { name: /\d{1,2}:\d{2}\s?(AM|PM)/ });
     expect(pills.length).toBeGreaterThan(0);
     await user.click(pills[0]);
-    expect(pills[0].className).toContain("bg-[#27427f]");
+    expect(pills[0]).toHaveAttribute("aria-pressed", "true");
 
     await user.click(screen.getByRole("button", { name: /book visit/i }));
     expect(createProjectEnquiry).toHaveBeenCalledWith(

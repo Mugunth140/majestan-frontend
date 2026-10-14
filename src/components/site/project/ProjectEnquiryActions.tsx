@@ -326,27 +326,29 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
                     />
                   </div>
 
-                  {/* Time slot grid */}
-                  <div>
-                    <label className={labelClass}>Preferred Time</label>
-                    <div className="grid! grid-cols-4! gap-2!">
-                      {VISIT_SLOTS.map((slot) => (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => setVisitSlot(slot)}
-                          className={
-                            "py-2! text-[12px]! rounded-lg! border! transition-colors! " +
-                            (visitSlot === slot
-                              ? "bg-[#27427f]! text-white! border-[#27427f]!"
-                              : "bg-white! text-gray-700! border-gray-300! hover:border-[#27427f]!")
-                          }
-                        >
-                          {formatSlot(slot)}
-                        </button>
-                      ))}
+                    {/* Time slot pills, finance-picker style: outline pills,
+                        selected turns bright-blue gradient. */}
+                    <div>
+                      <label className={labelClass}>Preferred Time</label>
+                      <div className="grid! grid-cols-4! gap-2!">
+                        {VISIT_SLOTS.map((slot) => (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setVisitSlot(slot)}
+                            aria-pressed={visitSlot === slot}
+                            className={
+                              "py-2! px-1! text-[12px]! font-medium! rounded-full! border! transition-colors! whitespace-nowrap! " +
+                              (visitSlot === slot
+                                ? "bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! border-[#2563eb]!"
+                                : "bg-white! text-gray-700! border-[#dae4f3]! hover:border-[#2563eb]!")
+                            }
+                          >
+                            {formatSlot(slot)}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
                   {status === "error" && errorMsg && (
                     <p className="text-[13px]! text-red-600!">{errorMsg}</p>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, Handshake, TrendingUp, BarChart3, Home, BadgePercent, Store, ArrowUpRight } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
+import { FeaturedProjectsSection } from "./featured-projects-section";
 import { HeroSection } from "./hero-section";
 import { OffersCarousel } from "@/components/site/ads/offers-carousel";
 import { LocalityOverviewSection } from "./locality-overview-section";
@@ -22,10 +23,6 @@ export function HomePage({ data, banners, offers }: { data: HomePageData; banner
   const { location } = useLocationContext();
   const citySlug = toLocationSlug(location);
   
-  // Always show featured properties since backend only returns top global 6 
-  // and filtering them strictly by sublocation breaks the UI for other cities.
-  const filteredApartments = data.featuredApartments;
-  const filteredVillas = data.featuredVillas;
 
   const saleCards = [
     ["Apartment", `/for-sale/apartments/${citySlug}`, "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", "for sale"],
@@ -37,8 +34,8 @@ export function HomePage({ data, banners, offers }: { data: HomePageData; banner
 
   const rentCards = [
     ["Office Space", `/for-rent/commercial-spaces/${citySlug}`, "https://images.unsplash.com/photo-1631193816258-28b44b21e78b?auto=format&fit=crop&w=800&q=80", "for rent"],
-    ["Warehouse", `/for-rent/industrial-spaces/${citySlug}`, "https://images.unsplash.com/photo-1689942010216-dc412bb1e7a9?auto=format&fit=crop&w=800&q=80", "for rent"],
-    ["Showroom", `/for-rent/commercial-spaces/${citySlug}`, "https://images.unsplash.com/photo-1555529902-5261145633bf?auto=format&fit=crop&w=800&q=80", "for rent"],
+    ["Warehouse", `/for-rent/industrial-spaces/${citySlug}`, "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80", "for rent"],
+    ["Showroom", `/for-rent/commercial-spaces/${citySlug}`, "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80", "for rent"],
     ["Apartment", `/for-rent/apartments/${citySlug}`, "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80", "for rent"],
     ["Villa", `/for-rent/villas/${citySlug}`, "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", "for rent"],
     ["Individual Houses", `/for-rent/independent-houses/${citySlug}`, "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", "for rent"],
@@ -90,7 +87,7 @@ export function HomePage({ data, banners, offers }: { data: HomePageData; banner
         </section>
 
         <LuxuryFeaturedSection 
-          properties={filteredApartments} 
+          properties={data.handpickedProperties} 
           title="Handpicked Properties" 
           subtitle={`Curated listings across ${location}'s most sought-after localities`} 
         />
@@ -156,10 +153,10 @@ export function HomePage({ data, banners, offers }: { data: HomePageData; banner
           </div>
         </section>
 
-        <LuxuryFeaturedSection 
-          properties={filteredVillas} 
-          title="Featured Villa Projects" 
-          subtitle={`Explore premium villas for sale in ${location}`} 
+        <FeaturedProjectsSection
+          projects={data.featuredProjects}
+          title="Featured Projects"
+          subtitle={`Explore standout new projects in ${location}`}
         />
 
         <LocalityOverviewSection

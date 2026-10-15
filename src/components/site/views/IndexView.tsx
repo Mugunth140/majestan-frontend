@@ -973,7 +973,7 @@ function FeaturedProjectCard({ card }: { card: FeaturedCard }): React.JSX.Elemen
                 </div>
 
                 <div className="heading-section text-left mb-48">
-                  <h2 className="title">Featured Villa Projects in {contextLocation}</h2>
+                  <h2 className="title">Featured Projects in {contextLocation}</h2>
                 </div>
 
                 <div

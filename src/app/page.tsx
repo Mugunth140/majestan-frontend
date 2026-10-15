@@ -18,8 +18,8 @@ const emptyHomeData: HomePageData = {
     unitTypes: [],
   },
   banners: [],
-  featuredApartments: [],
-  featuredVillas: [],
+  handpickedProperties: [],
+  featuredProjects: [],
 };
 
 export default async function Page() {

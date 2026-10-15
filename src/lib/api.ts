@@ -1,4 +1,5 @@
 import { getSublocation, type LocationRecord } from "./location-display";
+import type { ProjectListItem } from "./api/projects";
 
 export type Sublocation = {
   id: number;
@@ -30,7 +31,8 @@ export type HomeBanner = {
 
 export type FeaturedProperty = {
   id: number;
-  propertyType: "apartment" | "villa";
+  /** Any listing type: apartment, villa, plot, commercial… */
+  propertyType: string;
   detailPath: string;
   slugUrl: string | null;
   propertyName: string | null;
@@ -53,8 +55,10 @@ export type HomePageData = {
     unitTypes: UnitType[];
   };
   banners: HomeBanner[];
-  featuredApartments: FeaturedProperty[];
-  featuredVillas: FeaturedProperty[];
+  /** Curated in the CRM (Showcases); the newest apartments until curated. */
+  handpickedProperties: FeaturedProperty[];
+  /** Curated in the CRM (Showcases); the newest projects until curated. */
+  featuredProjects: ProjectListItem[];
 };
 
 type ApiEnvelope<T> = {

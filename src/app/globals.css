@@ -30,7 +30,7 @@ body {
  * (logo h-10 + py-2.5 * 2 ≈ 60px + border/shadow rounding).
  */
 :root {
-  --site-header-h: 65px;
+  --site-header-h: 69px;
 }
 
 .legacy-app-root,

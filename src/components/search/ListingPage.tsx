@@ -255,8 +255,8 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   const queryClient = useQueryClient();
   const [showDrawer, setShowDrawer] = useState(false);
 
-  // The site header is exactly 64px tall on mobile (py-2.5 + min-h-11 = 10+44+10=64).
-  // We use this for the sticky offset and spacer so it sits flush.
+  // Sticky offsets use the header's measured height (--site-header-h), so
+  // they stay flush if the bar's height changes.
 
   const rawPage = Number(searchParams.get("page")) || 1;
   const page = Math.max(1, Math.floor(rawPage));
@@ -521,7 +521,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-3!">
 
             {/* Sticky row: breadcrumbs + sort only */}
-            <div className="lg:sticky! lg:top-[64px]! z-20! bg-[#f6f7f9]! py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
+            <div className="lg:sticky! lg:top-[var(--site-header-h)]! z-20! bg-[#f6f7f9]! py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
               <div className="flex! flex-row! items-center! justify-between! gap-3!">
                 <div className="flex-1! min-w-0!">
                   <Breadcrumbs items={breadcrumbItems} jsonLd />

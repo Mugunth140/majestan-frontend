@@ -152,7 +152,7 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
   ).filter((s) => s && s.value) as { icon: React.ReactNode; label: string; value: string }[];
 
   return (
-    <div className="lg:sticky! lg:top-[133px]! flex! flex-col! gap-4!">
+    <div className="lg:sticky! lg:top-[calc(var(--site-header-h)+69px)]! flex! flex-col! gap-4!">
       {/* Title and enquiry stay beside the cover, as on the original property layout. */}
       <div className={LISTING_SUMMARY_CARD}>
         <div className="flex! items-start! justify-between! gap-3!">

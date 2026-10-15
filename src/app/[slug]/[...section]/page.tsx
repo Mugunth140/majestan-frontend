@@ -542,8 +542,8 @@ export default async function PropertySectionPage({
     return (
       <>
         <SiteHeader />
-        {/* Spacer matching fixed header height (64px) */}
-        <div className="h-[64px]!" aria-hidden="true" />
+        {/* Spacer matching the fixed header's measured height */}
+        <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
         <PropertyNavigation
           slug={property.canonicalSlug}
           activeSection={sectionKey}
@@ -643,7 +643,7 @@ export default async function PropertySectionPage({
     return (
       <>
         <SiteHeader />
-        <div className="h-[64px]!" aria-hidden="true" />
+        <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
         <ProjectNavigation
           slug={project.canonicalSlug}
           activeSection={sectionKey}

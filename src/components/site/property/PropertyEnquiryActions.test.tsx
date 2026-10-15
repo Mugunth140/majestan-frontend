@@ -39,7 +39,7 @@ describe("PropertyEnquiryActions", () => {
     render(<PropertyEnquiryActions property={PROP} />);
     await user.click(screen.getByRole("button", { name: /enquire now/i }));
     // auth modal opens (OTP entry) rather than the enquiry form:
-    expect(await screen.findByText(/enter your mobile number/i)).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
   });
 
   it("shows name/phone read-only for logged-in visitors and submits the enquiry", async () => {

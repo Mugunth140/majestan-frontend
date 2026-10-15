@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Sublocation, UnitType } from "@/lib/api";
@@ -422,6 +423,16 @@ export function HomeSearch({
               </span>
             </button>
           </div>
+
+          <div aria-hidden="true" className="w-px! h-6! bg-gray-200! mx-1! shrink-0!"></div>
+
+          {/* Plain text link (no button chrome) to new-launch projects */}
+          <Link
+            href="/projects?possession=new_launch"
+            className="shrink-0! text-[14px]! font-medium! leading-none! whitespace-nowrap! text-gray-500! transition-colors! hover:text-[#27427f]!"
+          >
+            New Launch
+          </Link>
         </div>
 
         {/* ── ROW 2: Search Bar ──────────────────────────────────

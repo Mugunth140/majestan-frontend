@@ -15,8 +15,8 @@ export default async function ProjectLayout({
   return (
     <div className="min-h-screen! bg-gray-50!">
       <SiteHeader />
-      {/* Spacer matching fixed header height (64px constant across all breakpoints) */}
-      <div className="h-[64px]!" aria-hidden="true" />
+      {/* Spacer matching the fixed header's measured height */}
+      <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
       <ProjectNavigation slug={`projects/${city}/${projectSlug}`} activeSection="" />
       <main className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-8! scroll-smooth!">
         {children}

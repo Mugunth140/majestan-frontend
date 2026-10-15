@@ -567,8 +567,8 @@ export default async function SlugPage({
     return (
       <>
         <SiteHeader />
-        {/* Spacer matching fixed header height (64px constant across breakpoints) */}
-        <div className="h-[64px]!" aria-hidden="true" />
+        {/* Spacer matching the fixed header's measured height */}
+        <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
         <PropertyNavigation
           slug={property.canonicalSlug}
           activeSection=""
@@ -621,8 +621,8 @@ export default async function SlugPage({
         <>
           <SiteHeader />
           <div className="min-h-screen! bg-[#f4f6f9]! font-manrope-page">
-            {/* Spacer matching fixed header height (64px) */}
-            <div className="h-[64px]!" aria-hidden="true" />
+            {/* Spacer matching the fixed header's measured height */}
+            <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
             <ProjectNavigation
               slug={project.canonicalSlug}
               activeSection=""

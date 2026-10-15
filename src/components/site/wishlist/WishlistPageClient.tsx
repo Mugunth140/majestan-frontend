@@ -96,7 +96,7 @@ export function WishlistPageClient() {
   return (
     <>
       <SiteHeader />
-      <div className="h-[64px]!" aria-hidden="true" />
+      <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
       <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
         <div className="mx-auto! max-w-7xl! px-4! pt-5! pb-24!">
           <Breadcrumbs items={[{ label: "Wishlist" }]} jsonLd />

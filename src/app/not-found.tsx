@@ -84,7 +84,7 @@ export default function NotFound() {
   return (
     <div className="flex! min-h-screen! flex-col! bg-white!">
       <SiteHeader />
-      <div className="h-[64px]!" aria-hidden="true" />
+      <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
 
       <main className={`${PAGE_CONTAINER} flex! w-full! flex-1! items-center! justify-center! py-20! md:py-28!`}>
         <div className="flex! w-full! max-w-[920px]! flex-col! items-center! text-center!">

@@ -42,7 +42,7 @@ async function gotoOtpStep() {
   });
 
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: /send otp/i }));
+    fireEvent.click(screen.getByRole("button", { name: /get verification code/i }));
   });
 
   expect(screen.getByText("Enter OTP")).toBeDefined();
@@ -114,7 +114,7 @@ describe("UserAuthModal step 2", () => {
       target: { value: "9876543210" },
     });
 
-    const sendButton = screen.getByRole("button", { name: /send otp/i });
+    const sendButton = screen.getByRole("button", { name: /get verification code/i });
     fireEvent.click(sendButton);
     // Bypass the (already-disabled) button and submit the form directly, so
     // the assertion targets the handler rather than the button's disabled
@@ -127,5 +127,74 @@ describe("UserAuthModal step 2", () => {
       resolveRequest({ otpSent: true, expiresInSeconds: 300 });
     });
     expect(screen.getByText("Enter OTP")).toBeDefined();
+  });
+});
+
+describe("UserAuthModal OTP feedback", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    requestLoginOtp.mockReset();
+    verifyLoginOtp.mockReset();
+    requestLoginOtp.mockResolvedValue({ otpSent: true, expiresInSeconds: 300 });
+  });
+
+  it("verifies on the sixth digit without pressing the button", async () => {
+    verifyLoginOtp.mockResolvedValue({
+      accessToken: "t",
+      user: { id: 1, name: "A", email: "a@b.co", phone: "9876543210", role: "user" },
+    });
+    await gotoOtpStep();
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText("6-digit code"), { target: { value: "123456" } });
+    });
+
+    expect(verifyLoginOtp).toHaveBeenCalledTimes(1);
+    expect(verifyLoginOtp.mock.calls[0][0]).toMatchObject({ otp: "123456", countryCode: "+91" });
+    expect(screen.getByText("Verified. Signing you in…")).toBeDefined();
+  });
+
+  it("shows the rejection and clears it once the code is edited", async () => {
+    verifyLoginOtp.mockRejectedValue(Object.assign(new Error("bad"), { status: 401 }));
+    await gotoOtpStep();
+
+    const input = screen.getByLabelText("6-digit code");
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "111111" } });
+    });
+    expect(screen.getByRole("alert").textContent).toMatch(/doesn't match/);
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "11111" } });
+    });
+    expect(input.getAttribute("aria-invalid")).toBe("false");
+  });
+});
+
+describe("UserAuthModal country code", () => {
+  beforeEach(() => {
+    vi.useRealTimers();
+    requestLoginOtp.mockReset();
+    requestLoginOtp.mockResolvedValue({ otpSent: true, expiresInSeconds: 300 });
+  });
+
+  it("searches the full list and sends the chosen code", async () => {
+    render(<UserAuthModal isOpen onClose={() => {}} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /country code/i }));
+    fireEvent.change(screen.getByLabelText("Search country or code"), {
+      target: { value: "971" },
+    });
+    fireEvent.click(screen.getByRole("option", { name: /united arab emirates/i }));
+
+    fireEvent.change(screen.getByPlaceholderText("Mobile number"), {
+      target: { value: "501234567" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /get verification code/i }));
+    });
+
+    expect(requestLoginOtp).toHaveBeenCalledWith({ countryCode: "+971", phone: "501234567" });
   });
 });

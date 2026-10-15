@@ -52,7 +52,7 @@ describe("ProjectEnquiryActions", () => {
     render(<ProjectEnquiryActions project={PROJECT} />);
     await user.click(screen.getByRole("button", { name: /enquire now/i }));
     // auth modal opens (OTP entry) rather than the enquiry form:
-    expect(await screen.findByText(/enter your mobile number/i)).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
   });
 
   it("selects a time slot from the picker and posts intent site_visit", async () => {
@@ -131,7 +131,7 @@ describe("ProjectEnquiryActions", () => {
       window,
       new CustomEvent(PROJECT_ENQUIRE_EVENT, { detail: { message: "hi" } }),
     );
-    expect(await screen.findByText(/enter your mobile number/i)).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
   });
 
   it("resumes the pending event message after OTP login and sends it", async () => {
@@ -144,7 +144,7 @@ describe("ProjectEnquiryActions", () => {
         detail: { intent: "enquire", message: "Need the floor plan" },
       }),
     );
-    expect(await screen.findByText(/enter your mobile number/i)).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
 
     act(() => {
       useUserAuthStore.setState({

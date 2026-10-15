@@ -2,17 +2,37 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
-import { MapPin, Heart, Menu, X, ChevronDown, Building, House, Map, Palmtree, Store, Factory, Laptop, ListChecks, FileSignature, Handshake, CircleDollarSign, Globe, UserRound, Phone } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import {
+  MapPin,
+  Heart,
+  ChevronDown,
+  Building,
+  House,
+  Map,
+  Palmtree,
+  Store,
+  Factory,
+  Laptop,
+  ListChecks,
+  FileSignature,
+  Handshake,
+  CircleDollarSign,
+  Globe,
+  LocateFixed,
+  LogOut,
+  Plus,
+  Search,
+  UserRound,
+} from "lucide-react";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
-import { LogOut } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
-import Image from "next/image";
 import { toLocationSlug } from "@/lib/seo-urls";
 import { adsForAudience, resolveAdHref } from "@/lib/ads";
 import { useAds } from "@/components/site/ads/use-ads";
+import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
 
 type MegaMenuLink = {
   text: string;
@@ -29,6 +49,7 @@ const SERVICE_LINKS: MegaMenuLink[] = [
 ];
 
 type Category = "Buy" | "Rent" | "Services" | null;
+const CATEGORIES = ["Buy", "Rent", "Services"] as const;
 
 /**
  * Mega-menu promo art comes from the CRM Advertisement module (placement
@@ -38,6 +59,84 @@ type Category = "Buy" | "Rent" | "Services" | null;
  * tinted panel and issues no request.
  */
 const MEGA_MENU_FALLBACK_ART: string | null = null;
+
+/** Each mobile-menu row rises in after the panel starts to unroll. */
+const menuItem = {
+  open: { opacity: 1, y: 0, transition: { duration: 0.36, ease: [0.23, 1, 0.32, 1] as const } },
+  closed: { opacity: 0, y: 14, transition: { duration: 0.16 } },
+};
+
+/** Above this many cities the dropdown gets a search field. */
+const CITY_SEARCH_THRESHOLD = 6;
+
+const EASE = [0.23, 1, 0.32, 1] as const;
+
+const FOCUS_RING =
+  "focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]/40! focus-visible:ring-offset-2!";
+const SECTION_LABEL = "m-0! text-[11px]! font-semibold! uppercase! tracking-[0.08em]! text-[#98a2b3]!";
+const POPOVER =
+  "absolute! right-0! top-full! z-[1010]! mt-3! rounded-2xl! border! border-solid! border-[#eaecf0]! bg-white! shadow-[0_20px_48px_-20px_rgba(16,24,40,0.3)]!";
+
+/** The generic "no photo" avatar: a silhouette on a soft blue-grey disc. */
+function DefaultAvatar({ size = 40 }: { size?: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-flex! shrink-0! overflow-hidden! rounded-full! bg-[#e3e8f1]!"
+      style={{ width: size, height: size }}
+    >
+      <svg viewBox="0 0 40 40" className="h-full! w-full!">
+        <circle cx="20" cy="16" r="7" fill="#9caac3" />
+        <path d="M5.5 40c1.4-8.6 7.4-13 14.5-13s13.1 4.4 14.5 13z" fill="#9caac3" />
+      </svg>
+    </span>
+  );
+}
+
+/**
+ * Post Property: brand yellow with a soft top highlight and a hairline edge,
+ * so it reads as a pressed-in surface rather than a flat sticker. On hover it
+ * turns brand blue, with no shadow. A gradient can't be faded to a flat
+ * colour, so the blue is its own layer (PostPropertyHover) that fades in.
+ */
+const POST_PROPERTY_BUTTON =
+  "group/pp relative! isolate! overflow-hidden! inline-flex! items-center! justify-center! rounded-full! border! border-solid! border-[#e9b500]! bg-[linear-gradient(180deg,#ffd84a_0%,#ffc700_100%)]! font-bold! leading-none! text-[#101828]! no-underline! shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_1px_2px_rgba(16,24,40,0.08)]! transition-[border-color,color,box-shadow,transform]! duration-200! ease-out! hover:border-[#27427f]! hover:text-white! hover:shadow-none! active:scale-[0.98]!";
+
+/** The blue that fades in over the yellow on hover. */
+function PostPropertyHover() {
+  return (
+    <span
+      aria-hidden="true"
+      className="absolute! inset-0! -z-10! bg-[#27427f]! opacity-0! transition-opacity! duration-200! ease-out! group-hover/pp:opacity-100!"
+    />
+  );
+}
+
+/** "Free", pinned to the button's top-right corner, outside its edge. */
+function FreeBadge() {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none! absolute! -top-2! -right-2! rounded-full! border-2! border-solid! border-white! bg-[#16a34a]! px-1.5! py-[3px]! text-[10px]! font-extrabold! uppercase! leading-none! tracking-[0.06em]! text-white! shadow-[0_2px_6px_-2px_rgba(22,163,74,0.6)]!"
+    >
+      Free
+    </span>
+  );
+}
+
+/** Radio-style mark for the city rows. */
+function RadioMark({ checked }: { checked: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-flex! h-[18px]! w-[18px]! shrink-0! items-center! justify-center! rounded-full! border-2! border-solid! transition-colors! duration-150! ${
+        checked ? "border-[#27427f]!" : "border-[#d0d5dd]!"
+      }`}
+    >
+      {checked && <span className="h-2! w-2! rounded-full! bg-[#27427f]!" />}
+    </span>
+  );
+}
 
 export function SiteHeader(): React.JSX.Element {
   const {
@@ -56,8 +155,11 @@ export function SiteHeader(): React.JSX.Element {
   const [hoveredCategory, setHoveredCategory] = useState<Category>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
+  const [citySearch, setCitySearch] = useState("");
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
+  const [isMobileCityOpen, setIsMobileCityOpen] = useState(false);
+  const [openMobileSection, setOpenMobileSection] = useState<Category>(null);
   /**
    * Art URLs that failed to load, so a broken creative degrades to the next
    * fallback (or the empty tinted panel) instead of a broken-image glyph.
@@ -65,15 +167,16 @@ export function SiteHeader(): React.JSX.Element {
   const [failedArt, setFailedArt] = useState<ReadonlySet<string>>(() => new Set());
   // One small request per page load, so the art is ready before the first hover.
   const menuAds = useAds("mega_menu");
-  const cityDropdownRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const locationMenuRef = useRef<HTMLDivElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
 
+  useLockBodyScroll(isMobileMenuOpen);
+
   // The header is `fixed`, so every page that renders a full-bleed hero at the
-  // very top needs to know how tall it actually is. It is not a constant: the
-  // logo shrinks at 1180/900/640px and the bar reflows, so the measured height
-  // ranges ~60px -> ~65px. Publishing it as --site-header-h keeps the offset
-  // exact at every breakpoint instead of hard-coding a px guess that goes stale
-  // the moment the bar's padding or logo size changes.
+  // very top needs to know how tall it actually is. Publishing the measured
+  // height as --site-header-h keeps that offset exact at every breakpoint.
   useEffect(() => {
     const el = headerRef.current;
     if (!el) return;
@@ -87,54 +190,66 @@ export function SiteHeader(): React.JSX.Element {
     return () => ro.disconnect();
   }, []);
 
+  // Every popover closes on an outside press or Escape.
   useEffect(() => {
-    if (isMobileMenuOpen) return;
-    setIsCityMenuOpen(false);
+    const anyOpen = isLocationMenuOpen || isAccountMenuOpen || hoveredCategory;
+    if (!anyOpen) return;
+    const handlePointer = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (locationMenuRef.current && !locationMenuRef.current.contains(target)) setIsLocationMenuOpen(false);
+      if (accountMenuRef.current && !accountMenuRef.current.contains(target)) setIsAccountMenuOpen(false);
+      if (headerRef.current && !headerRef.current.contains(target)) setHoveredCategory(null);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setIsLocationMenuOpen(false);
+      setIsAccountMenuOpen(false);
+      setHoveredCategory(null);
+    };
+    document.addEventListener("mousedown", handlePointer);
+    document.addEventListener("touchstart", handlePointer);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handlePointer);
+      document.removeEventListener("touchstart", handlePointer);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [isLocationMenuOpen, isAccountMenuOpen, hoveredCategory]);
+
+  // Escape closes the mobile menu too.
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMobileMenu();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
-    if (!isCityMenuOpen) return;
-    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node)) {
-        setIsCityMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [isCityMenuOpen]);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (isLocationMenuOpen) {
-      timeoutId = setTimeout(() => {
-        setIsLocationMenuOpen(false);
-      }, 5000);
-    }
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [isLocationMenuOpen]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     if (isAuthenticated) void syncWishlist();
   }, [isAuthenticated, user?.id, syncWishlist]);
 
+  // Closing the menu also folds its open sections, so it reopens clean.
+  function closeMobileMenu() {
+    setIsMobileMenuOpen(false);
+    setIsMobileCityOpen(false);
+    setOpenMobileSection(null);
+  }
 
-  const handleProtectedRoute = (e: React.MouseEvent, path: string) => {
+  const toggleLocationMenu = () => {
+    setIsLocationMenuOpen((v) => !v);
+    setCitySearch("");
+  };
+
+  const handleProtectedRoute = (e: React.MouseEvent) => {
     if (!isAuthenticated) {
       e.preventDefault();
       setIsAuthModalOpen(true);
@@ -145,7 +260,7 @@ export function SiteHeader(): React.JSX.Element {
     await updateLocation();
   };
 
-  const getLinks = (cat: Category) => {
+  const getLinks = (cat: Category): MegaMenuLink[] => {
     const citySlug = toLocationSlug(location);
     switch (cat) {
       case "Buy":
@@ -167,8 +282,10 @@ export function SiteHeader(): React.JSX.Element {
           { text: "Independent House", href: `/for-rent/independent-houses/${citySlug}`, icon: <House size={18} /> },
           { text: "Co-Working", href: `/for-rent/coworking/${citySlug}`, icon: <Laptop size={18} /> },
         ];
-      case "Services": return SERVICE_LINKS;
-      default: return [];
+      case "Services":
+        return SERVICE_LINKS;
+      default:
+        return [];
     }
   };
 
@@ -183,182 +300,326 @@ export function SiteHeader(): React.JSX.Element {
   };
 
   const getFeatured = (cat: Category) => {
-    const citySlug = toLocationSlug(location);
-    if (cat === "Buy") return { title: "Find your dream home", btn: "Explore Buy", href: `/for-sale/apartments/${citySlug}` };
-    if (cat === "Rent") return { title: "Verified rental properties", btn: "Browse Rent", href: `/for-rent/apartments/${citySlug}` };
-    if (cat === "Services") return { title: "Expert real estate help", btn: "Our Services", href: "/contact-us" };
+    if (cat === "Buy") return { title: "Find your dream home" };
+    if (cat === "Rent") return { title: "Verified rental properties" };
+    if (cat === "Services") return { title: "Expert real estate help" };
     return null;
   };
+
+  const realName = user?.name && user.name !== "Majestan User" ? user.name : "";
+  const displayName = realName || user?.phone;
+
+  const showCitySearch = cities.length > CITY_SEARCH_THRESHOLD;
+  const filteredCities = citySearch.trim()
+    ? cities.filter((c) => c.city.toLowerCase().includes(citySearch.trim().toLowerCase()))
+    : cities;
+
+  /** City rows, shared by the desktop dropdown and the mobile menu. */
+  const renderCityRows = (onPick: () => void) => (
+    <>
+      {isLoadingCities && (
+        <p className="m-0! px-3! py-2.5! text-[13px]! font-medium! text-[#667085]!">Loading cities…</p>
+      )}
+      {!isLoadingCities && filteredCities.length === 0 && (
+        <p className="m-0! px-3! py-2.5! text-[13px]! font-medium! text-[#667085]!">
+          {cities.length === 0 ? "No active cities available" : "No matching city"}
+        </p>
+      )}
+      {filteredCities.map((city) => {
+        const selected = location === city.city;
+        return (
+          <button
+            key={city.id}
+            type="button"
+            role="option"
+            aria-selected={selected}
+            onClick={() => {
+              setLocation(city.city);
+              onPick();
+            }}
+            className={`flex! w-full! cursor-pointer! items-center! gap-3! rounded-xl! border-0! px-3! py-2.5! text-left! text-[14px]! transition-colors! duration-150! ${
+              selected
+                ? "bg-[#f5f8ff]! font-semibold! text-[#101828]!"
+                : "bg-transparent! font-medium! text-[#344054]! hover:bg-[#f9fafb]! hover:text-[#101828]!"
+            }`}
+          >
+            <RadioMark checked={selected} />
+            {city.city}
+          </button>
+        );
+      })}
+    </>
+  );
 
   return (
     <>
       <header
         ref={headerRef}
-        className="fixed! top-0! w-full! max-w-full! left-0 z-[1000] bg-white/95! backdrop-blur-xs! py-2.5! px-5! font-['Lexend',sans-serif] shadow-[0_4px_20px_rgba(22,30,45,0.06)]!"
+        className={`font-manrope-page fixed! top-0! left-0! w-full! max-w-full! border-b! border-solid! bg-white/95! backdrop-blur-md! transition-[box-shadow,border-color]! duration-200! ${
+          isMobileMenuOpen ? "z-[10002]! bg-white!" : "z-[1000]!"
+        } ${
+          isMobileMenuOpen
+            ? "border-[#eaecf0]! shadow-none!"
+            : isScrolled || hoveredCategory
+            ? "border-[#eaecf0]! shadow-[0_6px_24px_-12px_rgba(16,24,40,0.18)]!"
+            : "border-transparent! shadow-none!"
+        }`}
         onMouseLeave={() => setHoveredCategory(null)}
       >
-        <div className="w-full mx-auto" style={{ maxWidth: "1400px" }}>
-          <div className="flex! min-h-11 items-center! justify-between! gap-3 max-[1024px]:gap-2">
-            {/* Logo */}
-            <Link href="/" className="inline-flex! shrink-0 transition-transform active:scale-95" aria-label="Majestan Realty Home">
-              <img
-                src="/assets/images/logo/logo.png"
-                alt="Majestan Realty"
-                className="w-auto! h-10! object-contain transition-all duration-300 max-[1180px]:h-[38px]! max-[900px]:h-8! max-[640px]:h-7! max-[640px]:max-w-[180px]!"
-              />
-            </Link>
+        <div className="mx-auto! flex! h-[68px]! w-full! max-w-[1400px]! items-center! justify-between! gap-4! px-4! sm:px-6! lg:px-8!">
+          {/* Logo */}
+          <Link
+            href="/"
+            onClick={() => isMobileMenuOpen && closeMobileMenu()}
+            className={`inline-flex! shrink-0! rounded-md! ${FOCUS_RING}`}
+            aria-label="Majestan Realty Home"
+          >
+            <img
+              src="/assets/images/logo/logo.png"
+              alt="Majestan Realty"
+              className="h-9! w-auto! object-contain! sm:h-10! max-[400px]:h-8!"
+            />
+          </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden! flex-1 justify-center! lg:flex!" aria-label="Main navigation">
-              <ul className="flex! items-center! gap-1.5 p-0">
-                {(["Buy", "Rent", "Services"] as const).map((cat) => (
-                  <li
-                    key={cat}
-                    onMouseEnter={() => {
-                      setHoveredCategory(cat);
-                    }}
-                    className="relative"
-                  >
-                    <button className={`inline-flex! items-center! gap-1.5 rounded-full border-0 bg-transparent px-4 py-2 text-[14px] font-bold text-black/80! leading-none no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3 ${hoveredCategory === cat ? "bg-[#27427f]/10 text-[#ffc900]" : ""}`}>
-                      {cat} <ChevronDown size={14} className={`transition-transform duration-200 ${hoveredCategory === cat ? "rotate-180" : ""}`} />
+          {/* Desktop navigation: text only; the open menu is marked by colour
+              and the turned chevron, not a pill. */}
+          <nav className="hidden! flex-1! justify-center! lg:flex!" aria-label="Main navigation">
+            <ul className="m-0! flex! list-none! items-center! gap-2! p-0!">
+              {CATEGORIES.map((cat) => {
+                const open = hoveredCategory === cat;
+                return (
+                  <li key={cat} onMouseEnter={() => setHoveredCategory(cat)}>
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      aria-haspopup="true"
+                      onClick={() => setHoveredCategory(open ? null : cat)}
+                      onFocus={() => setHoveredCategory(cat)}
+                      className={`inline-flex! h-[68px]! cursor-pointer! items-center! gap-1! border-0! bg-transparent! px-3! text-[15px]! font-semibold! leading-none! transition-colors! duration-150! ${FOCUS_RING} ${
+                        open ? "text-[#27427f]!" : "text-[#344054]! hover:text-[#27427f]!"
+                      }`}
+                    >
+                      {cat}
+                      <ChevronDown
+                        size={15}
+                        strokeWidth={2.25}
+                        className={`transition-transform! duration-200! ${open ? "rotate-180! text-[#27427f]!" : "text-[#98a2b3]!"}`}
+                      />
                     </button>
                   </li>
-                ))}
-                <li>
-                  <Link href="/contact-us" className="inline-flex! rounded-full! px-4 py-2 text-[14px] font-bold leading-none text-black/80! no-underline transition-colors hover:bg-[#27427f]/5 hover:text-[#ffc900] max-[1180px]:px-3">
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </nav>
+                );
+              })}
+            </ul>
+          </nav>
 
-            {/* Right Actions */}
-            <div className="flex! shrink-0 items-center! justify-end! gap-3 max-[1180px]:gap-2.5 max-[1024px]:gap-2">
-              {/* Wishlist */}
-              <Link href="/wishlist" className="inline-flex! relative text-gray-400 transition-all hover:scale-110 hover:text-pink-500" aria-label="Wishlist" onClick={(e) => handleProtectedRoute(e, "/wishlist")}>
-                <Heart size={23} className={wishlistCount > 0 ? "fill-pink-500! text-pink-500!" : ""} />
-                {wishlistCount > 0 && (
-                  <span className="absolute! -right-2 -top-2 flex! h-4 w-4 items-center! justify-center! rounded-full border border-white bg-pink-500 text-[9px]! font-black leading-none text-white">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
-
-
-              {/* Account */}
-              <div className="relative group">
-                <button 
-                  onClick={() => !isAuthenticated ? setIsAuthModalOpen(true) : undefined}
-                  className="inline-flex! items-center! justify-center! h-[42px]! w-[42px]! rounded-full! border-0 bg-[#27427f]/5! text-[#27427f] transition-colors hover:bg-[#27427f]/10!"
-                  aria-label="Account"
-                >
-                  <UserRound size={20} />
-                </button>
-                {isAuthenticated && (
-                  <div className="absolute! right-0! top-full! mt-2! w-56! rounded-2xl! bg-white! shadow-[0_10px_40px_rgba(0,0,0,0.08)]! border! border-gray-100! opacity-0! invisible! group-hover:opacity-100! group-hover:visible! transition-all! overflow-hidden! z-[1010]!">
-                    <div className="p-2!">
-                      <div className="px-3! py-2.5! mb-1! border-b! border-gray-100!">
-                        <p className="text-[11px]! font-bold! text-gray-400! uppercase! tracking-wider! mb-0.5!">Signed in as</p>
-                        <p className="text-[13px]! font-semibold! text-[#27427f]! truncate!">
-                          {user?.name && user.name !== "Majestan User" ? user.name : user?.phone}
-                        </p>
-                      </div>
-                      <button onClick={() => logout()} className="flex! w-full! items-center! gap-3! rounded-xl! px-3! py-2.5! text-[13px]! font-medium! text-rose-600! hover:bg-rose-50! transition-colors!">
-                        <LogOut size={16} />
-                        Log out
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Location */}
-              <div className="relative hidden! md:block!">
-                <button
-                  onClick={() => setIsLocationMenuOpen(!isLocationMenuOpen)}
-                  className="inline-flex! items-center! gap-2 border-0 bg-[#27427f]/5! px-3 py-3 rounded-full! transition-colors hover:bg-[#27427f]/10!"
-                >
-                  <MapPin size={16} className={`text-[#27427f] ${isLocating ? "animate-bounce" : ""}`} />
-                  <span className="text-[13px]! font-semibold! leading-none text-[#27427f]">{location}</span>
-                </button>
-                
-                <AnimatePresence>
-                  {isLocationMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute! right-0 top-full mt-2 w-64 rounded-2xl border border-white/40! bg-white/95! backdrop-blur-2xl! p-3 shadow-[0_15px_35px_rgba(22,30,45,0.15),inset_0_1px_0_rgba(255,255,255,0.8)]! z-[1010]"
-                    >
-                      <button
-                        onClick={(e) => {
-                          setIsLocationMenuOpen(false);
-                          detectLocation(e);
-                        }}
-                        className="flex! w-full items-center! gap-2.5 rounded-xl! border-0 bg-[#27427f]/5 px-3 py-2.5 text-left text-[13px]! font-bold text-[#27427f]! transition-colors hover:bg-[#27427f]/10!"
-                      >
-                        <MapPin size={16} />
-                        Use Current Location
-                      </button>
-                      <div className="my-2 border-t border-black/5"></div>
-                      <div className="px-2 pb-1 pt-1 text-[11px]! font-semibold tracking-normal text-black/40!">
-                        Available Cities
-                      </div>
-                      <div className="grid! gap-1">
-                        {isLoadingCities && (
-                          <p className="m-0 px-3 py-2 text-[13px]! text-black/45">
-                            Loading cities...
-                          </p>
-                        )}
-                        {!isLoadingCities && cities.length === 0 && (
-                          <p className="m-0 px-3 py-2 text-[13px]! text-black/45">
-                            No active cities available
-                          </p>
-                        )}
-                        {cities.map((city) => (
-                          <button
-                            key={city.id}
-                            onClick={() => {
-                              setLocation(city.city);
-                              setIsLocationMenuOpen(false);
-                            }}
-                            className={`flex! w-full items-center! rounded-lg! border-0! px-3! py-2! text-left text-[13px]! font-semibold! transition-colors hover:bg-[#27427f]/5! ${
-                              location === city.city ? "text-[#27427f]! bg-[#27427f]/5!" : "text-black/70! bg-transparent!"
-                            }`}
-                          >
-                            {city.city}
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Post Property */}
-              <Link href="/post-property"
-                className="hidden! relative items-center! gap-2 rounded-full bg-[#ffc900] px-6! py-3 text-[13px]! font-bold! text-black/80! leading-none no-underline transition-all hover:-translate-y-px hover:bg-[#27427f] hover:text-white! lg:inline-flex!"
-               onClick={(e) => { handleProtectedRoute(e, "/post-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}>
-                Post Property
-                <span className="absolute! -right-2.5 -top-1.5 rounded-lg bg-[#22c55e] px-3! py-0.2! text-[10px]! font-black leading-none tracking-widest text-white shadow-sm">FREE</span>
-              </Link>
-
-
-              {/* Mobile Toggle */}
-
+          {/* Right actions (desktop): city · account · post property.
+              Below lg everything lives in the menu instead. */}
+          <div className="hidden! shrink-0! items-center! gap-2! lg:flex!">
+            {/* City */}
+            <div className="relative!" ref={locationMenuRef}>
               <button
-                className="inline-flex! h-12 w-12 items-center! justify-center! rounded-full! border-0 bg-[#27427f]/5! text-[#27427f] transition-colors hover:bg-[#27427f]! lg:hidden!"
-                onClick={() => setIsMobileMenuOpen(true)}
-                aria-label="Open navigation menu"
+                type="button"
+                onClick={toggleLocationMenu}
+                aria-haspopup="dialog"
+                aria-expanded={isLocationMenuOpen}
+                aria-label={`City: ${location}`}
+                className={`group/city inline-flex! h-10! cursor-pointer! items-center! gap-1.5! rounded-full! border-0! bg-transparent! px-2! text-[14px]! font-semibold! leading-none! text-[#101828]! transition-colors! duration-150! hover:text-[#27427f]! ${FOCUS_RING}`}
               >
-                <Menu size={24} />
+                <MapPin size={17} strokeWidth={2.25} className={`text-[#27427f]! ${isLocating ? "animate-pulse!" : ""}`} />
+                <span className="max-w-[120px]! truncate!">{location}</span>
+                <ChevronDown
+                  size={15}
+                  strokeWidth={2.25}
+                  className={`text-[#98a2b3]! transition-transform! duration-200! group-hover/city:text-[#27427f]! ${isLocationMenuOpen ? "rotate-180!" : ""}`}
+                />
               </button>
+
+              <AnimatePresence>
+                {isLocationMenuOpen && (
+                  <motion.div
+                    role="dialog"
+                    aria-label="Choose your city"
+                    initial={{ opacity: 0, y: reduceMotion ? 0 : -6, scale: reduceMotion ? 1 : 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: reduceMotion ? 0 : -6, scale: reduceMotion ? 1 : 0.98 }}
+                    transition={{ duration: 0.18, ease: EASE }}
+                    style={{ transformOrigin: "top right" }}
+                    className={`${POPOVER} w-[300px]! p-2!`}
+                  >
+                    <div className="px-2! pt-1.5! pb-3!">
+                      <p className="m-0! text-[15px]! font-semibold! text-[#101828]!">Choose your city</p>
+                      <p className="m-0! mt-0.5! text-[13px]! font-medium! text-[#667085]!">
+                        We&apos;ll show properties around you.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        setIsLocationMenuOpen(false);
+                        detectLocation(e);
+                      }}
+                      className="flex! h-10! w-full! cursor-pointer! items-center! justify-center! gap-2! rounded-xl! border! border-solid! border-[#d0d5dd]! bg-white! text-[14px]! font-semibold! text-[#27427f]! transition-colors! duration-150! hover:border-[#27427f]! hover:bg-[#f5f8ff]!"
+                    >
+                      <LocateFixed size={16} strokeWidth={2.25} />
+                      Use my current location
+                    </button>
+
+                    {showCitySearch && (
+                      <div className="mt-2! flex! h-10! items-center! gap-2! rounded-xl! bg-[#f2f4f7]! px-3!">
+                        <Search size={15} className="shrink-0! text-[#98a2b3]!" />
+                        <input
+                          value={citySearch}
+                          onChange={(e) => setCitySearch(e.target.value)}
+                          placeholder="Search city"
+                          aria-label="Search city"
+                          className="m-0! h-full! min-w-0! flex-1! appearance-none! rounded-none! border-0! bg-transparent! p-0! text-[14px]! font-medium! text-[#101828]! shadow-none! outline-none! placeholder:text-[#98a2b3]!"
+                        />
+                      </div>
+                    )}
+
+                    <p className={`${SECTION_LABEL} px-3! pt-4! pb-1.5!`}>Available cities</p>
+                    <div role="listbox" aria-label="City" className="grid! max-h-60! gap-0.5! overflow-y-auto!">
+                      {renderCityRows(() => setIsLocationMenuOpen(false))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+
+            <span aria-hidden="true" className="mx-1! h-6! w-px! bg-[#e4e7ec]!" />
+
+            {/* Account: "Sign in" when logged out, a default avatar when in */}
+            <div className="relative!" ref={accountMenuRef}>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={() => setIsAccountMenuOpen((v) => !v)}
+                  aria-label="Account menu"
+                  aria-haspopup="menu"
+                  aria-expanded={isAccountMenuOpen}
+                  className={`inline-flex! cursor-pointer! items-center! gap-1! rounded-full! border-0! bg-transparent! p-0.5! pr-1.5! transition-colors! duration-150! hover:bg-[#f2f4f7]! ${FOCUS_RING}`}
+                >
+                  <DefaultAvatar size={36} />
+                  <ChevronDown
+                    size={15}
+                    strokeWidth={2.25}
+                    className={`text-[#98a2b3]! transition-transform! duration-200! ${isAccountMenuOpen ? "rotate-180!" : ""}`}
+                  />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  aria-label="Account"
+                  className={`inline-flex! h-10! cursor-pointer! items-center! justify-center! rounded-full! border-0! bg-transparent! px-3! text-[14px]! font-semibold! text-[#101828]! transition-colors! duration-150! hover:text-[#27427f]! ${FOCUS_RING}`}
+                >
+                  Sign in
+                </button>
+              )}
+              <AnimatePresence>
+                {isAuthenticated && isAccountMenuOpen && (
+                  <motion.div
+                    role="menu"
+                    initial={{ opacity: 0, y: reduceMotion ? 0 : -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: reduceMotion ? 0 : -4 }}
+                    transition={{ duration: 0.16, ease: EASE }}
+                    className={`${POPOVER} w-64! p-1.5!`}
+                  >
+                    <div className="mb-1! flex! items-center! gap-3! border-b! border-solid! border-[#f2f4f7]! px-2.5! pt-2! pb-3!">
+                      <DefaultAvatar size={36} />
+                      <div className="min-w-0!">
+                        <p className="m-0! truncate! text-[14px]! font-semibold! text-[#101828]!">{displayName}</p>
+                        <p className="m-0! text-[12px]! font-medium! text-[#667085]!">Signed in</p>
+                      </div>
+                    </div>
+                    <Link
+                      role="menuitem"
+                      href="/wishlist"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex! items-center! gap-2.5! rounded-xl! px-3! py-2.5! text-[14px]! font-medium! text-[#344054]! no-underline! transition-colors! hover:bg-[#f9fafb]! hover:text-[#101828]!"
+                    >
+                      <Heart size={16} /> Saved properties
+                      {wishlistCount > 0 && (
+                        <span className="ml-auto! text-[12px]! font-semibold! text-[#667085]! tabular-nums!">{wishlistCount}</span>
+                      )}
+                    </Link>
+                    <button
+                      role="menuitem"
+                      type="button"
+                      onClick={() => {
+                        setIsAccountMenuOpen(false);
+                        logout();
+                      }}
+                      className="flex! w-full! cursor-pointer! items-center! gap-2.5! rounded-xl! border-0! bg-transparent! px-3! py-2.5! text-left! text-[14px]! font-medium! text-[#d92d20]! transition-colors! hover:bg-[#fef3f2]!"
+                    >
+                      <LogOut size={16} /> Log out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Post Property */}
+            <span className="relative! ml-1! inline-flex!">
+              <Link
+                href="/post-property"
+                aria-label="Post Property, free"
+                className={`${POST_PROPERTY_BUTTON} h-[46px]! px-5! text-[14px]! ${FOCUS_RING}`}
+                onClick={handleProtectedRoute}
+              >
+                <PostPropertyHover />
+                Post Property
+              </Link>
+              <FreeBadge />
+            </span>
           </div>
+
+          {/* Menu trigger (below lg): a "Menu" pill. Its two lines fold into
+              an X and the label reads "Close" while the menu is open. */}
+          <button
+            type="button"
+            className={`inline-flex! h-10! shrink-0! cursor-pointer! items-center! gap-2.5! rounded-full! border! border-solid! pr-3! pl-4! text-[14px]! font-semibold! transition-colors! duration-200! lg:hidden! ${FOCUS_RING} ${
+              isMobileMenuOpen
+                ? "border-[#27427f]! bg-[#27427f]! text-white!"
+                : "border-[#e4e7ec]! bg-white! text-[#101828]! hover:border-[#d0d5dd]!"
+            }`}
+            onClick={() => (isMobileMenuOpen ? closeMobileMenu() : setIsMobileMenuOpen(true))}
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
+          >
+            <span className="relative! inline-block! w-[3.1em]! text-left!">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={isMobileMenuOpen ? "close" : "menu"}
+                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: EASE }}
+                  className="inline-block!"
+                >
+                  {isMobileMenuOpen ? "Close" : "Menu"}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+            <span aria-hidden="true" className="relative! block! h-3! w-[18px]!">
+              <span
+                className={`absolute! left-0! block! h-[2px]! w-[18px]! rounded-full! bg-current! transition-transform! duration-300! ease-[cubic-bezier(0.23,1,0.32,1)]! ${
+                  isMobileMenuOpen ? "top-[5px]! rotate-45!" : "top-0.5!"
+                }`}
+              />
+              <span
+                className={`absolute! left-0! block! h-[2px]! w-[18px]! rounded-full! bg-current! transition-transform! duration-300! ease-[cubic-bezier(0.23,1,0.32,1)]! ${
+                  isMobileMenuOpen ? "top-[5px]! -rotate-45!" : "top-[8px]!"
+                }`}
+              />
+            </span>
+          </button>
         </div>
 
-        {/* Desktop Mega Menu */}
+        {/* Desktop mega menu — the original overlay design */}
         <AnimatePresence>
           {hoveredCategory && (
             <motion.div
@@ -380,6 +641,7 @@ export function SiteHeader(): React.JSX.Element {
                       <Link
                         key={link.href}
                         href={link.href}
+                        onClick={() => setHoveredCategory(null)}
                         className="group flex! items-center! gap-3 rounded-[10px]! px-3! py-[9px]! text-[14px]! font-medium! leading-tight! text-gray-700! no-underline! transition-colors duration-150! hover:bg-[#f5f7fc]! hover:text-[#161e2d]!"
                       >
                         <span className="inline-flex! shrink-0 text-[#27427f] opacity-60! transition-opacity duration-150! group-hover:opacity-100!">
@@ -424,144 +686,218 @@ export function SiteHeader(): React.JSX.Element {
         </AnimatePresence>
       </header>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile menu. The header stays put (its Menu pill turns into Close)
+          and the panel unrolls downward from under it, its rows following
+          one after another; closing plays the same thing in reverse. It sits
+          above the chat widget, which would otherwise cover the CTA. */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed! inset-0 z-[1100] bg-[#27427f]/20 backdrop-blur-sm"
-            />
-
-            {/* Drawer panel */}
-            <motion.div
-              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 15 }}
-              className="fixed! top-0 right-0 bottom-0 z-[1101] w-full max-w-full bg-white! border-l border-[#27427f]/10! shadow-[-18px_0_45px_rgba(22,30,45,0.20)]! flex flex-col"
-            >
-              {/* Drawer header */}
-              <div className="flex! items-center! justify-between! px-5 py-4 border-b border-[#27427f]/10 shrink-0">
-                <Image src="/assets/images/logo/logo.png" alt="Majestan" width={220} height={40} className="" />
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="inline-flex! h-12 w-12 items-center! justify-center! rounded-full! border-0 bg-[#27427f]/5! text-[#27427f]!"
-                  aria-label="Close navigation menu"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              {/* Scrollable nav links */}
-              <div className="flex-1 overflow-y-auto px-5 py-5">
-                <div className="flex flex-col gap-6">
-                  {/* City Selector */}
-                  <div className="grid gap-2.5">
-                    <h6 className="m-0 px-1 text-[13px]! font-extrabold! leading-none tracking-[0.25em] text-[#27427f]/80! uppercase">
-                      Current City
-                    </h6>
-                    <div className="relative" ref={cityDropdownRef}>
+          <motion.div
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={{
+              open: reduceMotion
+                ? { opacity: 1 }
+                : {
+                    clipPath: "inset(0% 0% 0% 0%)",
+                    transition: { duration: 0.5, ease: EASE, delayChildren: 0.12, staggerChildren: 0.045 },
+                  },
+              closed: reduceMotion
+                ? { opacity: 0 }
+                : {
+                    clipPath: "inset(0% 0% 100% 0%)",
+                    transition: { duration: 0.38, ease: [0.77, 0, 0.175, 1], when: "afterChildren", staggerChildren: 0.025, staggerDirection: -1 },
+                  },
+            }}
+            className="font-manrope-page fixed! inset-x-0! bottom-0! top-[var(--site-header-h)]! z-[10001]! flex! flex-col! bg-white! lg:hidden!"
+          >
+            <div className="flex-1! overflow-y-auto! overscroll-contain! px-5! pt-3! pb-6! sm:px-8!">
+              <nav aria-label="Main navigation">
+                {CATEGORIES.map((cat) => {
+                  const open = openMobileSection === cat;
+                  return (
+                    <motion.div key={cat} variants={menuItem} className="border-b! border-solid! border-[#f2f4f7]!">
                       <button
                         type="button"
-                        onClick={() => setIsCityMenuOpen((v) => !v)}
-                        onMouseDown={(e) => e.preventDefault()}
-                        className={`w-full flex items-center justify-between gap-2 rounded-xl bg-[#27427f]/8 px-4 py-3.5 text-[14px]! font-bold text-[#27427f] outline-none border transition-colors cursor-pointer ${
-                          isCityMenuOpen
-                            ? "border-[#27427f]/40 bg-[#27427f]/10"
-                            : "border-[#27427f]/15 hover:border-[#27427f]/35 hover:bg-[#27427f]/10"
-                        }`}
+                        aria-expanded={open}
+                        onClick={() => setOpenMobileSection(open ? null : cat)}
+                        className="group/row flex! h-[72px]! w-full! cursor-pointer! items-center! justify-between! border-0! bg-transparent! p-0! text-left!"
                       >
-                        <span className="flex items-center gap-2 truncate">
-                          <MapPin size={16} className="shrink-0 text-[#27427f]" />
-                          <span className="truncate">{location || "Select City"}</span>
+                        <span className={`text-[28px]! font-semibold! tracking-[-0.03em]! transition-colors! duration-200! ${open ? "text-[#27427f]!" : "text-[#101828]!"}`}>
+                          {cat}
                         </span>
-                        <ChevronDown size={18} className={`shrink-0 text-[#27427f]/70 transition-transform duration-200 ${isCityMenuOpen ? "rotate-180" : ""}`} />
+                        <span
+                          aria-hidden="true"
+                          className={`inline-flex! h-9! w-9! items-center! justify-center! rounded-full! border! border-solid! transition-[background-color,border-color,color,transform]! duration-300! ease-[cubic-bezier(0.23,1,0.32,1)]! ${
+                            open
+                              ? "rotate-45! border-[#27427f]! bg-[#27427f]! text-white!"
+                              : "border-[#e4e7ec]! bg-white! text-[#101828]!"
+                          }`}
+                        >
+                          <Plus size={17} strokeWidth={2.25} />
+                        </span>
                       </button>
-
-                      <AnimatePresence>
-                        {isCityMenuOpen && (
+                      <AnimatePresence initial={false}>
+                        {open && (
                           <motion.div
-                            initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                            transition={{ duration: 0.15 }}
-                            className="absolute! left-0! right-0! top-full! mt-2! z-50! rounded-xl! bg-white! shadow-[0_12px_32px_rgba(22,30,45,0.18)]! border! border-[#27427f]/15! p-1.5! max-h-64! overflow-y-auto!"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: EASE }}
+                            className="overflow-hidden!"
                           >
-                            {cities.map((city) => (
-                              <button
-                                key={city.id}
-                                type="button"
-                                onClick={() => {
-                                  setLocation(city.city);
-                                  setIsCityMenuOpen(false);
-                                }}
-                                className={`w-full flex items-center gap-2.5 rounded-lg px-3.5 py-3 text-left text-[14px]! font-bold transition-colors cursor-pointer ${
-                                  location === city.city
-                                    ? "bg-[#27427f] text-white"
-                                    : "text-[#27427f] hover:bg-[#27427f]/8"
-                                }`}
-                              >
-                                <MapPin size={15} className={`shrink-0 ${location === city.city ? "text-white" : "text-[#27427f]/50"}`} />
-                                {city.city}
-                              </button>
-                            ))}
+                            <ul className="m-0! grid! list-none! grid-cols-2! gap-x-4! p-0! pb-5!">
+                              {getLinks(cat).map((link) => (
+                                <li key={link.href}>
+                                  <Link
+                                    href={link.href}
+                                    onClick={closeMobileMenu}
+                                    className="group/ml flex! items-center! gap-2.5! py-2.5! text-[15px]! font-medium! leading-tight! text-[#475467]! no-underline! transition-colors! hover:text-[#101828]!"
+                                  >
+                                    <span className="inline-flex! shrink-0! text-[#27427f]! opacity-60! transition-opacity! duration-150! group-hover/ml:opacity-100!">
+                                      {link.icon}
+                                    </span>
+                                    {link.text}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
                           </motion.div>
                         )}
                       </AnimatePresence>
-                    </div>
-                  </div>
+                    </motion.div>
+                  );
+                })}
+                <motion.div variants={menuItem} className="border-b! border-solid! border-[#f2f4f7]!">
+                  <Link
+                    href="/contact-us"
+                    onClick={closeMobileMenu}
+                    className="flex! h-[72px]! items-center! text-[28px]! font-semibold! tracking-[-0.03em]! text-[#101828]! no-underline!"
+                  >
+                    Contact
+                  </Link>
+                </motion.div>
+              </nav>
+            </div>
 
-                  <div className="h-px w-full bg-[#27427f]/15" />
-
-                  <div className="grid gap-6">
-                    {(["Buy", "Rent", "Services"] as const).map((cat) => (
-                      <div key={cat} className="grid gap-2">
-                        <h6 className="m-0 px-1 text-[13px]! font-extrabold! leading-none tracking-[0.25em] text-[#27427f]/80! uppercase">{cat}</h6>
-                        <div className="grid! gap-1.5">
-                          {getLinks(cat).slice(0, 4).map((link) => (
-                            <Link
-                              key={link.href}
-                              href={link.href}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="flex! items-center! gap-3 rounded-xl bg-transparent px-3 py-3! text-[14px]! font-bold text-[#27427f]! no-underline hover:bg-[#27427f]/10 transition-colors border border-[#27427f]/10 hover:border-[#27427f]/25"
-                            >
-                              <span className="text-[#27427f]">{link.icon}</span> {link.text}
-                            </Link>
-                          ))}
+            {/* Utilities, pinned: city and account in one soft panel, then the CTA */}
+            <motion.div
+              variants={menuItem}
+              className="shrink-0! border-t! border-solid! border-[#f2f4f7]! bg-white! px-5! pt-4! pb-[max(20px,env(safe-area-inset-bottom))]! sm:px-8!"
+            >
+              <div className="overflow-hidden! rounded-2xl! bg-[#f6f7f9]!">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileCityOpen((v) => !v)}
+                  aria-expanded={isMobileCityOpen}
+                  className="flex! w-full! cursor-pointer! items-center! gap-3! border-0! bg-transparent! px-4! py-3! text-left!"
+                >
+                  <span className="inline-flex! h-9! w-9! shrink-0! items-center! justify-center! rounded-full! bg-white! text-[#27427f]! shadow-[0_1px_2px_rgba(16,24,40,0.06)]!">
+                    <MapPin size={17} strokeWidth={2.25} />
+                  </span>
+                  <span className="min-w-0! flex-1!">
+                    <span className="block! text-[12px]! font-medium! text-[#667085]!">Location</span>
+                    <span className="block! truncate! text-[15px]! font-semibold! text-[#101828]!">{location || "Select city"}</span>
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0! text-[#98a2b3]! transition-transform! duration-200! ${isMobileCityOpen ? "rotate-180!" : ""}`}
+                  />
+                </button>
+                <AnimatePresence initial={false}>
+                  {isMobileCityOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.26, ease: EASE }}
+                      className="overflow-hidden!"
+                    >
+                      <div className="mx-2! mb-2! max-h-[30vh]! overflow-y-auto! rounded-xl! bg-white! p-1.5!">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            setIsMobileCityOpen(false);
+                            detectLocation(e);
+                          }}
+                          className="flex! w-full! cursor-pointer! items-center! gap-3! rounded-xl! border-0! bg-transparent! px-3! py-2.5! text-left! text-[14px]! font-semibold! text-[#27427f]! hover:bg-[#f5f8ff]!"
+                        >
+                          <LocateFixed size={16} strokeWidth={2.25} /> Use my current location
+                        </button>
+                        <div role="listbox" aria-label="City" className="grid! gap-0.5!">
+                          {renderCityRows(() => setIsMobileCityOpen(false))}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                  <div className="h-px w-full bg-[#27427f]/15 mt-2" />
-                  
-                  {/* Additional Mobile Links */}
-                  <div className="grid gap-1.5 pb-4">
-                    <Link
-                      href="/contact-us"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex! items-center! gap-3 rounded-xl bg-transparent px-3 py-3! text-[14px]! font-bold text-[#27427f]! no-underline hover:bg-[#27427f]/10 transition-colors border border-[#27427f]/10 hover:border-[#27427f]/25"
+                <div className="mx-4! h-px! bg-[#eaecf0]!" />
+
+                {isAuthenticated ? (
+                  <div className="flex! items-center! gap-3! px-4! py-3!">
+                    <DefaultAvatar size={36} />
+                    <span className="min-w-0! flex-1!">
+                      <span className="block! truncate! text-[15px]! font-semibold! text-[#101828]!">{displayName}</span>
+                      <Link
+                        href="/wishlist"
+                        onClick={closeMobileMenu}
+                        className="text-[13px]! font-medium! text-[#27427f]! no-underline!"
+                      >
+                        Saved properties{wishlistCount > 0 ? ` · ${wishlistCount}` : ""}
+                      </Link>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => logout()}
+                      aria-label="Log out"
+                      className="inline-flex! h-9! w-9! cursor-pointer! items-center! justify-center! rounded-full! border-0! bg-white! text-[#667085]! shadow-[0_1px_2px_rgba(16,24,40,0.06)]! hover:text-[#d92d20]!"
                     >
-                      <span className="text-[#27427f]"><Phone size={18} /></span> Contact Us
-                    </Link>
+                      <LogOut size={16} />
+                    </button>
                   </div>
-                </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMobileMenu();
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="flex! w-full! cursor-pointer! items-center! gap-3! border-0! bg-transparent! px-4! py-3! text-left!"
+                  >
+                    <span className="inline-flex! h-9! w-9! shrink-0! items-center! justify-center! rounded-full! bg-white! text-[#27427f]! shadow-[0_1px_2px_rgba(16,24,40,0.06)]!">
+                      <UserRound size={17} strokeWidth={2.25} />
+                    </span>
+                    <span className="min-w-0! flex-1!">
+                      <span className="block! text-[15px]! font-semibold! text-[#101828]!">Sign in</span>
+                      <span className="block! text-[12px]! font-medium! text-[#667085]!">Save properties and track enquiries</span>
+                    </span>
+                  </button>
+                )}
               </div>
 
-              {/* Bottom CTAs — pinned */}
-              <div className="shrink-0 border-t border-[#27427f]/20 bg-[#27427f]/[0.03] px-5 py-4 grid gap-3">
-                <Link 
+              <div className="relative! mt-4!">
+                <Link
                   href="/post-property"
-                  onClick={(e) => { handleProtectedRoute(e, "/post-property"); if(isMobileMenuOpen) setIsMobileMenuOpen(false); }}
-                  className="relative w-full rounded-xl bg-[#ffc900] py-3 text-[13px]! font-semibold! leading-none tracking-[0.12em] text-[#27427f] uppercase no-underline text-center transition-colors hover:bg-[#27427f] hover:text-white"
+                  aria-label="Post Property, free"
+                  onClick={(e) => {
+                    handleProtectedRoute(e);
+                    closeMobileMenu();
+                  }}
+                  className={`${POST_PROPERTY_BUTTON} h-14! w-full! text-[16px]!`}
                 >
+                  <PostPropertyHover />
                   Post Property
-                  <span className="absolute! -right-1 -top-2 rounded-full bg-[#22c55e] px-2.5 py-1 text-[8px]! font-black leading-none tracking-widest text-white shadow-sm normal-case">FREE</span>
                 </Link>
+                <FreeBadge />
               </div>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
       <UserAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

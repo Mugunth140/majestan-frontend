@@ -154,7 +154,7 @@ function ListedByCard() {
 export function ProjectAside({ project }: { project: ProjectDetail }) {
   return (
     <aside aria-label="Enquire about this project" className="min-w-0!">
-      <div className="lg:sticky! lg:top-[133px]! flex! flex-col! gap-4!">
+      <div className="lg:sticky! lg:top-[calc(var(--site-header-h)+69px)]! flex! flex-col! gap-4!">
         <EnquiryCard project={project} />
         <ListedByCard />
       </div>

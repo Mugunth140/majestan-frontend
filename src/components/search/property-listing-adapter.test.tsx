@@ -86,6 +86,42 @@ describe("getCardSpecCells", () => {
     expect(cells.length).toBeLessThanOrEqual(4);
   });
 
+  it("shows security deposit on Rent commercial cards, hidden on Sell", () => {
+    const rent = getCardSpecCells({
+      ...withDetails("commercial", {
+        superBuiltUpArea: "3000",
+        bathrooms: 2,
+        floorsOccupied: ["Ground", "1st"],
+        furnishingStatus: "FULLY FURNISHED",
+      }),
+      posttype: "Rent",
+      securityDeposit: "24000",
+    });
+    expect(rent.map((c) => c.label)).toContain("Security Deposit");
+    expect(rent.find((c) => c.label === "Security Deposit")?.value).toBe("₹ 24,000");
+
+    const sell = getCardSpecCells({
+      ...withDetails("commercial", { superBuiltUpArea: "3000" }),
+      posttype: "Sell",
+      securityDeposit: "24000",
+    });
+    expect(sell.map((c) => c.label)).not.toContain("Security Deposit");
+  });
+
+  it("shows security deposit on Rent industrial cards", () => {
+    const cells = getCardSpecCells({
+      ...withDetails("industrial", {
+        builtUpArea: "10000",
+        powerSupplyHp: "50",
+        ceilingHeightFt: "24",
+        heavyVehicleAccess: true,
+      }),
+      posttype: "Rent",
+      securityDeposit: "50000",
+    });
+    expect(cells.find((c) => c.label === "Security Deposit")?.value).toBe("₹ 50,000");
+  });
+
   it("caps plot cells at 4, dropping zoning and boundary", () => {
     const labels = getCardSpecCells(
       withDetails("plot", {

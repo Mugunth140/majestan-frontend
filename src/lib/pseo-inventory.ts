@@ -115,14 +115,24 @@ export async function hasPseoInventory(params: PseoCheckParams): Promise<boolean
 }
 
 /**
- * Runs inventory checks in small sequential batches with a delay between them
- * to avoid 429 errors when the backend rate-limits concurrent requests.
+ * Runs inventory checks against a SINGLE bulk snapshot instead of one
+ * `GET /properties?limit=1` hydration query (5 LEFT JOINs, full column
+ * list) per candidate. Sitemap + generateStaticParams build ~7k
+ * candidates, which previously hammered the backend with thousands of
+ * heavy queries on every build/revalidation (uncached in `next dev`,
+ * so it looked like an infinite aggressive loop in the DB logs).
+ *
+ * Falls back to per-item checks if the bulk endpoint is unreachable
+ * (e.g. old backend), so page generation never hard-fails.
  *
  * Returns an array of booleans in the same order as `items`.
  */
 export async function batchHasPseoInventory(
   items: PseoCheckParams[]
 ): Promise<boolean[]> {
+  const bulk = await fetchPseoInventorySnapshot();
+  if (bulk) return items.map((p) => snapshotHasInventory(bulk, p));
+
   const results: boolean[] = [];
 
   for (let i = 0; i < items.length; i += PSEO_INVENTORY_BATCH_SIZE) {
@@ -137,4 +147,61 @@ export async function batchHasPseoInventory(
   }
 
   return results;
+}
+
+type PseoInventoryRow = {
+  listingType: string;
+  propertyType: string;
+  city: string;
+  locality: string | null;
+  bedrooms: number | null;
+};
+
+const normPlace = (v: string): string =>
+  v.toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ").trim();
+
+async function fetchPseoInventorySnapshot(): Promise<PseoInventoryRow[] | null> {
+  try {
+    const res = await fetch(`${API_BASE}/properties/pseo-inventory`, {
+      // Same ISR window the per-item checks used — sitemap and
+      // generateStaticParams only run at build/revalidation time.
+      next: { revalidate: 3600, tags: ["pseo-inventory"] },
+    } as RequestInit);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const rows: unknown[] = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.items)
+      ? data.items
+      : Array.isArray(data?.data)
+      ? data.data
+      : [];
+    return rows.filter(
+      (r): r is PseoInventoryRow =>
+        !!r && typeof (r as any).listingType === "string" && typeof (r as any).propertyType === "string"
+    ) as PseoInventoryRow[];
+  } catch {
+    return null;
+  }
+}
+
+function snapshotHasInventory(rows: PseoInventoryRow[], params: PseoCheckParams): boolean {
+  if (!(params.propertyTypeSlug in PSEO_API_TYPE_MAP)) return false;
+  const apiType = PSEO_API_TYPE_MAP[params.propertyTypeSlug];
+  const cityNorm = normPlace(params.city || "");
+  const locNorm = params.sublocation ? normPlace(params.sublocation) : "";
+
+  let count = 0;
+  for (const r of rows) {
+    if (r.listingType !== params.listingType) continue;
+    if (apiType && r.propertyType !== apiType) continue;
+    if (cityNorm && normPlace(r.city || "") !== cityNorm) continue;
+    if (locNorm) {
+      if (normPlace(r.locality || "") !== locNorm) continue;
+      if (params.bedrooms != null && Number(r.bedrooms) !== params.bedrooms) continue;
+    }
+    count++;
+    if (count >= MIN_PSEO_INVENTORY) return true;
+  }
+  return count >= MIN_PSEO_INVENTORY;
 }

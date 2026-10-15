@@ -141,6 +141,22 @@ function getAge(item: PropertySearchItem): string | null {
   return d.propertyAge ?? (item as any).property_age ?? (item as any).ageofproperty ?? (item as any).age_of_property ?? null;
 }
 
+// Security deposit is a Rent-only, property-level (not details) field.
+// Returns null for Sell listings or when no deposit is stored.
+function getRentSecurityDeposit(item: PropertySearchItem): string | null {
+  if (!isRentListing(item.posttype)) return null;
+  const raw = (item as any).securityDeposit;
+  if (raw == null) return null;
+  const text = String(raw).trim();
+  if (text === "") return null;
+  if (/^\d+(\.\d+)?$/.test(text)) {
+    const n = Number(text);
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return formatPrice(n);
+  }
+  return text;
+}
+
 // Pricing-row ribbon: only the canonical condition vocabulary gets a badge;
 // anything else stays unlabeled rather than printing junk on the card.
 function getConditionBadge(item: PropertySearchItem): string | null {
@@ -161,14 +177,6 @@ function getParking(item: PropertySearchItem): string | null {
   if (n != null) return `${n}`;
   if (d.guestParking) return "Guest Parking";
   return null;
-}
-
-function fmtShortDate(v: unknown): string | null {
-  if (typeof v !== "string" || !v.trim()) return null;
-  const dt = new Date(v);
-  if (isNaN(dt.getTime())) return null;
-  const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.getMonth()];
-  return `${String(dt.getDate()).padStart(2, "0")}-${mon}-${dt.getFullYear()}`;
 }
 
 // "2026-10-02" → "2nd Oct 2026" for the photo overlay.
@@ -229,12 +237,6 @@ function getAreaCell(item: PropertySearchItem): { label: string; value: string }
   if (nzNum((item as any).cents) != null) return { label: "Plot Area", value: `${(item as any).cents} cents` };
   if (nzNum((item as any).acres) != null) return { label: "Plot Area", value: `${(item as any).acres} acres` };
   return null;
-}
-
-function getPossession(item: PropertySearchItem): string | null {
-  const d = getDetails(item);
-  if (typeof d.possessionStatus === "string" && d.possessionStatus.trim()) return d.possessionStatus.trim();
-  return fmtShortDate((item as any).availableFrom);
 }
 
 function trimNum(n: number): string {
@@ -323,7 +325,6 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
   const d = getDetails(item);
   const areaCell = getAreaCell(item);
   const facing = getFacing(item);
-  const possession = getPossession(item);
 
   if (item.propertyType === "plot") {
     // Plot buyers decide on size, orientation, dimensions, type and legal
@@ -369,11 +370,17 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
   }
 
   if (item.propertyType === "commercial") {
-    return getCommercialSpecs(d).slice(0, 4);
+    const cells: CardSpecCell[] = getCommercialSpecs(d).slice(0, 4);
+    const deposit = getRentSecurityDeposit(item);
+    if (deposit) cells.push({ label: "Security Deposit", value: deposit });
+    return cells;
   }
 
   if (item.propertyType === "industrial") {
-    return getIndustrialSpecs(d).slice(0, 4);
+    const cells: CardSpecCell[] = getIndustrialSpecs(d).slice(0, 4);
+    const deposit = getRentSecurityDeposit(item);
+    if (deposit) cells.push({ label: "Security Deposit", value: deposit });
+    return cells;
   }
 
   if (item.propertyType === "coworking") {
@@ -397,7 +404,8 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
   if (unitSpec) specCells.push({ label: "BHK", value: unitSpec });
   if (areaCell) specCells.push({ label: areaCell.label, value: areaCell.value });
   if (facing) specCells.push({ label: "Facing", value: facing });
-  if (possession) specCells.push({ label: "Possession", value: possession });
+  const age = getAge(item);
+  if (age) specCells.push({ label: "Property Age", value: age });
   return specCells;
 }
 

@@ -270,7 +270,7 @@ function SectionHeading({ title, text }: { title: string; text?: string }) {
         {displayTitle}
       </h2>
       {text ? (
-        <p className="text-sm! md:text-lg! font-light! text-gray-400! leading-relaxed! max-w-[45ch]! md:text-right! md:self-end! mb-1!">
+        <p className="text-[15px]! md:text-base! font-normal! text-[#667085]! leading-relaxed! max-w-[45ch]! md:text-right! md:self-end! mb-1!">
           {text}
         </p>
       ) : null}
@@ -278,6 +278,12 @@ function SectionHeading({ title, text }: { title: string; text?: string }) {
   );
 }
 
+/**
+ * Category cards. On phones a swipeable row that snaps card by card, with the
+ * next card peeking in so it reads as scrollable; from md up a grid.
+ * The section title already says "for sale" / "for rent", so each card's
+ * label is a quiet line rather than a pill.
+ */
 function CardRail({
   cards,
   gridClass = "lg:grid-cols-5!"
@@ -286,31 +292,40 @@ function CardRail({
   gridClass?: string;
 }) {
   return (
-    <div className={`grid! grid-cols-2! md:grid-cols-3! ${gridClass} gap-4! md:gap-5!`}>
-      {cards.map(([title, href, image, text], i) => (
+    <div
+      className={`-mx-4! flex! snap-x! snap-mandatory! gap-3! overflow-x-auto! scroll-px-4! px-4! pb-1! [scrollbar-width:none]! [&::-webkit-scrollbar]:hidden! sm:-mx-6! sm:scroll-px-6! sm:px-6! md:mx-0! md:grid! md:grid-cols-3! md:gap-5! md:overflow-visible! md:px-0! md:pb-0! ${gridClass}`}
+    >
+      {cards.map(([title, href, image, text]) => (
         <Link
           key={title}
           href={href}
-          className="group! relative! overflow-hidden! rounded-2xl! bg-[#f9fafb]! flex! flex-col! justify-end! p-5! md:p-6! h-[250px]! md:h-[320px]! transition-all! duration-500! hover:shadow-[0_20px_40px_-15px_rgba(39,66,127,0.2)]! hover:-translate-y-1.5!"
+          className="group! relative! isolate! flex! aspect-[4/5]! w-[72%]! shrink-0! snap-start! flex-col! justify-end! overflow-hidden! rounded-[20px]! bg-[#eef2f6]! p-5! no-underline! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#27427f]! focus-visible:ring-offset-2! sm:w-[44%]! md:aspect-auto! md:h-[320px]! md:w-auto! md:p-6!"
         >
-          <div className="absolute! inset-0! z-0! bg-[#eef2f6]!">
-            <img
-              src={image}
-              alt={title}
-              className="w-full! h-full! object-cover! transition-transform! duration-1000! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:scale-110!"
-            />
-            <div className="absolute! inset-0! bg-gradient-to-t! from-[#0a0a0a]/90! via-[#0a0a0a]/30! to-transparent! opacity-70! transition-opacity! duration-700! group-hover:opacity-95!" />
-          </div>
-          
-          <div className="relative! z-10! flex! flex-col! items-start! transform! transition-transform! duration-700! ease-[cubic-bezier(0.25,1,0.5,1)]! group-hover:-translate-y-2">
-            <span className="mb-3! rounded-full! bg-white/20! backdrop-blur-md! border! border-white/20! px-3! py-1! text-[9px]! md:text-[10px]! font-semibold! uppercase! tracking-[0.1em]! text-white! shadow-sm!">
-              {text}
-            </span>
-            <h5 className="text-xl! md:text-2xl! font-['Lexend',sans-serif]! font-medium! text-white! tracking-tight! leading-tight! drop-shadow-sm!">
-              {title}
-            </h5>
-            <div className="mt-4! h-[2px]! w-0! bg-white! transition-all! duration-700! ease-out! group-hover:w-12!"></div>
-          </div>
+          <img
+            src={image}
+            alt=""
+            loading="lazy"
+            className="absolute! inset-0! -z-10! h-full! w-full! object-cover! transition-transform! duration-700! ease-[cubic-bezier(0.23,1,0.32,1)]! group-hover:scale-[1.05]!"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute! inset-0! -z-10! bg-[linear-gradient(180deg,rgba(10,15,28,0)_35%,rgba(10,15,28,0.25)_60%,rgba(10,15,28,0.8)_100%)]!"
+          />
+
+          {/* Corner arrow: always shown on touch, revealed on hover elsewhere */}
+          <span
+            aria-hidden="true"
+            className="absolute! top-4! right-4! grid! h-10! w-10! place-items-center! rounded-full! bg-white/95! text-[#101828]! shadow-[0_4px_12px_-4px_rgba(10,15,28,0.35)]! transition-[opacity,transform]! duration-300! ease-[cubic-bezier(0.23,1,0.32,1)]! md:translate-y-1! md:opacity-0! md:group-hover:translate-y-0! md:group-hover:opacity-100!"
+          >
+            <ArrowUpRight size={18} strokeWidth={2.25} />
+          </span>
+
+          <span className="font-['Manrope',sans-serif]! text-[11px]! font-semibold! uppercase! tracking-[0.12em]! text-white/75!">
+            {text}
+          </span>
+          <span className="mt-1.5! font-['Manrope',sans-serif]! text-[20px]! font-semibold! leading-tight! tracking-[-0.02em]! text-white! md:text-[22px]!">
+            {title}
+          </span>
         </Link>
       ))}
     </div>

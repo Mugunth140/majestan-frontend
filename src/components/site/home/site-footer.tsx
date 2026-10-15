@@ -253,13 +253,9 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Bottom bar — centred as one group.
-              Was justify-between, which pinned the copyright to the left gutter
-              and the social icons to the right edge. items-center (not
-              items-start) so the cross-axis centring holds in the stacked
-              mobile layout too, and the gap grows on sm to keep the pair from
-              crowding once they sit on one line. */}
-          <div className="flex! flex-col! sm:flex-row! items-center! justify-center! gap-3! sm:gap-8! border-t! border-white/12! pt-[20px]!">
+          {/* Bottom bar — split on desktop: copyright left, socials right
+              (sm:justify-between). Stacked and centred on mobile. */}
+          <div className="flex! flex-col! sm:flex-row! items-center! justify-center! sm:justify-between! gap-3! sm:gap-8! border-t! border-white/12! pt-[20px]!">
             <p className="text-[13px]! text-center! text-white/60! sm:text-left!">
               © {new Date().getFullYear()}{" "}
               <span className="font-medium! text-white!">Majestan Realty</span>. All rights

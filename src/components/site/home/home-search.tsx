@@ -426,12 +426,12 @@ export function HomeSearch({
 
           <div aria-hidden="true" className="w-px! h-6! bg-gray-200! mx-1! shrink-0!"></div>
 
-          {/* Plain text link (no button chrome) to new-launch projects */}
+          {/* Plain text link (no button chrome) to the projects page */}
           <Link
-            href="/projects?possession=new_launch"
+            href="/projects"
             className="shrink-0! text-[14px]! font-medium! leading-none! whitespace-nowrap! text-gray-500! transition-colors! hover:text-[#27427f]!"
           >
-            New Launch
+            Explore New Launches
           </Link>
         </div>
 

@@ -576,8 +576,8 @@ export default async function SlugPage({
           sections={isSingle ? getVisibleSingleSections(property) : undefined}
           propertyType={property.propertyType}
         />
-        <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
-          <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">
+        <div className="bg-[#f4f6f9]! min-h-screen! font-manrope">
+          <div className={`${PAGE_CONTAINER} pt-5! pb-24!`}>
             <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>

@@ -21,6 +21,17 @@ export function formatAreaSqft(area: string | null | undefined): string {
  * page it links to.
  */
 export function getFloorPlanMeasurements(details: SeoPropertyDetails): FloorPlanMeasurement[] {
+  const parkingCount = Number(details?.parking);
+  const parkingType = details?.parkingType?.trim();
+  const normalizedParkingType = parkingType
+    ? parkingType.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())
+    : null;
+  const parkingValue = normalizedParkingType
+    ? `${Number.isFinite(parkingCount) && parkingCount > 0 ? `${parkingCount.toLocaleString("en-IN")} ` : ""}${normalizedParkingType}`
+    : Number.isFinite(parkingCount) && parkingCount > 0
+      ? `${parkingCount.toLocaleString("en-IN")} Covered`
+      : "—";
+
   return [
     {
       label: "Total Area",
@@ -39,7 +50,7 @@ export function getFloorPlanMeasurements(details: SeoPropertyDetails): FloorPlan
     },
     {
       label: "Parking",
-      value: details?.parking ? `${details.parking} Covered` : "—",
+      value: parkingValue,
       icon: Car,
     },
   ];

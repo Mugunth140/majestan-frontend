@@ -30,11 +30,11 @@ const property = {
 } as unknown as SeoProperty;
 
 describe("FloorPlanSection gallery", () => {
-  it("opens PDF plans as documents instead of rendering broken images", () => {
+  it("opens PDF plans in the shared viewer instead of rendering broken images", () => {
     render(<FloorPlanSection property={{ ...property, floorPlanFiles: [
       { title: "First floor", imageUrl: "/plan.PDF?token=example", imageKey: "uploads/plan.PDF" },
     ] }} embedded />);
-    expect(screen.getByRole("link", { name: "Open First floor (PDF)" }).getAttribute("href")).toBe("/plan.PDF?token=example");
+    expect(screen.getByRole("button", { name: "View First floor (PDF)" })).toBeDefined();
     expect(screen.queryByRole("img", { name: "First floor" })).toBeNull();
     expect(screen.getByRole("img", { name: "Detail plan" })).toBeDefined();
   });

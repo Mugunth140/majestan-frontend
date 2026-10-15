@@ -1,5 +1,5 @@
 // site/majestan-frontend/src/components/site/property/PropertyDetailsView.test.tsx
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PropertyDetailsView } from "./PropertyDetailsView";
 import type { SeoProperty } from "@/lib/api/property-by-slug";
@@ -65,8 +65,9 @@ describe("PropertyDetailsView info card", () => {
     // Sidebar row + overview stat each.
     expect(screen.getAllByText("Furnishing")).toHaveLength(2);
     expect(screen.getAllByText("Furnished")).toHaveLength(2);
-    expect(screen.getByText("Facing")).toBeDefined();
-    expect(screen.getByText("East")).toBeDefined();
+    const sidebar = within(screen.getByRole("complementary", { name: "Enquire about this property" }));
+    expect(sidebar.getByText("Facing")).toBeDefined();
+    expect(sidebar.getByText("East")).toBeDefined();
 
     // Exact match: the overview stats grid keeps "Listed On", the listed-by
     // card keeps "Listed By" — only the info card's bare "Listed" must go.
@@ -80,8 +81,9 @@ describe("PropertyDetailsView info card", () => {
     (propertyType) => {
       render(<PropertyDetailsView property={{ ...baseProperty, propertyType }} />);
 
-      expect(screen.getByText("Facing")).toBeDefined();
-      expect(screen.getByText("East")).toBeDefined();
+      const sidebar = within(screen.getByRole("complementary", { name: "Enquire about this property" }));
+      expect(sidebar.getByText("Facing")).toBeDefined();
+      expect(sidebar.getByText("East")).toBeDefined();
       expect(screen.queryByText("Listed")).toBeNull();
     },
   );
@@ -108,7 +110,7 @@ describe("PropertyDetailsView info card", () => {
       />,
     );
 
-    expect(screen.queryByText("Facing")).toBeNull();
+    expect(within(screen.getByRole("complementary", { name: "Enquire about this property" })).queryByText("Facing")).toBeNull();
     expect(screen.getAllByText("Furnishing")).toHaveLength(2);
   });
 
@@ -117,9 +119,29 @@ describe("PropertyDetailsView info card", () => {
 
     expect(screen.getByText("Listed")).toBeDefined();
     expect(screen.getAllByText("Property Type")).toHaveLength(2);
-    expect(screen.queryByText("Facing")).toBeNull();
+    expect(within(screen.getByRole("complementary", { name: "Enquire about this property" })).queryByText("Facing")).toBeNull();
     // The overview stat still says "Furnishing" — the info card must not.
     expect(screen.getAllByText("Furnishing")).toHaveLength(1);
+  });
+
+  it("renders the additional CRM facts inside Property details", () => {
+    render(<PropertyDetailsView property={{
+      ...baseProperty,
+      propertyCondition: "Resale",
+      availableFrom: "2026-11-03",
+      details: {
+        ...baseProperty.details!, builtUpArea: "1456", carpetArea: "1210.5",
+        balconies: 2, poojaRoom: true, studyRoom: false,
+        utilitiesProvided: "Solar water\nRainwater storage",
+      },
+    }} />);
+
+    const details = within(screen.getByRole("region", { name: "Property details" }));
+    for (const value of ["Resale", "1,456 sq.ft", "1,210.5 sq.ft", "Balconies", "Pooja Room", "Study Room", "3 Nov 2026"]) {
+      expect(details.getAllByText(value).length).toBeGreaterThan(0);
+    }
+    expect(details.getByText("No")).toBeDefined();
+    expect(details.getByText("Solar water Rainwater storage")).toBeDefined();
   });
 
   it("curates the sidebar for plot: land rows, not Listed and Property Type", () => {
@@ -386,7 +408,8 @@ describe("PropertyDetailsView overview teasers", () => {
     expect(hrefs).toEqual([`/${slug}/floor-plan`].sort());
 
     // The teaser carries the floor-plan page's measurements, not its imagery.
-    expect(screen.getByText("1,456 sq.ft")).toBeDefined();
+    const floorPlanCard = screen.getByRole("region", { name: "Floor Plan" });
+    expect(within(floorPlanCard).getByText("1,456 sq.ft")).toBeDefined();
     expect(
       screen.queryByRole("heading", { level: 2, name: "Photos" }),
     ).toBeNull();
@@ -439,7 +462,7 @@ describe("PropertyDetailsView overview teasers", () => {
     render(<PropertyDetailsView property={baseProperty} />);
 
     expect(screen.getByText("Need more details?")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Contact Us" })).toBeDefined();
+    expect(screen.getByRole("link", { name: "Contact Us" }).getAttribute("href")).toBe("/contact-us");
   });
 });
 
@@ -503,12 +526,26 @@ describe("PropertyDetailsView single-page types", () => {
 });
 
 describe("PropertyDetailsView description", () => {
+  it("places furnishing items directly after the amenities preview", () => {
+    render(<PropertyDetailsView property={{ ...baseProperty,
+      amenities: [{ id: 1, amenity: { id: 1, name: "Swimming pool" } }],
+      furnishings: [{ id: 1, furnishingItem: { id: 1, name: "Wardrobes", icon: "Archive" } }],
+    }} />);
+    const amenities = screen.getByRole("region", { name: "Key amenities" });
+    const furnishing = screen.getByRole("region", { name: "Furnishing items" });
+    expect(amenities.nextElementSibling).toBe(furnishing);
+    expect(within(furnishing).getByText("Wardrobes")).toBeDefined();
+  });
+
   it("renders blank-line-separated paragraphs as separate blocks", () => {
     const { container } = render(
       <PropertyDetailsView
         property={{ ...baseProperty, description: "Para one.\n\nPara two.\n\nPara three." }}
       />
     );
+    const about = within(screen.getByRole("region", { name: `About ${baseProperty.title}` }));
+    expect(about.queryByText("Para two.")).toBeNull();
+    fireEvent.click(about.getByRole("button", { name: "View more" }));
     const paras = container.querySelectorAll("p");
     const texts = [...paras].map((p) => p.textContent);
     expect(texts).toContain("Para one.");
@@ -557,5 +594,59 @@ describe("PropertyDetailsView floor item", () => {
     );
 
     expect(screen.queryByText("Floor No")).toBeNull();
+  });
+});
+
+
+describe("PropertyDetailsView redesigned hierarchy", () => {
+  it("keeps the carousel in the content column and the page title in the enquiry card", () => {
+    render(<PropertyDetailsView property={baseProperty} />);
+    const title = screen.getByRole("heading", { level: 1 });
+    const aside = screen.getByRole("complementary", { name: "Enquire about this property" });
+    expect(aside.contains(title)).toBe(true);
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    const overview = screen.getByRole("region", { name: "Property details" });
+    expect(within(overview).getByText("1,456 sq.ft")).toBeDefined();
+    expect(within(overview).getByText("Furnished")).toBeDefined();
+    expect(within(overview).getByText("Listed On")).toBeDefined();
+  });
+
+  it("starts with the primary photo and wraps the gallery with keyboard and button controls", () => {
+    render(<PropertyDetailsView property={{ ...baseProperty, images: [
+      { id: 1, imageUrl: "/other.jpg", imageKey: "other", isPrimary: false, createdAt: "" },
+      { id: 2, imageUrl: "/primary.jpg", imageKey: "primary", isPrimary: true, createdAt: "" },
+    ] }} />);
+    const gallery = screen.getByRole("region", { name: `${baseProperty.title} photos` });
+    const stage = within(gallery).getByRole("group", { name: "Property photos. Use left and right arrow keys to browse." });
+    expect(within(gallery).getByRole("img").getAttribute("src")).toMatch(/\/primary\.jpg$/);
+    fireEvent.keyDown(stage, { key: "ArrowLeft" });
+    expect(within(gallery).getByRole("img").getAttribute("src")).toMatch(/\/other\.jpg$/);
+    expect(within(gallery).getByText("2 / 2")).toBeDefined();
+    fireEvent.click(within(gallery).getByRole("button", { name: "Next photo" }));
+    expect(within(gallery).getByText("1 / 2")).toBeDefined();
+    fireEvent.click(within(gallery).getByRole("button", { name: "Show photo 2" }));
+    expect(within(gallery).getByText("2 / 2")).toBeDefined();
+    expect(within(gallery).getByRole("button", { name: "Show photo 2" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.keyDown(stage, { key: "Home" });
+    expect(within(gallery).getByText("1 / 2")).toBeDefined();
+    fireEvent.keyDown(stage, { key: "End" });
+    expect(within(gallery).getByText("2 / 2")).toBeDefined();
+  });
+});
+
+
+describe("property finance integration", () => {
+  it("uses the same initial estimate in the sidebar and calculator", () => {
+    render(<PropertyDetailsView property={baseProperty} />);
+    const estimate = screen.getByRole("status", { name: "Estimated monthly EMI" }).textContent;
+    const link = screen.getByRole("link", { name: /₹.*\/mo/ });
+    expect(link).toHaveTextContent(`${estimate}/mo`);
+    expect(link).toHaveAttribute("href", `/${baseProperty.canonicalSlug}#calculators`);
+  });
+
+  it("does not show purchase estimates for an available rental", () => {
+    render(<PropertyDetailsView property={{ ...baseProperty, listingType: "rent", status: "Available" }} />);
+    expect(screen.queryByRole("heading", { name: "Plan your EMI" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /₹.*\/mo/ })).toBeNull();
   });
 });

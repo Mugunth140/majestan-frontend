@@ -16,13 +16,14 @@ describe("NeedMoreDetails", () => {
         "Get the complete list of amenities and confirm availability with the property owner.",
       ),
     ).toBeDefined();
-    expect(screen.getByRole("button", { name: "Contact Us" })).toBeDefined();
+    expect(screen.getByRole("link", { name: "Contact Us" }).getAttribute("href")).toBe("/contact-us");
   });
 
-  it("renders without the message icon", () => {
-    const { container } = render(<NeedMoreDetails />);
-
-    expect(container.querySelector("svg")).toBeNull();
+  it("reuses the project help topics", () => {
+    render(<NeedMoreDetails />);
+    for (const topic of ["Site visits", "Home loans", "Documents and paperwork"]) {
+      expect(screen.getByText(topic)).toBeDefined();
+    }
   });
 
   it.each([

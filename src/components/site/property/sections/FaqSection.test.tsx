@@ -11,15 +11,12 @@ const faqs = [
 ];
 
 describe("FaqSection", () => {
-  it("renders inside the standard card with a tile-less heading", () => {
+  it("labels its section with the shared project heading", () => {
     const { container } = render(<FaqSection faqs={faqs} />);
 
     expect(screen.getByText("Frequently Asked Questions")).toBeDefined();
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toMatch("rounded-[20px]");
-    expect(card.className).toMatch("border-gray-200/70");
-    // No icon tile beside the heading (the old w-9 rounded-full tile).
-    expect(card.querySelector(".rounded-full")).toBeNull();
+    expect(card.getAttribute("aria-labelledby")).toBe(screen.getByRole("heading").id);
   });
 
   it("sorts by sortOrder and expands one answer at a time", async () => {
@@ -27,19 +24,19 @@ describe("FaqSection", () => {
 
     const buttons = screen.getAllByRole("button");
     expect(buttons[0].textContent).toContain("First?");
-    expect(screen.queryByText("One.")).toBeNull();
+    expect(screen.getByText("One.").closest("[aria-hidden]")).toHaveAttribute("aria-hidden", "true");
 
     await act(async () => {
       fireEvent.click(buttons[0]);
     });
-    expect(screen.getByText("One.")).toBeDefined();
+    expect(buttons[0]).toHaveAttribute("aria-expanded", "true");
 
     await act(async () => {
       fireEvent.click(buttons[1]);
     });
     // Single-open accordion: the second opens, the first collapses.
-    expect(screen.getByText("Two.")).toBeDefined();
-    expect(screen.queryByText("One.")).toBeNull();
+    expect(buttons[1]).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("One.").closest("[aria-hidden]")).toHaveAttribute("aria-hidden", "true");
   });
 
   it("renders nothing without faqs", () => {

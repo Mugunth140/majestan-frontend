@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, ArrowRight } from "lucide-react";
+import { CARD, HEADING, TEXT_LINK } from "@/components/site/project/project-ui";
 import { getLocalityOverviews, matchLocality } from "@/lib/api/localities";
 import type { Sublocation } from "@/lib/api";
 
@@ -41,9 +41,9 @@ export function LocalityTeaser({ locality, city, localityHref, full }: Props) {
   if (!match || !match.description || !match.description.trim()) return null;
 
   return (
-    <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
+    <div className={CARD}>
       <div className="flex! items-center! gap-3!">
-        <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
+        <h2 className={HEADING}>
           About {match.sublocation}
         </h2>
       </div>
@@ -53,7 +53,7 @@ export function LocalityTeaser({ locality, city, localityHref, full }: Props) {
       {localityHref && (
         <Link
           href={localityHref}
-          className="mt-4! inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
+          className={`${TEXT_LINK} mt-4! inline-flex! items-center! gap-2! text-sm! font-semibold!`}
         >
           View locality guide
         </Link>

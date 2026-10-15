@@ -44,19 +44,19 @@ export function PropertyTopActions({ property }: PropertyTopActionsProps) {
   };
 
   return (
-    <div className="flex! flex-col! sm:flex-row! justify-between! items-start! sm:items-center! gap-4!">
+    <div className="flex! flex-row! justify-between! items-center! gap-3!">
       <Link
         href={`/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`}
-        className="inline-flex! items-center! gap-2! text-sm! font-medium! text-gray-500! hover:text-gray-900! transition-colors! no-underline!"
+        className="inline-flex! items-center! gap-2! text-sm! font-medium! text-gray-500! hover:text-[#1645bf]! transition-colors! duration-200! ease-out-quint! no-underline! rounded-sm! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-offset-4!"
       >
         <ChevronLeft className="w-4! h-4!" />
         Back to listings
       </Link>
 
-      <div className="flex! items-center! gap-4!">
+      <div className="flex! items-center! gap-2!">
         <button
           onClick={handleShare}
-          className="inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-gray-300! hover:text-gray-900! transition-all! shadow-sm! cursor-pointer!"
+          className="inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-gray-300! hover:text-gray-900! transition-colors! duration-200! ease-out-quint! shadow-sm! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-offset-2! active:scale-[0.98]!"
         >
           {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
           {copied ? "Copied" : "Share"}

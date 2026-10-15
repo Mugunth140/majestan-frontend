@@ -73,8 +73,8 @@ export function PlaceDistanceSearch({ lat, lng, locality, city, state }: PlaceDi
   };
 
   return (
-    <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-      <h3 className="font-manrope! text-lg! md:text-xl! font-medium! text-gray-900!">
+    <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! p-6! md:p-8!">
+      <h3 className="font-manrope! text-xl! md:text-2xl! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]!">
         Search your favourite place from this property
       </h3>
       <form onSubmit={runSearch} className="mt-4! flex! flex-col! sm:flex-row! gap-3!">
@@ -86,21 +86,21 @@ export function PlaceDistanceSearch({ lat, lng, locality, city, state }: PlaceDi
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search a place, landmark or area…"
             aria-label="Search a place"
-            className="w-full! h-12! pl-11! pr-4! rounded-xl! bg-gray-50! border! border-gray-200! text-[15px]! text-gray-900! placeholder-gray-400! outline-none! focus:bg-white! focus:border-[#27427f]/40! focus:ring-2! focus:ring-[#27427f]/15! transition-all!"
+            className="w-full! h-12! pl-11! pr-4! rounded-xl! bg-gray-50! border! border-gray-200! text-[15px]! text-gray-900! placeholder-gray-400! outline-none! focus:bg-white! focus:border-[#2563eb]! focus:ring-2! focus:ring-[#2563eb]/15! transition-all!"
           />
         </div>
         <button
           type="submit"
           disabled={!isLoaded || search.status === "working"}
-          className="h-12! px-6! rounded-xl! bg-[#27427f]! text-white! font-manrope! font-medium! text-[15px]! hover:bg-[#1e3366]! transition-all! shrink-0! cursor-pointer! disabled:opacity-50! disabled:cursor-wait!"
+          className="h-12! px-6! rounded-xl! bg-[#2563eb]! text-white! font-manrope! font-semibold! text-base! hover:bg-[#1645bf]! transition-colors! duration-150! ease-out-quint! focus-visible:outline-2! focus-visible:outline-[#2563eb]! focus-visible:outline-offset-4! shrink-0! cursor-pointer! disabled:opacity-50! disabled:cursor-wait!"
         >
           {search.status === "working" ? "Searching…" : "Check distance"}
         </button>
       </form>
       {search.status === "done" && (
-        <div className="mt-4! flex! items-center! justify-between! gap-4! rounded-xl! bg-[#27427f]/5! border! border-[#27427f]/15! px-4! py-3!">
+        <div className="mt-4! flex! items-center! justify-between! gap-4! rounded-xl! bg-[#eef4ff]! border! border-[#dfe7f4]! px-4! py-3!">
           <div className="flex! items-center! gap-3! min-w-0!">
-            <MapPin className="w-5! h-5! text-[#27427f]! shrink-0!" />
+            <MapPin className="w-5! h-5! text-[#1645bf]! shrink-0!" />
             <div className="min-w-0!">
               <p className="font-manrope! font-semibold! text-[15px]! text-gray-900! truncate!">
                 {search.place}
@@ -110,7 +110,7 @@ export function PlaceDistanceSearch({ lat, lng, locality, city, state }: PlaceDi
               </p>
             </div>
           </div>
-          <span className="inline-flex! items-center! px-3! py-1.5! rounded-full! bg-[#27427f]! text-white! text-sm! font-manrope! font-semibold! whitespace-nowrap! shrink-0!">
+          <span className="inline-flex! items-center! px-3! py-1.5! rounded-full! bg-[#1645bf]! text-white! text-sm! font-manrope! font-semibold! whitespace-nowrap! shrink-0!">
             {formatDistanceKm(search.km)}
           </span>
         </div>

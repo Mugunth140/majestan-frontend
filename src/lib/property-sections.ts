@@ -42,6 +42,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { formatFurnishing } from "./property-format";
+import { getPropertyFurnishingItems } from "./property-furnishing";
 import {
   formatAreaSqft,
   getFloorPlanMeasurements,
@@ -167,6 +168,7 @@ export function formatPlotArea(value: unknown, areaUnit?: string | null): string
   if (/cent/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} cents`;
   if (/ground/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} grounds`;
   if (/acre/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} acres`;
+  if (/^(sq\.?\s*m|sqm|m²|square\s*met)/i.test(String(areaUnit ?? "").trim())) return `${n.toLocaleString("en-IN")} sq.m`;
   return `${n.toLocaleString("en-IN")} sq.ft`;
 }
 
@@ -533,7 +535,7 @@ export function getVisibleSingleSections(property: SeoProperty): SingleSectionId
   const faqsFor = (section: string) =>
     (property.faqs || []).filter((f) => f.section === section);
   const out: SingleSectionId[] = [];
-  if (amenityCount(property) > 0 || faqsFor("amenities").length > 0) {
+  if (amenityCount(property) > 0 || getPropertyFurnishingItems(property).length > 0 || faqsFor("amenities").length > 0) {
     out.push("amenities");
   }
   if (hasFloorPlanData(property) || faqsFor("floor-plan").length > 0) {

@@ -1,3 +1,4 @@
+import { Panel, IconMark } from "@/components/site/project/overview/overview-ui";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import {
   MapPin,
@@ -8,7 +9,6 @@ import {
   Clapperboard,
   Building,
   Navigation,
-  Globe,
   Train,
   Plane,
   Ship,
@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { LocalityGoogleMap } from './LocalityGoogleMap';
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
-import { resolveListingLocality } from '@/lib/locality-geo';
+import { resolveListingLocality, type LocationRow } from '@/lib/locality-geo';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import { PlaceDistanceSearch } from "@/components/site/property/PlaceDistanceSearch";
 
@@ -184,184 +184,91 @@ function getIndustrialConnectivity(
 
 type LocalitySectionProps = {
   property: SeoProperty;
+  hideContact?: boolean;
 };
 
-export function LocalitySection({ property, embedded = false }: LocalitySectionProps & { /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */ embedded?: boolean }) {
-  const localityData = property.locations?.[0]?.localityData;
-  const customCategories = localityData?.categories || (property.seo?.seoData?.locality as any)?.categories;
+type StoredLocality = {
+  categories?: { title: string; icon?: string; places: NearbyPlace[] }[];
+  connectivity?: { icon?: string; label: string; detail: string }[];
+};
+
+export function LocalitySection({ property, embedded = false, hideContact = false }: LocalitySectionProps & { /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */ embedded?: boolean }) {
+  const localityData = property.locations?.[0]?.localityData as StoredLocality | undefined;
+  const customCategories = localityData?.categories || (property.seo?.seoData?.locality as StoredLocality | undefined)?.categories;
   const categories: LocalityCategory[] = customCategories && customCategories.length > 0
-    ? customCategories.map((c: any) => ({ ...c, icon: resolveLocalityIcon(c.icon) }))
+    ? customCategories.map((c) => ({ ...c, icon: resolveLocalityIcon(c.icon) }))
     : getLocalityCategoriesForCity(property.city);
 
   const customConnectivity = localityData?.connectivity;
   const storedIndustrial =
     property.propertyType === "industrial" ? getIndustrialConnectivity(property.details) : null;
   const connectivityHighlights: ConnectivityHighlight[] = customConnectivity && customConnectivity.length > 0
-    ? customConnectivity.map((c: any) => ({ ...c, icon: resolveLocalityIcon(c.icon, Navigation) }))
+    ? customConnectivity.map((c) => ({ ...c, icon: resolveLocalityIcon(c.icon, Navigation) }))
     : (storedIndustrial ?? getConnectivityHighlights(property.city));
 
   const lat = property.locations?.[0]?.latitude ? Number(property.locations[0].latitude) : null;
   const lng = property.locations?.[0]?.longitude ? Number(property.locations[0].longitude) : null;
-  const localityName = resolveListingLocality(property.locations as any);
+  const localityName = resolveListingLocality(property.locations as LocationRow[]);
 
   return (
-    <div className="space-y-8!">
-      {/* Stacked single pages lead with the editorial locality overview
-          instead of the generic header card (which stays on sub-pages). */}
+    <div className="flex! flex-col! gap-6! min-w-0!">
       {embedded ? (
-        localityName ? (
-          <LocalityTeaser locality={localityName} city={property.city} full />
-        ) : null
+        localityName ? <LocalityTeaser locality={localityName} city={property.city} full /> : null
       ) : (
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-        <div className="mb-4!">
-          <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-            Location &amp; Neighbourhood
-          </h2>
-          <p className="text-gray-500! font-normal! leading-relaxed! text-base! mt-2!">
-            <span className="font-medium! text-gray-900!">{property.title}</span> is located in{" "}
-            <span className="font-medium! text-gray-900!">
-              {property.city}
-              {property.state ? `, ${property.state}` : ""}
-            </span>
-            . The neighbourhood offers excellent connectivity to essential services, educational
-            institutions, healthcare facilities, and entertainment options.
+        <Panel id="property-location" title="Location & Neighbourhood" meta={[localityName, property.city, property.state].filter(Boolean).join(", ")}>
+          <p className="mt-4! text-base! text-[#465066]! leading-relaxed!">
+            Explore the location and nearby places around {property.title}.
           </p>
-        </div>
-
-        {/* Location Tags */}
-        <div className="flex! flex-wrap! gap-3! mt-8!">
-          {[property.city, property.state, property.country].filter(Boolean).map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex! items-center! gap-2! px-4! py-2.5! bg-white! border! border-gray-200! rounded-full! text-sm! font-medium! text-gray-600!"
-            >
-              <Globe className="w-4! h-4! text-gray-400!" />
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
+        </Panel>
       )}
-
-      {/* Distance search: origin is the exact coords, else the locality */}
-      <PlaceDistanceSearch
-        lat={lat}
-        lng={lng}
-        locality={localityName}
-        city={property.city}
-        state={property.state}
-      />
-
-      {/* Nearby Places */}
-      <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-5!">
-        {categories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <div
-              key={category.title}
-              className="bg-white! rounded-[20px]! p-6! md:p-8! border! border-gray-200/70! shadow-sm! hover:border-[#27427f]/25! hover:shadow-[0_16px_40px_rgba(39,66,127,0.12)]! hover:-translate-y-1.5! transition-all! duration-300!"
-            >
-              <div className="flex! items-center! gap-3! mb-6!">
-                <Icon className="w-6! h-6! text-[#27427f]! shrink-0!" />
-                <h3 className="text-xl! font-semibold! text-gray-900!">
-                  {category.title}
-                </h3>
+      {!embedded && localityName && <LocalityTeaser locality={localityName} city={property.city} full />}
+      <PlaceDistanceSearch lat={lat} lng={lng} locality={localityName} city={property.city} state={property.state} />
+      <Panel id="property-nearby" title="Nearby places">
+        <div className="mt-6! grid! grid-cols-1! sm:grid-cols-2! gap-x-8! gap-y-6!">
+          {categories.map((category) => (
+            <section key={category.title} className="min-w-0! border-t! border-[#e2e9f4]! pt-5!">
+              <div className="flex! items-center! gap-3! mb-4!">
+                <IconMark Icon={category.icon} size="sm" />
+                <h3 className="m-0! text-base! font-semibold! text-[#0a0f1c]!">{category.title}</h3>
               </div>
-              <ul className="space-y-4!">
-                {category.places.map((place, idx) => (
-                  <li
-                    key={idx}
-                    className="flex! items-center! justify-between! gap-4! group"
-                  >
-                    <span className="relative! min-w-0!">
-                      <span className="block! text-sm! font-normal! text-gray-600! group-hover:text-gray-900! transition-colors! truncate!">{place.name}</span>
-                      {/* Full info on hover: the row truncates, so the popup
-                          opens upward with the complete name and distance
-                          without moving any layout. */}
-                      <span
-                        role="tooltip"
-                        className="pointer-events-none! absolute! bottom-full! left-0! mb-2! z-10! hidden! group-hover:block! max-w-[min(240px,60vw)]! rounded-xl! border! border-gray-200! bg-white! px-3! py-2! shadow-lg!"
-                      >
-                        <span className="block! text-sm! font-medium! text-gray-900! whitespace-normal!">
-                          {place.name}
-                        </span>
-                        <span className="block! text-xs! text-gray-500! mt-0.5!">
-                          {place.distance} away
-                        </span>
+              <ul className="m-0! p-0! list-none! flex! flex-col! gap-4!">
+                {category.places.map((place, index) => (
+                  <li key={`${place.name}-${index}`} className="flex! items-baseline! justify-between! gap-4! text-sm!">
+                    <span tabIndex={0} className="group/place relative! min-w-0! rounded-sm! focus-visible:outline-2! focus-visible:outline-[#2563eb]!">
+                      <span className="block! truncate! text-[#465066]!">{place.name}</span>
+                      <span role="tooltip" aria-label={`${place.name}, ${place.distance} away`}
+                        className="pointer-events-none! absolute! bottom-full! left-0! z-10! mb-2! hidden! group-hover/place:block! group-focus/place:block! w-max! max-w-[min(240px,60vw)]! rounded-lg! border! border-[#e2e9f4]! bg-white! px-3! py-2! shadow-lg!">
+                        <span className="block! text-sm! text-[#0a0f1c]!">{place.name}</span>
+                        <span className="block! mt-1! text-xs! text-[#5f6b80]!">{place.distance} away</span>
                       </span>
                     </span>
-                    <span className="text-xs! font-medium! text-gray-500! bg-gray-50! px-2! py-1! rounded-md! border! border-gray-200! whitespace-nowrap!">
-                      {place.distance}
-                    </span>
+                    <span className="text-[#1c2433]! font-medium! shrink-0! tabular-nums!">{place.distance}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Connectivity Highlights */}
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-        <div className="mb-8!">
-          <h3 className="text-lg! md:text-xl! font-normal! text-gray-900!">
-            Connectivity Highlights
-          </h3>
-          <p className="text-sm! font-normal! text-gray-500! mt-1!">How well-connected is this location</p>
+            </section>
+          ))}
         </div>
-
-        <div className="grid! grid-cols-1! sm:grid-cols-2! gap-5!">
-          {connectivityHighlights.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.label}
-                className="flex! items-start! gap-4!"
-              >
-                <Icon className="w-5! h-5! text-[#27427f]! shrink-0! mt-0.5!" />
-                <div>
-                  <p className="font-medium! text-gray-900! text-sm!">{item.label}</p>
-                  <p className="text-gray-500! text-sm! font-normal! mt-1! leading-relaxed!">{item.detail}</p>
-                </div>
+      </Panel>
+      <Panel id="property-connectivity" title="Connectivity Highlights" meta="Access and transport connections">
+        <div className="mt-6! pt-6! border-t! border-[#e2e9f4]! grid! grid-cols-1! sm:grid-cols-2! gap-6!">
+          {connectivityHighlights.map((item) => (
+            <div key={item.label} className="flex! items-start! gap-3!">
+              <IconMark Icon={item.icon} size="sm" />
+              <div className="min-w-0!">
+                <p className="m-0! text-sm! font-semibold! text-[#0a0f1c]!">{item.label}</p>
+                <p className="m-0! mt-1! text-sm! text-[#465066]! leading-relaxed!">{item.detail}</p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
-      </div>
-
-      {/* Locality description from the sublocations table. Renders only
-          when that locality has an overview; no self-link — this IS the page.
-          Skipped when embedded: the teaser already leads the section. */}
-      {!embedded && localityName && (
-        <LocalityTeaser locality={localityName} city={property.city} full />
-      )}
-
-      {/* Map — full-bleed: the map fills the card to its edges instead of
-          sitting as a second rounded box inside it */}
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden!">
-        <div className="p-6! md:p-8! pb-0!">
-          <h3 className="text-lg! md:text-xl! font-normal! text-gray-900!">
-            On the Map
-          </h3>
-          <p className="text-sm! font-normal! text-gray-500! mt-1!">
-            Approximate location in {property.city}
-          </p>
+      </Panel>
+      <Panel id="property-map" title="On the Map" meta={`Approximate location in ${property.city}`}>
+        <div className="mt-6! rounded-xl! overflow-hidden! border! border-[#e2e9f4]!">
+          <LocalityGoogleMap lat={lat} lng={lng} city={property.city} state={property.state} locality={localityName} />
         </div>
-
-        <div className="mt-6!">
-          <LocalityGoogleMap
-            lat={lat}
-            lng={lng}
-            city={property.city}
-            state={property.state}
-            locality={resolveListingLocality(property.locations as any)}
-          />
-        </div>
-      </div>
-
-      {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
-      {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
+      </Panel>
+      {!embedded && !hideContact && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );
 }

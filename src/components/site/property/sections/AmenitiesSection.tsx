@@ -1,3 +1,4 @@
+import { Panel, IconMark } from "@/components/site/project/overview/overview-ui";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import {
   Shield,
@@ -33,6 +34,7 @@ import {
   Wifi,
 } from "lucide-react";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
+import { PropertyFurnishingSection } from "@/components/site/property/PropertyFurnishingSection";
 
 type Amenity = {
   name: string;
@@ -87,13 +89,16 @@ export function getIconForAmenity(name?: string): React.ElementType {
 
 function getAmenityCategories(property: SeoProperty): AmenityCategory[] {
   // Read dynamically joined propertyAmenities from backend
-  const backendAmenities = ((property as any).propertyAmenities || []);
+  type AmenityJoin = { amenity?: { name: string; category?: string | null } | null };
+  const backendAmenities: AmenityJoin[] = property.amenities?.length
+    ? property.amenities
+    : (property as SeoProperty & { propertyAmenities?: AmenityJoin[] }).propertyAmenities ?? [];
   
   if (!backendAmenities.length) return [];
 
   const grouped: Record<string, Amenity[]> = {};
 
-  backendAmenities.forEach((pa: any) => {
+  backendAmenities.forEach((pa) => {
     const am = pa.amenity;
     if (!am || !am.name) return;
 
@@ -117,74 +122,41 @@ function getAmenityCategories(property: SeoProperty): AmenityCategory[] {
   }));
 }
 
-function AmenityCard({ amenity }: { amenity: Amenity }) {
-  const Icon = amenity.icon;
-
-  return (
-    <div className="group flex! items-center! gap-4! p-4! rounded-2xl! bg-white! border! border-gray-200/70! hover:border-[#27427f]/30! hover:shadow-[0_8px_24px_rgba(39,66,127,0.10)]! hover:-translate-y-0.5! transition-all! duration-300!">
-      <div className="w-12! h-12! rounded-xl! bg-[#27427f]/10! flex! items-center! justify-center! shrink-0!">
-        <Icon className="w-5! h-5! text-[#27427f]!" strokeWidth={1.75} />
-      </div>
-      <span className="font-manrope! font-semibold! text-base! text-gray-700! flex-1!">
-        {amenity.name}
-      </span>
-    </div>
-  );
-}
-
 type AmenitiesSectionProps = {
   property: SeoProperty;
-  /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */
   embedded?: boolean;
 };
 
 export function AmenitiesSection({ property, embedded = false }: AmenitiesSectionProps) {
   const categories = getAmenityCategories(property);
+  const count = categories.reduce((total, category) => total + category.amenities.length, 0);
 
   return (
-    <div className="space-y-12!">
-      
-      {categories.length === 0 ? (
-        <div className="bg-white! rounded-3xl! p-12! border! border-gray-100! text-center!">
-          <div className="w-20! h-20! rounded-2xl! bg-gray-50! flex! items-center! justify-center! mx-auto! mb-6!">
-            <Shield className="w-8! h-8! text-gray-300!" strokeWidth={1.5} />
-          </div>
-          <h3 className="font-manrope! text-xl! font-semibold! text-gray-900! mb-2!">No Amenities Listed</h3>
-          <p className="text-gray-500! max-w-md! mx-auto! leading-relaxed!">
-            Specific amenities and features have not been listed for this property yet. Please contact us for more detailed information.
+    <div className="flex! flex-col! gap-6! min-w-0!">
+      <Panel id="property-amenities" title="Amenities & Features" meta={count ? `${count} facilities at ${property.title}` : undefined}>
+        {count === 0 ? (
+          <p className="mt-6! text-base! text-[#465066]! leading-relaxed!">
+            Amenities have not been listed for this property yet. Contact us for more details.
           </p>
-        </div>
-      ) : (
-        <div className="bg-white! rounded-4xl! p-8! md:p-10! border! border-gray-100! shadow-sm!">
-          <div className="mb-10!">
-            <h2 className="font-manrope! text-2xl! md:text-3xl! font-semibold! text-gray-900! mb-2! tracking-tight!">
-              Amenities &amp; Features
-            </h2>
-            <p className="text-gray-500! text-base! leading-relaxed!">
-              Explore the premium facilities available at <span className="font-medium! text-gray-800!">{property.title}</span>
-            </p>
-          </div>
-
-          <div className="space-y-10!">
+        ) : (
+          <div className="mt-6! flex! flex-col! gap-6!">
             {categories.map((category) => (
-              <div key={category.title} className="pt-6! border-t! border-gray-200! first:border-0! first:pt-0!">
-                <div className="mb-6!">
-                  <h3 className="font-manrope! text-xl! font-semibold! text-gray-900! capitalize! tracking-relaxed!">
-                    {category.title}
-                  </h3>
-                </div>
-                <div className="grid! grid-cols-2! lg:grid-cols-3! gap-4! md:gap-5!">
+              <section key={category.title} className="border-t! border-[#e2e9f4]! pt-6!">
+                <h3 className="m-0! text-base! font-semibold! text-[#0a0f1c]! capitalize!">{category.title}</h3>
+                <ul className="m-0! mt-5! p-0! list-none! grid! grid-cols-1! sm:grid-cols-2! gap-x-6! gap-y-6!">
                   {category.amenities.map((amenity) => (
-                    <AmenityCard key={amenity.name} amenity={amenity} />
+                    <li key={amenity.name} className="flex! items-center! gap-3! min-w-0!">
+                      <IconMark Icon={amenity.icon} />
+                      <span className="text-sm! font-medium! text-[#1c2433]!">{amenity.name}</span>
+                    </li>
                   ))}
-                </div>
-              </div>
+                </ul>
+              </section>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* CTA Card — the shared section, identical on every page (skipped when embedded) */}
+        )}
+      </Panel>
+      <PropertyFurnishingSection property={property} />
       {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );

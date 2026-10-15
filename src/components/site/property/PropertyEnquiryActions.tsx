@@ -10,6 +10,7 @@ import { createPropertyEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
 import { VISIT_SLOTS, formatSlot, isValidVisitDate, maxVisitDate, todayYmd } from "@/lib/visit-slots";
+import { LISTING_ENQUIRY_BUTTON, LISTING_VISIT_BUTTON } from "@/components/site/shared/listing-summary-styles";
 
 export type EnquiryPropertyRef = {
   id: number;
@@ -549,14 +550,14 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
       <div className="mt-4! flex! flex-col! gap-2.5!">
         <button
           onClick={() => openIntent("enquire")}
-          className="w-full! bg-[#27427f]! text-white! font-manrope! font-normal! text-base! py-3! rounded-xl! hover:bg-[#1e3366]! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!"
+          className={LISTING_ENQUIRY_BUTTON}
         >
           <Phone className="w-4! h-4!" />
           Enquire Now
         </button>
         <button
           onClick={() => openIntent("visit")}
-          className="w-full! bg-white! text-[#27427f]! font-manrope! border! border-[#27427f]/25! hover:bg-[#27427f]/5! font-normal! text-base! py-3! rounded-xl! transition-all! flex! items-center! justify-center! gap-2! cursor-pointer!"
+          className={LISTING_VISIT_BUTTON}
         >
           <Calendar className="w-4! h-4!" />
           Schedule Visit

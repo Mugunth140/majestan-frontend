@@ -87,6 +87,55 @@ export type SeoPropertyDetails = {
   sfNumber?: string | null;
   propertyUse?: string | null;
   propertyAge?: string | null;
+  // Additional public specifications already returned by the CRM-backed detail endpoint.
+  balconies?: number | null;
+  parkingType?: string | null;
+  floorFacing?: string | null;
+  possessionStatus?: string | null;
+  waterSupply?: string | null;
+  guestParking?: boolean | null;
+  udsArea?: string | null;
+  unitNumber?: string | null;
+  unitType?: string | null;
+  numberOfFlats?: number | null;
+  towerNos?: number | null;
+  poojaRoom?: boolean | null;
+  studyRoom?: boolean | null;
+  architecturalStyle?: string | null;
+  availablePortion?: string | null;
+  amenities?: string | null;
+  outdoorSpaces?: string | null;
+  utilitiesProvided?: string | null;
+  neighborhoodHighlights?: string | null;
+  communityFacilities?: string | null;
+  buildingType?: string | null;
+  numberOfBays?: number | null;
+  numberOfCabins?: number | null;
+  fireSafety?: boolean | null;
+  loadingBays?: number | null;
+  warehouseRacks?: number | null;
+  workerFacilities?: string | null;
+  powerSupply2?: string | null;
+  powerSupply3?: string | null;
+  ownershipProofVerified?: string | null;
+  buildingApprovalCert?: string | null;
+  pollutionClearance?: string | null;
+  blueprintLayout?: string | null;
+  otherLegalClearance?: string | null;
+  otherLegalDetails?: string | null;
+  publicTransportAccess?: string | null;
+  truckTrailerCount?: number | null;
+  advanceRent?: string | null;
+  leaseTerm?: string | null;
+  incrementalRent?: string | null;
+  electricityCharges?: string | null;
+  highSpeedWifi?: boolean | null;
+  airConditioning?: boolean | null;
+  cctvSurveillance?: boolean | null;
+  elevatorAccess?: boolean | null;
+  securityStaff?: boolean | null;
+  furnitureProvided?: string | null;
+  accessibility?: string | null;
   roomDimensions?: { name: string; dimensions: string }[];
   floorPlanImages?: { title: string; imageUrl: string; imageKey: string }[];
 } | null;
@@ -128,6 +177,15 @@ export type SeoPropertyUnit = {
   floorPlanImageKey?: string | null;
 };
 
+export type SeoPropertyFurnishing = {
+  id: number;
+  furnishingItem: {
+    id: number;
+    name: string;
+    icon?: string | null;
+  } | null;
+};
+
 export type SeoPropertyFloorPlanFile = {
   title: string | null;
   imageUrl: string;
@@ -154,6 +212,26 @@ export type SeoProperty = {
   status: string;
   brokerageType?: string;
   brokerageValue?: string;
+  // Public listing facts and terms captured in the CRM.
+  propertyCondition?: string | null;
+  ownershipType?: string | null;
+  reraNumber?: string | null;
+  builderName?: string | null;
+  projectName?: string | null;
+  transactionType?: string | null;
+  handoverDate?: string | null;
+  saleType?: string | null;
+  roadAccess?: string | null;
+  roadName?: string | null;
+  tenantOccupied?: string | null;
+  availableFrom?: string | null;
+  availableUntil?: string | null;
+  maintenanceCharges?: string | null;
+  securityDeposit?: string | null;
+  bookingAmount?: string | null;
+  lockInPeriod?: string | null;
+  timeForRegistration?: string | null;
+  approvals?: string | null;
   ownerId: number;
   city: string;
   state: string;
@@ -163,6 +241,9 @@ export type SeoProperty = {
   details: SeoPropertyDetails;
   images: SeoPropertyImage[];
   amenities?: SeoPropertyAmenity[];
+  furnishings?: SeoPropertyFurnishing[];
+  /** Raw relation retained for older property payloads. */
+  propertyFurnishings?: SeoPropertyFurnishing[];
   units?: SeoPropertyUnit[];
   /** Floor-plan uploads (CRM sidebar). Resolved URLs from the backend. */
   floorPlanFiles?: SeoPropertyFloorPlanFile[];
@@ -233,6 +314,7 @@ export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(sl
       id: pa.id,
       amenity: pa.amenity ?? null,
     }));
+    data.furnishings = data.propertyFurnishings || data.__propertyFurnishings__ || data.furnishings || [];
     // Map units (for floor plans)
     data.units = (data.propertyUnits || data.__propertyUnits__ || []).map((u: any) => ({
       id: u.id,

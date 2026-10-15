@@ -60,7 +60,9 @@ export function Panel({
   tone = "light",
   tint = false,
   children,
+  className = "",
 }: {
+  className?: string;
   id: string;
   title: string;
   meta?: React.ReactNode;
@@ -77,7 +79,7 @@ export function Panel({
     <section
       id={id}
       aria-labelledby={headingId}
-      className={`${styles.panel} ${dark ? styles.ink : ""} ${tint ? styles.tint : ""} ${styles.reveal}`}
+      className={`${styles.panel} ${dark ? styles.ink : ""} ${tint ? styles.tint : ""} ${styles.reveal} ${className}`}
     >
       <div className="flex! flex-wrap! items-center! justify-between! gap-x-6! gap-y-3!">
         <div className="min-w-0!">

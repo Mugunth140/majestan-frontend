@@ -7,11 +7,7 @@ import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryA
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LABEL } from "@/components/site/project/project-ui";
 import { formatAddressLines } from "@/lib/location-display";
-
-/* The overview's light surface, spelled out in hex: the aside also renders on
-   sub-pages, outside the overview's colour tokens. */
-const ASIDE_CARD =
-  "rounded-2xl! border! border-[#dfe7f4]! bg-[linear-gradient(160deg,#fff_0%,#fff_55%,#edf4ff_100%)]! p-6! shadow-[0_1px_2px_rgba(10,15,28,0.04),0_24px_48px_-28px_rgba(22,69,191,0.35)]!";
+import { LISTING_SUMMARY_CARD } from "@/components/site/shared/listing-summary-styles";
 
 /**
  * The enquiry card: what it costs, who builds it, and the two actions.
@@ -31,7 +27,7 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
   });
 
   return (
-    <div className={ASIDE_CARD}>
+    <div className={LISTING_SUMMARY_CARD}>
       <div className="flex! items-start! justify-between! gap-3!">
         <h2 className="m-0! min-w-0! text-xl! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]! text-balance!">
           {project.name}

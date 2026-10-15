@@ -1,11 +1,10 @@
 "use client";
 
-import { useId, useState, type CSSProperties } from "react";
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { useId, useState } from "react";
 import { formatINR, type ProjectDetail, type ProjectUnit } from "@/lib/api/projects";
 import { projectFinanceEstimate, projectFinanceUnits, PROJECT_FINANCE_ASSUMPTIONS } from "@/lib/project-finance";
 import { unitAreaLabel } from "@/lib/project-config-summary";
+import { FinanceSection, FinanceBreakdown } from "@/components/site/shared/FinanceCalculator";
 import styles from "./project-finance.module.css";
 
 const money = (amount: number) => `₹${Math.round(amount).toLocaleString("en-IN")}`;
@@ -18,21 +17,9 @@ function unitTypeLabel(unit: ProjectUnit): string {
 
 export function CalculatorsSection({ project }: { project: ProjectDetail }) {
   return (
-    <section id="calculators" aria-labelledby="project-finance-title" className={`font-manrope-page ${styles.section}`}>
-      <h2 id="project-finance-title" className={styles.title}>Plan your EMI</h2>
-      {projectFinanceUnits(project).length ? (
-        <FinanceWidget key={project.id} project={project} />
-      ) : (
-        <div className={styles.empty}>
-          <strong>Price on request</strong>
-          <p>Estimates will appear when available homes are priced.</p>
-        </div>
-      )}
-      <nav className={styles.links} aria-label="Home finance tools">
-        <Link href="/emi-calculator">Full EMI calculator <ArrowUpRight size={20} aria-hidden="true" /></Link>
-        <Link href="/affordability-calculator">Check affordability <ArrowUpRight size={20} aria-hidden="true" /></Link>
-      </nav>
-    </section>
+    <FinanceSection emptyMessage="Estimates will appear when available homes are priced.">
+      {projectFinanceUnits(project).length > 0 ? <FinanceWidget key={project.id} project={project} /> : null}
+    </FinanceSection>
   );
 }
 
@@ -54,7 +41,6 @@ function FinanceWidget({ project }: { project: ProjectDetail }) {
   }
   const selectedType = unitTypeLabel(estimate.unit);
   const configurations = groups.get(selectedType) ?? [];
-  const principalShare = estimate.loanAmount / estimate.totalPayable * 100;
 
   return (
     <div className={styles.widget}>
@@ -93,49 +79,8 @@ function FinanceWidget({ project }: { project: ProjectDetail }) {
         </div>
       </fieldset>
 
-      <div className={styles.main}>
-        <div className={styles.payment}>
-          <span className={styles.label}>Estimated monthly EMI</span>
-          <output aria-label="Estimated monthly EMI" aria-live="polite" className={styles.emi}>{money(estimate.monthlyEmi)}</output>
-          <p className={styles.selectedPrice}>{formatINR(estimate.propertyPrice)} home · {formatINR(estimate.downPayment)} down</p>
-        </div>
-        <div className={styles.controls}>
-          <FinanceSlider label="Loan amount" min={10} max={90} step={5} value={loanPct}
-            display={`${formatINR(estimate.loanAmount)} · ${loanPct}%`} onChange={setLoanPct} />
-          <FinanceSlider label="Interest rate" min={5} max={15} step={0.25} value={rate} display={`${rate.toFixed(2)}% p.a.`} onChange={setRate} />
-          <FinanceSlider label="Loan tenure" min={5} max={30} step={1} value={years} display={`${years} years`} onChange={setYears} />
-        </div>
-      </div>
-
-      <div className={styles.breakdown}>
-        <div className={styles.repaymentBar} role="img" aria-label={`Repayment split: loan ${money(estimate.loanAmount)}, interest ${money(estimate.totalInterest)}`}>
-          <span className={styles.principal} style={{ width: `${principalShare}%` }} />
-          <span className={styles.interest} style={{ width: `${100 - principalShare}%` }} />
-        </div>
-        <dl className={styles.repaymentNumbers}>
-          <div><dt><span className={styles.loanDot} />Loan amount</dt><dd>{formatINR(estimate.loanAmount)}</dd></div>
-          <div><dt><span className={styles.interestDot} />Interest over {years} years</dt><dd>{formatINR(estimate.totalInterest)}</dd></div>
-        </dl>
-      </div>
-
-      <details className={styles.assumptions}>
-        <summary>{100 - loanPct}% down payment · View assumptions</summary>
-        <p>Illustrative estimate: {formatINR(estimate.loanAmount)} borrowed at {rate.toFixed(2)}% over {years} years. Lender terms and purchase costs may differ.</p>
-      </details>
-    </div>
-  );
-}
-
-function FinanceSlider({ label, min, max, step, value, display, onChange }: {
-  label: string; min: number; max: number; step: number; value: number; display: string; onChange: (value: number) => void;
-}) {
-  const id = useId();
-  const fill = (value - min) / (max - min) * 100;
-  return (
-    <div className={styles.slider}>
-      <div className={styles.sliderLabel}><label htmlFor={id}>{label}</label><output htmlFor={id}>{display}</output></div>
-      <input id={id} type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))}
-        style={{ "--finance-fill": `${fill}%` } as CSSProperties} />
+      <FinanceBreakdown estimate={estimate} rate={rate} years={years} loanPct={loanPct}
+        onRateChange={setRate} onYearsChange={setYears} onLoanPctChange={setLoanPct} />
     </div>
   );
 }

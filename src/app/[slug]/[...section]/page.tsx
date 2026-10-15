@@ -9,6 +9,9 @@ import { LocalitySection } from "@/components/site/property/sections/LocalitySec
 import { PhotosSection } from "@/components/site/property/sections/PhotosSection";
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
 import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
+import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
+import propertyStyles from "@/components/site/property/property-details.module.css";
+import { PAGE_CONTAINER } from "@/components/site/project/project-ui";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
 import { ProjectAmenitiesSection } from "@/components/site/project/sections/ProjectAmenitiesSection";
 import { ProjectFloorPlanSection } from "@/components/site/project/sections/ProjectFloorPlanSection";
@@ -126,8 +129,6 @@ const SECTION_META: Record<
     descriptionSuffix: "featuring interior, exterior, and amenity photographs.",
   },
 };
-
-const VALID_SECTIONS = new Set(Object.keys(SECTION_META));
 
 // Project sub-pages — one URL per section for all three project types,
 // mirroring the property multi-page structure.
@@ -422,13 +423,13 @@ function SectionContent({
 }) {
   switch (sectionKey) {
     case "amenities":
-      return <AmenitiesSection property={property} />;
+      return <AmenitiesSection property={property} embedded />;
     case "floor-plan":
-      return <FloorPlanSection property={property} />;
+      return <FloorPlanSection property={property} embedded />;
     case "locality":
-      return <LocalitySection property={property} />;
+      return <LocalitySection property={property} hideContact />;
     case "photos":
-      return <PhotosSection property={property} />;
+      return <PhotosSection property={property} embedded />;
     default:
       return null;
   }
@@ -547,33 +548,23 @@ export default async function PropertySectionPage({
           slug={property.canonicalSlug}
           activeSection={sectionKey}
         />
-        <div className="bg-[#f8f9fa]! min-h-screen! font-manrope">
-          <div className="container! mx-auto! px-4! max-w-7xl! pt-5! pb-24!">
+        <div className="bg-[#f4f6f9]! min-h-screen! font-manrope-page">
+          <main className={`${PAGE_CONTAINER} pt-5! pb-24!`}>
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
-            <PropertyTopActions property={property} />
-
-            <div className="grid! grid-cols-1! lg:grid-cols-3! gap-5! mt-5!">
-              {/* Main Content */}
-              <div className="lg:col-span-2!">
-                <SectionContent
-                  sectionKey={sectionKey}
-                  property={property}
-                />
-                
-                {/* Per-Section FAQs */}
-                {(property.faqs || []).filter(f => f.section === sectionKey).length > 0 && (
-                  <div className="mt-8!">
-                    <FaqSection faqs={(property.faqs || []).filter(f => f.section === sectionKey)} />
-                  </div>
-                )}
-              </div>
-
-              {/* Sidebar — the same info card as the overview */}
-              <div className="lg:col-span-1!">
-                <PropertyInfoSidebar property={property} />
+            <div className={`${OV_ROOT} ${propertyStyles.root}`}>
+              <PropertyTopActions property={property} />
+              <div className={propertyStyles.columns}>
+                <div className={propertyStyles.sectionContent}>
+                  <SectionContent sectionKey={sectionKey} property={property} />
+                  <FaqSection faqs={(property.faqs || []).filter((faq) => faq.section === sectionKey)} />
+                  <NeedMoreDetails propertyType={property.propertyType} />
+                </div>
+                <aside aria-label="Enquire about this property" className={propertyStyles.sectionAside}>
+                  <PropertyInfoSidebar property={property} />
+                </aside>
               </div>
             </div>
-          </div>
+          </main>
 
           <script
             type="application/ld+json"

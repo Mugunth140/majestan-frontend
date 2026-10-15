@@ -8,6 +8,7 @@ import { useUserAuthStore } from "@/store/userAuthStore";
 import { createProjectEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { isValidVisitDate } from "@/lib/visit-slots";
+import { LISTING_ENQUIRY_BUTTON, LISTING_VISIT_BUTTON } from "@/components/site/shared/listing-summary-styles";
 import { ProjectDialogShell, VisitPicker, firstBookableDate } from "@/components/site/project/ProjectEnquiryDialog";
 import {
   ContactCard,
@@ -289,14 +290,14 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
       <div className="mt-4! flex! flex-col! gap-2.5!">
         <button
           onClick={() => openIntent("enquire")}
-          className="cta-shimmer w-full! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! text-white! font-manrope! font-semibold! text-base! py-3! rounded-xl! border-0! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! flex! items-center! justify-center! gap-2! cursor-pointer!"
+          className={LISTING_ENQUIRY_BUTTON}
         >
           <Phone className="w-4! h-4!" />
           Enquire Now
         </button>
         <button
           onClick={() => openIntent("visit")}
-          className="w-full! bg-white! text-[#0a0f1c]! font-manrope! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! font-semibold! text-base! py-3! rounded-xl! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! flex! items-center! justify-center! gap-2! cursor-pointer!"
+          className={LISTING_VISIT_BUTTON}
         >
           <Calendar className="w-4! h-4!" />
           Schedule Visit

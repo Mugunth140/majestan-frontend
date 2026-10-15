@@ -116,7 +116,7 @@ export function PropertyNavigation({
     <div className="bg-white/95! backdrop-blur-md! sticky! top-[64px]! z-40! border-b! border-gray-200/80! shadow-xs! transition-all! duration-300! font-manrope">
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <nav
-          className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar!"
+          className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar"
           aria-label="Property sections"
         >
           {links.map((link) => {
@@ -185,7 +185,7 @@ function PropertyAnchorNavigation({ links }: { links: NavLink[] }) {
     <div className="bg-white/95! backdrop-blur-md! sticky! top-[64px]! z-40! border-b! border-gray-200/80! shadow-xs! transition-all! duration-300! font-manrope">
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <nav
-          className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar!"
+          className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar"
           aria-label="Property sections"
         >
           {links.map((link) => {

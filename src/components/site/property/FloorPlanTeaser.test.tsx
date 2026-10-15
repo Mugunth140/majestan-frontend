@@ -29,6 +29,26 @@ describe("FloorPlanTeaser", () => {
     expect(container.querySelector("img")).toBeNull();
   });
 
+  it("previews two named plans and links to the full floor-plan page for the rest", () => {
+    render(
+      <FloorPlanTeaser
+        details={details}
+        floorPlanHref="/some-villa/floor-plan"
+        plans={[
+          { key: "ground", title: "Ground floor", src: "/ground.png", isPdf: false },
+          { key: "first", title: "First floor", src: "/first.png", isPdf: false },
+          { key: "second", title: "Second floor", src: "/second.png", isPdf: false },
+        ]}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "View Ground floor" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "View First floor" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "View Second floor" })).toBeNull();
+    const link = screen.getByRole("link", { name: "View more" });
+    expect(link.getAttribute("href")).toBe("/some-villa/floor-plan");
+  });
+
   it("falls back to dashes when measurements are missing", () => {
     render(<FloorPlanTeaser details={null} floorPlanHref="/x/floor-plan" />);
 

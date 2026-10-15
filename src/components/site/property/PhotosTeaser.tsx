@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Panel, PanelLink } from "@/components/site/project/overview/overview-ui";
 import type { SeoPropertyImage } from "@/lib/api/property-by-slug";
 
 type PhotosTeaserProps = {
@@ -26,21 +27,8 @@ export function PhotosTeaser({ images, title, photosHref }: PhotosTeaserProps) {
   const tileClass = visible.length === 1 ? "aspect-[16/9]!" : "aspect-square!";
 
   return (
-    <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-      <div className="flex! items-center! justify-between!">
-        <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Photos</h2>
-        <div className="flex! items-center! gap-3!">
-          <span className="inline-flex! items-center! px-3! py-1.5! bg-gray-50! border! border-gray-200! rounded-full! text-[13px]! font-medium! text-gray-600!">
-            {images.length} {images.length === 1 ? "Photo" : "Photos"}
-          </span>
-          <Link
-            href={photosHref}
-            className="inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
-          >
-            View All
-          </Link>
-        </div>
-      </div>
+    <Panel id="photos-preview" title="Photos" meta={`${images.length} ${images.length === 1 ? "photo" : "photos"}`}
+      action={<PanelLink href={photosHref}>View All</PanelLink>}>
       <Link
         href={photosHref}
         aria-label="View all photos"
@@ -49,7 +37,7 @@ export function PhotosTeaser({ images, title, photosHref }: PhotosTeaserProps) {
         {visible.map((img, i) => (
           <div
             key={img.id}
-            className={`relative! rounded-2xl! overflow-hidden! ${tileClass} bg-gray-50!`}
+            className={`relative! rounded-xl! overflow-hidden! ${tileClass} bg-gray-50!`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -66,6 +54,6 @@ export function PhotosTeaser({ images, title, photosHref }: PhotosTeaserProps) {
           </div>
         ))}
       </Link>
-    </div>
+    </Panel>
   );
 }

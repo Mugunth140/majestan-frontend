@@ -23,7 +23,7 @@ describe("PhotosTeaser", () => {
     const srcs = screen.getAllByRole("img").map((el) => el.getAttribute("src"));
     expect(srcs).toEqual(["/img-1.jpg", "/img-2.jpg", "/img-3.jpg"]);
     expect(screen.getByText("+2")).toBeDefined();
-    expect(screen.getByText("5 Photos")).toBeDefined();
+    expect(screen.getByText(/5 photos/i)).toBeDefined();
     const link = screen.getByRole("link", { name: "View all photos" });
     expect(link.getAttribute("href")).toBe("/x/photos");
   });

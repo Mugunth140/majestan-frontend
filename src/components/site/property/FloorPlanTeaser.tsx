@@ -1,41 +1,35 @@
-import Link from "next/link";
+import { IconMark, Panel, PanelLink } from "@/components/site/project/overview/overview-ui";
+import { PropertyFloorPlanGallery } from "./PropertyFloorPlanGallery";
+import type { PropertyFloorPlan } from "@/lib/property-floor-plans";
 import { getFloorPlanMeasurements } from "@/lib/floor-plan-measurements";
 import type { SeoPropertyDetails } from "@/lib/api/property-by-slug";
 
 type FloorPlanTeaserProps = {
   details: SeoPropertyDetails;
   floorPlanHref: string;
+  plans?: PropertyFloorPlan[];
+  propertyTitle?: string;
 };
 
 /**
- * Overview teaser for the floor-plan sub-page: the key measurements only,
- * never the uploaded plan imagery. Values come from the same helper as the
- * sub-page, so the teaser can never disagree with it.
+ * Overview preview and key measurements. Drawings use the same fullscreen
+ * carousel as the floor-plan page, including every named floor.
  */
-export function FloorPlanTeaser({ details, floorPlanHref }: FloorPlanTeaserProps) {
+export function FloorPlanTeaser({ details, floorPlanHref, plans = [], propertyTitle }: FloorPlanTeaserProps) {
   const measurements = getFloorPlanMeasurements(details);
 
   return (
-    <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-      <div className="flex! items-center! justify-between!">
-        <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Floor Plan</h2>
-        <Link
-          href={floorPlanHref}
-          className="inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
-        >
-          View All
-        </Link>
-      </div>
+    <Panel id="floor-plan-preview" title="Floor Plan"
+      action={<PanelLink href={floorPlanHref}>{plans.length > 2 ? "View more" : "View All"}</PanelLink>}>
+      {plans.length > 0 && <PropertyFloorPlanGallery plans={plans} propertyTitle={propertyTitle} preview />}
       <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! md:grid-cols-4! gap-6!">
         {measurements.map((item) => {
           const Icon = item.icon;
           return (
             <div key={item.label} className="flex! items-center! gap-3!">
-              <div className="text-gray-500!">
-                <Icon className="w-4.5! h-4.5!" />
-              </div>
+              <IconMark Icon={Icon} size="sm" />
               <span className="min-w-0!">
-                <span className="block! text-[12px]! text-gray-400! font-normal! leading-tight!">
+                <span className="block! text-xs! text-[#5f6b80]! font-normal! leading-tight!">
                   {item.label}
                 </span>
                 <span className="block! text-base! font-semibold! text-gray-800! mt-1! leading-snug!">
@@ -46,6 +40,6 @@ export function FloorPlanTeaser({ details, floorPlanHref }: FloorPlanTeaserProps
           );
         })}
       </div>
-    </div>
+    </Panel>
   );
 }

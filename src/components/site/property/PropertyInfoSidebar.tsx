@@ -1,4 +1,5 @@
 // site/majestan-frontend/src/components/site/property/PropertyInfoSidebar.tsx
+import Image from "next/image";
 import {
   MapPin,
   BedDouble,
@@ -24,7 +25,9 @@ import {
 } from "@/lib/property-sections";
 import { capFirst, formatAddressLines, getPincode, getSublocation, type LocationRecord } from "@/lib/location-display";
 import { emi } from "@/lib/emi";
+import { PROJECT_FINANCE_ASSUMPTIONS } from "@/lib/project-finance";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
+import { LISTING_SUMMARY_CARD } from "@/components/site/shared/listing-summary-styles";
 
 type PropertyInfoSidebarProps = {
   property: SeoProperty;
@@ -54,14 +57,14 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
     property.propertyType === "apartment" ||
     property.propertyType === "villa" ||
     property.propertyType === "individual_portion";
-  const isSale = !property.status.toLowerCase().includes("rent");
+  const isSale = !["rent", "rental", "lease"].includes(property.listingType?.toLowerCase()) && !property.status.toLowerCase().includes("rent");
 
   const locRow = property.locations?.[0] as LocationRecord | undefined;
   const locData = locRow?.localityData as LocationRecord | undefined;
   const fullAddress = String(
     locRow?.address || locRow?.landmark || locData?.address || "",
   ).trim();
-  const rawSub = (property as any).sublocation || (property as any).locality || getSublocation(locRow);
+  const rawSub = (property as SeoProperty & { sublocation?: string }).sublocation || (property as SeoProperty & { locality?: string }).locality || getSublocation(locRow);
   const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
   const pincode = getPincode(locRow);
   const locationLines = formatAddressLines(fullAddress, {
@@ -149,22 +152,22 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
   ).filter((s) => s && s.value) as { icon: React.ReactNode; label: string; value: string }[];
 
   return (
-    <div className="lg:sticky! lg:top-[140px]! flex! flex-col! gap-5!">
-      {/* Info card */}
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm!">
+    <div className="lg:sticky! lg:top-[133px]! flex! flex-col! gap-4!">
+      {/* Title and enquiry stay beside the cover, as on the original property layout. */}
+      <div className={LISTING_SUMMARY_CARD}>
         <div className="flex! items-start! justify-between! gap-3!">
-          <h1 className="text-xl! font-manrope! font-medium! text-[#27427f]! leading-snug!">
+          <h1 className="m-0! text-xl! font-manrope! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]! text-balance!">
             {isApartment ? title : `${title} ${property.city}`}
           </h1>
         </div>
 
         {locationLines.length > 0 ? (
-          <div className="mt-2! flex! items-start! gap-2! text-[13px]! font-manrope! text-gray-500! leading-relaxed!">
-            <MapPin className="w-4! h-4! shrink-0! mt-1! text-gray-400!" />
+          <div className="mt-2! flex! items-start! gap-2! text-sm! font-manrope! text-[#1c2433]! leading-relaxed!">
+            <MapPin className="w-4! h-4! shrink-0! mt-1! text-[#0a0f1c]!" />
             <span className="min-w-0!">
               {locationLines.map((line, index) => (
                 <span
-                  className={`block!${index === 0 && locationLines.length > 1 ? " text-gray-700!" : ""}`}
+                  className="block!"
                   key={`${line}-${index}`}
                 >
                   {line}
@@ -174,16 +177,44 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           </div>
         ) : null}
 
+        <div className="mt-5! pt-5! border-t! border-[#e2e9f4]! flex! flex-col! items-start! gap-3!">
+          <div className="min-w-0!">
+            <p className="m-0! text-3xl! font-manrope! font-semibold! text-[#0a0f1c]! tracking-tight! tabular-nums!">
+              {formatPrice(property.price)}
+              {!isSale && (
+                <span className="text-sm! font-normal! text-[#5f6b80]!"> / mo</span>
+              )}
+            </p>
+            {perSqft && (
+              <p className="text-sm! font-manrope! font-normal! text-[#5f6b80]! mt-1!">{perSqft}</p>
+            )}
+          </div>
+          {(() => {
+            // Same 20% down payment, rate and tenure as the embedded calculator.
+            const priceNum = parseFloat(property.price);
+            const emiStarts =
+              isSale && Number.isFinite(priceNum) && priceNum > 0 ? emi(priceNum * (1 - PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct / 100), PROJECT_FINANCE_ASSUMPTIONS.annualRatePct, PROJECT_FINANCE_ASSUMPTIONS.years) : null;
+            return emiStarts ? (
+              <div className="flex! items-baseline! justify-between! gap-4! w-full!">
+                <span className="text-sm! font-manrope! font-normal! text-[#5f6b80]!">EMI from</span>
+                <a href={`/${property.canonicalSlug}#calculators`} className="text-sm! font-manrope! font-semibold! text-[#1c2433]! tabular-nums! no-underline! hover:underline! underline-offset-4! rounded-sm! focus-visible:outline-2! focus-visible:outline-[#2563eb]! focus-visible:outline-offset-4!">
+                  ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
+                </a>
+              </div>
+            ) : null;
+          })()}
+        </div>
+
         {sidebarSpecs.length > 0 && (
-          <div className="mt-5! pt-5! border-t! border-gray-100! grid! grid-cols-2! gap-x-3! gap-y-5!">
+          <div className="mt-5! pt-5! border-t! border-[#e2e9f4]! grid! grid-cols-2! gap-x-3! gap-y-5!">
             {sidebarSpecs.map((spec, i) => (
               <div key={i} className="flex! items-start! gap-2.5! min-w-0!">
-                <span className="text-gray-400! shrink-0!">{spec.icon}</span>
+                <span className="text-[#5f6b80]! shrink-0!">{spec.icon}</span>
                 <span className="min-w-0!">
-                  <span className="block! text-[12px]! font-manrope! text-gray-400! font-normal! leading-tight!">
+                  <span className="block! text-xs! font-manrope! text-[#5f6b80]! font-normal! leading-tight!">
                     {spec.label}
                   </span>
-                  <span className="block! text-base! font-manrope! font-semibold! text-gray-800! mt-1! leading-snug!">
+                  <span className="block! text-base! font-manrope! font-semibold! text-[#1c2433]! mt-1! leading-snug!">
                     {spec.value}
                   </span>
                 </span>
@@ -191,34 +222,6 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
             ))}
           </div>
         )}
-
-        <div className="mt-5! pt-5! border-t! border-gray-100! flex! items-end! justify-between! gap-4!">
-          <div className="min-w-0!">
-            <p className="text-xl! font-manrope! font-medium! text-gray-900! tracking-tight!">
-              {formatPrice(property.price)}
-              {!isSale && (
-                <span className="text-sm! font-normal! text-gray-500!"> / mo</span>
-              )}
-            </p>
-            {perSqft && (
-              <p className="text-[13px]! font-manrope! font-normal! text-gray-500! mt-1!">{perSqft}</p>
-            )}
-          </div>
-          {(() => {
-            // Sale listings only — same 7.25% / 20y basis as cards.
-            const priceNum = parseFloat(property.price);
-            const emiStarts =
-              isSale && Number.isFinite(priceNum) && priceNum > 0 ? emi(priceNum, 7.25, 20) : null;
-            return emiStarts ? (
-              <div className="flex! flex-col! gap-1! shrink-0! text-right!">
-                <span className="text-[11px]! font-manrope! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
-                <span className="text-[15px]! font-manrope! font-semibold! text-gray-800! tabular-nums!">
-                  ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
-                </span>
-              </div>
-            ) : null;
-          })()}
-        </div>
 
         <PropertyEnquiryActions
           property={{
@@ -232,8 +235,8 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
           }}
         />
 
-        <div className="mt-5! pt-3! border-t! border-gray-100! flex! items-center! justify-center! gap-1! text-[13px]! font-manrope! font-normal! text-gray-500! ">
-          <Coins className="w-4! h-4! text-yellow-500! shrink-0!" />
+        <div className="mt-5! pt-3! border-t! border-[#e2e9f4]! flex! items-center! justify-center! gap-1! text-sm! font-manrope! font-normal! text-[#465066]!">
+          <Coins className="w-4! h-4! text-emerald-600! shrink-0!" />
           {!property.brokerageType || property.brokerageType === 'no_brokerage'
             ? 'No brokerage for this property'
             : property.brokerageType === 'percentage'
@@ -242,7 +245,7 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
         </div>
 
         {property.propertyCode && (
-          <p className="mt-2! flex! items-center! justify-center! gap-2! text-[12px]! font-manrope! text-gray-400!">
+          <p className="mt-2! flex! items-center! justify-center! gap-2! text-xs! font-manrope! text-[#5f6b80]!">
             <Info className="w-3.5! h-3.5!" />
             ID: {property.propertyCode}
           </p>
@@ -250,20 +253,22 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
       </div>
 
       {/* Listed-by card */}
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! shadow-sm! flex! items-center! gap-4!">
-        <img
+      <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! p-6! flex! items-center! gap-4!">
+        <Image
+          width={56}
+          height={56}
           src="/favicon/android-chrome-512x512.png"
           alt="Majestan Realty"
           className="w-14! h-14! rounded-full! object-cover! shrink-0!"
         />
         <div>
-          <p className="text-xs! font-manrope! text-gray-500! font-normal! uppercase! tracking-wider! mb-0.5!">
+          <p className="text-xs! font-manrope! text-[#5f6b80]! font-normal! uppercase! tracking-wider! mb-0.5!">
             Listed By
           </p>
           <p className="font-manrope! font-medium! text-base! text-gray-900!">
             Majestan Realty
           </p>
-          <p className="text-xs! font-manrope! font-normal! text-gray-500! mt-1! flex! items-center! gap-1.5!">
+          <p className="text-xs! font-manrope! font-normal! text-[#5f6b80]! mt-1! flex! items-center! gap-1.5!">
             <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
             Verified
           </p>

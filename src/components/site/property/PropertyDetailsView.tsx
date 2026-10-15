@@ -1,28 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import sanitizeHtml from "sanitize-html";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
-import { getPlaceholderImage } from "@/lib/placeholder-images";
-import { ListingImage } from "@/components/site/listing/ListingImage";
-import { formatDate, formatDescriptionParagraphs, formatFurnishing } from "@/lib/property-format";
+import { formatDate, formatFurnishing } from "@/lib/property-format";
 import {
   BedDouble,
   Bath,
   Square,
   Car,
   Layers,
-  ChevronLeft,
-  ChevronRight,
   Building2,
   Calendar,
   ShieldCheck,
-  Images,
-  ArrowRight,
   Tag,
   Info,
 } from "lucide-react";
+import { getPropertyFloorPlans } from "@/lib/property-floor-plans";
+import { getAdditionalPropertyDetails } from "@/lib/property-detail-rows";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
 import {
   getCommercialSpecs,
@@ -40,7 +34,14 @@ import { LocalitySection } from "@/components/site/property/sections/LocalitySec
 import { PhotosSection } from "@/components/site/property/sections/PhotosSection";
 import { FloorPlanTeaser } from "@/components/site/property/FloorPlanTeaser";
 import { PhotosTeaser } from "@/components/site/property/PhotosTeaser";
+import { PropertyGallery } from "./PropertyGallery";
+import { OV_ROOT, Panel, PanelLink, IconMark } from "@/components/site/project/overview/overview-ui";
+import { TEXT_LINK } from "@/components/site/project/project-ui";
+import { PropertyFinanceSection } from "./PropertyFinanceSection";
+import { PropertyFurnishingSection } from "./PropertyFurnishingSection";
+import styles from "./property-details.module.css";
 import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSidebar";
+import { PropertyDescriptionPreview } from "@/components/site/property/PropertyDescriptionPreview";
 import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
@@ -51,6 +52,7 @@ type PropertyDetailsViewProps = {
 };
 
 export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
+  const [showAllPropertyDetails, setShowAllPropertyDetails] = useState(false);
   // Single-page types stack every section on this overview with anchor ids;
   // multi-page types keep the teaser cards linking out to subpages.
   const isSingle = isSinglePageType(property.propertyType);
@@ -61,11 +63,6 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   const showSection = (id: "amenities" | "floor-plan" | "locality" | "photos") =>
     visibleSections.includes(id);
 
-  const images = property.images ?? [];
-  const [activeImg, setActiveImg] = useState(0);
-  const currentImage = images.length > 0 ? images[Math.min(activeImg, images.length - 1)] : undefined;
-  const placeholderUrl = getPlaceholderImage({ propertyType: property.propertyType });
-
   const propertyTypeLabel =
     Object.values(PROPERTY_TYPES).find(
       (p) => p.apiValue === property.propertyType
@@ -74,15 +71,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       .replace(/_/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  const listingType = property.status.toLowerCase().includes("rent")
-    ? "for-rent"
-    : "for-sale";
-  const isSale = listingType === "for-sale";
-
   const locRow = property.locations?.[0] as LocationRecord | undefined;
   const rawSub =
-    (property as any).sublocation ||
-    (property as any).locality ||
+    (property as SeoProperty & { sublocation?: string }).sublocation ||
+    (property as SeoProperty & { locality?: string }).locality ||
     getSublocation(locRow);
   const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
 
@@ -121,9 +113,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       ? `₹ ${Math.round(priceNum / areaNum).toLocaleString("en-IN")} / sq.ft`
       : null);
 
-  const title = property.seo?.seoData?.overview?.h1 || property.title;
-
-  const overviewStats: { icon: React.ReactNode; label: string; value: string }[] = [
+  const baseOverviewStats: { icon: React.ReactNode; label: string; value: string; wide?: boolean }[] = [
     ...(!isLand && !isWorkspace && property.details?.bedrooms
       ? [{ icon: <BedDouble className="w-5! h-5!" />, label: "Bedrooms", value: `${property.details.bedrooms} BHK` }]
       : []),
@@ -139,7 +129,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       ? [{ icon: <Layers className="w-5! h-5!" />, label: "Floor No", value: `${property.details.floorNumber} / ${property.details.totalFloors}` }]
       : []),
     ...(!hasLandArea && !isWorkspace && property.details?.areaSqft
-      ? [{ icon: <Square className="w-5! h-5!" />, label: "Area", value: `${property.details.areaSqft} sq.ft` }]
+      ? [{ icon: <Square className="w-5! h-5!" />, label: "Area", value: `${Number(property.details.areaSqft).toLocaleString("en-IN", { maximumFractionDigits: 2 })} sq.ft` }]
       : []),
     ...(!isLand && !isWorkspace && property.details?.parking
       ? [{ icon: <Car className="w-5! h-5!" />, label: "Parking", value: `${property.details.parking} Covered` }]
@@ -171,6 +161,14 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
       : []),
   ];
 
+  const overviewStats = [
+    ...baseOverviewStats,
+    ...getAdditionalPropertyDetails(property, baseOverviewStats.map((stat) => stat.label)).map((row) => {
+      const Icon = row.icon;
+      return { ...row, icon: <Icon className="w-5! h-5!" /> };
+    }),
+  ];
+
   // Amenities preview — real tags only, never a hardcoded fallback.
   // Normalized amenities first, raw join as fallback (tests and older
   // payloads carry either shape).
@@ -185,140 +183,80 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     .filter((n): n is string => !!n && n.trim() !== "");
   const amenityNames = (normalizedNames.length > 0 ? normalizedNames : rawNames).slice(0, 6);
 
-  const prevImg = () => setActiveImg((i) => (i - 1 + images.length) % images.length);
-  const nextImg = () => setActiveImg((i) => (i + 1) % images.length);
+  const floorPlanPreviews = getPropertyFloorPlans(property);
 
   return (
-    <div className="flex! flex-col! gap-5!">
+    <div className={`${OV_ROOT} ${styles.root}`}>
       <PropertyTopActions property={property} />
-
-      <div className="grid! grid-cols-1! lg:grid-cols-3! gap-5!">
-        {/* Left column */}
-        <div className="lg:col-span-2! flex! flex-col! gap-5! min-w-0!">
-          {/* Hero gallery (the #overview anchor on single-page types) */}
-          <div
-            {...(isSingle ? { id: "overview" } : {})}
-            className={`relative! rounded-[20px]! overflow-hidden! bg-gray-100! h-[300px]! md:h-[430px]! group/gallery${isSingle ? " scroll-mt-40!" : ""}`}
-          >
-            {images.length > 0 ? (
-              images.map((img, idx) => (
-                <div
-                  key={img.imageUrl}
-                  className={`absolute! inset-0! transition-opacity! duration-500! ${
-                    idx === activeImg ? "opacity-100! z-10!" : "opacity-0! z-0!"
-                  }`}
-                >
-                  <ListingImage
-                    src={img.imageUrl}
-                    placeholderSrc={placeholderUrl}
-                    alt={`${title} - view ${idx + 1}`}
-                    eager={idx === 0}
-                    className="w-full! h-full! object-cover!"
-                  />
-                </div>
-              ))
-            ) : (
-              <ListingImage
-                src={null}
-                placeholderSrc={placeholderUrl}
-                alt={title}
-                eager
-                className="w-full! h-full! object-cover! animate-fade-in!"
-              />
-            )}
-            <div className="absolute! inset-0! bg-gradient-to-t! from-black/25! via-transparent! to-transparent! pointer-events-none! z-20!" />
-
-            {/* Overlay badges */}
-            <div className="absolute! top-4! right-4! flex! gap-2! z-20!">
-              <span
-                className={`inline-flex! items-center! px-4! py-2! rounded-xl! text-xs! font-semibold! backdrop-blur-md! ${isSale ? "bg-[#27427f]/95! text-white!" : "bg-gray-900/85! text-white!"}`}
-              >
-                {isSale ? "For Sale" : "For Rent"}
-              </span>
-              <span className="inline-flex! items-center! px-4! py-2! rounded-xl! bg-white/95! backdrop-blur-md! text-gray-900! text-xs! font-semibold! shadow-sm!">
-                {propertyTypeLabel}
-              </span>
-            </div>
-
-            {/* Arrows */}
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={prevImg}
-                  aria-label="Previous photo"
-                  className="absolute! left-4! top-1/2! -translate-y-1/2! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer! hidden! group-hover/gallery:flex! z-20!"
-                >
-                  <ChevronLeft className="w-5! h-5!" />
-                </button>
-                <button
-                  onClick={nextImg}
-                  aria-label="Next photo"
-                  className="absolute! right-4! top-1/2! -translate-y-1/2! flex! h-10! w-10! items-center! justify-center! rounded-full! bg-black/45! backdrop-blur-md! text-white! hover:bg-black/65! transition-all! cursor-pointer! z-20!"
-                >
-                  <ChevronRight className="w-5! h-5!" />
-                </button>
-              </>
-            )}
-
-            {/* Counter + photos button */}
-            {images.length > 0 && (
-            <div className="absolute! bottom-4! right-4! flex! items-center! gap-2! z-20!">
-              {images.length > 1 && (
-                <span className="px-3! py-1.5! rounded-full! bg-black/45! backdrop-blur-md! text-white! text-xs! font-medium! tabular-nums!">
-                  {activeImg + 1} / {images.length}
-                </span>
-              )}
-              <Link
-                href={isSingle ? "#photos" : `/${property.canonicalSlug}/photos`}
-                className="inline-flex! items-center! gap-2! px-4! py-2! bg-white/95! backdrop-blur-md! rounded-xl! text-gray-900! text-xs! font-semibold! no-underline! hover:bg-white! transition-all! shadow-sm!"
-              >
-                <Images className="w-4! h-4!" />
-                {images.length} Photos
-              </Link>
-            </div>
-            )}
+      <div className={styles.columns}>
+        <div className={styles.content}>
+          <div {...(isSingle ? { id: "overview" } : {})} className="scroll-mt-40!">
+            <PropertyGallery key={property.canonicalSlug} property={property} singlePage={isSingle} />
           </div>
-
           {/* Overview card */}
           {overviewStats.length > 0 && (
-            <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">
-                Property Overview of {title}
-              </h2>
-              <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! sm:grid-cols-3! gap-x-4! gap-y-7!">
-                {overviewStats.map((stat, i) => (
-                  <div key={i} className="flex! items-start! gap-1.5! min-w-0!">
-                    <div className="w-12! h-12! flex! items-center! justify-center! text-[#27427f]! shrink-0!">
-                      {stat.icon}
+            <Panel id="property-details" title="Property details">
+              <div id="property-details-grid" className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! sm:grid-cols-3! gap-x-4! gap-y-6!">
+                {overviewStats.map((stat, index) => {
+                  const collapsedVisibility = showAllPropertyDetails
+                    ? ""
+                    : index >= 6
+                      ? "hidden!"
+                      : index >= 4
+                        ? "hidden! sm:flex!"
+                        : "";
+                  return (
+                    <div key={stat.label} className={`flex! items-start! gap-3! min-w-0! ${stat.wide ? "col-span-2! sm:col-span-3!" : ""} ${collapsedVisibility}`}>
+                      <div className="w-10! h-10! rounded-xl! bg-[#eef4ff]! flex! items-center! justify-center! text-[#1645bf]! shrink-0!">
+                        {stat.icon}
+                      </div>
+                      <div className="min-w-0!">
+                        <p className="text-xs! text-[#5f6b80]! font-medium! leading-tight!">
+                          {stat.label}
+                        </p>
+                        <p className={`text-sm! font-semibold! text-gray-900! mt-1! leading-snug! break-words! ${stat.wide ? "whitespace-pre-line!" : ""}`}>
+                          {stat.value}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0!">
-                      <p className="text-[12px]! text-gray-400! font-normal! leading-tight!">
-                        {stat.label}
-                      </p>
-                      <p className="text-[14px]! font-semibold! text-gray-900! mt-1! leading-snug! break-words!">
-                        {stat.value}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-            </div>
+              {overviewStats.length > 4 && (
+                <button
+                  type="button"
+                  aria-controls="property-details-grid"
+                  aria-expanded={showAllPropertyDetails}
+                  onClick={() => setShowAllPropertyDetails((show) => !show)}
+                  className={`${TEXT_LINK} mt-5! inline-flex! text-sm! font-semibold! sm:hidden!`}
+                >
+                  {showAllPropertyDetails ? "Show less" : "View more"}
+                </button>
+              )}
+              {overviewStats.length > 6 && (
+                <button
+                  type="button"
+                  aria-controls="property-details-grid"
+                  aria-expanded={showAllPropertyDetails}
+                  onClick={() => setShowAllPropertyDetails((show) => !show)}
+                  className={`${TEXT_LINK} mt-5! hidden! text-sm! font-semibold! sm:inline-flex!`}
+                >
+                  {showAllPropertyDetails ? "Show less" : "View more"}
+                </button>
+              )}
+            </Panel>
           )}
 
           {/* About card */}
-          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">About this Property</h2>
+          <Panel id="about-property" title={`About ${property.title}`}>
             {property.description ? (
-              <div
-                className="mt-4! prose! max-w-none! text-gray-500! font-normal! leading-relaxed! text-medium! [&_p]:mb-6! [&_h3]:text-xl! [&_h3]:font-semibold! [&_h3]:text-gray-900! [&_h3]:mt-10! [&_h3]:mb-4! [&_ul]:list-disc! [&_ul]:pl-5! [&_li]:mb-2! [&_strong]:font-medium! [&_strong]:text-gray-900!"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(formatDescriptionParagraphs(property.description), { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['h1', 'h2', 'img']) }) }}
-              />
+              <PropertyDescriptionPreview description={property.description} />
             ) : (
-              <p className="mt-4! text-gray-500! font-light! italic!">
+              <p className="mt-4! text-gray-500! font-normal!">
                 Detailed description will be available soon. Contact us for more information.
               </p>
             )}
-          </div>
+          </Panel>
 
           {isSingle ? (
             <>
@@ -356,38 +294,32 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                 />
               ) : null}
 
-          {/* Amenities card — real tags only; hidden when the listing has none */}
-          {amenityNames.length > 0 && (
-          <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-            <div className="flex! items-center! justify-between!">
-              <h2 className="text-lg! md:text-xl! font-normal! text-gray-900!">Key Amenities</h2>
-              <Link
-                href={`/${property.canonicalSlug}/amenities`}
-                className="inline-flex! items-center! gap-2! text-sm! font-medium! text-[#27427f]! hover:text-[#1a2d59]! transition-colors! no-underline!"
-              >
-                View All
-              </Link>
-            </div>
-            <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! md:grid-cols-3! gap-6!">
-              {amenityNames.map((name) => {
-                const Icon = getIconForAmenity(name);
-                return (
-                  <div key={name} className="flex! items-center! gap-3!">
-                    <div className="text-gray-500!">
-                      <Icon className="w-4.5! h-4.5!" />
-                    </div>
-                    <span className="font-semibold! text-base! text-gray-600!">
-                      {name}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          )}
+              {/* Amenities card — real tags only; hidden when the listing has none */}
+              {amenityNames.length > 0 && (
+              <Panel id="amenities-preview" title="Key amenities" meta={`${amenityNames.length} amenities at a glance`}
+                action={<PanelLink href={`/${property.canonicalSlug}/amenities`}>View All</PanelLink>}>
+                <div className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! md:grid-cols-3! gap-6!">
+                  {amenityNames.map((name) => {
+                    const Icon = getIconForAmenity(name);
+                    return (
+                      <div key={name} className="flex! items-center! gap-3!">
+                        <IconMark Icon={Icon} />
+                        <span className="font-medium! text-sm! text-[#1c2433]!">
+                          {name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Panel>
+              )}
 
-              {/* Floor plan teaser: key measurements only, linking to the sub-page */}
+              <PropertyFurnishingSection property={property} preview />
+
+              {/* Project floor-plan viewer with this property’s drawings and measurements */}
               <FloorPlanTeaser
+                plans={floorPlanPreviews}
+                propertyTitle={property.title}
                 details={property.details}
                 floorPlanHref={`/${property.canonicalSlug}/floor-plan`}
               />
@@ -401,6 +333,8 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
             </>
           )}
 
+          <PropertyFinanceSection property={property} />
+
           {/* FAQ Section (Overview only) */}
           <FaqSection faqs={faqsFor("overview")} />
 
@@ -409,9 +343,9 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
         </div>
 
         {/* Right sidebar — the same card shown on every sub-page */}
-        <div className="lg:col-span-1! min-w-0!">
+        <aside aria-label="Enquire about this property" className={styles.aside}>
           <PropertyInfoSidebar property={property} />
-        </div>
+        </aside>
       </div>
     </div>
   );

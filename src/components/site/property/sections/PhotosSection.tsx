@@ -1,261 +1,88 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { type SeoProperty } from "@/lib/api/property-by-slug";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import type { SeoProperty } from "@/lib/api/property-by-slug";
+import { Panel, FOCUS_RING } from "@/components/site/project/overview/overview-ui";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
-import {
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  ImageOff,
-  Images,
-  ZoomIn,
-} from "lucide-react";
+import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
 
-type PhotosSectionProps = {
-  property: SeoProperty;
-  /** Stacked on the single-page overview: skip the trailing CTA (one page-level CTA instead). */
-  embedded?: boolean;
-};
+type PhotosSectionProps = { property: SeoProperty; embedded?: boolean };
+const LIGHTBOX_BUTTON = "grid! h-10! w-10! shrink-0! place-items-center! rounded-full! border! border-white/20! bg-white/10! text-white! cursor-pointer! transition-colors! duration-150! hover:bg-white/20! focus-visible:outline-2! focus-visible:outline-white! focus-visible:outline-offset-4!";
 
 export function PhotosSection({ property, embedded = false }: PhotosSectionProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const images = [...(property.images ?? [])].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
+  const count = images.length;
+  const selected = images[currentIndex] ?? images[0];
+  useLockBodyScroll(lightboxOpen);
 
-  const images = property.images ?? [];
-  const primaryImage = images.find((img) => img.isPrimary);
-  const galleryImages = images.filter((img) => !img.isPrimary);
-
-  // Order: primary first, then gallery
-  const allImages = primaryImage
-    ? [primaryImage, ...galleryImages]
-    : [...galleryImages];
-
-  const openLightbox = useCallback((index: number) => {
-    setCurrentIndex(index);
-    setLightboxOpen(true);
-  }, []);
-
-  const closeLightbox = useCallback(() => {
-    setLightboxOpen(false);
-  }, []);
-
-  const goNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % allImages.length);
-  }, [allImages.length]);
-
-  const goPrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-  }, [allImages.length]);
-
-  // Keyboard navigation
   useEffect(() => {
-    if (!lightboxOpen) return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (lightboxOpen && !dialog.open) dialog.showModal();
+    else if (!lightboxOpen && dialog.open) dialog.close();
+  }, [lightboxOpen]);
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") goNext();
-      if (e.key === "ArrowLeft") goPrev();
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [lightboxOpen, closeLightbox, goNext, goPrev]);
-
-  // Empty state
-  if (allImages.length === 0) {
-    return (
-      <div className="space-y-8!">
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-          <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-            Photos
-          </h2>
-          <div className="rounded-[20px]! border! border-gray-200! bg-gray-50/50! flex! flex-col! items-center! justify-center! py-24! text-center! hover:bg-gray-50! transition-colors! mt-6!">
-            <div className="w-20! h-20! rounded-full! bg-white! border! border-gray-200! flex! items-center! justify-center! mb-6!">
-              <ImageOff className="w-8! h-8! text-gray-400!" />
-            </div>
-            <h3 className="text-xl! font-medium! text-gray-900! mb-2!">
-              No photos available yet
-            </h3>
-            <p className="text-gray-500! text-base! font-normal! max-w-md! leading-relaxed!">
-              Photos for this property are being uploaded. Check back soon or contact
-              the owner for a virtual tour.
-            </p>
-          </div>
-        </div>
-
-      {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
-      {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
-    </div>
-  );
-  }
+  const step = (delta: number) => setCurrentIndex((index) => (index + delta + count) % count);
 
   return (
-    <div className="space-y-8!">
-      {/* Header */}
-      <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-6! md:p-8! shadow-sm!">
-        <div className="flex! flex-col! sm:flex-row! items-start! sm:items-center! justify-between! gap-4!">
-          <div>
-            <h2 className="text-2xl! md:text-3xl! font-semibold! text-gray-900!">
-              Photos
-            </h2>
-            <p className="text-sm! font-normal! text-gray-500! mt-1!">
-              Browse all photos of {property.title}
-            </p>
+    <div className="flex! flex-col! gap-6! min-w-0!">
+      <Panel id="property-photos" title="Photos" meta={count ? `${count} ${count === 1 ? "photo" : "photos"} of ${property.title}` : undefined}>
+        {count ? (
+          <div className="mt-6! grid! grid-cols-2! gap-3!">
+            {images.map((photo, index) => (
+              <button key={photo.id} type="button" onClick={() => { setCurrentIndex(index); setLightboxOpen(true); }}
+                aria-label={`Open photo ${index + 1} of ${property.title}`}
+                className={`group/photo relative! overflow-hidden! rounded-xl! bg-[#eef1f6]! cursor-pointer! ${index === 0 ? "col-span-2! aspect-[16/9]!" : "aspect-[4/3]!"} ${FOCUS_RING}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo.imageUrl} alt={`${property.title} photo ${index + 1}`} loading="lazy" decoding="async"
+                  className="block! h-full! w-full! object-cover! transition-transform! duration-300! ease-out-quint! group-hover/photo:scale-[1.02]! motion-reduce:transition-none!" />
+              </button>
+            ))}
           </div>
-          <span className="inline-flex! items-center! gap-2! px-4! py-2.5! bg-white! border! border-gray-200! rounded-full! text-sm! font-medium! text-gray-600!">
-            <Images className="w-4.5! h-4.5!" />
-            {allImages.length} {allImages.length === 1 ? "Photo" : "Photos"}
-          </span>
-        </div>
-      </div>
-
-      {/* Primary Image — full-bleed inside its card, like the map */}
-      {primaryImage && (
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! shadow-sm! overflow-hidden!">
-          <div className="relative!">
-            <span className="absolute! top-5! left-5! z-10! inline-flex! items-center! gap-1.5! px-3! py-1.5! bg-white/95! backdrop-blur-md! border! border-gray-200/50! rounded-full! text-xs! font-medium! uppercase! tracking-widest! text-gray-900! shadow-sm!">
-              <Star className="w-3.5! h-3.5!" />
-              Primary
-            </span>
-            <button
-              onClick={() => openLightbox(0)}
-              className="w-full! block! relative! group cursor-pointer!"
-            >
-              <img
-                src={primaryImage.imageUrl}
-                alt={`${property.title} - Primary`}
-                className="w-full! h-[350px]! md:h-[550px]! object-cover! transition-transform! duration-700! group-hover:scale-[1.02]!"
-              />
-              <div className="absolute! inset-0! bg-black/0! group-hover:bg-black/10! transition-colors! duration-300! flex! items-center! justify-center!">
-                <div className="opacity-0! group-hover:opacity-100! transition-all! duration-300! w-14! h-14! rounded-full! bg-white/95! backdrop-blur-md! flex! items-center! justify-center! shadow-lg! scale-50! group-hover:scale-100!">
-                  <ZoomIn className="w-5! h-5! text-gray-900!" />
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Gallery Grid */}
-      {galleryImages.length > 0 && (
-        <div className="bg-white! rounded-[20px]! border! border-gray-200/70! p-2! md:p-3! shadow-sm!">
-          <div className="grid! grid-cols-2! md:grid-cols-3! lg:grid-cols-4! gap-2! md:gap-3!">
-            {galleryImages.map((img, idx) => {
-              const imageIndex = primaryImage ? idx + 1 : idx;
-              // Create varied grid sizes for masonry effect
-              const isLarge = idx % 5 === 0;
-              return (
-                <button
-                  key={img.id}
-                  onClick={() => openLightbox(imageIndex)}
-                  className={`relative! rounded-[16px]! overflow-hidden! group cursor-pointer! ${
-                    isLarge ? "md:col-span-2! md:row-span-2!" : ""
-                  }`}
-                >
-                  <img
-                    src={img.imageUrl}
-                    alt={`${property.title} - View ${idx + 2}`}
-                    className={`w-full! object-cover! transition-transform! duration-700! group-hover:scale-105! ${
-                      isLarge ? "h-[240px]! md:h-[400px]!" : "h-[180px]! md:h-[195px]!"
-                    }`}
-                  />
-                  <div className="absolute! inset-0! bg-black/0! group-hover:bg-black/10! transition-colors! duration-300! flex! items-center! justify-center!">
-                    <div className="opacity-0! group-hover:opacity-100! transition-all! duration-300! w-12! h-12! rounded-full! bg-white/95! backdrop-blur-md! flex! items-center! justify-center! shadow-lg! scale-50! group-hover:scale-100!">
-                      <ZoomIn className="w-4.5! h-4.5! text-gray-900!" />
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Lightbox Modal */}
-      {lightboxOpen && (
-        <div className="fixed! inset-0! z-[9999]! bg-white/95! backdrop-blur-xl! flex! items-center! justify-center!">
-          {/* Close Button */}
-          <button
-            onClick={closeLightbox}
-            className="absolute! top-6! right-6! z-10! w-12! h-12! rounded-full! bg-gray-100/50! hover:bg-gray-200/50! flex! items-center! justify-center! transition-colors! backdrop-blur-md!"
-            aria-label="Close lightbox"
-          >
-            <X className="w-5! h-5! text-gray-900!" />
-          </button>
-
-          {/* Image Counter */}
-          <div className="absolute! top-6! left-6! z-10! px-4! py-2! bg-gray-100/50! backdrop-blur-md! rounded-full!">
-            <span className="text-gray-900! text-sm! font-medium! tracking-widest!">
-              {currentIndex + 1} / {allImages.length}
-            </span>
-          </div>
-
-          {/* Previous Button */}
-          {allImages.length > 1 && (
-            <button
-               onClick={(e) => { e.stopPropagation(); goPrev(); }}
-              className="absolute! left-6! z-10! w-14! h-14! rounded-full! bg-gray-100/50! hover:bg-gray-200/50! flex! items-center! justify-center! transition-all! backdrop-blur-md! hover:scale-105!"
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="w-6! h-6! text-gray-900!" />
-            </button>
-          )}
-
-          {/* Current Image */}
-          <div className="max-w-[90vw]! max-h-[80vh]! flex! items-center! justify-center!">
-            <img
-              src={allImages[currentIndex].imageUrl}
-              alt={`${property.title} - Image ${currentIndex + 1}`}
-              className="max-w-full! max-h-[80vh]! object-contain! rounded-[16px]! select-none! shadow-sm! border! border-gray-200!"
-              draggable={false}
-            />
-          </div>
-
-          {/* Next Button */}
-          {allImages.length > 1 && (
-            <button
-               onClick={(e) => { e.stopPropagation(); goNext(); }}
-              className="absolute! right-6! z-10! w-14! h-14! rounded-full! bg-gray-100/50! hover:bg-gray-200/50! flex! items-center! justify-center! transition-all! backdrop-blur-md! hover:scale-105!"
-              aria-label="Next image"
-            >
-              <ChevronRight className="w-6! h-6! text-gray-900!" />
-            </button>
-          )}
-
-          {/* Thumbnail Strip */}
-          {allImages.length > 1 && (
-            <div className="absolute! bottom-6! left-1/2! -translate-x-1/2! flex! gap-2! max-w-[90vw]! overflow-x-auto! py-2! px-4! bg-white/50! backdrop-blur-xl! rounded-[16px]! hide-scrollbar! border! border-gray-200!">
-              {allImages.map((img, idx) => (
-                <button
-                  key={img.id}
-                  onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
-                  className={`w-16! h-12! rounded-[8px]! overflow-hidden! shrink-0! border-2! transition-all! duration-300! ${
-                    idx === currentIndex
-                      ? "border-gray-900! opacity-100! scale-105! shadow-sm!"
-                      : "border-transparent! opacity-40! hover:opacity-100!"
-                  }`}
-                >
-                  <img
-                    src={img.imageUrl}
-                    alt=""
-                    className="w-full! h-full! object-cover!"
-                    draggable={false}
-                  />
-                </button>
-              ))}
+        ) : (
+          <p className="mt-6! text-base! text-[#465066]! leading-relaxed!">Photos have not been published for this property yet. Contact us to arrange a viewing.</p>
+        )}
+      </Panel>
+      <dialog ref={dialogRef} aria-label={`Photos of ${property.title}`} onClose={() => setLightboxOpen(false)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowRight" && count > 1) { event.preventDefault(); step(1); }
+          if (event.key === "ArrowLeft" && count > 1) { event.preventDefault(); step(-1); }
+        }}
+        className="fixed! inset-0! m-0! w-screen! max-w-none! h-dvh! max-h-none! border-0! bg-[#0a0f1c]! text-white! p-4! sm:p-8! backdrop:bg-black/70!">
+        {lightboxOpen && selected && (
+          <div className="flex! h-full! flex-col! gap-4!">
+            <div className="flex! items-center! justify-between! gap-4!">
+              <p className="m-0! text-sm! text-white/75! tabular-nums!">{currentIndex + 1} / {count}</p>
+              <button type="button" onClick={() => setLightboxOpen(false)} className={LIGHTBOX_BUTTON} aria-label="Close lightbox"><X className="w-5! h-5!" /></button>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Shared contact call-to-action, identical on every page (skipped when embedded) */}
+            <div className="relative! flex! flex-1! min-h-0! items-center! justify-center!">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={selected.imageUrl} alt={`${property.title} photo ${currentIndex + 1}`} className="max-h-full! max-w-full! object-contain!" />
+              {count > 1 && (
+                <>
+                  <button type="button" onClick={() => step(-1)} className={`${LIGHTBOX_BUTTON} absolute! left-0!`} aria-label="Previous image"><ChevronLeft className="w-5! h-5!" /></button>
+                  <button type="button" onClick={() => step(1)} className={`${LIGHTBOX_BUTTON} absolute! right-0!`} aria-label="Next image"><ChevronRight className="w-5! h-5!" /></button>
+                </>
+              )}
+            </div>
+            {count > 1 && (
+              <div className="flex! shrink-0! gap-2! mx-auto! max-w-full! overflow-x-auto! p-1!">
+                {images.map((photo, index) => (
+                  <button key={photo.id} type="button" onClick={() => setCurrentIndex(index)} aria-label={`View photo ${index + 1}`} aria-pressed={index === currentIndex}
+                    className={`h-12! w-16! shrink-0! overflow-hidden! rounded-sm! cursor-pointer! focus-visible:outline-2! focus-visible:outline-white! ${index === currentIndex ? "outline-1! outline-white! outline-offset-2!" : "opacity-50! hover:opacity-100!"}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.imageUrl} alt="" className="h-full! w-full! object-cover!" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </dialog>
       {!embedded && <NeedMoreDetails propertyType={property.propertyType} />}
     </div>
   );

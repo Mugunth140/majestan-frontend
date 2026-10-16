@@ -9,7 +9,8 @@ import { useUserAuthStore } from "@/store/userAuthStore";
 import { createPropertyEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
-import { VISIT_SLOTS, formatSlot, isValidVisitDate, maxVisitDate, todayYmd } from "@/lib/visit-slots";
+import { isValidVisitDate } from "@/lib/visit-slots";
+import { VisitPicker, firstBookableDate } from "@/components/site/project/ProjectEnquiryDialog";
 import { LISTING_ENQUIRY_BUTTON, LISTING_VISIT_BUTTON } from "@/components/site/shared/listing-summary-styles";
 
 export type EnquiryPropertyRef = {
@@ -373,7 +374,7 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Visit form state
-  const [visitDate, setVisitDate] = useState(todayYmd());
+  const [visitDate, setVisitDate] = useState(firstBookableDate);
   const [visitSlot, setVisitSlot] = useState("");
 
   // Shared
@@ -399,7 +400,7 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
     setStatus("idle");
     setErrorMsg("");
     setVisitSlot("");
-    setVisitDate(todayYmd());
+    setVisitDate(firstBookableDate());
     setDialog(which);
   }
 
@@ -410,7 +411,7 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
       setStatus("idle");
       setErrorMsg("");
       setVisitSlot("");
-      setVisitDate(todayYmd());
+      setVisitDate(firstBookableDate());
       setDialog(pendingIntent);
       setPendingIntent(null);
     }
@@ -602,39 +603,20 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
                 <motion.div key="form" exit={{ opacity: 0 }} className="space-y-[14px]!">
                   {contactCardCollapsed}
 
-                  {/* Date */}
-                  <div>
-                    <label className={labelClass}>Preferred Date</label>
-                      <input
-                        type="date"
-                        min={todayYmd()}
-                        max={maxVisitDate()}
-                        value={visitDate}
-                      onChange={(e) => setVisitDate(e.target.value)}
-                      className={inputClass}
-                    />
-                  </div>
-
-                  {/* Time slot picker: one compact select instead of a wall
-                      of pills. Native control, fully keyboard-operable. */}
-                  <div>
-                    <label htmlFor="property-visit-slot" className={labelClass}>
-                      Preferred Time
-                    </label>
-                    <select
-                      id="property-visit-slot"
-                      value={visitSlot}
-                      onChange={(e) => setVisitSlot(e.target.value)}
-                      className={inputClass}
-                    >
-                      <option value="">Select a time</option>
-                      {VISIT_SLOTS.map((slot) => (
-                        <option key={slot} value={slot}>
-                          {formatSlot(slot)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {/* Same picker as the project pages: the next two weeks
+                      as a day strip, hourly slots as a grid, past slots
+                      disabled. This was a native <select>, which the legacy
+                      theme hides site-wide (styles.css: select { display:
+                      none !important }), so no time could be chosen. */}
+                  <VisitPicker
+                    date={visitDate}
+                    slot={visitSlot}
+                    onDate={(value) => {
+                      setVisitDate(value);
+                      setVisitSlot("");
+                    }}
+                    onSlot={setVisitSlot}
+                  />
 
                   {status === "error" && errorMsg && (
                     <p className="text-[13px]! text-red-600!">{errorMsg}</p>

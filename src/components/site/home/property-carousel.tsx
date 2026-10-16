@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { FeaturedEnquiry, type FeaturedEnquiryRequest } from "./featured-enquiry";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Autoplay, Navigation, Pagination, EffectCoverflow } from "swiper/modules";
-import { createEnquiry, type FeaturedProperty, type HomeBanner } from "@/lib/api";
+import { type FeaturedProperty, type HomeBanner } from "@/lib/api";
 import { ListingImage } from "@/components/site/listing/ListingImage";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
-import { MapPin, ChevronLeft, ChevronRight, X, ArrowUpRight, Phone, Tag } from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight, ArrowUpRight, Phone, Tag } from "lucide-react";
 
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -70,7 +71,7 @@ export function FeatureCarousel(props: PropertyCarouselProps) {
    CURVED PATH CAROUSEL
 ══════════════════════════════════════════════════════════════════ */
 function CurvedPathCarousel({ properties }: { properties: FeaturedProperty[] }) {
-  const [enquiry, setEnquiry] = useState<FeaturedProperty | null>(null);
+  const [enquiry, setEnquiry] = useState<FeaturedEnquiryRequest | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
@@ -106,7 +107,7 @@ function CurvedPathCarousel({ properties }: { properties: FeaturedProperty[] }) 
                 isActive={isActive}
                 photo={prop.photo}
                 placeholderSrc={getPlaceholderImage({ propertyType: prop.propertyType })}
-                onContact={() => setEnquiry(prop)}
+                onContact={() => setEnquiry({ property: prop, token: Date.now() })}
               />
             )}
           </SwiperSlide>
@@ -134,9 +135,7 @@ function CurvedPathCarousel({ properties }: { properties: FeaturedProperty[] }) 
         </div>
       </Swiper>
 
-      <AnimatePresence>
-        {enquiry && <EnquiryDialog property={enquiry} onClose={() => setEnquiry(null)} />}
-      </AnimatePresence>
+      <FeaturedEnquiry request={enquiry} />
     </div>
   );
 }
@@ -278,122 +277,6 @@ function CurveCard({
   );
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   ENQUIRY DIALOG
-══════════════════════════════════════════════════════════════════ */
-function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onClose: () => void }) {
-  const [form,   setForm]   = useState({ name: "", email: "", phone: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setStatus("submitting");
-    try {
-      await createEnquiry({
-        ...form,
-        propertyType: property.propertyType,
-        listingType:  property.postType ?? undefined,
-        message:      `${form.message}\nProperty: ${property.propertyName ?? ""}`,
-      });
-      setStatus("success");
-      setForm({ name: "", email: "", phone: "", message: "" });
-    } catch { setStatus("error"); }
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      role="presentation" onClick={onClose}
-      className="fixed! inset-0! z-50! flex! items-end! sm:items-center! justify-center! bg-[#0a1628]/60! backdrop-blur-sm! p-4!"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 52, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 36, scale: 0.97 }}
-        transition={{ type: "spring", stiffness: 220, damping: 28 }}
-        role="dialog" aria-modal="true" aria-labelledby="enquiry-title"
-        onClick={(e) => e.stopPropagation()}
-        className="relative! w-full! max-w-md! rounded-[2rem]! bg-white! border! border-black/5! shadow-[0_40px_80px_-20px_rgba(10,22,40,0.22)]! p-8! sm:p-10!"
-      >
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 300, damping: 18 }}
-          type="button" onClick={onClose} aria-label="Close"
-          className="absolute! top-5! right-5! w-8! h-8! rounded-full! bg-[#27427f]/6! flex! items-center! justify-center! text-[#27427f]/55! hover:bg-[#27427f]/10! transition-colors!"
-        >
-          <X size={15} strokeWidth={2.5} />
-        </motion.button>
-
-        <div className="mb-6!">
-          <span className="text-[9px]! font-black! uppercase! tracking-[0.18em]! text-[#ffc900]! block! mb-1.5!">
-            {property.postType ?? "Enquiry"}
-          </span>
-          <h4 id="enquiry-title" className="text-xl! font-bold! text-[#1a2d5a]! leading-snug! tracking-tight! pr-8!">
-            {property.propertyName ?? "this property"}
-          </h4>
-        </div>
-
-        <AnimatePresence mode="wait">
-          {status === "success" ? (
-            <motion.div key="ok"
-              initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 22 }}
-              className="py-10! text-center!"
-            >
-              <div className="w-12! h-12! rounded-full! bg-[#27427f]/8! flex! items-center! justify-center! mx-auto! mb-4!">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#27427f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              <p className="font-semibold! text-[#1a2d5a]! text-base!">Enquiry submitted!</p>
-              <p className="text-sm! text-[#27427f]/50! mt-1!">We will contact you shortly.</p>
-            </motion.div>
-          ) : (
-            <motion.form key="form" onSubmit={onSubmit} exit={{ opacity: 0 }} className="flex! flex-col! gap-4!">
-              {([
-                { label: "Full Name", key: "name",  type: "text",  required: true,  ph: "e.g. Arjun Selvam" },
-                { label: "Email",     key: "email", type: "email", required: false, ph: "you@example.com" },
-                { label: "Phone",     key: "phone", type: "tel",   required: true,  ph: "+91 98400 00000" },
-              ] as const).map((f) => (
-                <div key={f.key} className="flex! flex-col! gap-1.5!">
-                  <label className="text-[10px]! font-black! uppercase! tracking-wider! text-[#27427f]/55!">
-                    {f.label}{f.required && <span className="text-[#ffc900] ml-0.5">*</span>}
-                  </label>
-                  <input
-                    type={f.type} required={f.required} placeholder={f.ph}
-                    value={form[f.key]}
-                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                    className="w-full! rounded-xl! border! border-[#27427f]/10! bg-[#f7f9fc]! px-4! py-3! text-sm! text-[#1a2d5a]! placeholder:text-[#27427f]/28! outline-none! focus:border-[#27427f]/35! focus:bg-white! transition-all! duration-200!"
-                  />
-                </div>
-              ))}
-              <div className="flex! flex-col! gap-1.5!">
-                <label className="text-[10px]! font-black! uppercase! tracking-wider! text-[#27427f]/55!">Message</label>
-                <textarea rows={3} placeholder="Any specific requirements..."
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full! rounded-xl! border! border-[#27427f]/10! bg-[#f7f9fc]! px-4! py-3! text-sm! text-[#1a2d5a]! placeholder:text-[#27427f]/28! outline-none! focus:border-[#27427f]/35! focus:bg-white! transition-all! duration-200! resize-none!"
-                />
-              </div>
-              {status === "error" && (
-                <p className="text-xs! text-red-500! font-semibold!">Could not submit. Please try again.</p>
-              )}
-              <motion.button
-                whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                type="submit" disabled={status === "submitting"}
-                className="mt-1! w-full! rounded-xl! bg-[#27427f]! py-3.5! text-sm! font-black! uppercase! tracking-wider! text-white! disabled:opacity-55! transition-all!"
-              >
-                {status === "submitting" ? "Sending..." : "Submit Enquiry"}
-              </motion.button>
-            </motion.form>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.div>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════════════
    PRICE FORMATTER

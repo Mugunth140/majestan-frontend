@@ -1,16 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useRef, useEffect } from "react";
+import { motion } from "motion/react";
+import { FeaturedEnquiry, type FeaturedEnquiryRequest } from "./featured-enquiry";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import { A11y, Autoplay, Navigation, Pagination } from "swiper/modules";
-import { createEnquiry, type FeaturedProperty } from "@/lib/api";
+import { type FeaturedProperty } from "@/lib/api";
 import { ListingImage } from "@/components/site/listing/ListingImage";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
-import { MapPin, ChevronLeft, ChevronRight, X, BedDouble, Ruler, CheckCircle2 } from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight, BedDouble, Ruler } from "lucide-react";
 
 import { FacingArrow } from "./facing-arrow";
 
@@ -31,7 +32,7 @@ type LuxuryFeaturedSectionProps = {
 export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFeaturedSectionProps) {
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [enquiry, setEnquiry] = useState<FeaturedProperty | null>(null);
+  const [enquiry, setEnquiry] = useState<FeaturedEnquiryRequest | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
                   property={prop}
                   isActive={true}
                   photo={prop.photo}
-                  onContact={() => setEnquiry(prop)}
+                  onContact={() => setEnquiry({ property: prop, token: Date.now() })}
                 />
               ))}
             </div>
@@ -130,7 +131,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
                     property={prop} 
                     isActive={isActive} 
                     photo={prop.photo}
-                    onContact={() => setEnquiry(properties[i % properties.length])}
+                    onContact={() => setEnquiry({ property: properties[i % properties.length], token: Date.now() })}
                   />
                 )}
               </SwiperSlide>
@@ -162,9 +163,7 @@ export function LuxuryFeaturedSection({ properties, title, subtitle }: LuxuryFea
         </div>
       </div>
 
-      <AnimatePresence>
-        {enquiry && <EnquiryDialog property={enquiry} onClose={() => setEnquiry(null)} />}
-      </AnimatePresence>
+      <FeaturedEnquiry request={enquiry} />
     </section>
   );
 }
@@ -295,123 +294,6 @@ function LuxuryCard({ property, photo, onContact }: { property: FeaturedProperty
   );
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   ENQUIRY DIALOG (Adapted for Light Mode)
-══════════════════════════════════════════════════════════════════ */
-// Field and label styling mirror the site enquiry form
-// (ContactEnquiryForm.tsx) so both surfaces read identically.
-const ENQUIRY_FIELD_CLASS =
-  "w-full! px-[13px]! py-[10px]! rounded-[10px]! bg-white! border! border-gray-300! " +
-  "text-[14px]! text-[#161e2d]! outline-none! transition-colors! duration-150! " +
-  "placeholder:text-gray-400! focus:border-[#27427f]!";
-
-const ENQUIRY_LABEL_CLASS = "block! text-[12px]! text-gray-600! mb-[6px]!";
-
-function EnquiryDialog({ property, onClose }: { property: FeaturedProperty; onClose: () => void }) {
-  const [form,   setForm]   = useState({ name: "", email: "", phone: "" });
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setStatus("submitting");
-    try {
-      await createEnquiry({
-        ...form,
-        propertyType: property.propertyType,
-        listingType:  property.postType ?? undefined,
-        // The form has no message field, so the property reference is the
-        // whole message — keeps the lead record traceable to the listing.
-        message:      `Property: ${property.propertyName ?? ""}`,
-      });
-      setStatus("success");
-      setForm({ name: "", email: "", phone: "" });
-    } catch { setStatus("error"); }
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.22 }}
-      role="presentation" onClick={onClose}
-      className="fixed! inset-0! z-50! flex! items-end! sm:items-center! justify-center! bg-gray-900/40! backdrop-blur-sm! p-4!"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 52, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 36, scale: 0.97 }}
-        transition={{ type: "spring", stiffness: 220, damping: 28 }}
-        role="dialog" aria-modal="true" aria-labelledby="enquiry-title"
-        onClick={(e) => e.stopPropagation()}
-        className="relative! w-full! max-w-md! rounded-[2rem]! bg-white! border! border-gray-100! shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]! p-8! sm:p-10!"
-      >
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 300, damping: 18 }}
-          type="button" onClick={onClose} aria-label="Close"
-          className="absolute! top-5! right-5! w-8! h-8! rounded-full! bg-gray-100! flex! items-center! justify-center! text-gray-500! hover:bg-gray-200! hover:text-gray-900! transition-colors!"
-        >
-          <X size={15} strokeWidth={2.5} />
-        </motion.button>
-
-        <div className="mb-6!">
-          <span className="block! mb-1.5! text-[10px]! font-semibold! uppercase! tracking-[0.14em]! text-[#27427f]!">
-            {property.postType ?? "Enquiry"}
-          </span>
-          <h4 id="enquiry-title" className="pr-8! text-[20px]! font-semibold! leading-snug! tracking-tight! text-[#161e2d]!">
-            {property.propertyName ?? "this property"}
-          </h4>
-        </div>
-
-        <AnimatePresence mode="wait">
-          {status === "success" ? (
-            <motion.div key="ok"
-              initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 22 }}
-              className="py-10! text-center!"
-            >
-              <div className="mx-auto! mb-4! flex! h-12! w-12! items-center! justify-center! rounded-full! bg-emerald-50!">
-                <CheckCircle2 className="h-6! w-6! text-emerald-600!" aria-hidden="true" />
-              </div>
-              <p className="text-[15px]! font-medium! text-[#161e2d]!">Enquiry submitted!</p>
-              <p className="mt-[5px]! text-[14px]! leading-[1.6]! text-gray-600!">We will contact you shortly.</p>
-            </motion.div>
-          ) : (
-            <motion.form key="form" onSubmit={onSubmit} exit={{ opacity: 0 }} className="space-y-[15px]!">
-              {([
-                { label: "Full Name", key: "name",  type: "text",  required: true,  ph: "e.g. Arjun Selvam" },
-                { label: "Email",     key: "email", type: "email", required: true,  ph: "you@example.com" },
-                { label: "Phone",     key: "phone", type: "tel",   required: true,  ph: "+91 98400 00000" },
-              ] as const).map((f) => (
-                <div key={f.key}>
-                  <label className={ENQUIRY_LABEL_CLASS}>
-                    {f.label}{f.required && <span className="text-[#27427f] ml-0.5">*</span>}
-                  </label>
-                  <input
-                    type={f.type} required={f.required} placeholder={f.ph}
-                    value={form[f.key]}
-                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                    className={ENQUIRY_FIELD_CLASS}
-                  />
-                </div>
-              ))}
-              {status === "error" && (
-                <p className="text-[13px]! text-red-600!">Could not submit. Please try again.</p>
-              )}
-              <motion.button
-                whileTap={{ scale: 0.99 }}
-                transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                type="submit" disabled={status === "submitting"}
-                className="inline-flex! w-full! items-center! justify-center! gap-2! rounded-[10px]! bg-[#27427f]! px-[20px]! py-[11px]! text-[13px]! font-medium! text-white! transition-colors! duration-150! hover:bg-[#1e3563]! active:scale-[0.99]! disabled:opacity-60! disabled:pointer-events-none!"
-              >
-                {status === "submitting" ? "Sending..." : "Submit Enquiry"}
-              </motion.button>
-            </motion.form>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.div>
-  );
-}
 
 // Only the canonical condition vocabulary gets a badge; anything else stays
 // unlabeled rather than printing junk on the card. Mirrors the listing-page

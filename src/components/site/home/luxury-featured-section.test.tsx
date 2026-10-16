@@ -3,6 +3,7 @@ import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
+import { useUserAuthStore } from "@/store/userAuthStore";
 import type { FeaturedProperty } from "@/lib/api";
 
 vi.mock("next/navigation", () => ({
@@ -72,7 +73,12 @@ describe("LuxuryCard redesigned rows", () => {
     expect(screen.queryByText("For sale")).toBeNull();
   });
 
-  it("opens an enquiry dialog without a message field", async () => {
+  it("opens the shared enquiry dialog with a signed-in visitor's saved details", async () => {
+    useUserAuthStore.setState({
+      token: "t",
+      isAuthenticated: true,
+      user: { id: 1, name: "Mugunth", phone: "+916384761234", email: "x@user.majestan.local" } as never,
+    });
     const user = userEvent.setup();
     render(
       <LuxuryFeaturedSection properties={[baseProp]} title="Handpicked Properties" subtitle="sub" />,
@@ -80,13 +86,12 @@ describe("LuxuryCard redesigned rows", () => {
     await user.click(screen.getByRole("button", { name: /enquire now/i }));
 
     const dialog = await screen.findByRole("dialog");
-    expect(dialog).toBeDefined();
-    expect(within(dialog).getByPlaceholderText("e.g. Arjun Selvam")).toBeDefined();
-    expect(within(dialog).getByPlaceholderText("you@example.com")).toBeDefined();
-    expect(within(dialog).getByPlaceholderText("+91 98400 00000")).toBeDefined();
-    // Message field is intentionally omitted.
-    expect(within(dialog).queryByPlaceholderText(/specific requirements/i)).toBeNull();
-    expect(within(dialog).queryByText(/^message$/i)).toBeNull();
+    // Name and phone come from the account; nothing to type.
+    expect(within(dialog).getByText("Mugunth")).toBeDefined();
+    expect(within(dialog).getByText("+916384761234")).toBeDefined();
+    expect(within(dialog).queryByPlaceholderText("Your full name")).toBeNull();
+    expect(within(dialog).getByRole("button", { name: /submit enquiry/i })).toBeDefined();
+    useUserAuthStore.setState({ token: null, user: null, isAuthenticated: false });
   });
 
   it("renders price per sq.ft alongside the price", () => {

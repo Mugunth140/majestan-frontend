@@ -8,7 +8,10 @@ import {
 } from "@/lib/seo-urls";
 import { batchHasPseoInventory, type PseoCheckParams } from "@/lib/pseo-inventory";
 
-export const revalidate = 3600;
+// Build on request, never at `next build`: CI has no backend, so a
+// build-time sitemap shipped with only the static pages (seen 2026-10-16).
+// The backend fetches below keep their own 1-hour data cache.
+export const dynamic = "force-dynamic";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.majestanrealty.com";

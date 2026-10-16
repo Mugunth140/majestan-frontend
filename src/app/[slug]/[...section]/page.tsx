@@ -1,6 +1,7 @@
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
+import { SimilarProjects, SimilarProperties } from "@/components/site/listing/SimilarListings";
 import { PropertyNavigation } from "@/components/site/property/property-navigation";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { AmenitiesSection } from "@/components/site/property/sections/AmenitiesSection";
@@ -579,6 +580,7 @@ export default async function PropertySectionPage({
             />
           )}
         </div>
+        <SimilarProperties propertyId={property.id} city={property.city} />
         <SiteFooter />
       </>
     );
@@ -683,6 +685,7 @@ export default async function PropertySectionPage({
             }}
           />
         )}
+        <SimilarProjects projectId={project.id} city={project.city} />
         <SiteFooter />
       </>
     );

@@ -71,4 +71,14 @@ describe("ProjectListingCard", () => {
     );
     expect(screen.queryByText("Total Units")).not.toBeInTheDocument();
   });
+
+  it("prefers the stored Total Units on apartment cards", () => {
+    render(
+      <ProjectListingCard
+        item={item({ totalUnits: 240 })}
+      />,
+    );
+    expect(screen.getByText("Total Units")).toBeInTheDocument();
+    expect(screen.getByText("240")).toBeInTheDocument();
+  });
 });

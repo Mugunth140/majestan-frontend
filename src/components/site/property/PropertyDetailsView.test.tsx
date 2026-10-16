@@ -137,10 +137,13 @@ describe("PropertyDetailsView info card", () => {
     }} />);
 
     const details = within(screen.getByRole("region", { name: "Property details" }));
-    for (const value of ["Resale", "1,456 sq.ft", "1,210.5 sq.ft", "Balconies", "Pooja Room", "Study Room", "3 Nov 2026"]) {
+    for (const value of ["Resale", "1,210.5 sq.ft", "Balconies", "Pooja Room", "Study Room", "3 Nov 2026"]) {
       expect(details.getAllByText(value).length).toBeGreaterThan(0);
     }
-    expect(details.getByText("No")).toBeDefined();
+    // The client removed Built-Up Area for apartments; carpet area stays.
+    expect(details.queryByText("Built-Up Area")).toBeNull();
+    expect(details.getByText("Available")).toBeDefined();
+    expect(details.getByText("Not Available")).toBeDefined();
     expect(details.getByText("Solar water Rainwater storage")).toBeDefined();
   });
 
@@ -565,25 +568,24 @@ describe("PropertyDetailsView floor item", () => {
     },
   });
 
-  it("shows floor over total for apartments when both are stored", () => {
+  it("shows the floor number and total floors for apartments", () => {
     render(<PropertyDetailsView property={withFloors()} />);
 
-    expect(screen.getByText("Floor No")).toBeDefined();
-    expect(screen.getByText("4 / 12")).toBeDefined();
+    expect(screen.getByText("Floor Number")).toBeDefined();
+    expect(screen.getByText("4th Floor")).toBeDefined();
+    expect(screen.getByText("Total Floors")).toBeDefined();
+    expect(screen.getByText("12")).toBeDefined();
   });
 
-  it("hides the item completely unless both halves are stored", () => {
-    for (const details of [
-      { floorNumber: "4", totalFloors: null },
-      { floorNumber: null, totalFloors: 12 },
-      { floorNumber: null, totalFloors: null },
-    ]) {
-      const { unmount } = render(
-        <PropertyDetailsView property={withFloors(details)} />,
-      );
-      expect(screen.queryByText("Floor No")).toBeNull();
-      unmount();
-    }
+  it("shows whichever half is stored, and nothing when neither is", () => {
+    const { unmount } = render(<PropertyDetailsView property={withFloors({ totalFloors: null })} />);
+    expect(screen.getByText("4th Floor")).toBeDefined();
+    expect(screen.queryByText("Total Floors")).toBeNull();
+    unmount();
+
+    render(<PropertyDetailsView property={withFloors({ floorNumber: null, totalFloors: null })} />);
+    expect(screen.queryByText("Floor Number")).toBeNull();
+    expect(screen.queryByText("Total Floors")).toBeNull();
   });
 
   it("hides the item for non-apartments even with complete data", () => {
@@ -593,7 +595,7 @@ describe("PropertyDetailsView floor item", () => {
       />,
     );
 
-    expect(screen.queryByText("Floor No")).toBeNull();
+    expect(screen.queryByText("Floor Number")).toBeNull();
   });
 });
 

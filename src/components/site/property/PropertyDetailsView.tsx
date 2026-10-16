@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { getPropertyFloorPlans } from "@/lib/property-floor-plans";
 import { getAdditionalPropertyDetails } from "@/lib/property-detail-rows";
+import { getGroupedPropertyDetails } from "@/lib/property-detail-groups";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
 import {
   getCommercialSpecs,
@@ -169,6 +170,11 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
     }),
   ];
 
+  // Every listing type shows its details in categories.
+  const detailGroups = getGroupedPropertyDetails(property, { pricePerSqft: perSqft });
+  /** Categories visible before "View all details". */
+  const GROUPS_COLLAPSED = 2;
+
   // Amenities preview — real tags only, never a hardcoded fallback.
   // Normalized amenities first, raw join as fallback (tests and older
   // payloads carry either shape).
@@ -193,8 +199,55 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
           <div {...(isSingle ? { id: "overview" } : {})} className="scroll-mt-40!">
             <PropertyGallery key={property.canonicalSlug} property={property} singlePage={isSingle} />
           </div>
-          {/* Overview card */}
-          {overviewStats.length > 0 && (
+          {/* Overview card: grouped categories for homes, flat grid otherwise */}
+          {detailGroups.length > 0 && (
+            <Panel id="property-details" title="Property details">
+              <div id="property-details-groups" className="mt-6!">
+                {detailGroups.map((g, index) => {
+                  // Collapsed categories stay in the page (search engines,
+                  // screen readers, find-in-page) and are only hidden visually.
+                  const collapsed = !showAllPropertyDetails && index >= GROUPS_COLLAPSED;
+                  const headingId = `property-details-${index}`;
+                  return (
+                    <section
+                      key={g.title}
+                      aria-labelledby={headingId}
+                      className={`border-t! border-solid! border-gray-100! pt-6! pb-6! ${collapsed ? "hidden!" : ""}`}
+                    >
+                      <h3
+                        id={headingId}
+                        className="m-0! text-[12px]! font-semibold! uppercase! tracking-[0.08em]! text-[#1645bf]/80!"
+                      >
+                        {g.title}
+                      </h3>
+                      <dl className="m-0! mt-4! grid! grid-cols-2! gap-x-6! gap-y-5! sm:grid-cols-3!">
+                        {g.fields.map((field) => (
+                          <div key={field.label} className={`min-w-0! ${field.wide ? "col-span-2! sm:col-span-3!" : ""}`}>
+                            <dt className="text-xs! font-medium! leading-tight! text-[#5f6b80]!">{field.label}</dt>
+                            <dd className="m-0! mt-1! text-sm! font-semibold! leading-snug! text-gray-900! break-words! whitespace-pre-line!">
+                              {field.value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </section>
+                  );
+                })}
+              </div>
+              {detailGroups.length > GROUPS_COLLAPSED && (
+                <button
+                  type="button"
+                  aria-controls="property-details-groups"
+                  aria-expanded={showAllPropertyDetails}
+                  onClick={() => setShowAllPropertyDetails((show) => !show)}
+                  className={`${TEXT_LINK} mt-2! inline-flex! text-sm! font-semibold!`}
+                >
+                  {showAllPropertyDetails ? "Show less" : "View all details"}
+                </button>
+              )}
+            </Panel>
+          )}
+          {detailGroups.length === 0 && overviewStats.length > 0 && (
             <Panel id="property-details" title="Property details">
               <div id="property-details-grid" className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! sm:grid-cols-3! gap-x-4! gap-y-6!">
                 {overviewStats.map((stat, index) => {

@@ -370,14 +370,20 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
   }
 
   if (item.propertyType === "commercial") {
-    const cells: CardSpecCell[] = getCommercialSpecs(d).slice(0, 4);
+    // Rent commercials skip Property Age (deposit takes its attention).
+    const isRent = isRentListing(item.posttype);
+    const cells: CardSpecCell[] = getCommercialSpecs(d)
+      .filter((c) => !(isRent && c.label === "Property Age"))
+      .slice(0, 4);
     const deposit = getRentSecurityDeposit(item);
     if (deposit) cells.push({ label: "Security Deposit", value: deposit });
     return cells;
   }
 
   if (item.propertyType === "industrial") {
-    const cells: CardSpecCell[] = getIndustrialSpecs(d).slice(0, 4);
+    const cells: CardSpecCell[] = getIndustrialSpecs(d)
+      .filter((c) => c.label !== "Covered Area")
+      .slice(0, 4);
     const deposit = getRentSecurityDeposit(item);
     if (deposit) cells.push({ label: "Security Deposit", value: deposit });
     return cells;

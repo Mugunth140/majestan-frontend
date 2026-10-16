@@ -130,7 +130,7 @@ export type ProjectDetail = {
   } | null;
 };
 
-export type ProjectListItem = Omit<ProjectDetail, "units" | "seo" | "description" | "address" | "towers" | "totalUnits" | "galleryImageUrls">;
+export type ProjectListItem = Omit<ProjectDetail, "units" | "seo" | "description" | "address" | "towers" | "galleryImageUrls">;
 
 export type ProjectListResponse = {
   items: ProjectListItem[];

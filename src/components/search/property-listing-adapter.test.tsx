@@ -108,6 +108,21 @@ describe("getCardSpecCells", () => {
     expect(sell.map((c) => c.label)).not.toContain("Security Deposit");
   });
 
+  it("replaces Covered Area with Security Deposit on industrial cards", () => {
+    const cells = getCardSpecCells({
+      ...withDetails("industrial", {
+        builtUpArea: "10000",
+        coveredArea: "5000",
+        openArea: "2000",
+      }),
+      posttype: "Rent",
+      securityDeposit: "50000",
+    });
+    expect(cells.map((c) => c.label)).not.toContain("Covered Area");
+    expect(cells.map((c) => c.label)).toContain("Open Area");
+    expect(cells.find((c) => c.label === "Security Deposit")?.value).toBe("₹ 50,000");
+  });
+
   it("shows security deposit on Rent industrial cards", () => {
     const cells = getCardSpecCells({
       ...withDetails("industrial", {
@@ -120,6 +135,21 @@ describe("getCardSpecCells", () => {
       securityDeposit: "50000",
     });
     expect(cells.find((c) => c.label === "Security Deposit")?.value).toBe("₹ 50,000");
+  });
+
+  it("drops Property Age on Rent commercial cards but keeps it on Sell", () => {
+    const rent = getCardSpecCells({
+      ...withDetails("commercial", { bathrooms: 2, propertyAge: "5 Years" }),
+      posttype: "Rent",
+      securityDeposit: "24000",
+    });
+    expect(rent.map((c) => c.label)).not.toContain("Property Age");
+
+    const sell = getCardSpecCells({
+      ...withDetails("commercial", { bathrooms: 2, propertyAge: "5 Years" }),
+      posttype: "Sell",
+    });
+    expect(sell.map((c) => c.label)).toContain("Property Age");
   });
 
   it("caps plot cells at 4, dropping zoning and boundary", () => {

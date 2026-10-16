@@ -1,6 +1,7 @@
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
+import { SimilarProjects, SimilarProperties } from "@/components/site/listing/SimilarListings";
 import { PropertyNavigation } from "@/components/site/property/property-navigation";
 import { PropertyDetailsView } from "@/components/site/property/PropertyDetailsView";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
@@ -594,6 +595,7 @@ export default async function SlugPage({
             />
           )}
         </div>
+        <SimilarProperties propertyId={property.id} city={property.city} />
         <SiteFooter />
       </>
     );
@@ -679,6 +681,7 @@ export default async function SlugPage({
               </div>
             </main>
           </div>
+          <SimilarProjects projectId={project.id} city={project.city} />
           <SiteFooter />
         </>
       );

@@ -218,9 +218,16 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     return "Ready to Move";
   })();
 
-  // Total unit count from the range summary; a card without a countable
-  // stock (zero or missing) shows no cell rather than a zero.
+  // Total unit count: apartment/villa cards read the stored Total Units
+  // from Structure & Layout; other types (and missing values) fall back to
+  // the countable unit-row stock. A card without a countable stock (zero or
+  // missing) shows no cell rather than a zero.
   const totalUnits = (() => {
+    if (item.projectType === "apartment" || item.projectType === "villa") {
+      const stored = item.totalUnits;
+      if (Number.isFinite(stored) && (stored as number) > 0)
+        return (stored as number).toLocaleString("en-IN");
+    }
     const n = item.ranges.unitsCount;
     return Number.isFinite(n) && (n as number) > 0
       ? (n as number).toLocaleString("en-IN")

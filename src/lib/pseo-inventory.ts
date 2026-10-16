@@ -160,7 +160,7 @@ type PseoInventoryRow = {
 const normPlace = (v: string): string =>
   v.toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ").trim();
 
-async function fetchPseoInventorySnapshot(): Promise<PseoInventoryRow[] | null> {
+export async function fetchPseoInventorySnapshot(): Promise<PseoInventoryRow[] | null> {
   try {
     const res = await fetch(`${API_BASE}/properties/pseo-inventory`, {
       // Same ISR window the per-item checks used — sitemap and

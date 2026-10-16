@@ -83,13 +83,20 @@ export const viewport: Viewport = {
 import { QueryProvider } from "@/providers/query-provider";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { GlobalWhatsAppEnquiry } from "@/components/site/enquiry/whatsapp-enquiry-popup";
+import { PopularSearchesProvider } from "@/providers/popular-searches-provider";
+import { fetchPseoInventorySnapshot } from "@/lib/pseo-inventory";
+import { aggregateInventory } from "@/lib/popular-searches";
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Footer "Popular Searches" counts. Cached snapshot (see pseo-inventory);
+  // aggregated here so pages ship counts, not one row per listing.
+  const inventoryCounts = aggregateInventory((await fetchPseoInventorySnapshot()) ?? []);
+
   const orgJsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
@@ -168,8 +175,10 @@ export default function RootLayout({
         />
         <QueryProvider>
           <LocationProvider>
-            {children}
-            <GlobalWhatsAppEnquiry />
+            <PopularSearchesProvider counts={inventoryCounts}>
+              {children}
+              <GlobalWhatsAppEnquiry />
+            </PopularSearchesProvider>
           </LocationProvider>
         </QueryProvider>
       </body>

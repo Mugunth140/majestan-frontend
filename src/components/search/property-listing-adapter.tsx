@@ -635,7 +635,9 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           <div className="ml-auto! shrink-0! self-center! flex!">
             {(() => {
               // Condition ribbon pinned to the end of the pricing row.
-              const badge = getConditionBadge(item);
+              // No badges on Rent cards — condition ribbons (Resale / New /
+              // Under Construction) are a Buy signal; rentals show none.
+              const badge = isRentListing(item.posttype) ? null : getConditionBadge(item);
               return badge ? (
                 <span
                   className="inline-flex! items-center! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"

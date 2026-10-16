@@ -160,3 +160,8 @@ export function useLocationContext() {
   }
   return context;
 }
+
+/** The selected city, or null outside a LocationProvider (e.g. isolated tests). */
+export function useSelectedCity(): string | null {
+  return useContext(LocationContext)?.location ?? null;
+}

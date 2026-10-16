@@ -15,6 +15,7 @@ import {
   PSEO_BEDROOM_OPTIONS,
   BEDROOM_PROPERTY_TYPE_SLUGS,
   isSinglePageType,
+  toLocationSlug,
   type PropertyTypeSlug,
 } from "@/lib/seo-urls";
 import { getVisibleSingleSections } from "@/lib/property-sections";
@@ -76,8 +77,10 @@ async function resolveSublocName(slug: string | undefined, city: string): Promis
       Array.isArray(data) ? data : data.data || data.items || [];
     const match = list.find(
       (s) =>
-        s.city.toLowerCase() === city.toLowerCase() &&
-        s.sublocation.toLowerCase() === slug.toLowerCase()
+        toLocationSlug(s.city) === toLocationSlug(city) &&
+        // Compare as slugs so multi-word names match: "sai-baba-colony"
+        // ↔ "Sai Baba Colony".
+        toLocationSlug(s.sublocation) === toLocationSlug(slug)
     );
     return match?.sublocation ?? slug;
   } catch {

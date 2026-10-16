@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 import Image from "next/image";
+import { PopularSearches } from "./popular-searches";
 
 const city = "coimbatore";
 
@@ -18,23 +19,23 @@ const footerColumns = [
   {
     title: "Buy",
     links: [
-      ["Apartments", `/for-sale/apartments/${city}`],
-      ["Villas", `/for-sale/villas/${city}`],
-      ["Independent Houses", `/for-sale/independent-houses/${city}`],
-      ["Plots", `/for-sale/plots/${city}`],
-      ["Farmlands", `/for-sale/farmlands/${city}`],
-      ["Commercial Spaces", `/for-sale/commercial-spaces/${city}`],
-      ["Industrials", `/for-sale/industrial-spaces/${city}`],
+      ["Apartments", `/apartments-for-sale-in-${city}`],
+      ["Villas", `/villas-for-sale-in-${city}`],
+      ["Independent Houses", `/independent-houses-for-sale-in-${city}`],
+      ["Plots", `/plots-for-sale-in-${city}`],
+      ["Farmlands", `/farmlands-for-sale-in-${city}`],
+      ["Commercial Spaces", `/commercial-spaces-for-sale-in-${city}`],
+      ["Industrials", `/industrial-spaces-for-sale-in-${city}`],
     ],
   },
   {
     title: "Rent",
     links: [
-      ["Commercial", `/for-rent/commercial-spaces/${city}`],
-      ["Industrial", `/for-rent/industrial-spaces/${city}`],
-      ["Apartment", `/for-rent/apartments/${city}`],
-      ["Villa", `/for-rent/villas/${city}`],
-      ["Independent House", `/for-rent/independent-houses/${city}`],
+      ["Commercial", `/commercial-spaces-for-rent-in-${city}`],
+      ["Industrial", `/industrial-spaces-for-rent-in-${city}`],
+      ["Apartment", `/apartments-for-rent-in-${city}`],
+      ["Villa", `/villas-for-rent-in-${city}`],
+      ["Independent House", `/independent-houses-for-rent-in-${city}`],
     ],
   },
   {
@@ -46,29 +47,6 @@ const footerColumns = [
       ["Financial Assistance", "/services/financial-assistance"],
       ["NRI Services", "/services/nri-property-investment"],
     ],
-  },
-] as const;
-
-const quickLinks = [
-  {
-    category: "Flats for Sale",
-    prefix: "for-sale/apartments",
-    locations: ["Saravanampatti", "Kalapatti", "Peelamedu", "Vilankurunchi", "Vadavalli"],
-  },
-  {
-    category: "Villas for Sale",
-    prefix: "for-sale/villas",
-    locations: ["Saravanampatti", "Kalapatti", "Peelamedu", "Ganapathy", "Vadavalli"],
-  },
-  {
-    category: "Plots for Sale",
-    prefix: "for-sale/plots",
-    locations: ["Saravanampatti", "Pappampatti", "Sulur", "Periyanaikenpalayam", "Kinathukadavu"],
-  },
-  {
-    category: "Commercial for Rent",
-    prefix: "for-rent/commercial-spaces",
-    locations: ["Gandhipuram", "Peelamedu", "Ganapathy", "Sai Baba Colony", "Kalapatti"],
   },
 ] as const;
 
@@ -95,65 +73,7 @@ const socials = [
 export function SiteFooter() {
   return (
     <>
-      {/* ── Popular Searches ────────────────────────────────────────────────
-          Pill-chip treatment styled with Manrope typography (normal to bold weights). */}
-      <section className="font-manrope-page relative! z-10! w-full! bg-white! border-t! border-gray-100! py-14!">
-        <div className="container! mx-auto! px-4! md:px-6! lg:px-8!">
-          {/* Heading */}
-          <div className="flex! items-center! gap-3! mb-8!">
-            <p className="text-[15px]! font-bold! tracking-wide! uppercase! text-[#27427f]!">Popular Searches</p>
-          </div>
-
-          {/* ── Mobile: snap rail. md+: the four-column grid. ────────────────
-              A flex row on small screens and a grid from md up, so the two
-              layouts are one DOM tree rather than two copies of the links.
-              The negative margin + matching padding bleeds the rail to the
-              viewport edge, so a partially-visible card reads as "scroll me"
-              instead of being clipped by the container gutter.
-
-              scroll-pl/pr is load-bearing, not decoration. Scroll-snap resolves
-              the snapport from the padding BOX, which excludes padding — so
-              with mandatory snapping the browser auto-scrolls the rail on load
-              by the full padding to flush the first card against the border
-              edge, and that card lands 14px left of the heading and of the
-              footer text below. scroll-padding re-declares where the real
-              content edge is, so the first card snaps to 14px and aligns. Kept
-              in lockstep with the px-4 above (both are 1rem = 14px here, since
-              styles.css sets the root to 14px rather than 16px).
-
-              Cards are snap-start at a near-full width: wide enough to read
-              the category and two chips, narrow enough that the next card
-              peeks in as the affordance. */}
-          <div className="flex! flex-nowrap! gap-4! overflow-x-auto! overscroll-x-contain! snap-x! snap-mandatory! hide-scrollbar -mx-4! px-4! pb-2! scroll-pl-4! scroll-pr-4! md:mx-0! md:px-0! md:pb-0! md:scroll-pl-0! md:scroll-pr-0! md:overflow-visible! md:snap-none! md:grid! md:grid-cols-2! md:gap-6! lg:grid-cols-4!">
-            {quickLinks.map(({ category, prefix, locations }) => (
-              <div
-                key={category}
-                className="w-[85%]! shrink-0! snap-start! md:w-auto! md:shrink!"
-              >
-                {/* Category label */}
-                <p className="text-[13px]! font-bold! text-[#161e2d]! mb-3! pb-2! border-b! border-gray-100! tracking-wide! transition-all! duration-300!">
-                  {category} in Coimbatore
-                </p>
-                {/* Location pill tags */}
-                <div className="flex! flex-wrap! gap-2!">
-                  {locations.map((location) => {
-                    const slug = location.toLowerCase().replace(/\s+/g, "-");
-                    return (
-                      <Link
-                        key={location}
-                        href={`/${prefix}/${city}/${slug}`}
-                        className="inline-block! px-3! py-1.5! rounded-lg! bg-[#f4f6fb]! text-[#27427f]! text-[13px]! font-semibold! border! border-[#27427f]/8! hover:bg-[#27427f]! hover:text-white! hover:border-[#27427f]! hover:shadow-sm! transition-all! duration-200!"
-                      >
-                        {location}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PopularSearches />
 
       {/* ── Footer ──────────────────────────────────────────────────────────
           Very dark navy. #27427f was too light; #161e2d is the near-black blue

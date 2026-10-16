@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { UserRound } from "lucide-react";
 
 export function AboutMission() {
   return (
@@ -37,8 +38,10 @@ export function AboutMission() {
             <div className="pt-4! flex! items-center! gap-6!">
               <div className="flex! -space-x-4!">
                 {[19, 20, 21].map((n, idx) => (
-                  <div key={n} style={{ zIndex: 10 - idx }} className="w-12! h-12! rounded-full! border-2! border-white! bg-gray-200! flex! items-center! justify-center! overflow-hidden!">
-                    <img src={`/assets/images/avatar/avt-png${n}.png`} alt="Agent" className="w-full! h-full! object-cover!" />
+                  // Icon discs: the stock avatar photos (/assets/images/avatar) were never
+                  // shipped, so these were three broken images (404s).
+                  <div key={n} style={{ zIndex: 10 - idx }} className="w-12! h-12! rounded-full! border-2! border-white! bg-[#eef3fb]! flex! items-center! justify-center! overflow-hidden!" aria-hidden="true">
+                    <UserRound className="w-5! h-5! text-[#27427f]!" />
                   </div>
                 ))}
               </div>

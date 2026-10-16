@@ -1,10 +1,5 @@
 import { type LegacyViewName, VIEW_COMPONENTS } from "@/lib/site/page-registry";
 
-type RoutePattern = {
-  pattern: RegExp;
-  view: LegacyViewName;
-};
-
 const AVAILABLE_VIEWS = new Set<LegacyViewName>(
   Object.keys(VIEW_COMPONENTS) as LegacyViewName[],
 );
@@ -34,16 +29,10 @@ const STATIC_ROUTE_MAP: Record<string, LegacyViewName> = {
 };
 
 
-const SEO_ROUTE_PATTERNS: RoutePattern[] = [
-  { pattern: /-ap\d+$/i, view: "apartment-details.php" },
-  { pattern: /-v\d+$/i, view: "villa-details.php" },
-  { pattern: /-p\d+$/i, view: "plot-details.php" },
-  { pattern: /-ip\d+$/i, view: "independent-house-details.php" },
-  { pattern: /-fl\d+$/i, view: "farmland-details.php" },
-  { pattern: /-cs\d+$/i, view: "commercial-details.php" },
-  { pattern: /-in\d+$/i, view: "industrial-details.php" },
-  { pattern: /-cw\d+$/i, view: "coworkers-details.php" },
-];
+// No SEO detail-slug patterns (-ap123, -cs45…) here: property and project
+// pages are served by the real routes. These used to send any unmatched
+// code-suffixed URL (every old-website URL) to an empty legacy view with a
+// 200, so they never returned 404.
 
 const hasView = (viewName: string): viewName is LegacyViewName =>
   AVAILABLE_VIEWS.has(viewName as LegacyViewName);
@@ -84,12 +73,6 @@ export const resolveViewForPath = (pathname: string): LegacyViewName | null => {
 
   if (segments.length >= 2 && segments[0] === "blogs" && hasView("blog_details.php")) {
     return "blog_details.php";
-  }
-
-  for (const matcher of SEO_ROUTE_PATTERNS) {
-    if (matcher.pattern.test(lookupKey) && hasView(matcher.view)) {
-      return matcher.view;
-    }
   }
 
   for (const candidate of pathToViewCandidates(lookupKey)) {

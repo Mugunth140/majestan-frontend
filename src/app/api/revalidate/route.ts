@@ -17,7 +17,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { slug, tag, secret } = body;
 
-    if (secret !== process.env.REVALIDATE_SECRET && secret !== "majestan-isr-secret") {
+    // No hardcoded fallback: it let anyone purge the site's cache.
+    const expected = process.env.REVALIDATE_SECRET;
+    if (!expected || secret !== expected) {
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
 

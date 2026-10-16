@@ -49,6 +49,25 @@ export type FeaturedProperty = {
   possession: string | null;
 };
 
+export type GoogleReview = {
+  authorName: string;
+  authorUrl: string | null;
+  photoUrl: string | null;
+  rating: number;
+  text: string;
+  relativeTime: string;
+  time: number;
+};
+
+/** Live from Majestan Realty's Google Business listing; null when unavailable. */
+export type GoogleReviews = {
+  rating: number;
+  total: number;
+  url: string | null;
+  writeReviewUrl: string;
+  reviews: GoogleReview[];
+};
+
 export type HomePageData = {
   filters: {
     sublocations: Sublocation[];
@@ -59,6 +78,7 @@ export type HomePageData = {
   handpickedProperties: FeaturedProperty[];
   /** Curated in the CRM (Showcases); the newest projects until curated. */
   featuredProjects: ProjectListItem[];
+  googleReviews: GoogleReviews | null;
 };
 
 type ApiEnvelope<T> = {

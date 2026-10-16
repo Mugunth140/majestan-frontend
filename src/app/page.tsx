@@ -20,6 +20,7 @@ const emptyHomeData: HomePageData = {
   banners: [],
   handpickedProperties: [],
   featuredProjects: [],
+  googleReviews: null,
 };
 
 export default async function Page() {

@@ -5,6 +5,7 @@ import { Search, Handshake, TrendingUp, BarChart3, Home, BadgePercent, Store, Ar
 import { useLocationContext } from "@/contexts/LocationContext";
 import { LuxuryFeaturedSection } from "./luxury-featured-section";
 import { FeaturedProjectsSection } from "./featured-projects-section";
+import { GoogleReviewsSection } from "./google-reviews-section";
 import { HeroSection } from "./hero-section";
 import { OffersCarousel } from "@/components/site/ads/offers-carousel";
 import { LocalityOverviewSection } from "./locality-overview-section";
@@ -242,6 +243,8 @@ export function HomePage({ data, banners, offers }: { data: HomePageData; banner
 
           </div>
         </section>
+        {/* Google reviews: the last section, right above the footer's Popular Searches */}
+        <GoogleReviewsSection data={data.googleReviews ?? null} />
       </main>
 
       <SiteFooter />

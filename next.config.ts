@@ -35,6 +35,17 @@ const nextConfig: NextConfig = {
         destination: "/post-property",
         permanent: true,
       },
+      // ── 0b. Service page aliases → the one canonical URL per service ─────
+      {
+        source: "/services/professional-brokerage-service",
+        destination: "/services/professional-brokerage-services",
+        permanent: true,
+      },
+      {
+        source: "/services/nri",
+        destination: "/services/nri-property-investment",
+        permanent: true,
+      },
       // ── 1. Stale SEO redirect entries ────────────────────────────────────
       // These pointed at old intermediary pages; send directly to new PSEO URLs.
       {

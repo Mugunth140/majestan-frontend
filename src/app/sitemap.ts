@@ -30,6 +30,10 @@ const STATIC_ROUTES = [
   // Redesigned out of the legacy view registry into its own static route, so it
   // no longer resolves through [slug]/[...section] and has to be listed here.
   "/services/liaisoning",
+  "/services/property-management",
+  "/services/professional-brokerage-services",
+  "/services/financial-assistance",
+  "/services/nri-property-investment",
 ];
 
 const CITIES = ["coimbatore"];

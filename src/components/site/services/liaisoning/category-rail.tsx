@@ -11,7 +11,7 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { CATEGORIES } from "./content";
+import { CATEGORIES, type Category } from "./content";
 import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
 
 /* ── Apple physics ──────────────────────────────────────────────────────────
@@ -69,7 +69,28 @@ type DragState = {
   startOffset: number;
 };
 
-export function CategoryRail() {
+type CategoryRailProps = {
+  /** Defaults to the liaisoning asset classes. */
+  categories?: readonly Category[];
+  title?: string;
+  description?: string;
+  /** Accessible name of the tab list. */
+  ariaLabel?: string;
+  /** Prefix for element ids and the shared-layout id; unique per page. */
+  idPrefix?: string;
+};
+
+/**
+ * Shared by the service pages. Every prop defaults to the liaisoning copy, so
+ * that page renders exactly as before.
+ */
+export function CategoryRail({
+  categories = CATEGORIES,
+  title = "Asset classes we handle",
+  description = "The same approval discipline, applied to very different buildings. Pick a category to see what we cover.",
+  ariaLabel = "Liaisoning coverage by asset class",
+  idPrefix = "liaisoning",
+}: CategoryRailProps = {}) {
   const reduceMotion = usePrefersReducedMotion();
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -91,7 +112,7 @@ export function CategoryRail() {
   });
   const samplesRef = useRef<{ t: number; x: number }[]>([]);
 
-  const active = CATEGORIES[activeIndex];
+  const active = categories[activeIndex];
 
   /** Scroll offset in px, always >= 0. Only `x` on the track derives from it. */
   const offset = useMotionValue(0);
@@ -230,11 +251,11 @@ export function CategoryRail() {
 
   const onTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
     let next: number | null = null;
-    if (event.key === "ArrowRight") next = (index + 1) % CATEGORIES.length;
+    if (event.key === "ArrowRight") next = (index + 1) % categories.length;
     else if (event.key === "ArrowLeft")
-      next = (index - 1 + CATEGORIES.length) % CATEGORIES.length;
+      next = (index - 1 + categories.length) % categories.length;
     else if (event.key === "Home") next = 0;
-    else if (event.key === "End") next = CATEGORIES.length - 1;
+    else if (event.key === "End") next = categories.length - 1;
 
     if (next === null) return;
     event.preventDefault();
@@ -297,8 +318,8 @@ const END_SLACK = 0.15;
   }
 
   const canScroll = maxScroll > 0;
-  const tabListId = "liaisoning-category-tabs";
-  const panelId = "liaisoning-category-panel";
+  const tabListId = `${idPrefix}-category-tabs`;
+  const panelId = `${idPrefix}-category-panel`;
 
   /**
    * One box, not three. This was a white card with a border and a shadow, padded
@@ -309,19 +330,18 @@ const END_SLACK = 0.15;
     "liaisoning-card group! shrink-0! w-[78%]! sm:w-[48%]! md:w-[31%]! lg:w-[24%]!";
 
   return (
-    <section className="pt-[34px]! pb-[52px]! md:pt-[44px]! md:pb-[68px]!" aria-labelledby="liaisoning-categories-heading">
+    <section className="pt-[34px]! pb-[52px]! md:pt-[44px]! md:pb-[68px]!" aria-labelledby={`${idPrefix}-categories-heading`}>
       <div className="relative! max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <div className="flex! flex-col! md:flex-row! md:items-end! justify-between! gap-5! mb-[26px]!">
           <div className="max-w-2xl!">
             <h2
-              id="liaisoning-categories-heading"
+              id={`${idPrefix}-categories-heading`}
               className="text-[clamp(23px,2.6vw,30px)]! font-medium! text-[#161e2d]! leading-[1.15]! tracking-[-0.018em]!"
             >
-              Asset classes we handle
+              {title}
             </h2>
             <p className="mt-[10px]! max-w-[52ch]! text-[14px]! md:text-[15px]! leading-[1.65]! text-gray-500!">
-              The same approval discipline, applied to very different buildings. Pick a category
-              to see what we cover.
+              {description}
             </p>
           </div>
 
@@ -363,10 +383,10 @@ const END_SLACK = 0.15;
             translucent pane. */}
         <div
           role="tablist"
-          aria-label="Liaisoning coverage by asset class"
+          aria-label={ariaLabel}
           className="liaisoning-segmented inline-flex! p-[4px]! rounded-full! bg-[#27427f]/[0.06]! border! border-[#27427f]/10! max-w-full! overflow-x-auto! sm:overflow-visible!"
         >
-          {CATEGORIES.map((category, index) => {
+          {categories.map((category, index) => {
             const isActive = index === activeIndex;
             return (
               <button
@@ -388,7 +408,7 @@ const END_SLACK = 0.15;
               >
                 {isActive && (
                   <motion.span
-                    layoutId="liaisoning-tab-thumb"
+                    layoutId={`${idPrefix}-tab-thumb`}
                     aria-hidden="true"
                     className="absolute! inset-0! rounded-full! bg-white! shadow-[0_2px_8px_rgba(22,30,45,0.10)]!"
                     transition={

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
-  getAllProjectSlugs,
   getProjectBySlugUrl,
   formatINR,
 } from "@/lib/api/projects";
@@ -9,12 +8,10 @@ import {
 export const dynamicParams = true;
 export const revalidate = 300;
 
-export async function generateStaticParams() {
-  const slugs = await getAllProjectSlugs();
-  return slugs
-    .map((canonical) => canonical.replace(/^\/+/, "").split("/"))
-    .filter((parts) => parts.length === 3 && parts[0] === "projects")
-    .map(([, city, projectSlug]) => ({ city, projectSlug }));
+export async function generateStaticParams(): Promise<{ city: string; projectSlug: string }[]> {
+  // No build-time prerender (see [slug]/page.tsx): every project page
+  // renders on demand and ISR-caches per `revalidate`.
+  return [];
 }
 
 type PageProps = {

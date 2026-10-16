@@ -143,7 +143,6 @@ export default async function RootLayout({
         <link rel="stylesheet" type="text/css" href="/assets/css/swiper-bundle.min.css" />
         <link rel="stylesheet" type="text/css" href="/assets/css/sib-styles.css" />
         <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
-        <link rel="stylesheet" type="text/css" href="/assets/icons/icomoon/style.css" />
         <link
           rel="preconnect"
           href="https://cdnjs.cloudflare.com"

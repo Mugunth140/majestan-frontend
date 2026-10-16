@@ -24,7 +24,7 @@ import { projectFaqItems } from "@/components/site/project/overview/faq-items";
 import { FaqOverview } from "@/components/site/project/overview/FaqOverview";
 import { ProjectHelpSection } from "@/components/site/project/overview/ProjectHelpSection";
 import { OV_ROOT } from "@/components/site/project/overview/overview-ui";
-import { getProjectBySlugUrl, getAllProjectSlugs } from "@/lib/api/projects";
+import { getProjectBySlugUrl } from "@/lib/api/projects";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
 import { amenitiesPageLabel, hasFurnishing } from "@/lib/project-overview";
@@ -52,44 +52,10 @@ export const dynamicParams = true;
 // accumulate rendered pages in .next/cache indefinitely.
 export const revalidate = 300;
 
-export async function generateStaticParams() {
-  try {
-    const { API_BASE_URL } = await import("@/lib/api");
-    const res = await fetch(`${API_BASE_URL}/properties/all-slugs`);
-    if (!res.ok) return [];
-    
-    const data = await res.json();
-    const slugs: string[] = Array.isArray(data) ? data : (data.data || data.items || []);
-    
-    const sections = ["amenities", "floor-plan", "locality", "photos"];
-    const params: { slug: string; section: string[] }[] = [];
-    
-    for (const slug of slugs) {
-      for (const section of sections) {
-        params.push({ slug, section: [section] });
-      }
-    }
-
-    // Project sub-pages (single-segment canonical slugs only; multi-segment
-    // legacy /projects/city/slug URLs keep their redirect route).
-    try {
-      const projectSlugs = (await getAllProjectSlugs()).filter(
-        (s) => !!s && !s.includes("/")
-      );
-      for (const slug of projectSlugs) {
-        for (const section of PROJECT_SECTION_SLUGS) {
-          params.push({ slug, section: [section] });
-        }
-      }
-    } catch {
-      /* projects API unreachable — property params still generate */
-    }
-    
-    return params;
-  } catch (error) {
-    console.error("Failed to fetch slugs for static generation:", error);
-    return [];
-  }
+export async function generateStaticParams(): Promise<{ slug: string; section: string[] }[]> {
+  // No build-time prerender (see [slug]/page.tsx): every section page
+  // renders on demand and ISR-caches per `revalidate`.
+  return [];
 }
 
 const RESERVED_SECTION_SLUGS = new Set(["assets"]);
@@ -133,8 +99,6 @@ const SECTION_META: Record<
 
 // Project sub-pages — one URL per section for all three project types,
 // mirroring the property multi-page structure.
-const PROJECT_SECTION_SLUGS = ["amenities", "floor-plans", "locality", "photos"];
-
 const PROJECT_SECTION_META: Record<
   string,
   {

@@ -12,8 +12,6 @@ import {
   PROPERTY_TYPES,
   parsePseoSlug,
   buildPseoSlug,
-  PSEO_BEDROOM_OPTIONS,
-  BEDROOM_PROPERTY_TYPE_SLUGS,
   isSinglePageType,
   toLocationSlug,
   type PropertyTypeSlug,
@@ -28,7 +26,6 @@ import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
 import {
   getProjectBySlugUrl,
-  getAllProjectSlugs,
   formatINR as formatProjectINR,
 } from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
@@ -36,7 +33,6 @@ import { ProjectDetailsView } from "@/components/site/project/ProjectDetailsView
 import { projectFaqItems } from "@/components/site/project/overview/faq-items";
 import { ProjectTopActions } from "@/components/site/project/ProjectTopActions";
 import { PAGE_CONTAINER } from "@/components/site/project/project-ui";
-import { batchHasPseoInventory, type PseoCheckParams } from "@/lib/pseo-inventory";
 
 export const dynamicParams = true;
 // Bound the ISR full-route cache: crawler/scanner garbage URLs must not
@@ -56,9 +52,6 @@ const API_BASE =
   _abs(process.env.API_BASE_URL) ||
   _abs(process.env.NEXT_PUBLIC_API_BASE_URL) ||
   "http://localhost:5000/api/v1";
-
-// Known cities for PSEO generation — keep in sync with sitemap.ts
-const PSEO_CITIES = ["coimbatore"];
 
 /**
  * Resolve a lowercase sublocation slug (as returned by parsePseoSlug) back to
@@ -88,114 +81,16 @@ async function resolveSublocName(slug: string | undefined, city: string): Promis
   }
 }
 
-// Property type slugs that generate PSEO pages (exclude "properties" catch-all)
-const PSEO_PROPERTY_TYPE_SLUGS = Object.keys(PROPERTY_TYPES).filter(
-  (k) => k !== "properties" && PROPERTY_TYPES[k as PropertyTypeSlug].apiValue !== ""
-) as PropertyTypeSlug[];
-
-export async function generateStaticParams() {
-  const out: { slug: string }[] = [];
-
-  // ── Property slugs ────────────────────────────────────────────────────────
-  try {
-    const { API_BASE_URL } = await import("@/lib/api");
-    const res = await fetch(`${API_BASE_URL}/properties/all-slugs`);
-    if (res.ok) {
-      const data = await res.json();
-      const slugs: string[] = Array.isArray(data)
-        ? data
-        : data.data || data.items || [];
-      for (const slug of slugs) out.push({ slug });
-    }
-  } catch (error) {
-    console.error("Failed to fetch property slugs for static generation:", error);
-  }
-
-  // ── Project slugs ─────────────────────────────────────────────────────────
-  try {
-    const projectSlugs = await getAllProjectSlugs();
-    for (const full of projectSlugs) {
-      const clean = full.replace(/^\/+/, "");
-      if (clean && !clean.includes("/")) out.push({ slug: clean });
-    }
-  } catch (error) {
-    console.error("Failed to fetch project slugs for static generation:", error);
-  }
-
-  // ── PSEO slugs (inventory-gated) ──────────────────────────────────────────
-  try {
-    const subRes = await fetch(`${API_BASE}/metadata/sublocations`, {
-      next: { revalidate: 3600 },
-    });
-    const subData = subRes.ok ? await subRes.json() : [];
-    const sublocations: Array<{ sublocation: string; city: string }> =
-      Array.isArray(subData) ? subData : subData.data || subData.items || [];
-
-    const listingTypes: Array<"Sell" | "Rent"> = ["Sell", "Rent"];
-
-    const inventoryChecks: Array<{
-      slug: string;
-      params: PseoCheckParams;
-    }> = [];
-
-    for (const city of PSEO_CITIES) {
-      const citySublocations = sublocations.filter(
-        (s) => s.city.toLowerCase() === city.toLowerCase()
-      );
-
-      for (const lt of listingTypes) {
-        for (const ptSlug of PSEO_PROPERTY_TYPE_SLUGS) {
-          // City-level page (no sublocation)
-          inventoryChecks.push({
-            slug: buildPseoSlug(lt, ptSlug, city),
-            params: { listingType: lt, propertyTypeSlug: ptSlug, city },
-          });
-
-          // Sublocation-level pages
-          for (const sub of citySublocations) {
-            inventoryChecks.push({
-              slug: buildPseoSlug(lt, ptSlug, city, sub.sublocation),
-              params: {
-                listingType: lt,
-                propertyTypeSlug: ptSlug,
-                city,
-                sublocation: sub.sublocation,
-              },
-            });
-
-            // BHK-segmented pages — residential types only, 2/3/4 BHK (1 excluded)
-            if (BEDROOM_PROPERTY_TYPE_SLUGS.includes(ptSlug)) {
-              for (const bhk of PSEO_BEDROOM_OPTIONS) {
-                inventoryChecks.push({
-                  slug: buildPseoSlug(lt, ptSlug, city, sub.sublocation, bhk),
-                  params: {
-                    listingType: lt,
-                    propertyTypeSlug: ptSlug,
-                    city,
-                    sublocation: sub.sublocation,
-                    bedrooms: bhk,
-                  },
-                });
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Run inventory checks in small sequential batches to avoid 429s
-    const allParams = inventoryChecks.map((c) => c.params);
-    const allResults = await batchHasPseoInventory(allParams);
-    for (let j = 0; j < inventoryChecks.length; j++) {
-      if (allResults[j]) {
-        out.push({ slug: inventoryChecks[j].slug });
-      }
-    }
-  } catch (error) {
-    console.error("Failed to generate PSEO static params:", error);
-  }
-
-  return out;
+/**
+ * No build-time prerender: this route used to enumerate the entire catalog
+ * (every property slug + every PSEO combination) here, firing tens of
+ * thousands of backend fetches from one IP during `next build` — tripping
+ * the backend throttle (429 cascade) and spiking CPU on both containers.
+ * With `dynamicParams: true` every URL still renders on demand and
+ * ISR-caches per `revalidate`; the sitemap keeps exposing URLs to crawlers.
+ */
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
 }
 
 const RESERVED_SLUGS = new Set([

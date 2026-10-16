@@ -38,7 +38,7 @@ const withDetails = (propertyType: string, details: Record<string, unknown>) =>
   }) as unknown as PropertySearchItem;
 
 describe("getCardSpecCells", () => {
-  it("curates commercial cells: washrooms and floors, no bedrooms", () => {
+  it("curates commercial cells: washrooms and furnishing, no floors occupied", () => {
     const labels = getCardSpecCells(
       withDetails("commercial", {
         superBuiltUpArea: "3000",
@@ -47,7 +47,7 @@ describe("getCardSpecCells", () => {
         furnishingStatus: "FULLY FURNISHED",
       })
     ).map((c) => c.label);
-    expect(labels).toEqual(["Built-Up Area", "Washrooms", "Floors Occupied", "Furnishing"]);
+    expect(labels).toEqual(["Built-Up Area", "Washrooms", "Furnishing"]);
   });
 
   it("curates industrial cells: power, ceiling, heavy vehicles", () => {

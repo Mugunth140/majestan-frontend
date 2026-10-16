@@ -371,8 +371,10 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
 
   if (item.propertyType === "commercial") {
     // Rent commercials skip Property Age (deposit takes its attention).
+    // Floors Occupied is off cards entirely (detail page keeps it).
     const isRent = isRentListing(item.posttype);
     const cells: CardSpecCell[] = getCommercialSpecs(d)
+      .filter((c) => c.label !== "Floors Occupied")
       .filter((c) => !(isRent && c.label === "Property Age"))
       .slice(0, 4);
     const deposit = getRentSecurityDeposit(item);

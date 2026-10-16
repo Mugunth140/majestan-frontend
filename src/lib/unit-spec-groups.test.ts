@@ -68,9 +68,29 @@ describe("unitSpecGroups", () => {
     expect(preview.parking).toBe("1 space · Covered · Guest");
     expect(preview.furnishing).toBe("Semi Furnished · 1 item");
     expect(groups.find((g) => g.key === "rooms")?.rooms).toEqual([
-      { name: "Master bedroom", dimensions: "12 x 14 ft" },
+      { name: "Master bedroom", dimensions: "12′ × 14′ ft" },
     ]);
     expect(groups.find((g) => g.key === "furnishing")?.items).toEqual(["Wardrobe"]);
+  });
+
+  it("normalizes room sizes to L′ × W′, decimals included", () => {
+    const groups = unitSpecGroups(
+      unit({
+        roomDimensions: [
+          { name: "Hall", dimensions: "12.5 × 13.2 ft" },
+          { name: "Kitchen", dimensions: "10x12" },
+          { name: "Study", dimensions: "11′ × 12′" },
+          { name: "Store", dimensions: "n/a" },
+        ],
+      } as Partial<ProjectUnit>),
+      apartment,
+    );
+    expect(groups.find((g) => g.key === "rooms")?.rooms).toEqual([
+      { name: "Hall", dimensions: "12.5′ × 13.2′ ft" },
+      { name: "Kitchen", dimensions: "10′ × 12′ ft" },
+      { name: "Study", dimensions: "11′ × 12′ ft" },
+      { name: "Store", dimensions: "n/a" },
+    ]);
   });
 
   it("groups a plot by price and plot features instead of rooms", () => {

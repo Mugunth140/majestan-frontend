@@ -47,6 +47,19 @@ function joinPreview(parts: (string | null | undefined)[]): string | null {
   return kept.length > 0 ? kept.join(" · ") : null;
 }
 
+/**
+ * Canonical room size: "12.5′ × 13.2′ ft". Accepts whatever is stored —
+ * new "12.5′ × 13.2′ ft", legacy "12 × 10 ft", "12x10" — and unparseable
+ * strings pass through untouched.
+ */
+export function formatRoomSize(dimensions: unknown): string {
+  const raw = typeof dimensions === "string" ? dimensions.trim() : "";
+  const match = raw.match(/(\d+(?:\.\d+)?)\s*′?\s*[x×*]\s*(\d+(?:\.\d+)?)\s*′?/i);
+  if (!match) return raw;
+  const num = (s: string) => String(parseFloat(parseFloat(s).toFixed(2)));
+  return `${num(match[1])}′ × ${num(match[2])}′ ft`;
+}
+
 function group(
   key: SpecGroupKey,
   title: string,
@@ -79,7 +92,7 @@ export function unitSpecGroups(unit: ProjectUnit, project: ProjectDetail): SpecG
           ["Price", price],
           ["Rate", rate],
           ["Plot area", plotArea === "—" ? null : plotArea],
-          ["Dimensions", dimensions],
+          ["Dimensions", dimensions ? formatRoomSize(dimensions) : null],
         ]),
       ),
       group(
@@ -98,10 +111,12 @@ export function unitSpecGroups(unit: ProjectUnit, project: ProjectDetail): SpecG
     ].filter(hasContent);
   }
 
-  const rooms = (unit.roomDimensions ?? []).filter(
-    (room): room is { name: string; dimensions: string } =>
-      !!room?.name && room.name !== "Plot" && !!room.dimensions,
-  );
+  const rooms = (unit.roomDimensions ?? [])
+    .filter(
+      (room): room is { name: string; dimensions: string } =>
+        !!room?.name && room.name !== "Plot" && !!room.dimensions,
+    )
+    .map((room) => ({ ...room, dimensions: formatRoomSize(room.dimensions) }));
   const items = unitFurnishings(unit);
   const floor = (() => {
     if (unit.floorNo == null || String(unit.floorNo).trim() === "") return null;

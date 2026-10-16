@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { BedDouble, Building2, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { BedDouble, Building2, ChevronLeft, ChevronRight, MapPin, Ruler } from "lucide-react";
 import { formatINRRange, type ProjectListItem } from "@/lib/api/projects";
+import { emi } from "@/lib/emi";
 import { possessionLabel, projectTypeLabel } from "@/lib/project-overview";
 import { ListingImage } from "@/components/site/listing/ListingImage";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
@@ -21,6 +22,18 @@ function bhkLabel(bhk: number[]): string | null {
   if (values.length === 1) return `${values[0]} BHK`;
   return `${values.slice(0, -1).join(", ")} & ${values[values.length - 1]} BHK`;
 }
+
+/** "4,176 – 5,639 sq.ft" built-up area range from the unit summary. */
+function areaRangeLabel(min: number | null | undefined, max: number | null | undefined): string | null {
+  if (min == null || min <= 0) return null;
+  const fmt = (n: number) => n.toLocaleString("en-IN");
+  return max != null && max > 0 && max !== min ? `${fmt(min)} – ${fmt(max)} sq.ft` : `${fmt(min)} sq.ft`;
+}
+
+// Same loan basis as the project listing card: lowest starting price,
+// 20-year tenure, full range-floor price as the loan.
+const EMI_RATE_PCT = 7.25;
+const EMI_YEARS = 20;
 
 /**
  * "Featured Projects" on the home page: projects picked in the CRM
@@ -102,9 +115,12 @@ export function FeaturedProjectsSection({ projects, title, subtitle }: FeaturedP
 function ProjectCard({ project }: { project: ProjectListItem }) {
   const price = formatINRRange(project.ranges?.minPrice ?? null, project.ranges?.maxPrice ?? null);
   const config = bhkLabel(project.ranges?.bhk ?? []);
+  const area = areaRangeLabel(project.ranges?.minArea ?? null, project.ranges?.maxArea ?? null);
   const location = [project.sublocation, project.city].filter(Boolean).join(", ");
   const status = project.possessionStatus ? possessionLabel(project.possessionStatus) : null;
   const href = `/${project.canonicalSlug || project.slug}`;
+  const minPrice = project.ranges?.minPrice;
+  const emiStarts = minPrice != null && minPrice > 0 ? emi(minPrice, EMI_RATE_PCT, EMI_YEARS) : null;
 
   return (
     <Link
@@ -140,8 +156,13 @@ function ProjectCard({ project }: { project: ProjectListItem }) {
           </p>
         )}
 
-        <div className="mt-4! border-t! border-gray-100! pt-3!">
+        <div className="mt-4! border-t! border-gray-100! pt-3! flex! items-baseline! justify-between! gap-2!">
           <span className="text-xl! font-bold! leading-none! text-gray-900!">{price}</span>
+          {emiStarts ? (
+            <span className="shrink-0! text-[13px]! font-medium! text-gray-500!">
+              EMI from ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
+            </span>
+          ) : null}
         </div>
 
         <div className="mt-3! flex! min-w-0! items-center! gap-3! border-t! border-gray-100! pt-3! text-sm! font-medium! text-gray-900!">
@@ -156,10 +177,13 @@ function ProjectCard({ project }: { project: ProjectListItem }) {
               <span className="truncate!">{projectTypeLabel(project.projectType)} project</span>
             </span>
           )}
-          {project.builderName && (
+          {area && (
             <>
               <span className="w-px! self-stretch! bg-gray-200!" aria-hidden="true" />
-              <span className="min-w-0! truncate! text-gray-500!">{project.builderName}</span>
+              <span className="inline-flex! min-w-0! items-center! gap-1.5!">
+                <Ruler className="h-4! w-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
+                <span className="truncate!">{area}</span>
+              </span>
             </>
           )}
         </div>

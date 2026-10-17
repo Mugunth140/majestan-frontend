@@ -21,6 +21,7 @@ import { AdBanner } from "@/components/site/ads/ad-banner";
 import { interleaveAds } from "@/components/site/ads/listing-feed";
 import { useAds } from "@/components/site/ads/use-ads";
 import { adsForAudience } from "@/lib/ads";
+import listingCardStyles from "@/components/site/listing/listing-card.module.css";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -81,12 +82,16 @@ const SHIMMER_DELAYS = ["", "shimmer-d1", "shimmer-d2"];
 function CardSkeleton({ index = 0 }: { index?: number }) {
   const d = SHIMMER_DELAYS[index % SHIMMER_DELAYS.length];
   return (
-    <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0!">
-      {/* Photo — same geometry as the real image (stretch to content on desktop) */}
-      <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
+    <div className="relative! bg-white! rounded-2xl! border! border-[#e6ebf2]! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0!">
+      {/* Photo — same responsive geometry as the real cards. */}
+      <div className="relative! w-full! aspect-[4/3]! sm:aspect-video! lg:aspect-square! lg:w-[300px]! lg:self-start! shrink-0! overflow-hidden! bg-gray-100!">
         <div className={`absolute! inset-0! bg-gray-200! shimmer! ${d}`} />
+        <div className="absolute! top-3! right-3! flex! gap-2! lg:hidden!">
+          <div className="h-[44px]! w-[44px]! rounded-full! bg-white/80!" />
+          <div className="h-[44px]! w-[44px]! rounded-full! bg-white/80!" />
+        </div>
       </div>
-      <div className="px-5! py-3! flex! flex-col! flex-1! min-w-0! justify-center!">
+      <div className="p-4! lg:px-5! lg:py-3! flex! flex-col! flex-1! min-w-0! justify-center!">
         {/* Title + wishlist/share */}
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
@@ -96,8 +101,8 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
               <div className={`h-[18px]! rounded-md! bg-gray-100! w-1/2! shimmer! ${d}`} />
             </div>
           </div>
-          <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
-          <div className="w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
+          <div className="hidden! lg:block! w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
+          <div className="hidden! lg:block! w-8! h-8! rounded-full! bg-gray-100! shrink-0!" />
         </div>
         {/* Price — mirrors real card (dotted divider above, above spec table) */}
         <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-end! gap-3! leading-none!">
@@ -105,23 +110,23 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
           <div className="h-[16px]! rounded! bg-gray-100! w-20!" />
         </div>
         {/* Spec table */}
-        <div className="mt-3! border-y! border-dashed! border-gray-200! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
+        <div className={listingCardStyles.specs}>
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="min-w-0!">
+            <div key={i} className={listingCardStyles.spec}>
               <div className="h-[15px]! rounded! bg-gray-100! w-2/3!" />
               <div className={`h-[18px]! rounded! bg-gray-200! w-4/5! mt-0.5! shimmer! ${d}`} />
             </div>
           ))}
         </div>
         {/* Section links — separated by the spec table's bottom dotted line */}
-        <div className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!">
+        <div className="hidden! lg:flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="h-[18px]! rounded! bg-gray-100! w-20!" />
           ))}
         </div>
         {/* Actions */}
-        <div className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!">
-          <div className={`h-[42px]! rounded-xl! bg-gray-100! flex-1! shimmer! ${d}`} />
+        <div className="mt-4! lg:mt-3! flex! flex-row! gap-2.5!">
+          <div className={`hidden! lg:block! h-[42px]! rounded-xl! bg-gray-100! flex-1! shimmer! ${d}`} />
           <div className={`h-[42px]! rounded-xl! bg-gray-200! flex-1! shimmer! ${d}`} />
         </div>
       </div>

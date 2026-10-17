@@ -8,6 +8,8 @@ import { formatPlotCents, type ProjectListItem } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { ListingImage } from "@/components/site/listing/ListingImage";
+import { ListingConditionBadge } from "@/components/site/listing/ListingConditionBadge";
+import listingCardStyles from "@/components/site/listing/listing-card.module.css";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { useUserAuthStore } from "@/store/userAuthStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
@@ -301,12 +303,12 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   if (possession && !isPlot) specCells.push({ label: "Possession", value: possession });
 
   return (
-    <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! hover:border-[#cfd9ea]! hover:shadow-[0_24px_48px_-28px_rgba(22,69,191,0.35)]! transition-[box-shadow,border-color]! duration-300! ease-out-quint! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
+    <div className="relative! bg-white! rounded-2xl! border! border-[#e6ebf2]! hover:border-[#cfd9ea]! hover:shadow-[0_24px_48px_-28px_rgba(22,69,191,0.35)]! transition-[box-shadow,border-color]! duration-300! ease-out-quint! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
 
-      {/* Image — 1:1 square on all breakpoints: full-width on
-          mobile/tablet, fixed 300px square pinned to the top on desktop. */}
+      {/* Image — compact landscape on mobile, with the original
+          300px square retained on desktop. */}
       <div
-        className="relative! w-full! aspect-square! lg:w-[300px]! lg:self-start! shrink-0! overflow-hidden! bg-gray-100! cursor-pointer!"
+        className="relative! w-full! aspect-[4/3]! sm:aspect-video! lg:aspect-square! lg:w-[300px]! lg:self-start! shrink-0! overflow-hidden! bg-gray-100! cursor-pointer!"
         onClick={navigateToDetail}
         role="link"
         tabIndex={0}
@@ -321,10 +323,10 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           alt={item.name || "Project"}
           className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
         />
-        {/* RERA verified badge — top-right over image */}
+        {/* RERA verified badge — left on mobile, right on desktop */}
         {reraVerified && (
-          <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/95! backdrop-blur-sm! text-[#1645bf]! text-[11px]! font-semibold! px-2.5! py-1! rounded-full! shadow-sm!">
-            <BadgeCheck className="w-3.5! h-3.5! fill-[#2563eb]! text-white! stroke-1.5!" />
+          <span className="absolute! top-3! left-3! lg:left-auto! lg:right-3! z-10! inline-flex! items-center! gap-0.5! bg-white! backdrop-blur-sm! text-[#1645bf]! text-[12px]! font-bold! px-1! pr-1.5! py-0.5! rounded-full! shadow-md!">
+            <BadgeCheck className="w-6! h-6! fill-[#2563eb]! text-white! stroke-2!" />
             RERA
           </span>
         )}
@@ -342,7 +344,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
       {/* Content — clicking anywhere here goes to the overview page.
           Interactive children (wishlist/share/links/actions) stop propagation. */}
       <div
-        className="px-5! py-3! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
+        className="p-4! lg:px-5! lg:py-3! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
         onClick={() => router.push(detailPath)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "A" && (e.target as HTMLElement).tagName !== "BUTTON") {
@@ -354,11 +356,11 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
         aria-label={`View details of ${item.name || "project"}`}
       >
 
-        {/* Title + share */}
+        {/* On mobile the condition badge sits beside the title; social controls overlay the photo. */}
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
             <div onClick={navigateToDetail} className="no-underline! cursor-pointer!">
-              <h3 className="m-0! text-lg! font-semibold! tracking-[-0.02em]! text-[#0a0f1c]! line-clamp-1! leading-snug! hover:text-[#1645bf]! transition-colors! duration-150!">
+              <h3 className="m-0! text-lg! font-semibold! tracking-[-0.02em]! text-[#0a0f1c]! line-clamp-2! lg:line-clamp-1! leading-snug! hover:text-[#1645bf]! transition-colors! duration-150!">
                 {item.name}
               </h3>
             </div>
@@ -367,21 +369,25 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
               <span className="truncate!">{locationLabel}</span>
             </p>
           </div>
-          <WishlistButton propertyId={item.id} propertyType="project" />
-          <button
-            onClick={handleShare}
-            aria-label="Share this project"
-            className="p-2! rounded-full! text-gray-400! hover:text-[#1645bf]! hover:bg-[#eef4ff]! transition-colors! cursor-pointer! shrink-0!"
-          >
-            {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
-          </button>
+          <ListingConditionBadge label={conditionBadge} className="max-w-[45%]! shrink-0! self-start! lg:hidden!" />
+          <div className="absolute! top-3! right-3! z-10! flex! items-center! gap-2! lg:static! lg:z-auto! lg:gap-0!" onClick={(event) => event.stopPropagation()}>
+            <WishlistButton propertyId={item.id} propertyType="project" className="inline-flex! items-center! justify-center! min-w-[44px]! min-h-[44px]! bg-white/95! shadow-sm! lg:min-w-0! lg:min-h-0! lg:bg-transparent! lg:shadow-none! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!" />
+            <button
+              type="button"
+              onClick={handleShare}
+              aria-label="Share this project"
+              className="inline-flex! items-center! justify-center! min-w-[44px]! min-h-[44px]! p-2! bg-white/95! shadow-sm! rounded-full! text-gray-400! hover:text-[#1645bf]! hover:bg-[#eef4ff]! transition-colors! cursor-pointer! shrink-0! lg:min-w-0! lg:min-h-0! lg:bg-transparent! lg:shadow-none! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!"
+            >
+              {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
+            </button>
+          </div>
         </div>
 
         {/* Price — dotted divider above, directly under title/location for prominence.
             EXPERIMENTAL: price over per-sqft, EMI label over EMI figure. */}
-        <div className="mt-3! border-t! border-[#e6ebf2]! pt-3! flex! flex-wrap! items-center! gap-x-16! gap-y-3! leading-none!">
+        <div className={`mt-3! border-t! border-[#e6ebf2]! pt-3! flex! flex-wrap! items-center! gap-x-4! lg:gap-x-16! gap-y-3! leading-none! ${!isRent && emiStarts ? "justify-around! lg:justify-start!" : ""}`}>
           <div className="flex! flex-col! gap-1! min-w-0! shrink-0!">
-            <span className="text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
+            <span className="text-xl! lg:text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
               {price}
               {isRent && <span className="text-[13px]! font-medium! text-gray-500!"> /mo</span>}
             </span>
@@ -390,40 +396,33 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
             ) : null}
           </div>
           {!isRent && emiStarts ? (
-            <div className="flex! flex-col! gap-1! shrink-0!">
+            <div className="flex! flex-col! items-end! lg:items-start! text-right! lg:text-left! gap-1! shrink-0!">
               <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
               <span className="text-[15px]! font-semibold! text-[#0a0f1c]! tabular-nums!">
                 ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
               </span>
             </div>
           ) : null}
-          <div className="ml-auto! shrink-0! self-center! flex!">
-            {conditionBadge ? (
-              <span
-                className="inline-flex! items-center! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"
-                style={{ clipPath: "polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%)" }}
-              >
-                {conditionBadge}
-              </span>
-            ) : null}
+          <div className="ml-auto! shrink-0! self-center! hidden! lg:flex!">
+            <ListingConditionBadge label={conditionBadge} />
           </div>
         </div>
 
-        {/* Spec table */}
+        {/* Scrollable specifications on mobile; four columns on desktop. */}
         {specCells.length > 0 && (
-          <div className="mt-3! border-y! border-[#e6ebf2]! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
+          <dl className={listingCardStyles.specs} tabIndex={0} aria-label="Project specifications">
             {specCells.map((cell) => (
-              <div key={cell.label} className="min-w-0!">
-                <div className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">{cell.label}</div>
-                <div className="text-sm! font-semibold! text-[#0a0f1c]! break-words! leading-snug! mt-1!">{cell.value}</div>
+              <div key={cell.label} className={listingCardStyles.spec}>
+                <dt className="m-0! text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">{cell.label}</dt>
+                <dd className={`${listingCardStyles.specValue} m-0! text-sm! font-semibold! text-[#0a0f1c]! break-words! leading-snug! mt-1!`}>{cell.value}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         )}
 
         {/* Section links — separated by the spec table's bottom dotted line */}
         <div
-          className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
+          className="hidden! lg:flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
           {projectSections.map((s) => {
@@ -449,12 +448,12 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
         {/* Actions */}
         <div
-          className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!"
+          className="mt-4! lg:mt-3! flex! flex-row! gap-2.5!"
           onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={() => setEnquireToken(Date.now())}
-            className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-[#0a0f1c]! bg-white! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! cursor-pointer!"
+            className="flex! min-h-[44px]! lg:min-h-0! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-[#0a0f1c]! bg-white! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! cursor-pointer!"
           >
             <Phone className="w-4! h-4!" />
             Enquire
@@ -469,7 +468,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
             <button
               onClick={handleBrochure}
               disabled={downloadingBrochure}
-              className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer! disabled:opacity-70!"
+              className="flex! min-h-[44px]! lg:min-h-0! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer! disabled:opacity-70!"
             >
               <Download className="w-4! h-4!" />
               {downloadingBrochure ? "Downloading..." : "Brochure"}
@@ -478,7 +477,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
             <button
               type="button"
               onClick={navigateToDetail}
-              className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer!"
+              className="flex! min-h-[44px]! lg:min-h-0! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer!"
             >
               View Details
             </button>

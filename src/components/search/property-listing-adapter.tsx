@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MapPin, X, Phone, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck } from "lucide-react";
 import { ListingImage } from "@/components/site/listing/ListingImage";
+import { ListingConditionBadge } from "@/components/site/listing/ListingConditionBadge";
+import listingCardStyles from "@/components/site/listing/listing-card.module.css";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { searchProperties, type PropertySearchItem } from "@/lib/api";
 import {
@@ -460,6 +462,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   const photosPath = `${detailPath}/photos`;
   const locationLabel = getLocationLabel(item);
   const reraVerified = isReraVerified(item);
+  const conditionBadge = isRentListing(item.posttype) ? null : getConditionBadge(item);
   const sectionLinks = getCardSectionLinks(item, detailPath);
   const specCells = getCardSpecCells(item);
 
@@ -537,11 +540,11 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   };
 
   return (
-    <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! hover:border-[#cfd9ea]! hover:shadow-[0_24px_48px_-28px_rgba(22,69,191,0.35)]! transition-[box-shadow,border-color]! duration-300! ease-out-quint! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
+    <div className="relative! bg-white! rounded-2xl! border! border-[#e6ebf2]! hover:border-[#cfd9ea]! hover:shadow-[0_24px_48px_-28px_rgba(22,69,191,0.35)]! transition-[box-shadow,border-color]! duration-300! ease-out-quint! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
 
-      {/* Image — 1:1 square on all breakpoints: full-width on
-          mobile/tablet, fixed 300px square pinned to the top on desktop. */}
-      <div className="relative! w-full! aspect-square! lg:w-[300px]! lg:self-start! shrink-0! overflow-hidden! bg-gray-100!">
+      {/* Image — compact landscape on mobile, with the original
+          300px square retained on desktop. */}
+      <div className="relative! w-full! aspect-[4/3]! sm:aspect-video! lg:aspect-square! lg:w-[300px]! lg:self-start! shrink-0! overflow-hidden! bg-gray-100!">
         <Link href={photosPath} aria-label={`View photos of ${item.propertyname || "property"}`} className="absolute! inset-0!">
           <ListingImage
             src={photoUrl}
@@ -550,10 +553,10 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
           />
         </Link>
-        {/* RERA verified badge — top-right over image */}
+        {/* RERA verified badge — left on mobile, right on desktop */}
         {reraVerified && (
-          <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/95! backdrop-blur-sm! text-[#1645bf]! text-[11px]! font-semibold! px-2.5! py-1! rounded-full! shadow-sm!">
-          <BadgeCheck className="w-3.5! h-3.5! fill-[#2563eb]! text-white! stroke-1.5!"/>
+          <span className="absolute! top-3! left-3! lg:left-auto! lg:right-3! z-10! inline-flex! items-center! gap-0.5! bg-white! backdrop-blur-sm! text-[#1645bf]! text-[12px]! font-bold! px-1! pr-1.5! py-0.5! rounded-full! shadow-md!">
+          <BadgeCheck className="w-6! h-6! fill-[#2563eb]! text-white! stroke-2!"/>
             RERA
           </span>
         )}
@@ -574,7 +577,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
       {/* Content — clicking anywhere here goes to the overview page.
           Interactive children (wishlist/share/links/actions) stop propagation. */}
       <div
-        className="px-5! py-3! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
+        className="p-4! lg:px-5! lg:py-3! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
         onClick={() => router.push(detailPath)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "A" && (e.target as HTMLElement).tagName !== "BUTTON") {
@@ -586,11 +589,11 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
         aria-label={`View details of ${item.propertyname || "property"}`}
       >
 
-        {/* Title + share */}
+        {/* On mobile the condition badge sits beside the title; social controls overlay the photo. */}
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
             <Link href={detailPath} onClick={(e) => e.stopPropagation()} className="no-underline!">
-              <h3 className="m-0! text-lg! font-semibold! tracking-[-0.02em]! text-[#0a0f1c]! line-clamp-1! leading-snug! hover:text-[#1645bf]! transition-colors! duration-150!">
+              <h3 className="m-0! text-lg! font-semibold! tracking-[-0.02em]! text-[#0a0f1c]! line-clamp-2! lg:line-clamp-1! leading-snug! hover:text-[#1645bf]! transition-colors! duration-150!">
                 {item.propertyname}
               </h3>
             </Link>
@@ -599,20 +602,24 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
               <span className="truncate!">{locationLabel}</span>
             </p>
           </div>
-          <WishlistButton propertyId={item.id} propertyType={item.propertyType} />
-          <button
-            onClick={handleShare}
-            aria-label="Share this property"
-            className="p-2! rounded-full! text-gray-400! hover:text-[#1645bf]! hover:bg-[#eef4ff]! transition-colors! cursor-pointer! shrink-0!"
-          >
-            {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
-          </button>
+          <ListingConditionBadge label={conditionBadge} className="max-w-[45%]! shrink-0! self-start! lg:hidden!" />
+          <div className="absolute! top-3! right-3! z-10! flex! items-center! gap-2! lg:static! lg:z-auto! lg:gap-0!" onClick={(event) => event.stopPropagation()}>
+            <WishlistButton propertyId={item.id} propertyType={item.propertyType} className="inline-flex! items-center! justify-center! min-w-[44px]! min-h-[44px]! bg-white/95! shadow-sm! lg:min-w-0! lg:min-h-0! lg:bg-transparent! lg:shadow-none! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!" />
+            <button
+              type="button"
+              onClick={handleShare}
+              aria-label="Share this property"
+              className="inline-flex! items-center! justify-center! min-w-[44px]! min-h-[44px]! p-2! bg-white/95! shadow-sm! rounded-full! text-gray-400! hover:text-[#1645bf]! hover:bg-[#eef4ff]! transition-colors! cursor-pointer! shrink-0! lg:min-w-0! lg:min-h-0! lg:bg-transparent! lg:shadow-none! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!"
+            >
+              {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
+            </button>
+          </div>
         </div>
 
         {/* Price — dotted divider above, directly under title/location for prominence */}
-        <div className="mt-3! border-t! border-[#e6ebf2]! pt-3! flex! flex-wrap! items-end! gap-x-10! gap-y-3! leading-none!">
+        <div className={`mt-3! border-t! border-[#e6ebf2]! pt-3! flex! flex-wrap! items-end! gap-x-4! lg:gap-x-10! gap-y-3! leading-none! ${emiStarts ? "justify-around! lg:justify-start!" : ""}`}>
           <div className="flex! flex-col! gap-1! min-w-0! shrink-0!">
-            <span className="text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
+            <span className="text-xl! lg:text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
               {priceDisplay}
               {isRentListing(item.posttype) && (
                 <span className="text-[13px]! font-medium! text-gray-500!"> /mo</span>
@@ -626,46 +633,33 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             })()}
           </div>
           {emiStarts ? (
-            <div className="flex! flex-col! gap-1! shrink-0!">
+            <div className="flex! flex-col! items-end! lg:items-start! text-right! lg:text-left! gap-1! shrink-0!">
               <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
               <span className="text-[15px]! font-semibold! text-[#0a0f1c]! tabular-nums!">
                 ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
               </span>
             </div>
           ) : null}
-          <div className="ml-auto! shrink-0! self-center! flex!">
-            {(() => {
-              // Condition ribbon pinned to the end of the pricing row.
-              // No badges on Rent cards — condition ribbons (Resale / New /
-              // Under Construction) are a Buy signal; rentals show none.
-              const badge = isRentListing(item.posttype) ? null : getConditionBadge(item);
-              return badge ? (
-                <span
-                  className="inline-flex! items-center! bg-gray-200! text-gray-600! text-[11px]! font-bold! tracking-wider! pl-3.5! pr-2.5! py-1.5! leading-none!"
-                  style={{ clipPath: "polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%)" }}
-                >
-                  {badge}
-                </span>
-              ) : null;
-            })()}
+          <div className="ml-auto! shrink-0! self-center! hidden! lg:flex!">
+            <ListingConditionBadge label={conditionBadge} />
           </div>
         </div>
 
-        {/* Spec table */}
+        {/* Scrollable specifications on mobile; four columns on desktop. */}
         {specCells.length > 0 && (
-          <div className="mt-3! border-y! border-[#e6ebf2]! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
+          <dl className={listingCardStyles.specs} tabIndex={0} aria-label="Property specifications">
             {specCells.map((cell) => (
-              <div key={cell.label} className="min-w-0!">
-                <div className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">{cell.label}</div>
-                <div className="text-sm! font-semibold! text-[#0a0f1c]! break-words! leading-snug! mt-1!">{cell.value}</div>
+              <div key={cell.label} className={listingCardStyles.spec}>
+                <dt className="m-0! text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">{cell.label}</dt>
+                <dd className={`${listingCardStyles.specValue} m-0! text-sm! font-semibold! text-[#0a0f1c]! break-words! leading-snug! mt-1!`}>{cell.value}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         )}
 
         {/* Section links — separated by the spec table's bottom dotted line */}
         <div
-          className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
+          className="hidden! lg:flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
           {sectionLinks.map((link) => (
@@ -684,12 +678,19 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
 
         {/* Actions */}
         <div
-          className="mt-3! flex! flex-col! sm:flex-row! gap-2.5!"
+          className="mt-4! lg:mt-3! flex! flex-row! gap-2.5!"
           onClick={(e) => e.stopPropagation()}
         >
+          <Link
+            href={detailPath}
+            className="hidden! lg:flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-[#0a0f1c]! bg-white! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! no-underline! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!"
+          >
+            View Details
+          </Link>
           <button
+            type="button"
             onClick={() => setEnquireToken(Date.now())}
-            className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-[#0a0f1c]! bg-white! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! cursor-pointer!"
+            className="flex! flex-1! items-center! justify-center! gap-2! min-h-[44px]! lg:min-h-0! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!"
           >
             <Phone className="w-4! h-4!" />
             Enquire
@@ -699,12 +700,6 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             hideTriggers
             externalOpen={enquireToken != null ? { intent: "enquire", token: enquireToken } : null}
           />
-          <Link
-            href={detailPath}
-            className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! no-underline!"
-          >
-            View Details
-          </Link>
         </div>
       </div>
     </div>

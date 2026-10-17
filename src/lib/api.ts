@@ -202,6 +202,7 @@ export async function createEnquiry(payload: {
 /* ── Property Search ───────────────────────────────────────── */
 
 export type PropertySearchParams = {
+  includeProjects?: boolean;
   propertyType?: string;
   listingType?: string;
   location?: string;
@@ -222,6 +223,8 @@ export type PropertySearchParams = {
 
 export type PropertySearchItem = {
   id: number;
+  listingKind?: 'property' | 'project';
+  project?: ProjectListItem;
   propertyType: string;
   legacyPropertyType: string;
   propertyname?: string;
@@ -300,6 +303,7 @@ export async function searchProperties(
 ): Promise<PropertySearchResponse> {
   const query = new URLSearchParams();
 
+  if (params.includeProjects) query.set("includeProjects", "true");
   if (params.propertyType) {
     const mapped = PROPERTY_TYPE_MAP[params.propertyType] ?? params.propertyType;
     query.set("propertyType", mapped);
@@ -340,6 +344,7 @@ export async function searchProperties(
 
   if (res && Array.isArray(res.items)) {
     res.items = res.items.map((item: any) => {
+      if (item.listingKind === "project") return item;
       // Skip if already mapped
       if (item.propertyname !== undefined && item.propertyname === item.title) return item;
       

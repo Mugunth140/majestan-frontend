@@ -644,6 +644,7 @@ async function PseoListingSection({
     try {
       initialData = await searchProperties(
         {
+          includeProjects: true,
           listingType: pseo.listingType,
           propertyType: pseo.propertyType,
           location: seedLocation,

@@ -55,6 +55,13 @@ function item(overrides: Partial<ProjectListItem> = {}): ProjectListItem {
 }
 
 describe("ProjectListingCard", () => {
+  it("shows monthly rent without sale EMI or condition badges in rental listings", () => {
+    render(<ProjectListingCard item={item({ listingType: "Rent", ranges: { ...item().ranges, minPrice: 45000, maxPrice: 45000 } })} />);
+    expect(screen.getByText("₹ 45,000")).toBeInTheDocument();
+    expect(screen.getByText("/mo")).toBeInTheDocument();
+    expect(screen.queryByText("EMI from")).not.toBeInTheDocument();
+    expect(screen.queryByText("NEW ARRIVAL")).not.toBeInTheDocument();
+  });
   it("shows Total Units instead of Facing", () => {
     render(<ProjectListingCard item={item()} />);
     expect(screen.getByText("Total Units")).toBeInTheDocument();

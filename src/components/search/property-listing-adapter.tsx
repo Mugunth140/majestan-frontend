@@ -26,6 +26,7 @@ import {
 import { PropertySearchFilters, type FilterValues } from "./PropertySearchFilters";
 import type { ListingAdapter } from "./listing-adapter";
 import { formatLocationLine } from "@/lib/location-display";
+import { ProjectListingCard } from "@/components/projects/ProjectListingCard";
 
 const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
   apartment:          "ap",
@@ -728,9 +729,9 @@ export function createPropertyAdapter(init: {
     resetFilters,
 
     fetchItems: async ({ filters, sort, page }) => {
-      // Property listings show properties only. Projects live exclusively
-      // on the /projects listing page (createProjectAdapter).
       return searchProperties({
+        includeProjects: true,
+        city: init.initialCity,
         listingType: filters.listingType,
         propertyType: filters.propertyType,
         location: filters.location,
@@ -749,9 +750,11 @@ export function createPropertyAdapter(init: {
       });
     },
 
-    getItemKey: (item) => item.id,
+    getItemKey: (item) => `${item.listingKind ?? "property"}:${item.id}`,
 
-    renderCard: (item) => <PropertyListingCard key={item.id} item={item} />,
+    renderCard: (item) => item.listingKind === "project" && item.project
+      ? <ProjectListingCard key={`project:${item.id}`} item={item.project} />
+      : <PropertyListingCard key={`property:${item.id}`} item={item} />,
     adAudience: (filters) => (filters.listingType === "Rent" ? "rent" : "buy"),
 
     renderFilters: ({ values, onChange, onReset }) => (

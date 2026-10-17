@@ -99,6 +99,7 @@ function getConditionBadge(possessionStatus: string | null | undefined): string 
 }
 
 export function ProjectListingCard({ item }: { item: ProjectListItem }) {
+  const isRent = item.listingType === "Rent";
   const router = useRouter();
   const detailPath = `/${item.canonicalSlug}`;
   const placeholderUrl = getPlaceholderImage({ projectType: item.projectType });
@@ -197,7 +198,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
   const possession =
     formatPossessionStatus(item.possessionStatus) ?? fmtShortDate(item.possessionDate);
-  const conditionBadge = getConditionBadge(item.possessionStatus);
+  const conditionBadge = isRent ? null : getConditionBadge(item.possessionStatus);
 
   // Availability strip, wired to the possession date: before it shows
   // "Available from {date}"; once it passes, it flips to "Ready to Move".
@@ -382,12 +383,13 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           <div className="flex! flex-col! gap-1! min-w-0! shrink-0!">
             <span className="text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
               {price}
+              {isRent && <span className="text-[13px]! font-medium! text-gray-500!"> /mo</span>}
             </span>
             {pricePerSqft ? (
               <span className="text-[13px]! font-medium! text-[#465066]!">{pricePerSqft}</span>
             ) : null}
           </div>
-          {emiStarts ? (
+          {!isRent && emiStarts ? (
             <div className="flex! flex-col! gap-1! shrink-0!">
               <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
               <span className="text-[15px]! font-semibold! text-[#0a0f1c]! tabular-nums!">

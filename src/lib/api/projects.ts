@@ -73,6 +73,8 @@ export type ProjectBuilder = {
 };
 
 export type ProjectDetail = {
+  /** Listing context when a project appears in property search results. */
+  listingType?: "Sell" | "Rent";
   id: number;
   projectCode: string | null;
   name: string;

@@ -31,7 +31,7 @@ export type PropertySearchFiltersProps = {
 };
 
 const fieldClass =
-  "w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! text-[13px]! font-medium! text-gray-800! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! placeholder:text-gray-400! placeholder:font-normal!";
+  "w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! text-[13px]! font-medium! text-gray-800! focus:outline-none! focus:ring-2! focus:ring-[#1645bf]/20! focus:border-[#1645bf]! transition-all! placeholder:text-gray-400! placeholder:font-normal!";
 
 function Section({
   title,
@@ -55,7 +55,7 @@ function Section({
             {title}
           </span>
           {value ? (
-            <span className="block! text-[11px]! font-light! text-[#27427f]! truncate! mt-0.5!">
+            <span className="block! text-[11px]! font-light! text-[#1645bf]! truncate! mt-0.5!">
               {value}
             </span>
           ) : null}
@@ -147,7 +147,7 @@ export function PropertySearchFilters({
   const moreSummary = moreCount > 0 ? `${moreCount} selected` : "";
 
   return (
-    <div className="font-['Manrope',sans-serif]! bg-white! rounded-xl! border! border-gray-200/70! shadow-sm! w-full!">
+    <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! w-full!">
       {/* Header */}
       <div className="px-5! py-4! border-b! border-gray-100! flex! items-center! justify-between!">
         <h3 className="text-[15px]! font-medium! text-gray-800! flex! items-center! gap-2!">
@@ -183,7 +183,7 @@ export function PropertySearchFilters({
               onClick={() => updateFilter("listingType", type)}
               className={`flex-1! py-2! text-[13px]! font-medium! rounded-md! transition-all! duration-200! cursor-pointer! ${
                 values.listingType === type
-                  ? "bg-white! text-[#27427f]! shadow-sm!"
+                  ? "bg-white! text-[#1645bf]! shadow-sm!"
                   : "text-gray-500! hover:text-gray-700!"
               }`}
             >
@@ -262,8 +262,8 @@ export function PropertySearchFilters({
                 }}
                 className={`px-2.5! py-1.5! rounded-lg! border! text-[11px]! font-medium! transition-all! cursor-pointer! tabular-nums! ${
                   values.minPrice === preset.min && values.maxPrice === preset.max
-                    ? "bg-[#27427f]! text-white! border-[#27427f]!"
-                    : "bg-white! text-gray-500! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
+                    ? "bg-[#1645bf]! text-white! border-[#1645bf]!"
+                    : "bg-white! text-gray-500! border-gray-200! hover:border-[#1645bf]/40! hover:text-[#1645bf]!"
                 }`}
               >
                 {preset.label}
@@ -280,8 +280,8 @@ export function PropertySearchFilters({
                 onClick={() => updateFilter("bedrooms", values.bedrooms === num ? "" : num)}
                 className={`flex-1! h-9! rounded-lg! border! text-[13px]! font-medium! transition-all! cursor-pointer! tabular-nums! ${
                   values.bedrooms === num
-                    ? "bg-[#27427f]! text-white! border-[#27427f]!"
-                    : "bg-white! text-gray-500! border-gray-200! hover:border-[#27427f]/40! hover:text-[#27427f]!"
+                    ? "bg-[#1645bf]! text-white! border-[#1645bf]!"
+                    : "bg-white! text-gray-500! border-gray-200! hover:border-[#1645bf]/40! hover:text-[#1645bf]!"
                 }`}
               >
                 {num}

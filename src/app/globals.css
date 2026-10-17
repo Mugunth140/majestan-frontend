@@ -24,6 +24,21 @@ body {
   padding: 0;
 }
 
+/* Section navigation is custom UI. Override legacy/native button chrome,
+   which can render extra arrows with some browser and OS themes. */
+.section-navigation-link {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-image: none !important;
+}
+
+.section-navigation-link::before,
+.section-navigation-link::after {
+  content: none !important;
+  display: none !important;
+}
+
 /*
  * Fallback height of the fixed site header, used until (and if) the header's
  * ResizeObserver publishes the measured value. Matches the desktop bar

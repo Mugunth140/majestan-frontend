@@ -81,7 +81,7 @@ const SHIMMER_DELAYS = ["", "shimmer-d1", "shimmer-d2"];
 function CardSkeleton({ index = 0 }: { index?: number }) {
   const d = SHIMMER_DELAYS[index % SHIMMER_DELAYS.length];
   return (
-    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0!">
+    <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0!">
       {/* Photo — same geometry as the real image (stretch to content on desktop) */}
       <div className="relative! w-full! aspect-square! lg:aspect-auto! lg:w-[300px]! lg:h-auto! lg:self-stretch! lg:min-h-[240px]! shrink-0! overflow-hidden! bg-gray-100!">
         <div className={`absolute! inset-0! bg-gray-200! shimmer! ${d}`} />
@@ -138,11 +138,11 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
  */
 export function ListingShellSkeleton() {
   return (
-    <div className="max-w-[1120px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!" aria-hidden="true">
+    <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!" aria-hidden="true">
       <div className="flex! gap-6! items-start!">
         {/* ── Sidebar — mirrors PropertySearchFilters + map ── */}
         <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! pt-4! pb-6! pr-1!">
-          <div className="bg-white! rounded-xl! border! border-gray-200/70! shadow-sm! w-full!">
+          <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! w-full!">
             {/* Header: title + reset */}
             <div className="px-5! py-4! border-b! border-gray-100! flex! items-center! justify-between!">
               <div className="h-[18px]! rounded-md! bg-gray-200! w-24! shimmer!" />
@@ -402,7 +402,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
   })();
 
   return (
-    <div className="min-h-screen! bg-[#f6f7f9]!">
+    <div className="min-h-screen! bg-[#f4f6f9]! font-manrope-page">
       {/* Header spacer */}
       <div className="h-[54px]!" aria-hidden="true" />
 
@@ -434,7 +434,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             </div>
             {/* header */}
             <div className="flex! items-center! justify-between! px-5! py-3! border-b! border-gray-100! shrink-0!">
-              <h2 className="font-['Lexend',sans-serif]! text-base! font-bold! text-gray-900!">
+              <h2 className="text-base! font-bold! text-gray-900!">
                 Filters
               </h2>
               <div className="flex! items-center! gap-4!">
@@ -443,7 +443,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     handleFilterChange(adapter.resetFilters);
                     setShowDrawer(false);
                   }}
-                  className="text-xs! font-bold! text-[#27427f]! uppercase! tracking-wider! cursor-pointer!"
+                  className="text-xs! font-bold! text-[#1645bf]! uppercase! tracking-wider! cursor-pointer!"
                 >
                   Reset All
                 </button>
@@ -469,7 +469,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                       onClick={() => handleSortChange(opt.value)}
                       className={`px-3! py-1.5! rounded-lg! border! text-[12px]! font-medium! transition-all! cursor-pointer! ${
                         sort === opt.value
-                          ? "bg-[#27427f]! text-white! border-[#27427f]!"
+                          ? "bg-[#1645bf]! text-white! border-[#1645bf]!"
                           : "bg-white! text-gray-500! border-gray-200!"
                       }`}
                     >
@@ -488,7 +488,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             <div className="shrink-0! px-4! py-4! border-t! border-gray-100! bg-white!">
               <button
                 onClick={() => setShowDrawer(false)}
-                className="w-full! py-3! rounded-xl! bg-[#27427f]! text-white! text-sm! font-bold! cursor-pointer! hover:bg-[#1a2d59]! transition-colors!"
+                className="w-full! py-3! rounded-xl! bg-[#1645bf]! text-white! text-sm! font-bold! cursor-pointer! hover:bg-[#1239a0]! transition-colors!"
               >
                 Show {data?.total ?? 0} Results
               </button>
@@ -498,7 +498,9 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
       )}
 
       {/* ── Page body ── */}
-      <div className="max-w-[1250px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!">
+      {/* Same page column as the property and project detail pages, so the
+          listing lines up with the header, the footer and the page you open. */}
+      <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!">
         <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}
@@ -509,7 +511,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
               onReset: () => handleFilterChange(adapter.resetFilters),
             })}
             {adapter.renderActiveChips(filters, handleFilterChange)}
-            <div className="h-[240px]! rounded-2xl! overflow-hidden! shadow-sm! border! border-gray-100! shrink-0!">
+            <div className="h-[240px]! rounded-2xl! overflow-hidden! border! border-[#e6ebf2]! shrink-0!">
               <LocalityMap
                 city={adapter.mapCity(filters)}
                 locality={adapter.mapLocality?.(filters)}
@@ -521,7 +523,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
           <main className="flex-1! min-w-0! flex! flex-col! pt-3! lg:pt-3!">
 
             {/* Sticky row: breadcrumbs + sort only */}
-            <div className="lg:sticky! lg:top-[var(--site-header-h)]! z-20! bg-[#f6f7f9]! py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
+            <div className="lg:sticky! lg:top-[var(--site-header-h)]! z-20! bg-[#f4f6f9]! py-1! mb-3! -mx-4! lg:mx-0! px-4! lg:px-0!">
               <div className="flex! flex-row! items-center! justify-between! gap-3!">
                 <div className="flex-1! min-w-0!">
                   <Breadcrumbs items={breadcrumbItems} jsonLd />
@@ -536,9 +538,9 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     onChange={(v) => handleSortChange(v)}
                     ariaLabel="Sort listings"
                     trailingIcon={
-                      <ArrowUpDown className="w-3.5! h-3.5! text-[#27427f]!" />
+                      <ArrowUpDown className="w-3.5! h-3.5! text-[#1645bf]!" />
                     }
-                    buttonClassName="font-['Manrope',sans-serif]! bg-[#eef2f7]! border-transparent! rounded-full! pl-4! py-2.5! font-semibold! text-[#27427f]! hover:bg-[#dde5f0]! focus:bg-white! focus:border-[#27427f]/30!"
+                    buttonClassName="bg-white! border-[#e6ebf2]! rounded-full! pl-4! py-2.5! font-semibold! text-[#0a0f1c]! hover:border-[#cfd9ea]! focus:border-[#2563eb]/40!"
                   />
                 </div>
               </div>
@@ -546,13 +548,14 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
 
             {/* Title (scrolls away) */}
             <div className="min-w-0! mt-0! mb-4!">
-              <h1 className="font-['Manrope',sans-serif]! text-lg! sm:text-2xl! font-medium! text-gray-900! leading-snug! capitalize! truncate!">
-                <span className="text-gray-900! text-lg! font-['Manrope',sans-serif] font-normal!">
-                  {totalCount} {countLabel}
-                </span>{" "}
-                <span className="font-light! text-gray-300!">|</span>{" "}
+              {/* Heading set like the detail pages' titles; the result count
+                  sits under it instead of sharing the line behind a pipe. */}
+              <h1 className="m-0! text-[22px]! sm:text-[28px]! font-semibold! tracking-[-0.025em]! leading-tight! text-[#0a0f1c]! capitalize! text-balance!">
                 {pageTitle}
               </h1>
+              <p className="m-0! mt-1.5! text-sm! text-[#465066]! tabular-nums!">
+                {totalCount} {countLabel}
+              </p>
             </div>
 
             {/* Active chips on mobile */}
@@ -600,11 +603,11 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     </button>
                   </div>
                 ) : data?.items.length === 0 ? (
-                  <div className="bg-white! rounded-2xl! border! border-gray-100! p-16! text-center! flex! flex-col! items-center!">
+                  <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! p-16! text-center! flex! flex-col! items-center!">
                     <div className="w-20! h-20! bg-gray-50! rounded-full! flex! items-center! justify-center! mb-5!">
                       <Search className="w-8! h-8! text-gray-300!" />
                     </div>
-                    <h3 className="font-['Lexend',sans-serif]! text-xl! font-bold! text-gray-900! mb-2!">
+                    <h3 className="text-xl! font-bold! text-gray-900! mb-2!">
                       {adapter.emptyTitle}
                     </h3>
                     <p className="text-gray-500! text-sm! max-w-sm! mb-6!">
@@ -612,7 +615,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     </p>
                     <button
                       onClick={() => handleFilterChange(adapter.resetFilters)}
-                      className="px-6! py-2.5! bg-[#27427f]! text-white! rounded-xl! font-bold! text-sm! hover:bg-[#1a2d59]! transition-colors! cursor-pointer!"
+                      className="px-6! py-2.5! bg-[#1645bf]! text-white! rounded-xl! font-bold! text-sm! hover:bg-[#1239a0]! transition-colors! cursor-pointer!"
                     >
                       Clear All Filters
                     </button>
@@ -661,7 +664,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                             prefetch
                             scroll={false}
                             aria-label="Previous page"
-                            className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-600! hover:bg-gray-100! hover:text-[#27427f]! transition-colors! no-underline!"
+                            className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-600! hover:bg-gray-100! hover:text-[#1645bf]! transition-colors! no-underline!"
                           >
                             <ChevronLeft className="w-4! h-4!" />
                             <span className="hidden! sm:inline!">Previous</span>
@@ -681,7 +684,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                             <span
                               key={p}
                               aria-current="page"
-                              className="w-9! h-9! flex! items-center! justify-center! rounded-lg! text-[13px]! font-bold! text-white! bg-[#27427f]! tabular-nums!"
+                              className="w-9! h-9! flex! items-center! justify-center! rounded-lg! text-[13px]! font-bold! text-white! bg-[#1645bf]! tabular-nums!"
                             >
                               {p}
                             </span>
@@ -692,7 +695,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                               prefetch
                               scroll={false}
                               aria-label={`Page ${p}`}
-                              className="w-9! h-9! flex! items-center! justify-center! rounded-lg! text-[13px]! font-medium! text-gray-600! hover:bg-gray-100! hover:text-[#27427f]! transition-colors! no-underline! tabular-nums!"
+                              className="w-9! h-9! flex! items-center! justify-center! rounded-lg! text-[13px]! font-medium! text-gray-600! hover:bg-gray-100! hover:text-[#1645bf]! transition-colors! no-underline! tabular-nums!"
                             >
                               {p}
                             </Link>
@@ -704,7 +707,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                             prefetch
                             scroll={false}
                             aria-label="Next page"
-                            className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-600! hover:bg-gray-100! hover:text-[#27427f]! transition-colors! no-underline!"
+                            className="flex! items-center! gap-1! h-9! px-3.5! rounded-full! text-[13px]! font-semibold! text-gray-600! hover:bg-gray-100! hover:text-[#1645bf]! transition-colors! no-underline!"
                           >
                             <span className="hidden! sm:inline!">Next</span>
                             <ChevronRight className="w-4! h-4!" />

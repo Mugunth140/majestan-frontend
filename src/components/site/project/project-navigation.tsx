@@ -48,7 +48,7 @@ export function ProjectNavigation({
               <Link
                 key={s.id}
                 href={href}
-                className={`group! relative! flex! items-center! gap-2! whitespace-nowrap! py-3.5! text-[14px]! font-medium! transition-colors! duration-300! shrink-0! no-underline! ${
+                className={`section-navigation-link group! relative! flex! items-center! gap-2! whitespace-nowrap! py-3.5! text-[14px]! font-medium! transition-colors! duration-300! shrink-0! no-underline! ${
                   isActive
                     ? "text-[#1645bf]!"
                     : "text-gray-500! hover:text-gray-900!"

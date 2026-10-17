@@ -11,7 +11,7 @@ export function MapPlaceholder({ city, locality }: { city: string; locality?: st
       <div 
         className="absolute! inset-0! opacity-20!" 
         style={{
-          backgroundImage: `linear-gradient(#27427f 1px, transparent 1px), linear-gradient(90deg, #27427f 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(#1645bf 1px, transparent 1px), linear-gradient(90deg, #1645bf 1px, transparent 1px)`,
           backgroundSize: '40px 40px'
         }}
       />
@@ -21,10 +21,10 @@ export function MapPlaceholder({ city, locality }: { city: string; locality?: st
         <div className="relative! w-64! h-64!">
           {/* Main Pin */}
           <div className="absolute! top-1/2! left-1/2! -translate-x-1/2! -translate-y-1/2! z-10! flex! flex-col! items-center! animate-bounce!">
-            <div className="bg-[#27427f]! text-white! px-3! py-1.5! rounded-lg! text-xs! font-bold! shadow-lg! mb-1! whitespace-nowrap!">
+            <div className="bg-[#1645bf]! text-white! px-3! py-1.5! rounded-lg! text-xs! font-bold! shadow-lg! mb-1! whitespace-nowrap!">
               {locationLabel}
             </div>
-            <MapPin className="w-8! h-8! text-[#27427f]! fill-white!" />
+            <MapPin className="w-8! h-8! text-[#1645bf]! fill-white!" />
           </div>
           
           {/* Decorative smaller pins */}
@@ -45,7 +45,7 @@ export function MapPlaceholder({ city, locality }: { city: string; locality?: st
 
       {/* Overlay Message */}
       <div className="absolute! bottom-0! left-0! right-0! bg-gradient-to-t! from-white/90! to-transparent! pt-20! pb-6! px-6! text-center! backdrop-blur-[2px]!">
-        <h3 className="font-bold! text-[#27427f]! mb-1!">Interactive Map View</h3>
+        <h3 className="font-bold! text-[#1645bf]! mb-1!">Interactive Map View</h3>
         <p className="text-xs! text-gray-500!">Will be available soon with live property locations.</p>
       </div>
     </div>

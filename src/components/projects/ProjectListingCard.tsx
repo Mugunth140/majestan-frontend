@@ -300,7 +300,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   if (possession && !isPlot) specCells.push({ label: "Possession", value: possession });
 
   return (
-    <div className="font-['Manrope',sans-serif]! bg-white! rounded-2xl! border! border-gray-200/70! shadow-sm! hover:shadow-[0_10px_28px_rgba(39,66,127,0.10)]! transition-all! duration-300! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
+    <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! hover:border-[#cfd9ea]! hover:shadow-[0_24px_48px_-28px_rgba(22,69,191,0.35)]! transition-[box-shadow,border-color]! duration-300! ease-out-quint! flex! flex-col! lg:flex-row! overflow-hidden! min-w-0! group!">
 
       {/* Image — 1:1 square on all breakpoints: full-width on
           mobile/tablet, fixed 300px square pinned to the top on desktop. */}
@@ -322,8 +322,8 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
         />
         {/* RERA verified badge — top-right over image */}
         {reraVerified && (
-          <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/90! backdrop-blur-sm! text-[#1d9bf0]! text-[10px]! font-bold! px-2! py-1! rounded-lg! shadow-sm!">
-            <BadgeCheck className="w-3.5! h-3.5! fill-blue-400! text-white! stroke-1.5!" />
+          <span className="absolute! top-3! right-3! z-10! inline-flex! items-center! gap-1! bg-white/95! backdrop-blur-sm! text-[#1645bf]! text-[11px]! font-semibold! px-2.5! py-1! rounded-full! shadow-sm!">
+            <BadgeCheck className="w-3.5! h-3.5! fill-[#2563eb]! text-white! stroke-1.5!" />
             RERA
           </span>
         )}
@@ -341,7 +341,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
       {/* Content — clicking anywhere here goes to the overview page.
           Interactive children (wishlist/share/links/actions) stop propagation. */}
       <div
-        className="px-5! py-3! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
+        className="p-5! lg:p-6! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
         onClick={() => router.push(detailPath)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "A" && (e.target as HTMLElement).tagName !== "BUTTON") {
@@ -357,11 +357,11 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
         <div className="flex! items-start! gap-2! min-w-0!">
           <div className="min-w-0! flex-1!">
             <div onClick={navigateToDetail} className="no-underline! cursor-pointer!">
-              <h3 className="font-['Manrope',sans-serif]! text-[17px]! font-semibold! text-[#27427f]! line-clamp-1! leading-snug! hover:text-[#1a2d59]! transition-colors!">
+              <h3 className="m-0! text-lg! font-semibold! tracking-[-0.02em]! text-[#0a0f1c]! line-clamp-1! leading-snug! hover:text-[#1645bf]! transition-colors! duration-150!">
                 {item.name}
               </h3>
             </div>
-            <p className="flex! items-center! gap-1.5! text-[13px]! text-gray-600! min-w-0!">
+            <p className="flex! items-center! gap-1.5! mt-1! text-[13px]! text-[#465066]! min-w-0!">
               <MapPin className="w-3.5! h-3.5! text-gray-500! shrink-0!" />
               <span className="truncate!">{locationLabel}</span>
             </p>
@@ -370,7 +370,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           <button
             onClick={handleShare}
             aria-label="Share this project"
-            className="p-2! rounded-full! text-gray-400! hover:text-[#27427f]! hover:bg-gray-100! transition-colors! cursor-pointer! shrink-0!"
+            className="p-2! rounded-full! text-gray-400! hover:text-[#1645bf]! hover:bg-[#eef4ff]! transition-colors! cursor-pointer! shrink-0!"
           >
             {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
           </button>
@@ -378,19 +378,19 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
         {/* Price — dotted divider above, directly under title/location for prominence.
             EXPERIMENTAL: price over per-sqft, EMI label over EMI figure. */}
-        <div className="mt-3! border-t! border-dashed! border-gray-200! pt-3! flex! items-center! gap-16! leading-none!">
+        <div className="mt-3! border-t! border-[#e6ebf2]! pt-3! flex! flex-wrap! items-center! gap-x-8! gap-y-3! leading-none!">
           <div className="flex! flex-col! gap-1! min-w-0! shrink-0!">
-            <span className="text-[22px]! font-semibold! text-[#27427f]!">
+            <span className="text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
               {price}
             </span>
             {pricePerSqft ? (
-              <span className="text-[13px]! font-medium! text-gray-700!">{pricePerSqft}</span>
+              <span className="text-[13px]! font-medium! text-[#465066]!">{pricePerSqft}</span>
             ) : null}
           </div>
           {emiStarts ? (
             <div className="flex! flex-col! gap-1! shrink-0!">
               <span className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">EMI from</span>
-              <span className="text-[15px]! font-semibold! text-gray-800! tabular-nums!">
+              <span className="text-[15px]! font-semibold! text-[#0a0f1c]! tabular-nums!">
                 ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
               </span>
             </div>
@@ -409,11 +409,11 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
         {/* Spec table */}
         {specCells.length > 0 && (
-          <div className="mt-3! border-y! border-dashed! border-gray-200! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
+          <div className="mt-3! border-y! border-[#e6ebf2]! py-3! grid! grid-cols-2! sm:grid-cols-4! gap-x-3! gap-y-4!">
             {specCells.map((cell) => (
               <div key={cell.label} className="min-w-0!">
-                <div className="text-[11px]! text-gray-500! font-normal!">{cell.label}</div>
-                <div className="text-[13px]! font-medium! text-gray-800! truncate! mt-0.5!">{cell.value}</div>
+                <div className="text-[11px]! font-medium! uppercase! tracking-wide! text-gray-500!">{cell.label}</div>
+                <div className="text-sm! font-semibold! text-[#0a0f1c]! break-words! leading-snug! mt-1!">{cell.value}</div>
               </div>
             ))}
           </div>
@@ -421,7 +421,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
         {/* Section links — separated by the spec table's bottom dotted line */}
         <div
-          className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
+          className="flex! flex-wrap! items-center! justify-center! gap-x-5! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
           {projectSections.map((s) => {
@@ -434,9 +434,9 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
                   e.stopPropagation();
                   router.push(sectionHref);
                 }}
-                className="flex! items-center! gap-1.5! text-[12px]! font-medium! text-gray-500! hover:text-[#27427f]! transition-colors! no-underline! group/link! cursor-pointer! bg-transparent! border-none! p-0!"
+                className="section-navigation-link flex! items-center! gap-1.5! text-[12px]! font-medium! text-[#465066]! hover:text-[#1645bf]! transition-colors! no-underline! group/link! cursor-pointer! bg-transparent! border-none! p-0!"
               >
-                <span className="text-gray-400! group-hover/link:text-[#27427f]! transition-colors!">
+                <span className="text-gray-400! group-hover/link:text-[#1645bf]! transition-colors!">
                   {s.icon}
                 </span>
                 {s.label}
@@ -452,7 +452,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
         >
           <button
             onClick={() => setEnquireToken(Date.now())}
-            className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-[#27427f]! bg-[#eef2f7]! hover:bg-[#dde5f0]! transition-colors! cursor-pointer!"
+            className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-[#0a0f1c]! bg-white! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! cursor-pointer!"
           >
             <Phone className="w-4! h-4!" />
             Enquire
@@ -467,7 +467,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
             <button
               onClick={handleBrochure}
               disabled={downloadingBrochure}
-              className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! cursor-pointer! disabled:opacity-70!"
+              className="flex! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer! disabled:opacity-70!"
             >
               <Download className="w-4! h-4!" />
               {downloadingBrochure ? "Downloading..." : "Brochure"}
@@ -476,7 +476,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
             <button
               type="button"
               onClick={navigateToDetail}
-              className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-medium! text-white! bg-[#27427f]! hover:bg-[#1e3a6e]! transition-colors! cursor-pointer!"
+              className="flex! flex-1! items-center! justify-center! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer!"
             >
               View Details
             </button>

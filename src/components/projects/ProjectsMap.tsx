@@ -191,7 +191,7 @@ export function ProjectsMap({ items, city }: { items: ProjectListItem[]; city: s
                     ? {
                         path: google.maps.SymbolPath.CIRCLE,
                         scale: 11,
-                        fillColor: pin.id === activeId ? "#ffc900" : "#27427f",
+                        fillColor: pin.id === activeId ? "#ffc900" : "#1645bf",
                         fillOpacity: 1,
                         strokeColor: "#ffffff",
                         strokeWeight: 2.5,
@@ -207,10 +207,10 @@ export function ProjectsMap({ items, city }: { items: ProjectListItem[]; city: s
                   <p className="text-[11px]! text-gray-500! mt-0.5!">
                     {[activePin.item.sublocation, activePin.item.city].filter(Boolean).join(", ")}
                   </p>
-                  <p className="text-[13px]! font-bold! text-[#27427f]! mt-1.5!">{activePrice}</p>
+                  <p className="text-[13px]! font-bold! text-[#1645bf]! mt-1.5!">{activePrice}</p>
                   <Link
                     href={`/${activePin.item.canonicalSlug}`}
-                    className="inline-block! mt-2! text-[12px]! font-bold! text-[#27427f]! hover:text-[#1a2d59]! no-underline!"
+                    className="inline-block! mt-2! text-[12px]! font-bold! text-[#1645bf]! hover:text-[#0a0f1c]! no-underline!"
                   >
                     View project →
                   </Link>

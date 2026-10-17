@@ -99,37 +99,37 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
           <h3 className="text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-2!">Active Filters</h3>
           <div className="flex! flex-wrap! gap-1.5!">
             {filters.keyword && (
-              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+              <span className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 &ldquo;{filters.keyword}&rdquo;
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({ ...filters, keyword: "" })} />
               </span>
             )}
             {(filters.minPrice || filters.maxPrice) && (
-              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+              <span className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 Price: {filters.minPrice ? `₹${Number(filters.minPrice) / 100000}L+` : '0'} to {filters.maxPrice ? `₹${Number(filters.maxPrice) / 100000}L` : 'Any'}
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({ ...filters, minPrice: "", maxPrice: "" })} />
               </span>
             )}
             {filters.bhk && (
-              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+              <span className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 {filters.bhk} BHK
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({ ...filters, bhk: "" })} />
               </span>
             )}
             {(filters.minArea || filters.maxArea) && (
-              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+              <span className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 Area: {filters.minArea || "0"} to {filters.maxArea || "Any"} sq.ft
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({ ...filters, minArea: "", maxArea: "" })} />
               </span>
             )}
             {filters.possession && (
-              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+              <span className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 {POSSESSION_LABELS[filters.possession] ?? filters.possession}
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({ ...filters, possession: "" })} />
               </span>
             )}
             {filters.reraVerified && (
-              <span className="inline-flex! items-center! gap-1.5! bg-[#27427f]/10! text-[#27427f]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
+              <span className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 RERA Verified
                 <X className="w-3! h-3! cursor-pointer! hover:text-red-500! transition-colors!" onClick={() => onChange({ ...filters, reraVerified: "" })} />
               </span>

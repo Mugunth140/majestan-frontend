@@ -27,7 +27,7 @@ function FilterChip({
       onClick={onClick}
       className={`shrink-0! flex! items-center! gap-1! px-3.5! py-2! rounded-full! border! text-[13px]! transition-colors! cursor-pointer! whitespace-nowrap! ${
         active
-          ? "border-[#27427f]! text-[#27427f]! font-bold! bg-white!"
+          ? "border-[#1645bf]! text-[#1645bf]! font-bold! bg-white!"
           : "border-gray-200! text-gray-500! font-medium! bg-white!"
       }`}
     >
@@ -59,7 +59,7 @@ export function MobileFilterBar({
         >
           <SlidersHorizontal className="w-4! h-4!" />
           {activeFilterCount > 0 && (
-            <span className="absolute! -top-1! -right-1! bg-[#27427f]! text-white! text-[9px]! font-extrabold! min-w-4! h-4! px-0.5! rounded-full! flex! items-center! justify-center! leading-none!">
+            <span className="absolute! -top-1! -right-1! bg-[#1645bf]! text-white! text-[9px]! font-extrabold! min-w-4! h-4! px-0.5! rounded-full! flex! items-center! justify-center! leading-none!">
               {activeFilterCount}
             </span>
           )}

@@ -59,7 +59,7 @@ export function CustomSelect({
         aria-label={ariaLabel}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className={`w-full! flex! items-center! gap-2! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-[13px]! font-medium! text-gray-800! hover:border-[#27427f]/40! focus:outline-none! focus:ring-2! focus:ring-[#27427f]/20! focus:border-[#27427f]! transition-all! cursor-pointer! ${buttonClassName}`}
+        className={`w-full! flex! items-center! gap-2! bg-white! border! border-gray-200! rounded-lg! py-2.5! pl-3! pr-8! text-[13px]! font-medium! text-gray-800! hover:border-[#1645bf]/40! focus:outline-none! focus:ring-2! focus:ring-[#1645bf]/20! focus:border-[#1645bf]! transition-all! cursor-pointer! ${buttonClassName}`}
       >
         {leadingIcon ? <span className="shrink-0!">{leadingIcon}</span> : null}
         <span className="flex-1! text-left! truncate!">
@@ -87,7 +87,7 @@ export function CustomSelect({
                 }}
                 className={`w-full! flex! items-center! justify-between! gap-2! px-3! py-2! text-[13px]! text-left! transition-colors! cursor-pointer! ${
                   active
-                    ? "font-semibold! text-[#27427f]! bg-[#27427f]/[0.06]!"
+                    ? "font-semibold! text-[#1645bf]! bg-[#1645bf]/[0.06]!"
                     : "font-normal! text-gray-600! hover:bg-gray-50! hover:text-gray-900!"
                 }`}
               >

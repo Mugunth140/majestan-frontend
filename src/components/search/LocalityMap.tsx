@@ -5,7 +5,7 @@ export function LocalityMap({ city, locality }: { city: string; locality?: strin
   const src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=13&output=embed`;
 
   return (
-    <div className="relative! w-full! h-[240px]! rounded-xl! overflow-hidden! border! border-gray-200/70! bg-gray-100!">
+    <div className="relative! w-full! h-[240px]! overflow-hidden! bg-gray-100!">
       <iframe
         key={query}
         title={`Map of ${query}`}

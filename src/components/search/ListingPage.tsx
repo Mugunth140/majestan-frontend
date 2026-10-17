@@ -138,7 +138,7 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
  */
 export function ListingShellSkeleton() {
   return (
-    <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!" aria-hidden="true">
+    <div className="max-w-[1250px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!" aria-hidden="true">
       <div className="flex! gap-6! items-start!">
         {/* ── Sidebar — mirrors PropertySearchFilters + map ── */}
         <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! pt-4! pb-6! pr-1!">
@@ -498,9 +498,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
       )}
 
       {/* ── Page body ── */}
-      {/* Same page column as the property and project detail pages, so the
-          listing lines up with the header, the footer and the page you open. */}
-      <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!">
+      <div className="max-w-[1250px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!">
         <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}

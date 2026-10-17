@@ -183,6 +183,8 @@ export function ProjectFilterPanel({ values, onChange, onReset }: { values: Proj
               onChange({ ...values, ...textFields, city: newVal || currentCity });
             }}
             ariaLabel="Location"
+            searchable
+            searchPlaceholder="Search sub-localities..."
             leadingIcon={<MapPin className="w-4! h-4! text-gray-400!" />}
             buttonClassName={isAll ? "text-gray-400!" : ""}
           />

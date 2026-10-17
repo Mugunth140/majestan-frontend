@@ -341,7 +341,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
       {/* Content — clicking anywhere here goes to the overview page.
           Interactive children (wishlist/share/links/actions) stop propagation. */}
       <div
-        className="p-5! lg:p-6! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
+        className="px-5! py-3! flex! flex-col! flex-1! min-w-0! justify-center! cursor-pointer!"
         onClick={() => router.push(detailPath)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "A" && (e.target as HTMLElement).tagName !== "BUTTON") {
@@ -378,7 +378,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
         {/* Price — dotted divider above, directly under title/location for prominence.
             EXPERIMENTAL: price over per-sqft, EMI label over EMI figure. */}
-        <div className="mt-3! border-t! border-[#e6ebf2]! pt-3! flex! flex-wrap! items-center! gap-x-8! gap-y-3! leading-none!">
+        <div className="mt-3! border-t! border-[#e6ebf2]! pt-3! flex! flex-wrap! items-center! gap-x-16! gap-y-3! leading-none!">
           <div className="flex! flex-col! gap-1! min-w-0! shrink-0!">
             <span className="text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
               {price}
@@ -421,7 +421,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
 
         {/* Section links — separated by the spec table's bottom dotted line */}
         <div
-          className="flex! flex-wrap! items-center! justify-center! gap-x-5! gap-y-2! mt-3!"
+          className="flex! flex-wrap! items-center! justify-center! gap-x-7! gap-y-2! mt-3!"
           onClick={(e) => e.stopPropagation()}
         >
           {projectSections.map((s) => {

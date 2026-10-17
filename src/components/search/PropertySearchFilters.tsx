@@ -210,6 +210,8 @@ export function PropertySearchFilters({
               onChange({ ...values, ...textFields, location: newVal || currentCity });
             }}
             ariaLabel="Location"
+            searchable
+            searchPlaceholder="Search sub-localities..."
             leadingIcon={<MapPin className="w-4! h-4! text-gray-400!" />}
             buttonClassName={isAll ? "text-gray-400!" : ""}
           />

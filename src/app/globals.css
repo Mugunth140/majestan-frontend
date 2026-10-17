@@ -42,7 +42,7 @@ body {
 /*
  * Fallback height of the fixed site header, used until (and if) the header's
  * ResizeObserver publishes the measured value. Matches the desktop bar
- * (logo h-10 + py-2.5 * 2 ≈ 60px + border/shadow rounding).
+ * (68px navigation row plus its 1px bottom border).
  */
 :root {
   --site-header-h: 69px;

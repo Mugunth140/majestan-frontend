@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
@@ -176,12 +176,13 @@ export function SiteHeader(): React.JSX.Element {
 
   // The header is `fixed`, so every page that renders a full-bleed hero at the
   // very top needs to know how tall it actually is. Publishing the measured
-  // height as --site-header-h keeps that offset exact at every breakpoint.
-  useEffect(() => {
+  // height before paint keeps spacers and sticky tabs flush, including at
+  // browser zoom levels where the header has a fractional pixel height.
+  useLayoutEffect(() => {
     const el = headerRef.current;
     if (!el) return;
     const apply = () => {
-      const h = Math.round(el.getBoundingClientRect().height);
+      const h = el.getBoundingClientRect().height;
       if (h > 0) document.documentElement.style.setProperty("--site-header-h", `${h}px`);
     };
     apply();

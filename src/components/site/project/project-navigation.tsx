@@ -37,7 +37,7 @@ export function ProjectNavigation({
   const planLabel = projectType ? getFloorPlanLabel(projectType) : "Floor Plan";
 
   return (
-    <div className="bg-white/95! backdrop-blur-md! sticky! top-[var(--site-header-h)]! z-40! border-b! border-gray-200/80! shadow-xs! transition-all! duration-300! font-manrope">
+    <div className="m-0! p-0! bg-white! backdrop-blur-md! sticky! top-[var(--site-header-h)]! z-40! border-b! border-gray-200/80! shadow-xs! transition-[background-color,box-shadow]! duration-300! font-manrope">
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <nav className="flex! items-center! gap-6! md:gap-8! overflow-x-auto! hide-scrollbar!" aria-label="Project sections">
           {PROJECT_SECTIONS.map((s) => {

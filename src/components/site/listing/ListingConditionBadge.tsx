@@ -5,7 +5,6 @@ export function ListingConditionBadge({ label, className = "" }: { label: string
   return (
     <span className={`${styles.badgeWrap} ${className}`}>
       <span className={styles.badge}>{label}</span>
-      <span className={styles.badgeFold} aria-hidden="true" />
     </span>
   );
 }

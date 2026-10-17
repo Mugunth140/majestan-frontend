@@ -18,6 +18,7 @@ import {
 import { getPropertyFloorPlans } from "@/lib/property-floor-plans";
 import { getAdditionalPropertyDetails } from "@/lib/property-detail-rows";
 import { getGroupedPropertyDetails } from "@/lib/property-detail-groups";
+import { GroupedDetails } from "@/components/site/shared/GroupedDetails";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
 import {
   getCommercialSpecs,
@@ -36,7 +37,7 @@ import { PhotosSection } from "@/components/site/property/sections/PhotosSection
 import { FloorPlanTeaser } from "@/components/site/property/FloorPlanTeaser";
 import { PhotosTeaser } from "@/components/site/property/PhotosTeaser";
 import { PropertyGallery } from "./PropertyGallery";
-import { OV_ROOT, Panel, PanelLink, IconMark } from "@/components/site/project/overview/overview-ui";
+import { OV_ROOT, Panel, PanelLink, IconMark, EYEBROW, INK } from "@/components/site/project/overview/overview-ui";
 import { TEXT_LINK } from "@/components/site/project/project-ui";
 import { PropertyFinanceSection } from "./PropertyFinanceSection";
 import { PropertyFurnishingSection } from "./PropertyFurnishingSection";
@@ -172,8 +173,6 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
 
   // Every listing type shows its details in categories.
   const detailGroups = getGroupedPropertyDetails(property, { pricePerSqft: perSqft });
-  /** Categories visible before "View all details". */
-  const GROUPS_COLLAPSED = 2;
 
   // Amenities preview — real tags only, never a hardcoded fallback.
   // Normalized amenities first, raw join as fallback (tests and older
@@ -199,52 +198,10 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
           <div {...(isSingle ? { id: "overview" } : {})} className="scroll-mt-40!">
             <PropertyGallery key={property.canonicalSlug} property={property} singlePage={isSingle} />
           </div>
-          {/* Overview card: grouped categories for homes, flat grid otherwise */}
+          {/* Shared grouped details; retain the legacy grid only for uncategorized data */}
           {detailGroups.length > 0 && (
             <Panel id="property-details" title="Property details">
-              <div id="property-details-groups" className="mt-6!">
-                {detailGroups.map((g, index) => {
-                  // Collapsed categories stay in the page (search engines,
-                  // screen readers, find-in-page) and are only hidden visually.
-                  const collapsed = !showAllPropertyDetails && index >= GROUPS_COLLAPSED;
-                  const headingId = `property-details-${index}`;
-                  return (
-                    <section
-                      key={g.title}
-                      aria-labelledby={headingId}
-                      className={`border-t! border-solid! border-gray-100! pt-6! pb-6! ${collapsed ? "hidden!" : ""}`}
-                    >
-                      <h3
-                        id={headingId}
-                        className="m-0! text-[12px]! font-semibold! uppercase! tracking-[0.08em]! text-[#1645bf]/80!"
-                      >
-                        {g.title}
-                      </h3>
-                      <dl className="m-0! mt-4! grid! grid-cols-2! gap-x-6! gap-y-5! sm:grid-cols-3!">
-                        {g.fields.map((field) => (
-                          <div key={field.label} className={`min-w-0! ${field.wide ? "col-span-2! sm:col-span-3!" : ""}`}>
-                            <dt className="text-xs! font-medium! leading-tight! text-[#5f6b80]!">{field.label}</dt>
-                            <dd className="m-0! mt-1! text-sm! font-semibold! leading-snug! text-gray-900! break-words! whitespace-pre-line!">
-                              {field.value}
-                            </dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </section>
-                  );
-                })}
-              </div>
-              {detailGroups.length > GROUPS_COLLAPSED && (
-                <button
-                  type="button"
-                  aria-controls="property-details-groups"
-                  aria-expanded={showAllPropertyDetails}
-                  onClick={() => setShowAllPropertyDetails((show) => !show)}
-                  className={`${TEXT_LINK} mt-2! inline-flex! text-sm! font-semibold!`}
-                >
-                  {showAllPropertyDetails ? "Show less" : "View all details"}
-                </button>
-              )}
+              <GroupedDetails groups={detailGroups} id="property-details-groups" />
             </Panel>
           )}
           {detailGroups.length === 0 && overviewStats.length > 0 && (
@@ -260,14 +217,14 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
                         : "";
                   return (
                     <div key={stat.label} className={`flex! items-start! gap-3! min-w-0! ${stat.wide ? "col-span-2! sm:col-span-3!" : ""} ${collapsedVisibility}`}>
-                      <div className="w-10! h-10! rounded-xl! bg-[#eef4ff]! flex! items-center! justify-center! text-[#1645bf]! shrink-0!">
+                      <div className="w-8! h-8! rounded-lg! bg-[#eef4ff]! flex! items-center! justify-center! text-[#1645bf]! shrink-0!">
                         {stat.icon}
                       </div>
                       <div className="min-w-0!">
-                        <p className="text-xs! text-[#5f6b80]! font-medium! leading-tight!">
+                        <p className={`m-0! ${EYEBROW}`}>
                           {stat.label}
                         </p>
-                        <p className={`text-sm! font-semibold! text-gray-900! mt-1! leading-snug! break-words! ${stat.wide ? "whitespace-pre-line!" : ""}`}>
+                        <p className={`m-0! text-[15px]! font-semibold! ${INK} mt-0.5! leading-snug! break-words! ${stat.wide ? "whitespace-pre-line!" : ""}`}>
                           {stat.value}
                         </p>
                       </div>

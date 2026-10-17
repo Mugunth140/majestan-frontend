@@ -1,36 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Bath,
-  BookOpen,
-  Building,
-  Building2,
-  CalendarClock,
-  Car,
-  CarFront,
-  Compass,
-  Fence,
-  Flame,
-  Hash,
-  Home,
-  Layers,
-  LandPlot,
-  Maximize,
-  Ruler,
-  Sofa,
-  Tag,
-  Wallet,
-  Warehouse,
-  type LucideIcon,
-} from "lucide-react";
 import type { ProjectDetail } from "@/lib/api/projects";
-import { buildAboutRows } from "@/lib/project-overview";
+import { getGroupedProjectDetails } from "@/lib/project-detail-groups";
+import { GroupedDetails } from "@/components/site/shared/GroupedDetails";
 import { paragraphs } from "@/components/site/project/project-ui";
 import {
-  EYEBROW,
   INK,
-  IconMark,
   MUTED,
   PROSE,
   Panel,
@@ -40,39 +16,6 @@ import {
 /** Shown in place of a description so the card never opens on an empty gap. */
 const NO_DESCRIPTION =
   "A full description has not been published for this project yet. Send an enquiry and our team will share the details.";
-
-/** Three rows of the three-column grid before "Show all details". */
-const DETAILS_PREVIEW = 9;
-
-/** An icon per detail, so the grid scans by shape before it is read. */
-const DETAIL_ICONS: Record<string, LucideIcon> = {
-  "Project type": Home,
-  "Possession date": CalendarClock,
-  "Total units": Hash,
-  Towers: Building2,
-  "Floors per tower": Layers,
-  "Project area": Maximize,
-  "Boundary wall": Fence,
-  "Open sides": LandPlot,
-  Facing: Compass,
-  "Facings available": Compass,
-  Developer: Building,
-  "Project ID": Tag,
-  "Units on sale": Warehouse,
-  Bathrooms: Bath,
-  Balconies: Ruler,
-  "Carpet area": Ruler,
-  "UDS area": LandPlot,
-  "Car parking": Car,
-  "Guest parking": CarFront,
-  "Pooja room": Flame,
-  "Study room": BookOpen,
-  Furnishing: Sofa,
-  Floor: Layers,
-  Floors: Layers,
-  Maintenance: Wallet,
-  "Available from": CalendarClock,
-};
 
 type Tower = { name: string; floors: number | null; units: number | null };
 
@@ -93,15 +36,12 @@ function towerList(project: ProjectDetail): Tower[] {
 
 export function AboutSection({ project }: { project: ProjectDetail }) {
   const [expanded, setExpanded] = useState(false);
-  const [allDetails, setAllDetails] = useState(false);
   const descriptionParagraphs = paragraphs(project.description);
-  const rows = buildAboutRows(project);
+  const groups = getGroupedProjectDetails(project);
   const towers = towerList(project);
   const collapsible = descriptionParagraphs.length > 1;
   const visibleParagraphs =
     collapsible && !expanded ? descriptionParagraphs.slice(0, 1) : descriptionParagraphs;
-  const detailsCollapsible = rows.length > DETAILS_PREVIEW + 1;
-  const visibleRows = detailsCollapsible && !allDetails ? rows.slice(0, DETAILS_PREVIEW) : rows;
 
   return (
     <Panel title={`About ${project.name}`} id="about">
@@ -130,32 +70,10 @@ export function AboutSection({ project }: { project: ProjectDetail }) {
         )}
       </div>
 
-      {rows.length > 0 && (
+      {groups.length > 0 && (
         <div className="mt-8!">
           <h3 className={`m-0! text-base! font-semibold! ${INK}`}>Project details</h3>
-          <dl className="m-0! mt-5! grid! grid-cols-2! sm:grid-cols-3! gap-x-6! gap-y-6!">
-            {visibleRows.map((row, index) => (
-              <div key={`${row.label}-${index}`} className="flex! items-start! gap-3! min-w-0!">
-                <IconMark Icon={DETAIL_ICONS[row.label] ?? Tag} size="sm" />
-                <div className="min-w-0! flex! flex-col-reverse!">
-                  <dd className={`m-0! mt-0.5! text-[15px]! font-semibold! leading-snug! break-words! ${INK}`}>
-                    {row.value}
-                  </dd>
-                  <dt className={EYEBROW}>{row.label}</dt>
-                </div>
-              </div>
-            ))}
-          </dl>
-          {detailsCollapsible && (
-            <button
-              type="button"
-              onClick={() => setAllDetails((value) => !value)}
-              aria-expanded={allDetails}
-              className={`mt-6! ${TOGGLE}`}
-            >
-              {allDetails ? "Show fewer details" : `Show all ${rows.length} details`}
-            </button>
-          )}
+          <GroupedDetails groups={groups} id="project-details-groups" headingLevel={4} />
         </div>
       )}
 

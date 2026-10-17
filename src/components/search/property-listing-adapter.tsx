@@ -602,7 +602,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
               <span className="truncate!">{locationLabel}</span>
             </p>
           </div>
-          <ListingConditionBadge label={conditionBadge} className="max-w-[45%]! shrink-0! self-start! lg:hidden!" />
+          <ListingConditionBadge label={conditionBadge} className="max-w-none! shrink-0! self-start! lg:hidden!" />
           <div className="absolute! top-3! right-3! z-10! flex! items-center! gap-2! lg:static! lg:z-auto! lg:gap-0!" onClick={(event) => event.stopPropagation()}>
             <WishlistButton propertyId={item.id} propertyType={item.propertyType} className="inline-flex! items-center! justify-center! min-w-[44px]! min-h-[44px]! bg-white/95! shadow-sm! lg:min-w-0! lg:min-h-0! lg:bg-transparent! lg:shadow-none! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!" />
             <button
@@ -640,7 +640,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
               </span>
             </div>
           ) : null}
-          <div className="ml-auto! shrink-0! self-center! hidden! lg:flex!">
+          <div className={`${listingCardStyles.badgeSlot} ml-auto! shrink-0! self-center! hidden! lg:flex!`}>
             <ListingConditionBadge label={conditionBadge} />
           </div>
         </div>

@@ -22,6 +22,8 @@ import type { NextConfig } from "next";
 // ---------------------------------------------------------------------------
 
 const nextConfig: NextConfig = {
+  // Isolated build/test output keeps local verification separate from dev.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   // Disable Strict Mode to prevent React DevTools crashes during HMR
   reactStrictMode: false,
   // Produce .next/standalone with a minimal server.js — the Docker runner

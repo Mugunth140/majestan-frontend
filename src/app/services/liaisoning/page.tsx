@@ -1,3 +1,5 @@
+import { getSeo,seoMetadata } from '@/lib/seo-engine';
+import { CoreSeoBoundary } from '@/components/seo/core-seo';
 import type { Metadata } from "next";
 
 import { SiteHeader } from "@/components/site/layout/site-header";
@@ -25,7 +27,7 @@ const CANONICAL_URL = `https://www.majestanrealty.com${LIAISONING_SEO.canonical}
  * description/keywords are restored verbatim from the original CodeIgniter
  * controller (Services::liaisoning), which the port to Next.js dropped.
  */
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: { absolute: LIAISONING_SEO.title },
   description: LIAISONING_SEO.description,
   keywords: [...LIAISONING_SEO.keywords],
@@ -137,8 +139,10 @@ function buildStructuredData(): unknown {
   return { "@context": "https://schema.org", "@graph": [service, authorities, faq] };
 }
 
+export async function generateMetadata():Promise<Metadata>{return seoMetadata(await getSeo('/services/liaisoning'),defaultMetadata);}
+
 export default function LiaisoningRoute() {
-  return (
+  return (<CoreSeoBoundary path="/services/liaisoning">
     <>
       <SiteHeader />
       <main className="font-manrope-page pt-[var(--site-header-h)]! bg-[#f2f5f9]!">
@@ -153,5 +157,5 @@ export default function LiaisoningRoute() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildStructuredData()) }}
       />
     </>
-  );
+  </CoreSeoBoundary>);
 }

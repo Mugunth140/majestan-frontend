@@ -21,6 +21,10 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
     ...(project.galleryImageUrls ?? []),
   ].filter(Boolean) as string[];
   const mobileCover = project.mobileCoverImageUrl || null;
+  const altOverrides = (
+    project as ProjectDetail & { galleryImageAltOverrides?: Record<string, string> }
+  ).galleryImageAltOverrides;
+  const altFor = (src: string, fallback: string) => altOverrides?.[src] || fallback;
   const placeholder = getPlaceholderImage({ projectType: project.projectType });
   const [active, setActive] = useState(0);
 
@@ -81,14 +85,14 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
                     <ListingImage
                       src={img}
                       placeholderSrc={placeholder}
-                      alt={`${project.name} — cover`}
+                      alt={altFor(img, `${project.name} — cover`)}
                       eager
                       className="w-full! h-full! object-cover! hidden! sm:block!"
                     />
                     <ListingImage
                       src={mobileCover}
                       placeholderSrc={placeholder}
-                      alt={`${project.name} — cover`}
+                      alt={altFor(mobileCover, `${project.name} — cover`)}
                       eager
                       className="w-full! h-full! object-cover! sm:hidden!"
                     />
@@ -97,7 +101,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
                   <ListingImage
                     src={img}
                     placeholderSrc={placeholder}
-                    alt={`${project.name} — photo ${index + 1}`}
+                    alt={altFor(img, `${project.name} — photo ${index + 1}`)}
                     eager={index === 0}
                     className="w-full! h-full! object-cover!"
                   />

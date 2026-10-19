@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 .mimosa
+# Isolated local SEO verification output
+/.next-seo-verify/
+/.next-seo-build/

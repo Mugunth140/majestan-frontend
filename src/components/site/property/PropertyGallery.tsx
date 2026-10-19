@@ -76,7 +76,7 @@ export function PropertyGallery({ property, singlePage }: { property: SeoPropert
         <Image
           key={imageSrc}
           src={imageSrc}
-          alt={count ? `${title} — photo ${index + 1}` : `${title} photo placeholder`}
+          alt={images[index]?.altText || (count ? `${title} — photo ${index + 1}` : `${title} photo placeholder`)}
           fill
           unoptimized
           loading="eager"

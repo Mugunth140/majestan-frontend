@@ -1,4 +1,5 @@
 "use client";
+import { SeoH1 } from '@/components/seo/core-heading';
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
@@ -553,9 +554,9 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
             <div className="min-w-0! mt-0! mb-4!">
               {/* Heading set like the detail pages' titles; the result count
                   sits under it instead of sharing the line behind a pipe. */}
-              <h1 className="m-0! text-[22px]! sm:text-[28px]! font-semibold! tracking-[-0.025em]! leading-tight! text-[#0a0f1c]! capitalize! text-balance!">
+              <SeoH1 className="m-0! text-[22px]! sm:text-[28px]! font-semibold! tracking-[-0.025em]! leading-tight! text-[#0a0f1c]! capitalize! text-balance!">
                 {pageTitle}
-              </h1>
+              </SeoH1>
               <p className="m-0! mt-1.5! text-sm! text-[#465066]! tabular-nums!">
                 {totalCount} {countLabel}
               </p>

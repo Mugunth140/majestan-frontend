@@ -362,7 +362,7 @@ export type ConfigurationGroup = {
   units: ProjectUnit[];
 };
 
-export type UnitFloorPlan = { floorName: string; imageUrl: string };
+export type UnitFloorPlan = { floorName: string; imageUrl: string; altText?: string };
 
 /** Prefer named floor plans; older project units still expose one unnamed plan. */
 export function unitFloorPlans(unit: ProjectUnit): UnitFloorPlan[] {
@@ -370,11 +370,11 @@ export function unitFloorPlans(unit: ProjectUnit): UnitFloorPlan[] {
     return unit.floorPlans.flatMap((plan) => {
       const imageUrl = plan.imageUrl?.trim();
       const floorName = plan.floorName?.trim();
-      return imageUrl ? [{ floorName: floorName || "Floor plan", imageUrl }] : [];
+      return imageUrl ? [{ floorName: floorName || "Floor plan", imageUrl, altText: (plan as typeof plan & { altText?: string }).altText }] : [];
     });
   }
   return unit.floorPlanImageUrl
-    ? [{ floorName: "Floor plan", imageUrl: unit.floorPlanImageUrl }]
+    ? [{ floorName: "Floor plan", imageUrl: unit.floorPlanImageUrl, altText: (unit as typeof unit & { floorPlanAltText?: string }).floorPlanAltText }]
     : [];
 }
 

@@ -1,3 +1,5 @@
+import { getSeo,seoMetadata } from '@/lib/seo-engine';
+import { CoreSeoBoundary } from '@/components/seo/core-seo';
 import type { Metadata } from "next";
 
 import { FinancialAssistancePage } from "@/components/site/services/financial-assistance/financial-assistance-page";
@@ -14,7 +16,7 @@ import {
   ServicePageShell,
 } from "@/components/site/services/shared/service-route";
 
-export const metadata: Metadata = buildServiceMetadata(SEO, HERO);
+const defaultMetadata: Metadata = buildServiceMetadata(SEO, HERO);
 
 const PAGE_URL = `https://www.majestanrealty.com${SEO.canonical}`;
 
@@ -42,10 +44,12 @@ const JSON_LD = buildServiceJsonLd({
   ],
 });
 
+export async function generateMetadata():Promise<Metadata>{return seoMetadata(await getSeo('/services/financial-assistance'),defaultMetadata);}
+
 export default function FinancialAssistanceRoute() {
-  return (
+  return (<CoreSeoBoundary path="/services/financial-assistance">
     <ServicePageShell crumb="Financial Assistance" jsonLd={JSON_LD}>
       <FinancialAssistancePage />
     </ServicePageShell>
-  );
+  </CoreSeoBoundary>);
 }

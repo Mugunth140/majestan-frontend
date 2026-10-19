@@ -1,3 +1,6 @@
+import { SeoHeadingProvider } from '@/components/seo/core-heading';
+import { getSeo, getListingSeo, seoMetadata, withSeo, jsonLd } from '@/lib/seo-engine';
+import { SeoHighlights, SeoJsonLd, SeoListingPage, SeoLocalityContent, SeoLocalityBottom } from '@/components/seo/seo-content';
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
@@ -141,6 +144,8 @@ export async function generateMetadata({
   params,
 }: SlugPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const engineSeo = await getSeo('/'+slug);
+  const sourceSlug = engineSeo?.source_path?.replace(/^\//,'') || slug;
 
   if (RESERVED_SLUGS.has(slug)) {
     return {
@@ -149,10 +154,12 @@ export async function generateMetadata({
     };
   }
 
+  if (engineSeo && !engineSeo.redirect) return seoMetadata(engineSeo);
+
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = await getPropertyBySeoSlug(slug);
+    property = withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
   } catch (err) {
     console.error(`[generateMetadata] Failed to fetch property for slug "${slug}":`, err);
     return {
@@ -244,7 +251,7 @@ export async function generateMetadata({
   }
 
   try {
-    const project = await getProjectBySlugUrl(slug).catch(() => null);
+    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch(() => null);
     if (project) {
       const canonicalPath = `/${project.canonicalSlug}`;
       const seo = project.seo?.seoData?.overview;
@@ -420,6 +427,8 @@ export default async function SlugPage({
   searchParams,
 }: SlugPageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
+  const engineSeo = await getSeo('/'+slug);
+  const sourceSlug = engineSeo?.source_path?.replace(/^\//,'') || slug;
   // NOTE: searchParams must NOT be awaited here. Reading it at the top level
   // of the page poisons static prerendering (DYNAMIC_SERVER_USAGE → 500 on
   // every slug URL). It is awaited inside <PseoListingSection> below, which
@@ -429,10 +438,17 @@ export default async function SlugPage({
     notFound();
   }
 
+  if (engineSeo?.redirect) permanentRedirect(engineSeo.redirect);
+  if (engineSeo?.gone) notFound();
+  if (engineSeo?.scope === 'listing' && engineSeo.config_key) {
+    const query = await searchParams;
+    return <SeoListingPage seo={engineSeo} page={Number(query?.page)||1}/>;
+  }
+
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = await getPropertyBySeoSlug(slug);
+    property = withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
   } catch (err) {
     console.error(`[SlugPage] Failed to fetch property for slug "${slug}":`, err);
     // Rethrow so error.tsx renders with a 5xx status: a 200 "Service
@@ -446,12 +462,12 @@ export default async function SlugPage({
       permanentRedirect(`/${property.canonicalSlug}`);
     }
 
-    const structuredData = buildPropertyStructuredData(property);
+    const structuredData = engineSeo?.json_ld || buildPropertyStructuredData(property);
     const breadcrumbItems = buildBreadcrumbItems(property);
     // Every property page renders exactly one FAQ block (overview FAQs at
     // the end), so only those are marked up.
     const isSingle = isSinglePageType(property.propertyType);
-    const faqJsonLd = buildFaqPageJsonLd(
+    const faqJsonLd = engineSeo ? null : buildFaqPageJsonLd(
       (property.faqs || []).filter((f) => f.section === "overview"),
       `https://www.majestanrealty.com/${property.canonicalSlug}`,
     );
@@ -473,11 +489,11 @@ export default async function SlugPage({
             <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
-            <PropertyDetailsView property={property} />
+            <SeoHighlights seo={engineSeo} /><PropertyDetailsView property={property} />
           </div>
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
           />
           {faqJsonLd && (
             <script
@@ -493,7 +509,7 @@ export default async function SlugPage({
   }
 
   try {
-    const project = await getProjectBySlugUrl(slug).catch(() => null);
+    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch(() => null);
     if (project) {
       const breadcrumbItems = [
         { label: "Projects", href: "/projects" },
@@ -506,7 +522,7 @@ export default async function SlugPage({
         .filter((n: number) => Number.isFinite(n) && n > 0);
       // The overview shows exactly one FAQ block (overview FAQs at the end),
       // so only those are marked up.
-      const faqJsonLd = buildFaqPageJsonLd(
+      const faqJsonLd = engineSeo ? null : buildFaqPageJsonLd(
         projectFaqItems(project).filter((f) => f.section === "overview"),
         `https://www.majestanrealty.com/${project.canonicalSlug}`,
       );
@@ -534,7 +550,7 @@ export default async function SlugPage({
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
+                    __html: jsonLd(engineSeo?.json_ld || {
                       "@context": "https://schema.org",
                       "@type": "ApartmentComplex",
                       name: project.name,
@@ -567,7 +583,7 @@ export default async function SlugPage({
                   />
                 )}
                 <div id="overview" className="scroll-mt-40!">
-                  <ProjectDetailsView project={project} />
+                  <SeoHighlights seo={engineSeo} /><ProjectDetailsView project={project} />
                 </div>
               </div>
             </main>
@@ -596,6 +612,8 @@ export default async function SlugPage({
   }
 
   // ── PSEO page handler ─────────────────────────────────────────────────────
+  if (engineSeo?.scope === 'page') return <SeoListingPage seo={engineSeo}/>;
+
   // searchParams is read inside <PseoListingSection> (always under Suspense)
   // so the page shell stays statically prerenderable.
   const pseo = parsePseoSlug(slug);
@@ -629,6 +647,7 @@ async function PseoListingSection({
   {
     // Resolve the sublocation slug ("saravanampatti") → canonical name
     // ("Saravanampatti") so the filter dropdown and syncUrl comparisons match.
+    const listingSeo = await getListingSeo('/'+slug);
     const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
 
     const qOrUndef = (v: string) => (v.trim() !== "" ? v : undefined);
@@ -708,6 +727,8 @@ async function PseoListingSection({
     return (
       <>
         <SiteHeader />
+        <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
+        <SeoHeadingProvider heading={listingSeo?.h1}><SeoLocalityContent seo={listingSeo} heading={false} />
         <Suspense fallback={<ListingShellSkeleton />}>
           <PropertyListingShell
             adapterInit={{
@@ -721,9 +742,10 @@ async function PseoListingSection({
             initialData={initialData}
           />
         </Suspense>
+        </SeoHeadingProvider><SeoLocalityBottom seo={listingSeo} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLd(listingSeo?.json_ld ? {...listingSeo.json_ld,'@graph':[...listingSeo.json_ld['@graph'].filter((node:any)=>node['@type']!=='ItemList'),itemListJsonLd]} : itemListJsonLd) }}
         />
         <SiteFooter />
       </>

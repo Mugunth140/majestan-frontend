@@ -28,4 +28,25 @@ describe("ProjectGallery", () => {
     ]);
     expect(screen.getByText("1 / 3")).toBeInTheDocument();
   });
+
+  it("uses SEO alt overrides for the cover, mobile cover, and gallery photos", () => {
+    const cover = "https://cdn.test/cover.png";
+    const mobile = "https://cdn.test/mobile.png";
+    const photo = "https://cdn.test/photo.png";
+    const item = {
+      ...project(cover, [photo]),
+      mobileCoverImageUrl: mobile,
+      galleryImageAltOverrides: {
+        [cover]: "Cover alt",
+        [mobile]: "Mobile cover alt",
+        [photo]: "Gallery photo alt",
+      },
+    } as ProjectDetail;
+
+    render(<ProjectGallery project={item} />);
+
+    expect(screen.getAllByAltText("Cover alt").length).toBe(1);
+    expect(screen.getByAltText("Mobile cover alt")).toBeInTheDocument();
+    expect(screen.getByAltText("Gallery photo alt")).toBeInTheDocument();
+  });
 });

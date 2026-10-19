@@ -345,7 +345,7 @@ function ActiveUnitPanel({
         slideIndexByUnitFloor.set(`${unit.id}:${floorIndex}`, slides.length);
         slides.push({
           src: floor.imageUrl,
-          alt: `${name}${floor.floorName === "Floor plan" ? "" : ` ${floor.floorName}`} ${planNoun}, ${group.label}, ${project.name}`,
+          alt: floor.altText || `${name}${floor.floorName === "Floor plan" ? "" : ` ${floor.floorName}`} ${planNoun}, ${group.label}, ${project.name}`,
           title: floor.floorName === "Floor plan" ? `${name} ${planNoun}` : `${name} · ${floor.floorName} ${planNoun}`,
           subtitle: unitMeta(unit, name, group),
         });

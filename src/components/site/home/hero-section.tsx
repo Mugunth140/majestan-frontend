@@ -1,4 +1,5 @@
 "use client";
+import { SeoH1 } from '@/components/seo/core-heading';
 
 import Link from "next/link";
 import { HomeSearch } from "./home-search";
@@ -41,7 +42,7 @@ export function HeroSection({ sublocations, unitTypes, banners = [] }: HeroSecti
     <section className="relative overflow-hidden bg-white flex flex-col min-h-[calc(100svh-var(--site-header-h,65px))]!">
 
       {/* ── SEO-only heading (banner artwork carries the visible text) ── */}
-      <h1 className="sr-only">Your Trusted Real Estate Partner in {city}</h1>
+      <SeoH1 className="sr-only">Your Trusted Real Estate Partner in {city}</SeoH1>
 
       {/* ── Banner carousel at the exact ad aspect ratio ─────────────── */}
       {banners.length > 0 ? (

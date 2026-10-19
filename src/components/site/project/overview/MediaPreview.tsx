@@ -63,6 +63,9 @@ export function MediaPreview({ project }: { project: ProjectDetail }) {
         slug={slug}
         name={project.name}
         photos={photos}
+        photoAltOverrides={(
+          project as ProjectDetail & { galleryImageAltOverrides?: Record<string, string> }
+        ).galleryImageAltOverrides}
         videos={videos}
         placeholder={placeholder}
       />

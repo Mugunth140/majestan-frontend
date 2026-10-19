@@ -1,3 +1,4 @@
+import { seoFetch,jsonLd } from '@/lib/seo-engine';
 /* eslint-disable @next/next/no-css-tags */
 import type { Metadata, Viewport } from "next";
 import "swiper/css";
@@ -97,7 +98,7 @@ export default async function RootLayout({
   // aggregated here so pages ship counts, not one row per listing.
   const inventoryCounts = aggregateInventory((await fetchPseoInventorySnapshot()) ?? []);
 
-  const orgJsonLd = {
+  const defaultOrgJsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
     "@id": "https://www.majestanrealty.com#organization",
@@ -118,6 +119,8 @@ export default async function RootLayout({
       "https://www.linkedin.com/company/majestanrealty",
     ],
   };
+
+  const orgJsonLd = await seoFetch('organization') || defaultOrgJsonLd;
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -162,7 +165,7 @@ export default async function RootLayout({
       <body className="theme-color-3 majestan-app-root" suppressHydrationWarning>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLd(orgJsonLd) }}
         />
         <script
           type="application/ld+json"

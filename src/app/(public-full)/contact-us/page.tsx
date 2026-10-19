@@ -1,3 +1,5 @@
+import { getSeo,seoMetadata } from '@/lib/seo-engine';
+import { CoreSeoBoundary } from '@/components/seo/core-seo';
 import type { Metadata } from "next";
 
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
@@ -16,7 +18,7 @@ const CANONICAL_URL = `https://www.majestanrealty.com${CONTACT_SEO.canonical}`;
  * template that would otherwise be appended to a title that already ends in the
  * brand.
  */
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: { absolute: CONTACT_SEO.title },
   description: CONTACT_SEO.description,
   alternates: { canonical: CONTACT_SEO.canonical },
@@ -76,16 +78,18 @@ function buildStructuredData(): unknown {
   };
 }
 
+export async function generateMetadata():Promise<Metadata>{return seoMetadata(await getSeo('/contact-us'),defaultMetadata);}
+
 export default function ContactUsPage() {
-  return (
-    /*
+  return (<CoreSeoBoundary path="/contact-us">
+    {/*
       No SiteHeader/SiteFooter here: app/(public-full)/layout.tsx already renders
       both, and importing them again produced two of each on the page.
 
       The layout also deliberately adds no top padding ("so hero sections start at
       the absolute top"), which leaves fixed-header content underneath it — so the
       offset is applied on <main> with the measured --site-header-h instead.
-    */
+    */}
     <main className="font-manrope-page pt-[var(--site-header-h)]! pb-20! md:pb-28! bg-[#f4f6f9]!">
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <div className="pt-6!">
@@ -113,5 +117,5 @@ export default function ContactUsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildStructuredData()) }}
       />
     </main>
-  );
+  </CoreSeoBoundary>);
 }

@@ -63,7 +63,7 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
     floorName: floor.floorName,
     src: floor.imageUrl,
     href: projectFloorPlanHref(slug, unit.id, floor.floorName),
-    alt: `${group.label} ${configuration} ${floor.floorName} ${planNoun} for ${project.name}`,
+    alt: floor.altText || `${group.label} ${configuration} ${floor.floorName} ${planNoun} for ${project.name}`,
   }));
 
   return (

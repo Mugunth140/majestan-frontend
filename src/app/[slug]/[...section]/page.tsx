@@ -33,6 +33,7 @@ import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import { PROPERTY_TYPES, isSinglePageType } from "@/lib/seo-urls";
 import { workspaceAmenitySuffix } from "@/lib/property-sections";
+import { getSeo, SEO_SITE, type SeoSnapshot } from "@/lib/seo-engine";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
@@ -63,6 +64,115 @@ const RESERVED_SECTION_SLUGS = new Set(["assets"]);
 type PropertySectionPageProps = {
   params: Promise<{ slug: string; section: string[] }>;
 };
+
+function getSectionSeo(rootSeo: SeoSnapshot | null, sectionKey: string) {
+  const key =
+    sectionKey === "floor-plan" || sectionKey === "floor-plans"
+      ? "floor_plan"
+      : sectionKey.replace(/-([a-z])/g, (_, letter: string) =>
+          letter.toUpperCase(),
+        );
+  const sectionSeo = rootSeo?.section_seo || rootSeo?.sectionSeo || {};
+  const snakeKey = key.replace(/[A-Z]/g, (letter: string) =>
+    `_${letter.toLowerCase()}`,
+  );
+  return sectionSeo[sectionKey] || sectionSeo[key] || sectionSeo[snakeKey] || {};
+}
+
+async function getEffectiveRootSeo(slug: string): Promise<SeoSnapshot | null> {
+  let seo = await getSeo(`/${slug}`);
+  for (let redirects = 0; seo?.redirect && redirects < 2; redirects += 1) {
+    let target = String(seo.redirect);
+    if (/^https?:\/\//i.test(target)) target = new URL(target).pathname;
+    if (!target.startsWith("/")) target = `/${target}`;
+    seo = await getSeo(target);
+  }
+  return seo;
+}
+
+function field(value: Record<string, unknown>, ...keys: string[]): string | undefined {
+  for (const key of keys) {
+    const candidate = value?.[key];
+    if (
+      typeof candidate === "string" &&
+      candidate.trim() &&
+      !/\{\{?[^{}]+\}\}?/.test(candidate)
+    ) {
+      return candidate.trim();
+    }
+  }
+  return undefined;
+}
+
+function robotsValue(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["index", "follow", "true", "1"].includes(normalized)) return true;
+    if (["noindex", "nofollow", "false", "0"].includes(normalized)) return false;
+  }
+  return undefined;
+}
+
+function childRobots(
+  rootSeo: SeoSnapshot | null,
+  childSeo: Record<string, unknown>,
+  legacy?: Record<string, unknown> | null,
+) {
+  const fallback = {
+    index: robotsValue(rootSeo?.robots_index) ?? true,
+    follow: robotsValue(rootSeo?.robots_follow) ?? true,
+  };
+  const legacyParts: { index?: boolean; follow?: boolean } =
+    typeof legacy?.robots === "string" ? parseRobots(legacy.robots) : {};
+  const childParts: { index?: boolean; follow?: boolean } =
+    typeof childSeo.robots === "string" ? parseRobots(childSeo.robots) : {};
+  return {
+    index:
+      robotsValue(childSeo.robots_index ?? childSeo.robotsIndex) ??
+      childParts.index ??
+      robotsValue(legacy?.robots_index ?? legacy?.robotsIndex) ??
+      legacyParts.index ??
+      fallback.index,
+    follow:
+      robotsValue(childSeo.robots_follow ?? childSeo.robotsFollow) ??
+      childParts.follow ??
+      robotsValue(legacy?.robots_follow ?? legacy?.robotsFollow) ??
+      legacyParts.follow ??
+      fallback.follow,
+  };
+}
+
+function absoluteUrl(path: string): string {
+  return /^https?:\/\//i.test(path) ? path : `${SEO_SITE}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function schemaKeywords(seo: SeoSnapshot | null): string[] | undefined {
+  const sources = [
+    seo?.schema_keywords,
+    seo?.schemaKeywords,
+    seo?.keywords,
+    seo?.settings?.schema_keywords,
+    seo?.settings?.schemaKeywords,
+    seo?.settings?.keywords,
+    seo?.settings?.focus_keyword,
+    seo?.settings?.focusKeyword,
+    seo?.settings?.secondary_keywords,
+    seo?.settings?.secondaryKeywords,
+  ];
+  const words = sources
+    .flatMap((source: unknown) => {
+      if (Array.isArray(source)) return source;
+      return typeof source === "string" ? source.split(",") : [];
+    })
+    .filter(
+      (word: unknown): word is string =>
+        typeof word === "string" && !!word.trim(),
+    )
+    .map((word: string) => word.trim());
+  return words.length ? [...new Set(words)] : undefined;
+}
 
 const SECTION_META: Record<
   string,
@@ -203,10 +313,11 @@ export async function generateMetadata({
   params,
 }: PropertySectionPageProps): Promise<Metadata> {
   const { slug, section } = await params;
+  const rootSeo = await getEffectiveRootSeo(slug);
 
   if (RESERVED_SECTION_SLUGS.has(slug)) {
     return {
-      title: "Page Not Found | Majestan Realty",
+      title: { absolute: "Page Not Found | Majestan Realty" },
       robots: { index: false, follow: false },
     };
   }
@@ -218,7 +329,7 @@ export async function generateMetadata({
   } catch (err) {
     console.error(`[generateMetadata] Failed to fetch property for slug "${slug}":`, err);
     return {
-      title: "Majestan Realty",
+      title: { absolute: "Majestan Realty" },
       description: "Browse premium properties in India.",
       robots: { index: false, follow: true },
     };
@@ -229,12 +340,13 @@ export async function generateMetadata({
     const sectionConfig = SECTION_META[sectionKey];
     if (!sectionConfig || section.length !== 1) {
       return {
-        title: "Page Not Found | Majestan Realty",
+        title: { absolute: "Page Not Found | Majestan Realty" },
         robots: { index: false, follow: false },
       };
     }
 
     const canonicalPath = `/${property.canonicalSlug}/${sectionKey}`;
+    const childSeo = getSectionSeo(rootSeo, sectionKey);
 
     const SEO_KEY_MAP: Record<string, string> = {
       "floor-plan": "floor_plan",
@@ -257,23 +369,23 @@ export async function generateMetadata({
         : sectionConfig.descriptionSuffix;
     const fallbackDescription = `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${suffix}`;
 
-    const title = seoPage?.title || fallbackTitle;
-    const description = seoPage?.description || fallbackDescription;
-    const ogTitle =
-      seoPage?.og_title ||
-      `${sectionConfig.titlePrefix} - ${property.title} | Majestan Realty`;
-    const ogDescription = seoPage?.og_description || description;
-    const baseRobots = parseRobots(seoPage?.robots);
+    const legacySectionSeo = seoPage as Record<string, unknown> | undefined;
+    const title = field(childSeo, "metaTitle", "meta_title", "title") || field(legacySectionSeo || {}, "title") || fallbackTitle;
+    const description = field(childSeo, "metaDescription", "meta_description", "description") || field(legacySectionSeo || {}, "description") || fallbackDescription;
+    const ogTitle = field(legacySectionSeo || {}, "og_title") || title;
+    const ogDescription = field(legacySectionSeo || {}, "og_description") || description;
+    const baseRobots = childRobots(rootSeo, childSeo, seoPage);
     const isIndexableStatus = property.status?.toLowerCase() === "available";
     const robots = {
       index: isIndexableStatus ? baseRobots.index : false,
       follow: baseRobots.follow,
     };
 
-    const ogImages = seoPage?.og_image
+    const ogImage = field(legacySectionSeo || {}, "og_image");
+    const ogImages = ogImage
       ? [
           {
-            url: seoPage.og_image,
+            url: ogImage,
             width: 1200,
             height: 630,
             alt: `${property.title} - ${sectionConfig.titlePrefix}`,
@@ -290,15 +402,15 @@ export async function generateMetadata({
           .slice(0, 2);
 
     return {
-      title,
+      title: { absolute: title },
       description,
       alternates: {
-        canonical: canonicalPath,
+        canonical: absoluteUrl(field(childSeo, "canonicalUrl", "canonical_url", "canonical") || canonicalPath),
       },
       openGraph: {
         title: ogTitle,
         description: ogDescription,
-        url: canonicalPath,
+        url: absoluteUrl(field(childSeo, "canonicalUrl", "canonical_url", "canonical") || canonicalPath),
         type: "article",
         images: ogImages,
       },
@@ -310,8 +422,8 @@ export async function generateMetadata({
       robots: {
         ...robots,
         googleBot: {
-          index: robots.index ?? true,
-          follow: robots.follow ?? true,
+          index: robots.index,
+          follow: robots.follow,
           "max-image-preview": "large",
           "max-snippet": -1,
         },
@@ -328,7 +440,7 @@ export async function generateMetadata({
       const sectionConfig = PROJECT_SECTION_META[sectionKey];
       if (!sectionConfig || section.length !== 1) {
         return {
-          title: "Page Not Found | Majestan Realty",
+          title: { absolute: "Page Not Found | Majestan Realty" },
           robots: { index: false, follow: false },
         };
       }
@@ -338,17 +450,19 @@ export async function generateMetadata({
         ? `${project.ranges.bhk.join(", ")} BHK `
         : "";
       const titlePrefix = projectSectionTitlePrefix(sectionKey, project.projectType);
-      const title = `${titlePrefix} - ${project.name} | ${bhkLabel}${typeLabel} in ${project.city} | Majestan Realty`;
-      const description = projectSectionDescription(sectionKey, project);
+      const childSeo = getSectionSeo(rootSeo, sectionKey);
+      const title = field(childSeo, "metaTitle", "meta_title", "title") || `${titlePrefix} - ${project.name} | ${bhkLabel}${typeLabel} in ${project.city} | Majestan Realty`;
+      const description = field(childSeo, "metaDescription", "meta_description", "description") || projectSectionDescription(sectionKey, project);
+      const canonicalUrl = absoluteUrl(field(childSeo, "canonicalUrl", "canonical_url", "canonical") || canonicalPath);
       const ogImage = project.coverImageUrl || undefined;
       return {
-        title,
+        title: { absolute: title },
         description,
-        alternates: { canonical: canonicalPath },
+        alternates: { canonical: canonicalUrl },
         openGraph: {
           title,
           description,
-          url: canonicalPath,
+          url: canonicalUrl,
           type: "article",
           ...(ogImage
             ? { images: [{ url: ogImage, width: 1200, height: 630, alt: `${project.name} - ${titlePrefix}` }] }
@@ -359,6 +473,13 @@ export async function generateMetadata({
           title,
           description,
           ...(ogImage ? { images: [ogImage] } : {}),
+        },
+        robots: {
+          ...childRobots(rootSeo, childSeo),
+          googleBot: {
+            ...childRobots(rootSeo, childSeo),
+            "max-image-preview": "large",
+          },
         },
       };
     }
@@ -373,7 +494,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: "Page Not Found | Majestan Realty",
+    title: { absolute: "Page Not Found | Majestan Realty" },
     robots: { index: false, follow: false },
   };
 }
@@ -462,21 +583,33 @@ export default async function PropertySectionPage({
       permanentRedirect(`/${property.canonicalSlug}#${sectionKey}`);
     }
 
+    const rootSeo = await getEffectiveRootSeo(slug);
+    const childSeo = getSectionSeo(rootSeo, sectionKey);
+    const sectionH1 = field(childSeo, "h1") || sectionConfig.titlePrefix;
+    const canonicalUrl = absoluteUrl(
+      field(childSeo, "canonicalUrl", "canonical_url", "canonical") ||
+        `/${property.canonicalSlug}/${sectionKey}`,
+    );
+    const sectionDescription =
+      field(childSeo, "metaDescription", "meta_description", "description") ||
+      `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${sectionConfig.descriptionSuffix}`;
+
     const breadcrumbItems = buildBreadcrumbItems(
       property,
-      sectionConfig.titlePrefix
+      sectionH1
     );
 
     // JSON-LD for this section page
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      name: `${sectionConfig.titlePrefix} - ${property.title}`,
-      description: `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${sectionConfig.descriptionSuffix}`,
-      url: `https://www.majestanrealty.com/${property.canonicalSlug}/${sectionKey}`,
+      name: field(childSeo, "metaTitle", "meta_title", "title") || `${sectionConfig.titlePrefix} - ${property.title}`,
+      description: sectionDescription,
+      url: canonicalUrl,
+      ...(schemaKeywords(rootSeo) ? { keywords: schemaKeywords(rootSeo) } : {}),
       isPartOf: {
         "@type": "WebPage",
-        url: `https://www.majestanrealty.com/${property.canonicalSlug}`,
+        url: absoluteUrl(`/${property.canonicalSlug}`),
         name: property.title,
       },
       breadcrumb: {
@@ -487,7 +620,7 @@ export default async function PropertySectionPage({
             "@type": "ListItem",
             position: i + 2,
             name: item.label,
-            ...(item.href ? { item: `https://www.majestanrealty.com${item.href}` } : {}),
+            item: item.href ? absoluteUrl(item.href) : canonicalUrl,
           })),
         ],
       },
@@ -496,7 +629,7 @@ export default async function PropertySectionPage({
     // Only FAQs visible on this page are marked up.
     const faqJsonLd = buildFaqPageJsonLd(
       (property.faqs || []).filter((f) => f.section === sectionKey),
-      `https://www.majestanrealty.com/${property.canonicalSlug}/${sectionKey}`,
+      canonicalUrl,
     );
 
     return (
@@ -511,6 +644,9 @@ export default async function PropertySectionPage({
         <div className="bg-[#f4f6f9]! min-h-screen! font-manrope-page">
           <main className={`${PAGE_CONTAINER} pt-5! pb-24!`}>
             <Breadcrumbs items={breadcrumbItems} jsonLd={false} />
+            <h1 className="mb-5! mt-3! text-2xl! font-semibold! leading-tight! text-gray-900! md:text-3xl!">
+              {sectionH1}
+            </h1>
             <div className={`${OV_ROOT} ${propertyStyles.root}`}>
               <PropertyTopActions property={property} />
               <div className={propertyStyles.columns}>
@@ -520,7 +656,7 @@ export default async function PropertySectionPage({
                   <NeedMoreDetails propertyType={property.propertyType} />
                 </div>
                 <aside aria-label="Enquire about this property" className={propertyStyles.sectionAside}>
-                  <PropertyInfoSidebar property={property} />
+                  <PropertyInfoSidebar property={property} headingLevel={2} />
                 </aside>
               </div>
             </div>
@@ -563,11 +699,19 @@ export default async function PropertySectionPage({
       permanentRedirect(`/${project.canonicalSlug}`);
     }
     const titlePrefix = projectSectionTitlePrefix(sectionKey, project.projectType);
+    const rootSeo = await getEffectiveRootSeo(slug);
+    const childSeo = getSectionSeo(rootSeo, sectionKey);
+    const sectionH1 = field(childSeo, "h1") || projectSectionHeading(sectionKey, project.projectType);
+    const sectionDescription = field(childSeo, "metaDescription", "meta_description", "description") || projectSectionDescription(sectionKey, project);
+    const canonicalUrl = absoluteUrl(
+      field(childSeo, "canonicalUrl", "canonical_url", "canonical") ||
+        `/${project.canonicalSlug}/${sectionKey}`,
+    );
     const breadcrumbItems = [
       { label: "Projects", href: "/projects" },
       { label: project.city, href: "/projects" },
       { label: project.name, href: `/${project.canonicalSlug}` },
-      { label: titlePrefix },
+      { label: sectionH1 },
     ];
     // Only FAQs filed under this section are shown and marked up.
     const sectionFaqs = projectFaqItems(project).filter(
@@ -575,17 +719,18 @@ export default async function PropertySectionPage({
     );
     const faqJsonLd = buildFaqPageJsonLd(
       sectionFaqs,
-      `https://www.majestanrealty.com/${project.canonicalSlug}/${sectionKey}`,
+      canonicalUrl,
     );
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      name: `${titlePrefix} - ${project.name}`,
-      description: projectSectionDescription(sectionKey, project),
-      url: `https://www.majestanrealty.com/${project.canonicalSlug}/${sectionKey}`,
+      name: field(childSeo, "metaTitle", "meta_title", "title") || `${titlePrefix} - ${project.name}`,
+      description: sectionDescription,
+      url: canonicalUrl,
+      ...(schemaKeywords(rootSeo) ? { keywords: schemaKeywords(rootSeo) } : {}),
       isPartOf: {
         "@type": "WebPage",
-        url: `https://www.majestanrealty.com/${project.canonicalSlug}`,
+        url: absoluteUrl(`/${project.canonicalSlug}`),
         name: project.name,
       },
       breadcrumb: {
@@ -596,7 +741,7 @@ export default async function PropertySectionPage({
             "@type": "ListItem",
             position: i + 2,
             name: item.label,
-            ...(item.href ? { item: `https://www.majestanrealty.com${item.href}` } : {}),
+            item: item.href ? absoluteUrl(item.href) : canonicalUrl,
           })),
         ],
       },
@@ -619,9 +764,7 @@ export default async function PropertySectionPage({
                 </div>
                 <ProjectTopActions project={project} />
               </div>
-              <ProjectSectionTitle
-                title={projectSectionHeading(sectionKey, project.projectType)}
-              />
+              <ProjectSectionTitle title={sectionH1} />
               <ProjectShell project={project}>
                 <ProjectSectionContent sectionKey={sectionKey} project={project} />
                 <FaqOverview project={project} section={sectionKey} hideWhenEmpty />

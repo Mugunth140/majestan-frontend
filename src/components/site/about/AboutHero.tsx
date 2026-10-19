@@ -1,3 +1,4 @@
+import { SeoH1 } from '@/components/seo/core-heading';
 import Image from "next/image";
 
 export function AboutHero() {
@@ -18,10 +19,10 @@ export function AboutHero() {
 
       {/* Content */}
       <div className="relative! z-10! container! mx-auto! px-4! text-center!">
-        <h1 className="text-4xl! md:text-6xl! lg:text-7xl! font-bold! text-white! mb-6! leading-tight!">
+        <SeoH1 className="text-4xl! md:text-6xl! lg:text-7xl! font-bold! text-white! mb-6! leading-tight!">
           Welcome to <br className="hidden! md:block!" />
           <span className="text-[#ffc900]!">Majestan Realty</span>
-        </h1>
+        </SeoH1>
         <p className="text-lg! md:text-xl! text-white/80! max-w-3xl! mx-auto!">
           Your trusted partner for comprehensive real estate services, property management, liaisoning, and specialized expertise in industrial properties and farm lands in Coimbatore.
         </p>

@@ -1,9 +1,11 @@
+import { getSeo,seoMetadata } from '@/lib/seo-engine';
+import { CoreSeoBoundary } from '@/components/seo/core-seo';
 import type { Metadata } from "next";
 import { HomePage } from "@/components/site/home/home-page";
 import { getHomePageData, type HomePageData } from "@/lib/api";
 import { getAdsBanners } from "@/lib/ads";
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title: "Majestan Realty | Real Estate Experts in Coimbatore",
   description:
     "Looking for the top realtor in Coimbatore? Majestan Realty offers trusted real estate services in villas, plots, apartments and commercial properties.",
@@ -23,6 +25,8 @@ const emptyHomeData: HomePageData = {
   googleReviews: null,
 };
 
+export async function generateMetadata():Promise<Metadata>{return seoMetadata(await getSeo('/'),defaultMetadata);}
+
 export default async function Page() {
   let homeData = emptyHomeData;
 
@@ -37,5 +41,5 @@ export default async function Page() {
     getAdsBanners("offers").catch(() => []),
   ]);
 
-  return <HomePage data={homeData} banners={banners} offers={offers} />;
+  return <CoreSeoBoundary path="/"><HomePage data={homeData} banners={banners} offers={offers} /></CoreSeoBoundary>;
 }

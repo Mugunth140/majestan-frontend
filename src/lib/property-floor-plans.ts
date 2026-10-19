@@ -5,6 +5,7 @@ export type PropertyFloorPlan = {
   key: string;
   title: string;
   src: string;
+  altText?: string;
   isPdf: boolean;
 };
 
@@ -15,6 +16,7 @@ export function getPropertyFloorPlans(property: SeoProperty): PropertyFloorPlan[
     ...(property.details?.floorPlanImages ?? []),
     ...(property.units ?? []).filter((unit) => unit.floorPlanImageUrl).map((unit) => ({
       title: unit.title, imageUrl: unit.floorPlanImageUrl!, imageKey: unit.floorPlanImageKey,
+      altText: (unit as typeof unit & { floorPlanAltText?: string }).floorPlanAltText,
     })),
   ];
   const keys = new Set<string>();
@@ -30,6 +32,7 @@ export function getPropertyFloorPlans(property: SeoProperty): PropertyFloorPlan[
       key,
       title: plan.title?.trim() || `${getFloorPlanLabel(property.propertyType)} ${plans.length + 1}`,
       src,
+      altText: (plan as typeof plan & { altText?: string }).altText,
       isPdf: /\.pdf(?:$|[?#])/i.test(plan.imageKey || src),
     });
   }

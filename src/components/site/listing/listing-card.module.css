@@ -27,6 +27,36 @@
   clip-path: polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%);
 }
 
+/* The fold: the ribbon's tail corner turned back on itself. It hangs
+   downward, not sideways — the badge sits flush against the card's right
+   edge (negative margins) and the card's overflow-hidden would slice off
+   anything past it. */
+.badgeFold {
+  position: absolute;
+  right: 0;
+  bottom: -10px;
+  width: 24px;
+  height: 10px;
+  z-index: -1;
+  pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  background: linear-gradient(200deg, #e6ebf1 0%, #b4bdc9 55%, #8c96a4 100%);
+  filter: drop-shadow(-1px 1px 2px rgb(15 23 42 / 30%));
+}
+
+/* Crease where the tail bends, so the flap reads as folded paper rather
+   than a drop shadow. */
+.badgeWrap::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 12px;
+  pointer-events: none;
+  background: linear-gradient(210deg, transparent 40%, rgb(15 23 42 / 14%) 100%);
+}
+
 .badge::after {
   content: "";
   position: absolute;

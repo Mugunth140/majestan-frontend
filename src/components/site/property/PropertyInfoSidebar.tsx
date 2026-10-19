@@ -31,6 +31,7 @@ import { LISTING_SUMMARY_CARD } from "@/components/site/shared/listing-summary-s
 
 type PropertyInfoSidebarProps = {
   property: SeoProperty;
+  headingLevel?: 1 | 2;
 };
 
 /**
@@ -41,7 +42,10 @@ type PropertyInfoSidebarProps = {
  * (apartments show Furnishing + Facing); other types keep the generic rows
  * until curated.
  */
-export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
+export function PropertyInfoSidebar({
+  property,
+  headingLevel = 1,
+}: PropertyInfoSidebarProps) {
   const propertyTypeLabel =
     Object.values(PROPERTY_TYPES).find(
       (p) => p.apiValue === property.propertyType
@@ -112,6 +116,7 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
   };
 
   const title = property.seo?.seoData?.overview?.h1 || property.title;
+  const PropertyHeading = headingLevel === 2 ? "h2" : "h1";
 
   const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = (
     isLand
@@ -156,9 +161,9 @@ export function PropertyInfoSidebar({ property }: PropertyInfoSidebarProps) {
       {/* Title and enquiry stay beside the cover, as on the original property layout. */}
       <div className={LISTING_SUMMARY_CARD}>
         <div className="flex! items-start! justify-between! gap-3!">
-          <h1 className="m-0! text-xl! font-manrope! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]! text-balance!">
+          <PropertyHeading className="m-0! text-xl! font-manrope! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]! text-balance!">
             {isApartment ? title : `${title} ${property.city}`}
-          </h1>
+          </PropertyHeading>
         </div>
 
         {locationLines.length > 0 ? (

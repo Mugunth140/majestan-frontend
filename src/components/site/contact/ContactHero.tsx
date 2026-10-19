@@ -1,3 +1,4 @@
+import { SeoH1 } from '@/components/seo/core-heading';
 import Link from "next/link";
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 
@@ -28,12 +29,12 @@ const CHANNELS = [
 export function ContactHero() {
   return (
     <div>
-      <h1
+      <SeoH1
         id="contact-hero-heading"
         className="m-0! max-w-[14ch]! text-[clamp(36px,5vw,56px)]! font-semibold! text-[#0a0f1c]! leading-[1.02]! tracking-[-0.04em]!"
       >
         {HERO.title}
-      </h1>
+      </SeoH1>
       <p className="m-0! mt-5! max-w-[48ch]! text-[16px]! leading-[1.7]! text-[#465066]!">
         {HERO.description} {INTRO_DESCRIPTION}
       </p>

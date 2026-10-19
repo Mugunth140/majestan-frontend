@@ -38,7 +38,7 @@ export function PhotosSection({ property, embedded = false }: PhotosSectionProps
                 aria-label={`Open photo ${index + 1} of ${property.title}`}
                 className={`group/photo relative! overflow-hidden! rounded-xl! bg-[#eef1f6]! cursor-pointer! ${index === 0 ? "col-span-2! aspect-[16/9]!" : "aspect-[4/3]!"} ${FOCUS_RING}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.imageUrl} alt={`${property.title} photo ${index + 1}`} loading="lazy" decoding="async"
+                <img src={photo.imageUrl} alt={photo.altText || `${property.title} photo ${index + 1}`} loading="lazy" decoding="async"
                   className="block! h-full! w-full! object-cover! transition-transform! duration-300! ease-out-quint! group-hover/photo:scale-[1.02]! motion-reduce:transition-none!" />
               </button>
             ))}
@@ -61,7 +61,7 @@ export function PhotosSection({ property, embedded = false }: PhotosSectionProps
             </div>
             <div className="relative! flex! flex-1! min-h-0! items-center! justify-center!">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={selected.imageUrl} alt={`${property.title} photo ${currentIndex + 1}`} className="max-h-full! max-w-full! object-contain!" />
+              <img src={selected.imageUrl} alt={selected.altText || `${property.title} photo ${currentIndex + 1}`} className="max-h-full! max-w-full! object-contain!" />
               {count > 1 && (
                 <>
                   <button type="button" onClick={() => step(-1)} className={`${LIGHTBOX_BUTTON} absolute! left-0!`} aria-label="Previous image"><ChevronLeft className="w-5! h-5!" /></button>

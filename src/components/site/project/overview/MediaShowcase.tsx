@@ -22,12 +22,14 @@ export function MediaShowcase({
   slug,
   name,
   photos,
+  photoAltOverrides,
   videos,
   placeholder,
 }: {
   slug: string;
   name: string;
   photos: string[];
+  photoAltOverrides?: Record<string, string>;
   videos: ProjectVideo[];
   placeholder: string;
 }) {
@@ -47,7 +49,7 @@ export function MediaShowcase({
             <YouTubeFacade videoId={leadVideo.id} title={leadVideo.title ?? `${name} video`} />
           ) : (
             leadPhoto && (
-              <PhotoTile slug={slug} src={leadPhoto} alt={`${name} photo 1`} placeholder={placeholder} className="aspect-video!" />
+              <PhotoTile slug={slug} src={leadPhoto} alt={photoAltOverrides?.[leadPhoto] || `${name} photo 1`} placeholder={placeholder} className="aspect-video!" />
             )
           )}
         </div>
@@ -58,7 +60,7 @@ export function MediaShowcase({
               key={`${src}-${i}`}
               slug={slug}
               src={src}
-              alt={`${name} photo ${i + (leadVideo ? 1 : 2)}`}
+              alt={photoAltOverrides?.[src] || `${name} photo ${i + (leadVideo ? 1 : 2)}`}
               placeholder={placeholder}
               className="aspect-[4/3]! sm:aspect-auto!"
               overlay={last ? `+${hiddenPhotos} ${plural(hiddenPhotos, "photo", "photos")}` : undefined}

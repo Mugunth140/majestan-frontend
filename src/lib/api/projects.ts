@@ -1,3 +1,4 @@
+import {getSeo,withSeo} from '@/lib/seo-engine';
 export type ProjectFurnishingItem = { id: number; name: string; icon?: string | null };
 
 export type ProjectUnit = {
@@ -179,8 +180,11 @@ async function fetchProjectApi<T>(path: string, init?: RequestInit): Promise<T> 
   return payload as T;
 }
 
-export function getProjectBySlugUrl(slug: string): Promise<ProjectDetail> {
-  return fetchProjectApi<ProjectDetail>(`/projects/by-slug/${encodeURIComponent(slug)}`);
+export async function getProjectBySlugUrl(slug: string): Promise<ProjectDetail> {
+  const project=await fetchProjectApi<ProjectDetail>(`/projects/by-slug/${encodeURIComponent(slug)}`);
+  const mainSeo=await getSeo('/'+slug);
+  const effectiveSeo=mainSeo?.redirect?await getSeo(mainSeo.redirect):mainSeo;
+  return withSeo(project,effectiveSeo);
 }
 
 export function listProjects(params: ProjectListParams = {}): Promise<ProjectListResponse> {

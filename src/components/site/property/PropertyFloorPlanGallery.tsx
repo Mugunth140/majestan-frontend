@@ -44,7 +44,7 @@ export function PropertyFloorPlanGallery({ plans, propertyTitle = "this property
                 <span className={styles.pdfTile}><FileText size={36} aria-hidden="true" /><span>PDF plan</span></span>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={plan.src} alt={plan.title} loading="lazy" decoding="async" draggable={false} />
+                <img src={plan.src} alt={plan.altText || plan.title} loading="lazy" decoding="async" draggable={false} />
               )}
             </span>
             <span className={styles.tileCaption}>{plan.title}<Maximize2 size={16} aria-hidden="true" /></span>
@@ -86,7 +86,7 @@ export function PropertyFloorPlanGallery({ plans, propertyTitle = "this property
                 <p className={styles.error} role="alert">This plan could not be loaded. Use “Open file” to view the original.</p>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={selected.key} src={selected.src} alt={`${selected.title} floor plan`} draggable={false}
+                <img key={selected.key} src={selected.src} alt={selected.altText || `${selected.title} floor plan`} draggable={false}
                   onError={() => setFailedKey(selected.key)} className={styles.drawing} />
               )}
             </div>

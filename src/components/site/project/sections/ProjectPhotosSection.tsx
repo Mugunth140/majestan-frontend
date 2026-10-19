@@ -25,6 +25,9 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
   // Cover first, then the gallery, so the lightbox order matches the grid.
   const galleryImages = (project.galleryImageUrls ?? []).filter(Boolean) as string[];
   const allImages = [project.coverImageUrl, ...galleryImages].filter(Boolean) as string[];
+  const altForImage = (src: string, index: number) =>
+    (project as ProjectDetail & { galleryImageAltOverrides?: Record<string, string> }).galleryImageAltOverrides?.[src] ||
+    `${project.name} photo ${index + 1}`;
   const count = allImages.length;
 
   // The lock and key handlers only exist while the lightbox is open, so the
@@ -88,7 +91,7 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={src}
-                  alt={`${project.name} photo ${idx + 1}`}
+                  alt={altForImage(src, idx)}
                   loading="lazy"
                   draggable={false}
                   className="w-full! h-full! object-cover! transition-transform! duration-300! ease-out-quint! group-hover:scale-[1.03]!"
@@ -136,7 +139,7 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={allImages[currentIndex]}
-              alt={`${project.name} photo ${currentIndex + 1}`}
+              alt={altForImage(allImages[currentIndex], currentIndex)}
               draggable={false}
               className="max-w-full! max-h-[80vh]! object-contain! rounded-xl! select-none! border! border-gray-200!"
             />

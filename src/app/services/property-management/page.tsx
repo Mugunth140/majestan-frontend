@@ -1,3 +1,5 @@
+import { getSeo,seoMetadata } from '@/lib/seo-engine';
+import { CoreSeoBoundary } from '@/components/seo/core-seo';
 import type { Metadata } from "next";
 
 import { PropertyManagementPage } from "@/components/site/services/property-management/property-management-page";
@@ -13,7 +15,7 @@ import {
   ServicePageShell,
 } from "@/components/site/services/shared/service-route";
 
-export const metadata: Metadata = buildServiceMetadata(SEO, HERO);
+const defaultMetadata: Metadata = buildServiceMetadata(SEO, HERO);
 
 const JSON_LD = buildServiceJsonLd({
   seo: SEO,
@@ -27,10 +29,12 @@ const JSON_LD = buildServiceJsonLd({
   },
 });
 
+export async function generateMetadata():Promise<Metadata>{return seoMetadata(await getSeo('/services/property-management'),defaultMetadata);}
+
 export default function PropertyManagementRoute() {
-  return (
+  return (<CoreSeoBoundary path="/services/property-management">
     <ServicePageShell crumb="Property Management" jsonLd={JSON_LD}>
       <PropertyManagementPage />
     </ServicePageShell>
-  );
+  </CoreSeoBoundary>);
 }

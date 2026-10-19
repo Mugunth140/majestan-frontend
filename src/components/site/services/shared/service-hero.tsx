@@ -1,9 +1,10 @@
+import { SeoH1 } from '@/components/seo/core-heading';
 import Image from "next/image";
 
 import type { ServiceHeroContent } from "./types";
 
 /**
- * The page's single <h1>, same composition as the liaisoning hero. Not wrapped
+ * The page's single <SeoH1>, same composition as the liaisoning hero. Not wrapped
  * in a reveal: it holds the LCP image.
  */
 export function ServiceHero({
@@ -21,7 +22,7 @@ export function ServiceHero({
       <div className="max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8!">
         <div className="grid! grid-cols-1! lg:grid-cols-[1.08fr_1fr]! gap-9! md:gap-14! items-center!">
           <div className="max-w-[600px]!">
-            <h1
+            <SeoH1
               id={`${id}-hero-heading`}
               className="text-[clamp(32px,4.6vw,48px)]! font-semibold! text-[#161e2d]! leading-[1.06]! tracking-[-0.025em]!"
             >
@@ -31,7 +32,7 @@ export function ServiceHero({
                   {index < hero.titleLines.length - 1 ? " " : ""}
                 </span>
               ))}
-            </h1>
+            </SeoH1>
 
             <p className="mt-[18px]! max-w-[54ch]! text-[15px]! md:text-[16px]! leading-[1.7]! text-gray-600!">
               {hero.description}

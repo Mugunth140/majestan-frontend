@@ -1,3 +1,4 @@
+import {getSeo,withSeo} from '@/lib/seo-engine';
 import { cache } from "react";
 import { API_BASE_URL } from "@/lib/api";
 
@@ -141,6 +142,7 @@ export type SeoPropertyDetails = {
 } | null;
 
 export type SeoPropertyImage = {
+  altText?: string;
   id: number;
   imageUrl: string;
   imageKey: string;
@@ -333,5 +335,7 @@ export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(sl
     }));
   }
 
-  return data as SeoProperty;
+  const mainSeo=await getSeo('/'+slug);
+  const effectiveSeo=mainSeo?.redirect?await getSeo(mainSeo.redirect):mainSeo;
+  return withSeo(data as SeoProperty,effectiveSeo);
 });

@@ -23,11 +23,27 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
   const videos = projectVideos(project);
 
   // Cover first, then the gallery, so the lightbox order matches the grid.
-  const galleryImages = (project.galleryImageUrls ?? []).filter(Boolean) as string[];
-  const allImages = [project.coverImageUrl, ...galleryImages].filter(Boolean) as string[];
+  const galleryImages = (project.galleryImageUrls ?? []).filter(
+    Boolean,
+  ) as string[];
+  const allImages = [project.coverImageUrl, ...galleryImages].filter(
+    Boolean,
+  ) as string[];
   const altForImage = (src: string, index: number) =>
-    (project as ProjectDetail & { galleryImageAltOverrides?: Record<string, string> }).galleryImageAltOverrides?.[src] ||
-    `${project.name} photo ${index + 1}`;
+    (
+      project as ProjectDetail & {
+        galleryImageAltOverrides?: Record<string, string>;
+      }
+    ).galleryImageAltOverrides?.[src] || `${project.name} photo ${index + 1}`;
+  const media =
+    (
+      project as ProjectDetail & {
+        galleryImageSeo?: Record<
+          string,
+          { titleText?: string; caption?: string }
+        >;
+      }
+    ).galleryImageSeo || {};
   const count = allImages.length;
 
   // The lock and key handlers only exist while the lightbox is open, so the
@@ -38,7 +54,8 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightboxOpen(false);
       if (e.key === "ArrowRight") setCurrentIndex((i) => (i + 1) % count);
-      if (e.key === "ArrowLeft") setCurrentIndex((i) => (i - 1 + count) % count);
+      if (e.key === "ArrowLeft")
+        setCurrentIndex((i) => (i - 1 + count) % count);
     };
 
     document.body.style.overflow = "hidden";
@@ -52,7 +69,9 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
   if (count === 0 && videos.length === 0) {
     return (
       <Card title="Photos and videos">
-        <p className={`${BODY} mt-6!`}>Photos for this project have not been published yet.</p>
+        <p className={`${BODY} mt-6!`}>
+          Photos for this project have not been published yet.
+        </p>
       </Card>
     );
   }
@@ -82,21 +101,28 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
         <Card title={`Photos · ${count}`}>
           <div className="grid! grid-cols-2! md:grid-cols-3! gap-3! mt-6!">
             {allImages.map((src, idx) => (
-              <button
-                key={`${src}-${idx}`}
-                type="button"
-                onClick={() => openLightbox(idx)}
-                className={`group aspect-[4/3]! rounded-xl! overflow-hidden! bg-gray-100! relative! cursor-pointer! ${FOCUS_RING}`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={src}
-                  alt={altForImage(src, idx)}
-                  loading="lazy"
-                  draggable={false}
-                  className="w-full! h-full! object-cover! transition-transform! duration-300! ease-out-quint! group-hover:scale-[1.03]!"
-                />
-              </button>
+              <figure key={`${src}-${idx}`} className="m-0! min-w-0!">
+                <button
+                  type="button"
+                  onClick={() => openLightbox(idx)}
+                  className={`group aspect-[4/3]! rounded-xl! overflow-hidden! bg-gray-100! relative! cursor-pointer! ${FOCUS_RING}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={src}
+                    alt={altForImage(src, idx)}
+                    title={media[src]?.titleText}
+                    loading="lazy"
+                    draggable={false}
+                    className="w-full! h-full! object-cover! transition-transform! duration-300! ease-out-quint! group-hover:scale-[1.03]!"
+                  />
+                </button>
+                {media[src]?.caption && (
+                  <figcaption className="mt-2! text-sm! text-gray-600!">
+                    {media[src].caption}
+                  </figcaption>
+                )}
+              </figure>
             ))}
           </div>
         </Card>
@@ -131,7 +157,10 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
               aria-label="Previous image"
               className={`absolute! left-6! z-10! w-12! h-12! rounded-full! bg-gray-100! hover:bg-gray-200! grid! place-items-center! transition-colors! duration-150! ease-out-quint! ${FOCUS_RING}`}
             >
-              <ChevronLeft className="w-6! h-6! text-gray-900!" aria-hidden="true" />
+              <ChevronLeft
+                className="w-6! h-6! text-gray-900!"
+                aria-hidden="true"
+              />
             </button>
           )}
 
@@ -152,7 +181,10 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
               aria-label="Next image"
               className={`absolute! right-6! z-10! w-12! h-12! rounded-full! bg-gray-100! hover:bg-gray-200! grid! place-items-center! transition-colors! duration-150! ease-out-quint! ${FOCUS_RING}`}
             >
-              <ChevronRight className="w-6! h-6! text-gray-900!" aria-hidden="true" />
+              <ChevronRight
+                className="w-6! h-6! text-gray-900!"
+                aria-hidden="true"
+              />
             </button>
           )}
 

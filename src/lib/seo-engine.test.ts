@@ -7,10 +7,19 @@ describe("SEO engine output", () => {
       {
         canonicalSlug: "villa",
         images: [
-          { id: 9, imageUrl: "https://cdn.test/shared.jpg", altText: "Existing alt" },
+          {
+            id: 9,
+            imageUrl: "https://cdn.test/shared.jpg",
+            altText: "Existing alt",
+          },
         ],
         floorPlanFiles: [
-          { id: 9, imageKey: "floor-9", imageUrl: "https://cdn.test/floor.pdf", title: "Ground floor" },
+          {
+            id: 9,
+            imageKey: "floor-9",
+            imageUrl: "https://cdn.test/floor.pdf",
+            title: "Ground floor",
+          },
         ],
       },
       {
@@ -27,7 +36,9 @@ describe("SEO engine output", () => {
     );
 
     expect(property.images[0].altText).toBe("URL matched photo");
-    expect((property.floorPlanFiles as Array<{ altText?: string }>)[0].altText).toBe("URL matched floor plan");
+    expect(
+      (property.floorPlanFiles as Array<{ altText?: string }>)[0].altText,
+    ).toBe("URL matched floor plan");
   });
 
   it("applies URL overrides to project photos and unit floor plans", () => {
@@ -41,7 +52,11 @@ describe("SEO engine output", () => {
           {
             id: 23,
             floorPlans: [
-              { floorName: "Ground", imageKey: "ground-key", imageUrl: "https://cdn.test/plan.jpg" },
+              {
+                floorName: "Ground",
+                imageKey: "ground-key",
+                imageUrl: "https://cdn.test/plan.jpg",
+              },
             ],
           },
         ],
@@ -59,15 +74,64 @@ describe("SEO engine output", () => {
       },
     );
 
-    expect((project as typeof project & { galleryImageAltOverrides: Record<string, string> }).galleryImageAltOverrides["https://cdn.test/gallery.jpg"]).toBe("Gallery photo alt");
+    expect(
+      (
+        project as typeof project & {
+          galleryImageAltOverrides: Record<string, string>;
+        }
+      ).galleryImageAltOverrides["https://cdn.test/gallery.jpg"],
+    ).toBe("Gallery photo alt");
     const plans = project.units[0].floorPlans as Array<{ altText?: string }>;
     expect(plans[0].altText).toBe("Floor plan URL alt");
   });
 
   it("returns absolute SEO titles and safely escapes JSON-LD", () => {
-    expect(seoMetadata({ meta_title: "Villa floor plans | Majestan Realty" }).title).toEqual({
+    expect(
+      seoMetadata({ meta_title: "Villa floor plans | Majestan Realty" }).title,
+    ).toEqual({
       absolute: "Villa floor plans | Majestan Realty",
     });
-    expect(jsonLd({ name: "<script>\u2028" })).toBe('{"name":"\\u003cscript>\\u2028"}');
+    expect(jsonLd({ name: "<script>\u2028" })).toBe(
+      '{"name":"\\u003cscript>\\u2028"}',
+    );
+  });
+});
+
+describe("structured media SEO", () => {
+  it("applies alt, title and caption without changing inventory", () => {
+    const input = {
+      title: "Original title",
+      status: "available",
+      canonicalSlug: "original",
+      images: [{ id: 5, imageUrl: "https://cdn.test/photo.jpg" }],
+      floorPlanFiles: [{ id: 8, imageUrl: "https://cdn.test/floor.jpg" }],
+    };
+    const output = withSeo(input, {
+      path: "/custom",
+      image_alts: {
+        "property-image:5": {
+          alt_text: "Entry",
+          title_text: "Main entrance",
+          caption: "East-facing entrance",
+        },
+        "property-floor:8": {
+          alt_text: "Ground floor",
+          title_text: "Ground floor layout",
+          caption: "Two bedrooms",
+        },
+      },
+    });
+    expect(output.images[0]).toMatchObject({
+      altText: "Entry",
+      titleText: "Main entrance",
+      caption: "East-facing entrance",
+    });
+    expect(output.floorPlanFiles[0]).toMatchObject({
+      altText: "Ground floor",
+      titleText: "Ground floor layout",
+      caption: "Two bedrooms",
+    });
+    expect(input.images[0]).not.toHaveProperty("caption");
+    expect(output.status).toBe("available");
   });
 });

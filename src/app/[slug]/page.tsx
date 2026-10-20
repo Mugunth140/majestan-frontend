@@ -1,6 +1,6 @@
 import { SeoHeadingProvider } from '@/components/seo/core-heading';
 import { getSeo, getListingSeo, seoMetadata, withSeo, jsonLd } from '@/lib/seo-engine';
-import { SeoHighlights, SeoJsonLd, SeoListingPage, SeoLocalityContent, SeoLocalityBottom } from '@/components/seo/seo-content';
+import { SeoHighlights, SeoEntityDetails, SeoOffMarketBanner, SeoOffMarketPage, SeoJsonLd, SeoListingPage, SeoLocalityContent, SeoLocalityBottom } from '@/components/seo/seo-content';
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
@@ -440,6 +440,7 @@ export default async function SlugPage({
 
   if (engineSeo?.redirect) permanentRedirect(engineSeo.redirect);
   if (engineSeo?.gone) notFound();
+  if (engineSeo?.off_market && engineSeo?.target_snapshot) return <SeoOffMarketPage seo={engineSeo} />;
   if (engineSeo?.scope === 'listing' && engineSeo.config_key) {
     const query = await searchParams;
     return <SeoListingPage seo={engineSeo} page={Number(query?.page)||1}/>;
@@ -489,7 +490,7 @@ export default async function SlugPage({
             <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
-            <SeoHighlights seo={engineSeo} /><PropertyDetailsView property={property} />
+            <SeoOffMarketBanner seo={engineSeo} /><SeoHighlights seo={engineSeo} /><SeoEntityDetails seo={engineSeo} /><PropertyDetailsView property={property} />
           </div>
           <script
             type="application/ld+json"
@@ -583,7 +584,7 @@ export default async function SlugPage({
                   />
                 )}
                 <div id="overview" className="scroll-mt-40!">
-                  <SeoHighlights seo={engineSeo} /><ProjectDetailsView project={project} />
+                  <SeoOffMarketBanner seo={engineSeo} /><SeoHighlights seo={engineSeo} /><SeoEntityDetails seo={engineSeo} /><ProjectDetailsView project={project} />
                 </div>
               </div>
             </main>

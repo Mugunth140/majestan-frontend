@@ -2,10 +2,21 @@ import { Grid3X3 } from "lucide-react";
 import { RequestButton } from "@/components/site/project/RequestButton";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
-import { groupUnitsByConfiguration, projectFloorPlanHref, unitFloorPlans } from "@/lib/project-overview";
+import {
+  groupUnitsByConfiguration,
+  projectFloorPlanHref,
+  unitFloorPlans,
+} from "@/lib/project-overview";
 import { unitAreaLabel } from "@/lib/project-config-summary";
-import { Panel, PanelEmpty, PanelLink } from "@/components/site/project/overview/overview-ui";
-import { FloorPlanViewer, type PlanPreview } from "@/components/site/project/overview/FloorPlanViewer";
+import {
+  Panel,
+  PanelEmpty,
+  PanelLink,
+} from "@/components/site/project/overview/overview-ui";
+import {
+  FloorPlanViewer,
+  type PlanPreview,
+} from "@/components/site/project/overview/FloorPlanViewer";
 
 /** Enough to show the range of plans without turning the overview into a gallery. */
 const MAX_PREVIEWS = 6;
@@ -18,7 +29,8 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
       const seenConfigurations = new Set<string>();
       return group.units.flatMap((unit) => {
         const area = unitAreaLabel(unit, project.projectType);
-        const configuration = area || unit.title?.trim() || unit.unitCode || String(unit.id);
+        const configuration =
+          area || unit.title?.trim() || unit.unitCode || String(unit.id);
         if (seenConfigurations.has(configuration)) return [];
         const floor = unitFloorPlans(unit)[0];
         if (floor) seenConfigurations.add(configuration);
@@ -55,16 +67,22 @@ export function FloorPlanPreview({ project }: { project: ProjectDetail }) {
     );
   }
 
-  const plans: PlanPreview[] = previews.map(({ group, unit, floor, configuration }) => ({
-    key: `${group.key}-${unit.id}`,
-    label: group.label,
-    configuration,
-    area: unitAreaLabel(unit, project.projectType),
-    floorName: floor.floorName,
-    src: floor.imageUrl,
-    href: projectFloorPlanHref(slug, unit.id, floor.floorName),
-    alt: floor.altText || `${group.label} ${configuration} ${floor.floorName} ${planNoun} for ${project.name}`,
-  }));
+  const plans: PlanPreview[] = previews.map(
+    ({ group, unit, floor, configuration }) => ({
+      key: `${group.key}-${unit.id}`,
+      label: group.label,
+      configuration,
+      area: unitAreaLabel(unit, project.projectType),
+      floorName: floor.floorName,
+      src: floor.imageUrl,
+      href: projectFloorPlanHref(slug, unit.id, floor.floorName),
+      titleText: floor.titleText,
+      caption: floor.caption,
+      alt:
+        floor.altText ||
+        `${group.label} ${configuration} ${floor.floorName} ${planNoun} for ${project.name}`,
+    }),
+  );
 
   return (
     <Panel

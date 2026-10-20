@@ -40,10 +40,15 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
       </div>
       {locationLines.length > 0 && (
         <p className="mt-1.5! flex! items-start! gap-1.5! text-sm! text-[#1c2433]!">
-          <MapPin className="w-4! h-4! shrink-0! mt-0.5! text-[#0a0f1c]!" aria-hidden="true" />
+          <MapPin
+            className="w-4! h-4! shrink-0! mt-0.5! text-[#0a0f1c]!"
+            aria-hidden="true"
+          />
           <span className="min-w-0!">
             {locationLines.map((line, index) => (
-              <span className="block!" key={`${line}-${index}`}>{line}</span>
+              <span className="block!" key={`${line}-${index}`}>
+                {line}
+              </span>
             ))}
           </span>
         </p>
@@ -62,17 +67,26 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
             {rate && (
               <div className="flex! items-baseline! justify-between! gap-4!">
                 <dt className="text-[13px]! font-normal! text-[#5f6b80]!">
-                  {rate.label.replace("Rate ", "").replace(/^./, (c) => c.toUpperCase())}
+                  {rate.label
+                    .replace("Rate ", "")
+                    .replace(/^./, (c) => c.toUpperCase())}
                 </dt>
                 <dd className="m-0! text-[13px]! font-semibold! text-[#1c2433]! tabular-nums! text-right!">
                   {rate.value}
-                  {rate.note ? <span className="text-[13px]! font-normal! text-[#5f6b80]!"> {rate.note}</span> : null}
+                  {rate.note ? (
+                    <span className="text-[13px]! font-normal! text-[#5f6b80]!">
+                      {" "}
+                      {rate.note}
+                    </span>
+                  ) : null}
                 </dd>
               </div>
             )}
             {emiStarts ? (
               <div className="flex! items-baseline! justify-between! gap-4!">
-                <dt className="text-[13px]! font-normal! text-[#5f6b80]!">EMI from</dt>
+                <dt className="text-[13px]! font-normal! text-[#5f6b80]!">
+                  EMI from
+                </dt>
                 <dd className="m-0! text-[13px]!">
                   <a
                     href="#calculators"
@@ -95,18 +109,27 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
             target="_blank"
             rel="noopener noreferrer"
             download
-            title={project.brochureName ?? undefined}
+            title={
+              (project as ProjectDetail & { brochureSeoTitle?: string })
+                .brochureSeoTitle ||
+              project.brochureName ||
+              undefined
+            }
             className="mt-2.5! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-transparent! px-4! py-3! text-base! font-semibold! text-[#0a0f1c]! no-underline! cursor-pointer! transition-[color,background-color,transform]! duration-150! ease-out-quint! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]!"
           >
             <Download className="w-4! h-4!" aria-hidden="true" />
-            Download brochure
+            {(project as ProjectDetail & { brochureSeoTitle?: string })
+              .brochureSeoTitle || "Download brochure"}
           </a>
         )}
       </div>
 
       <div className="mt-4! pt-4! border-t! border-[#e2e9f4]! flex! flex-col! items-center! gap-1.5! text-center!">
         <p className="m-0! flex! items-center! gap-1.5! text-[13px]! text-[#465066]!">
-          <Coins className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
+          <Coins
+            className="w-4! h-4! shrink-0! text-emerald-600!"
+            aria-hidden="true"
+          />
           Zero brokerage on this project
         </p>
         {project.projectCode && (
@@ -137,7 +160,10 @@ function ListedByCard() {
           Majestan Realty
         </p>
         <p className="m-0! mt-1! flex! items-center! gap-1.5! text-sm! text-[#5f6b80]!">
-          <ShieldCheck className="w-4! h-4! shrink-0! text-emerald-600!" aria-hidden="true" />
+          <ShieldCheck
+            className="w-4! h-4! shrink-0! text-emerald-600!"
+            aria-hidden="true"
+          />
           Verified
         </p>
       </div>

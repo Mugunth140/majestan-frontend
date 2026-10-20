@@ -864,49 +864,156 @@
   font-weight: 600;
 }
 
-/* Login screen */
-.seo-login-wrap {
+/* Login styles explicitly reset the public site's oversized form controls. */
+.seo-command.seo-login-wrap {
   display: grid;
-  min-height: 100vh;
+  min-height: 100svh !important;
   place-items: center;
-  padding: 16px 12px;
-  background: #f8f9fb !important;
+  padding: 32px 20px;
+  background: #f1f4f9 !important;
 }
 .seo-login {
   width: 100%;
-  max-width: 360px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  max-width: 400px;
+  overflow: hidden;
+  border: 1px solid #e0e5ed;
+  border-radius: 16px;
   background: #fff;
+  box-shadow: 0 16px 48px -24px #243c6240, 0 2px 6px #243c6205;
 }
-.seo-login > img {
+.seo-login-brand {
+  padding: 30px 32px 24px;
+  border-bottom: 1px solid #eef0f4;
+}
+.seo-login-brand img {
   display: block;
-  width: 140px;
-  height: 40px;
-  margin: 0 auto 12px;
+  width: 176px;
+  height: 44px;
   object-fit: contain;
+  margin: 0 auto;
 }
-.seo-login h1 {
-  margin-bottom: 12px !important;
-  text-align: center;
+.seo-login-heading { padding: 26px 32px 22px; }
+.seo-command .seo-login h1 {
+  margin: 0 0 6px !important;
+  font-size: 22px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.6px !important;
+}
+.seo-command .seo-login-heading p {
+  color: #737d8d;
+  font-size: 12px !important;
 }
 .seo-login form {
   display: grid;
-  gap: 9px;
-  margin-bottom: 10px;
+  gap: 18px;
+  padding: 0 32px 28px;
+  margin: 0;
 }
-.seo-login label {
-  display: grid;
-  gap: 4px;
-  color: var(--secondary);
-  font-size: 11px !important;
-}
-.seo-login > a {
+.seo-login-field { display: grid; gap: 7px; }
+.seo-command .seo-login label {
   display: block;
-  color: var(--blue) !important;
-  font-size: 11px !important;
+  color: #354052;
+  font-size: 12px !important;
+  font-weight: 600;
+}
+.seo-login-input {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 44px;
+  border: 1px solid #dce1e9;
+  border-radius: 8px;
+  background: #fff;
+  color: #8a95a6;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.seo-login-input > svg { flex-shrink: 0; }
+.seo-login-input:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #2563eb14;
+}
+.seo-command .seo-login .seo-login-input input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font-size: 13px !important;
+  line-height: normal !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.seo-command .seo-login input::placeholder { color: #9aa3b1; opacity: 1; }
+.seo-command .seo-login-reveal {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  margin-right: -6px;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #7b8798;
+}
+.seo-command .seo-login-reveal:hover { background: #f1f5fb; color: #2563eb; }
+.seo-command .seo-login-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  height: 42px;
+  margin-top: 4px;
+  border: 1px solid #2563eb !important;
+  border-radius: 8px !important;
+  background: #2563eb !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 3px 6px #2563eb20;
+  transition: background 150ms, box-shadow 150ms;
+}
+.seo-command .seo-login-submit:hover:not(:disabled) {
+  border-color: #1d4ed8 !important;
+  background: #1d4ed8 !important;
+  box-shadow: 0 4px 10px #2563eb30;
+}
+.seo-command .seo-login .seo-error {
+  margin: -3px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #fecdd3;
+  border-radius: 7px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 12px !important;
+  overflow-wrap: anywhere;
+}
+.seo-login-footer {
+  padding: 16px 32px;
+  border-top: 1px solid #eef0f4;
+  background: #fafbfd;
   text-align: center;
+}
+.seo-command .seo-login-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #607086 !important;
+  font-size: 12px !important;
+}
+.seo-command .seo-login-footer a:hover { color: #2563eb !important; }
+.seo-login-spinner { animation: seo-login-spin 900ms linear infinite; }
+@keyframes seo-login-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .seo-login-spinner { animation: none; }
+  .seo-login-input, .seo-command .seo-login-submit { transition: none; }
 }
 
 /* Sidebar collapses to a narrow icon rail on desktop. */
@@ -995,9 +1102,9 @@
   .seo-filter-options select {
     flex: 1 1 120px;
   }
-  .seo-login {
-    padding: 14px;
-  }
+  .seo-login-brand { padding: 24px; }
+  .seo-login-heading { padding: 24px 24px 20px; }
+  .seo-login form { padding: 0 24px 24px; }
 }
 
 /* Color distinguishes primary actions, destructive actions, and SEO states. */
@@ -1103,4 +1210,76 @@
       color 140ms ease-out,
       box-shadow 140ms ease-out;
   }
+}
+
+/* Advanced editor additions */
+.seo-command .seo-field-label {
+  color: inherit;
+  font-size: 11px !important;
+}
+.seo-command .seo-counter {
+  align-self: flex-end;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+  font-variant-numeric: tabular-nums;
+}
+.seo-command .seo-toggle-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.seo-command .seo-inline-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  gap: 6px;
+}
+.seo-command .seo-landmarks {
+  display: grid;
+  gap: 8px;
+}
+.seo-command .seo-landmark-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 120px auto;
+  align-items: end;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.seo-command .seo-faq-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.seo-command .seo-social-preview > img {
+  display: block;
+  width: min(100%, 360px);
+  max-height: 180px;
+  margin-top: 8px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+@media (max-width: 720px) {
+  .seo-command .seo-landmark-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.seo-command .seo-record-name:has(.seo-record-thumb) {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.seo-command .seo-record-thumb {
+  display: block;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 24px;
+  object-fit: cover;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+}
+.seo-command .seo-record-name > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

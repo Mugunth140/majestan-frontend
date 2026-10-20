@@ -26,9 +26,21 @@ async function forward(
   }
   const { path } = await context.params;
   if (
-    path.some(
-      (s) => s === "." || s === ".." || s.includes("/") || s.includes("\\"),
-    )
+    path.some((s, index) => {
+      // Core config keys contain their fixed route, e.g. page:/about-us.
+      // They remain a single encoded upstream parameter, never a route.
+      const coreConfigKey =
+        path.length === 2 &&
+        path[0] === "configs" &&
+        index === 1 &&
+        /^page:\/?(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/.test(s);
+      return (
+        s === "." ||
+        s === ".." ||
+        s.includes("\\") ||
+        (s.includes("/") && !coreConfigKey)
+      );
+    })
   )
     return NextResponse.json({ message: "Invalid path" }, { status: 400 });
   try {

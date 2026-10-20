@@ -16,7 +16,9 @@ export function ProjectShell({
 }) {
   return (
     <div className="grid! grid-cols-1! lg:grid-cols-3! gap-6! items-stretch!">
-      <div className="lg:col-span-2! flex! flex-col! gap-6! min-w-0!">{children}</div>
+      <div className="lg:col-span-2! flex! flex-col! gap-6! min-w-0!">
+        {children}
+      </div>
       <ProjectAside project={project} />
     </div>
   );
@@ -42,7 +44,12 @@ export function ProjectTitleRow({
   heading: string;
 }) {
   const street = (project.address || "").trim();
-  const region = [project.sublocation, project.city, project.state, project.pincode]
+  const region = [
+    project.sublocation,
+    project.city,
+    project.state,
+    project.pincode,
+  ]
     .filter(Boolean)
     .join(", ");
   const rera = (project.reraNumber || "").trim();
@@ -55,8 +62,13 @@ export function ProjectTitleRow({
         </h1>
         {(street || region) && (
           <p className="mt-3! mb-0! flex! items-start! gap-2! text-[15px]! text-[#1c2433]!">
-            <MapPin className="w-[18px]! h-[18px]! shrink-0! mt-0.5! text-[#0a0f1c]!" aria-hidden="true" />
-            <span className="min-w-0!">{[street, region].filter(Boolean).join(", ")}</span>
+            <MapPin
+              className="w-[18px]! h-[18px]! shrink-0! mt-0.5! text-[#0a0f1c]!"
+              aria-hidden="true"
+            />
+            <span className="min-w-0!">
+              {[street, region].filter(Boolean).join(", ")}
+            </span>
           </p>
         )}
       </div>
@@ -65,7 +77,9 @@ export function ProjectTitleRow({
       <div className="flex! flex-wrap! items-center! gap-2! sm:flex-col! sm:items-end! sm:shrink-0!">
         <p
           className={`m-0! inline-flex! items-center! gap-1.5! rounded-full! px-3! py-1.5! text-[13px]! ${
-            rera ? "bg-white! text-[#1c2433]! ring-1! ring-[#e2e9f4]!" : "bg-white! text-[#5f6b80]! ring-1! ring-[#e2e9f4]!"
+            rera
+              ? "bg-white! text-[#1c2433]! ring-1! ring-[#e2e9f4]!"
+              : "bg-white! text-[#5f6b80]! ring-1! ring-[#e2e9f4]!"
           }`}
         >
           <BadgeCheck
@@ -74,7 +88,9 @@ export function ProjectTitleRow({
           />
           <span className="text-[#5f6b80]!">RERA</span>
           {rera ? (
-            <span className="font-semibold! tabular-nums! break-all!">{rera}</span>
+            <span className="font-semibold! tabular-nums! break-all!">
+              {rera}
+            </span>
           ) : (
             <span>Not available</span>
           )}
@@ -85,11 +101,17 @@ export function ProjectTitleRow({
             target="_blank"
             rel="noopener noreferrer"
             download
-            title={project.brochureName ?? undefined}
+            title={
+              (project as ProjectDetail & { brochureSeoTitle?: string })
+                .brochureSeoTitle ||
+              project.brochureName ||
+              undefined
+            }
             className="inline-flex! items-center! gap-2! rounded-full! bg-white! px-4! py-2! text-sm! font-semibold! text-[#0a0f1c]! ring-1! ring-[#cfdcf0]! no-underline! whitespace-nowrap! transition-[box-shadow,color,transform]! duration-150! ease-out-quint! hover:ring-[#0a0f1c]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#0a0f1c]! focus-visible:ring-offset-2!"
           >
             <Download className="w-4! h-4!" aria-hidden="true" />
-            Download brochure
+            {(project as ProjectDetail & { brochureSeoTitle?: string })
+              .brochureSeoTitle || "Download brochure"}
           </a>
         )}
       </div>

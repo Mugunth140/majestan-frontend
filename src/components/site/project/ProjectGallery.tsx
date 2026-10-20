@@ -22,9 +22,21 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
   ].filter(Boolean) as string[];
   const mobileCover = project.mobileCoverImageUrl || null;
   const altOverrides = (
-    project as ProjectDetail & { galleryImageAltOverrides?: Record<string, string> }
+    project as ProjectDetail & {
+      galleryImageAltOverrides?: Record<string, string>;
+    }
   ).galleryImageAltOverrides;
-  const altFor = (src: string, fallback: string) => altOverrides?.[src] || fallback;
+  const media =
+    (
+      project as ProjectDetail & {
+        galleryImageSeo?: Record<
+          string,
+          { titleText?: string; caption?: string }
+        >;
+      }
+    ).galleryImageSeo || {};
+  const altFor = (src: string, fallback: string) =>
+    altOverrides?.[src] || fallback;
   const placeholder = getPlaceholderImage({ projectType: project.projectType });
   const [active, setActive] = useState(0);
 
@@ -50,7 +62,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
   };
 
   return (
-    <section
+    <figure
       aria-label={`${project.name} photos`}
       /* In the page column, so it lines up with the title and the facts row
          below it and carries the same corners as every card on the page. */
@@ -86,6 +98,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
                       src={img}
                       placeholderSrc={placeholder}
                       alt={altFor(img, `${project.name} — cover`)}
+                      title={media[img]?.titleText}
                       eager
                       className="w-full! h-full! object-cover! hidden! sm:block!"
                     />
@@ -93,6 +106,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
                       src={mobileCover}
                       placeholderSrc={placeholder}
                       alt={altFor(mobileCover, `${project.name} — cover`)}
+                      title={media[mobileCover]?.titleText}
                       eager
                       className="w-full! h-full! object-cover! sm:hidden!"
                     />
@@ -102,6 +116,7 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
                     src={img}
                     placeholderSrc={placeholder}
                     alt={altFor(img, `${project.name} — photo ${index + 1}`)}
+                    title={media[img]?.titleText}
                     eager={index === 0}
                     className="w-full! h-full! object-cover!"
                   />
@@ -154,6 +169,11 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
           </div>
         )}
       </div>
-    </section>
+      {media[images[active]]?.caption && (
+        <figcaption className="px-4! py-3! text-sm! text-gray-600!">
+          {media[images[active]].caption}
+        </figcaption>
+      )}
+    </figure>
   );
 }

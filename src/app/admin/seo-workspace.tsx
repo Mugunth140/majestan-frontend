@@ -9,6 +9,7 @@ const labels: Record<string, string> = {
   apartment: "Apartment",
   villa: "Villa",
   individual_portion: "Independent house",
+  independent_house: "Independent house",
   plot: "Plot",
   farmland: "Farmland",
   commercial: "Commercial space",
@@ -90,7 +91,11 @@ function Check({
     <label className="seo-check">
       <input
         type="checkbox"
-        checked={Boolean(form[name])}
+        checked={
+          name === "show_live_market_snapshot" && form[name] === undefined
+            ? true
+            : Boolean(form[name])
+        }
         onChange={(e) => set(name, e.target.checked)}
       />
       {label}
@@ -168,11 +173,45 @@ function Editor({
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const [schema, setSchema] = useState(
-    JSON.stringify((initial.config || initial).schema_overrides || {}, null, 2),
+    JSON.stringify(
+      (initial.config || initial).custom_schema_json ||
+        (initial.config || initial).schema_overrides ||
+        {},
+      null,
+      2,
+    ),
   );
   const [sections, setSections] = useState(
     JSON.stringify((initial.config || initial).section_seo || {}, null, 2),
   );
+  const initialConfig = initial.config || initial;
+  const templateSections = initialConfig.section_seo || {};
+  const templateSettings = initialConfig.settings || {};
+  const templateField = (key: string) => {
+    if (key === "floor_plan_title_template")
+      return (
+        templateSections.floor_plans?.meta_title ||
+        templateSections.floor_plan?.meta_title ||
+        ""
+      );
+    if (key === "floor_plan_description_template")
+      return (
+        templateSections.floor_plans?.meta_description ||
+        templateSections.floor_plan?.meta_description ||
+        ""
+      );
+    if (key === "photos_title_template")
+      return templateSections.photos?.meta_title || "";
+    if (key === "photos_description_template")
+      return templateSections.photos?.meta_description || "";
+    if (key === "image_alt_template")
+      return (
+        initialConfig.image_alt_template ||
+        templateSettings.image_alt_template ||
+        ""
+      );
+    return initialConfig[key.replace("_template", "")] || "";
+  };
   const ref = useRef<HTMLDivElement>(null);
   const listing = Boolean(initial.isListing || form.listing_id),
     technical = form.scope === "technical",
@@ -196,11 +235,66 @@ function Editor({
     setBusy(true);
     setError("");
     try {
-      const body = {
+      const body: Row = {
         ...form,
         schema_overrides: JSON.parse(schema),
+        custom_schema_json: JSON.parse(schema),
         section_seo: JSON.parse(sections),
       };
+      if (template) {
+        const nextSections = { ...body.section_seo };
+        const putSection = (section: string, key: string, value: string) => {
+          nextSections[section] = {
+            ...(nextSections[section] || {}),
+            [key]: value,
+          };
+        };
+        body.meta_title_template =
+          form.meta_title_template ?? templateField("meta_title_template");
+        body.meta_description_template =
+          form.meta_description_template ??
+          templateField("meta_description_template");
+        body.h1_template = form.h1_template ?? templateField("h1_template");
+        body.meta_title = body.meta_title_template;
+        body.meta_description = body.meta_description_template;
+        body.h1 = body.h1_template;
+        body.floor_plan_title_template =
+          form.floor_plan_title_template ??
+          templateField("floor_plan_title_template");
+        body.floor_plan_description_template =
+          form.floor_plan_description_template ??
+          templateField("floor_plan_description_template");
+        body.photos_title_template =
+          form.photos_title_template ?? templateField("photos_title_template");
+        body.photos_description_template =
+          form.photos_description_template ??
+          templateField("photos_description_template");
+        const floorPlanSection =
+          form.settings?.scope === "project" ? "floor_plans" : "floor_plan";
+        putSection(
+          floorPlanSection,
+          "meta_title",
+          body.floor_plan_title_template,
+        );
+        putSection(
+          floorPlanSection,
+          "meta_description",
+          body.floor_plan_description_template,
+        );
+        putSection("photos", "meta_title", body.photos_title_template);
+        putSection(
+          "photos",
+          "meta_description",
+          body.photos_description_template,
+        );
+        body.image_alt_template =
+          form.image_alt_template ?? templateField("image_alt_template");
+        body.settings = {
+          ...form.settings,
+          image_alt_template: body.image_alt_template,
+        };
+        body.section_seo = nextSections;
+      }
       if (listing) await seoApi("listing-pages", body);
       else
         await seoApi(
@@ -318,11 +412,6 @@ function Editor({
                     onChange={(e) => set("transaction_intent", e.target.value)}
                   >
                     {intents
-                      .filter(
-                        ([v]) =>
-                          form.inventory_kind !== "project" ||
-                          ["buy"].includes(v),
-                      )
                       .map(([v, l]) => (
                         <option key={v} value={v}>
                           {l}
@@ -338,7 +427,9 @@ function Editor({
                     value={
                       form.inventory_kind === "project"
                         ? form.project_type || ""
-                        : form.property_type || ""
+                        : form.property_type === "individual_portion"
+                          ? "independent_house"
+                          : form.property_type || ""
                     }
                     onChange={(e) =>
                       set(
@@ -351,10 +442,10 @@ function Editor({
                   >
                     <option value="">All types</option>
                     {Object.entries(labels)
-                      .filter(
-                        ([v]) =>
-                          form.inventory_kind !== "project" ||
-                          ["apartment", "villa", "plot"].includes(v),
+                      .filter(([v]) =>
+                        form.inventory_kind === "project"
+                          ? ["apartment", "villa", "plot"].includes(v)
+                          : v !== "individual_portion",
                       )
                       .map(([v, l]) => (
                         <option key={v} value={v}>
@@ -399,10 +490,27 @@ function Editor({
                       ))}
                   </select>
                 </label>
-                <Field
-                  label="Bedrooms (optional)"
-                  name="bedrooms"
-                  type="number"
+                <label className="seo-field">
+                  Bedrooms
+                  <select
+                    value={form.bedrooms ?? ""}
+                    onChange={(e) =>
+                      set(
+                        "bedrooms",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                  >
+                    <option value="">Any</option>
+                    <option value="1">1 BHK</option>
+                    <option value="2">2 BHK</option>
+                    <option value="3">3 BHK</option>
+                    <option value="4">4+ BHK</option>
+                  </select>
+                </label>
+                <Check
+                  label="Show live market snapshot"
+                  name="show_live_market_snapshot"
                   form={form}
                   set={set}
                 />
@@ -440,17 +548,39 @@ function Editor({
                   />
                 )}
                 <Field
-                  label="Meta title"
-                  name="meta_title"
-                  form={form}
+                  label={template ? "Meta title template" : "Meta title"}
+                  name={template ? "meta_title_template" : "meta_title"}
+                  form={
+                    template
+                      ? {
+                          ...form,
+                          meta_title_template:
+                            form.meta_title_template ??
+                            templateField("meta_title_template"),
+                        }
+                      : form
+                  }
                   set={set}
                   max={255}
                   hint="Aim for about 50–60 characters."
                 />
                 <Field
-                  label="Meta description"
-                  name="meta_description"
-                  form={form}
+                  label={
+                    template ? "Meta description template" : "Meta description"
+                  }
+                  name={
+                    template ? "meta_description_template" : "meta_description"
+                  }
+                  form={
+                    template
+                      ? {
+                          ...form,
+                          meta_description_template:
+                            form.meta_description_template ??
+                            templateField("meta_description_template"),
+                        }
+                      : form
+                  }
                   set={set}
                   area
                   max={320}
@@ -482,19 +612,60 @@ function Editor({
                 <div className="seo-form-grid">
                   <Field
                     label="H1 heading"
-                    name="h1"
-                    form={form}
+                    name={template ? "h1_template" : "h1"}
+                    form={
+                      template
+                        ? {
+                            ...form,
+                            h1_template:
+                              form.h1_template ?? templateField("h1_template"),
+                          }
+                        : form
+                    }
                     set={set}
                     max={255}
                   />
-                  <Field
-                    label="H2 subheading"
-                    name="h2"
-                    form={form}
-                    set={set}
-                    max={255}
-                  />
+                  {!template && (
+                    <Field
+                      label="H2 subheading"
+                      name="h2"
+                      form={form}
+                      set={set}
+                      max={255}
+                    />
+                  )}
                 </div>
+                {template && (
+                  <div className="seo-form-grid">
+                    {[
+                      [
+                        "floor_plan_title_template",
+                        "Floor plan title template",
+                      ],
+                      [
+                        "floor_plan_description_template",
+                        "Floor plan description template",
+                      ],
+                      ["photos_title_template", "Photos title template"],
+                      [
+                        "photos_description_template",
+                        "Photos description template",
+                      ],
+                      ["image_alt_template", "Image alt template"],
+                    ].map(([name, label]) => (
+                      <Field
+                        key={name}
+                        label={label}
+                        name={name}
+                        form={{
+                          ...form,
+                          [name]: form[name] ?? templateField(name),
+                        }}
+                        set={set}
+                      />
+                    ))}
+                  </div>
+                )}
                 <label className="seo-field">
                   AI summary / key highlights
                   <textarea
@@ -505,7 +676,7 @@ function Editor({
                   />
                   <small>One factual highlight per line.</small>
                 </label>
-                {listing && (
+                {(listing || form.scope === "page") && (
                   <>
                     <Field
                       label="Top introduction"
@@ -753,7 +924,7 @@ function Editor({
           )}
           <div className="seo-form-actions">
             <button
-              className="seo-button seo-secondary"
+              className="seo-button seo-secondary seo-danger"
               type="button"
               onClick={onClose}
               disabled={busy}
@@ -882,6 +1053,7 @@ export function SeoWorkspace({
                   scope: "listing",
                   inventory_kind: "property",
                   transaction_intent: "buy",
+                  show_live_market_snapshot: true,
                   city_id: options.cities?.find(
                     (c: Row) => c.name === "Coimbatore",
                   )?.id,
@@ -973,8 +1145,9 @@ export function SeoWorkspace({
                 {Object.entries(labels)
                   .filter(
                     ([v]) =>
-                      module !== "project" ||
-                      ["apartment", "villa", "plot"].includes(v),
+                      v !== "independent_house" &&
+                      (module !== "project" ||
+                        ["apartment", "villa", "plot"].includes(v)),
                   )
                   .map(([v, l]) => (
                     <option value={v} key={v}>
@@ -1252,7 +1425,16 @@ export function SeoWorkspace({
                           target="_blank"
                           rel="noreferrer"
                         >
-                          {row.name}
+                          {row.thumbnail_url && (
+                            <img
+                              className="seo-record-thumb"
+                              src={row.thumbnail_url}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          )}
+                          <span>{row.name}</span>
                         </a>
                       ) : (
                         <span

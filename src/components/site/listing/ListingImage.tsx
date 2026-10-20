@@ -45,6 +45,7 @@ type ListingImageProps = {
   /** Instant type placeholder shown until the real photo is ready. */
   placeholderSrc: string;
   alt: string;
+  title?: string;
   /** Layout classes shared by both images (positioning, object-fit, zoom). */
   className?: string;
   /** Render the real photo eagerly with high fetch priority (first card). */
@@ -132,7 +133,10 @@ export function ListingImage({
             el.dataset.listingFallback = "1";
             if (attemptsRef.current < 1) {
               attemptsRef.current += 1;
-              retryTimer.current = setTimeout(() => setAttempt((a) => a + 1), RETRY_MS);
+              retryTimer.current = setTimeout(
+                () => setAttempt((a) => a + 1),
+                RETRY_MS,
+              );
               return;
             }
             setFailed(true);

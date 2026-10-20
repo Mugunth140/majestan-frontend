@@ -1,3 +1,4 @@
+import { SeoFooterContent } from "@/components/seo/core-heading";
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 import Image from "next/image";
@@ -73,6 +74,7 @@ const socials = [
 export function SiteFooter() {
   return (
     <>
+      <SeoFooterContent />
       <PopularSearches />
 
       {/* ── Footer ──────────────────────────────────────────────────────────

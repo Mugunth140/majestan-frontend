@@ -147,7 +147,7 @@ export function SeoAdminShell({ children }: { children: React.ReactNode }) {
                 <small>{user.email}</small>
               </span>
               <button
-                className="seo-button seo-secondary"
+                className="seo-button seo-secondary seo-danger"
                 type="button"
                 onClick={async () => {
                   await seoApi("auth/logout", {});

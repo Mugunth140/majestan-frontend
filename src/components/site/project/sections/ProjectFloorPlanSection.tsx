@@ -27,10 +27,17 @@ import {
   unitFloorPlans,
   type ConfigurationGroup,
 } from "@/lib/project-overview";
-import { unitSpecGroups, type SpecGroup, type SpecGroupKey } from "@/lib/unit-spec-groups";
+import {
+  unitSpecGroups,
+  type SpecGroup,
+  type SpecGroupKey,
+} from "@/lib/unit-spec-groups";
 import { Card, EmptyState, LABEL } from "@/components/site/project/project-ui";
 import { RequestButton } from "@/components/site/project/RequestButton";
-import { FloorPlanLightbox, type FloorPlanSlide } from "@/components/site/project/FloorPlanLightbox";
+import {
+  FloorPlanLightbox,
+  type FloorPlanSlide,
+} from "@/components/site/project/FloorPlanLightbox";
 import { CompactSummaryBody } from "@/components/site/project/configuration-parts";
 import { StatusChip } from "@/components/site/project/configuration-parts";
 
@@ -62,7 +69,11 @@ function unitName(unit: ProjectUnit, index: number): string {
 }
 
 /** "U1 · 2 BHK · Floor 12 of 15 · North facing", without repeating the name. */
-function unitMeta(unit: ProjectUnit, name: string, group: ConfigurationGroup): string {
+function unitMeta(
+  unit: ProjectUnit,
+  name: string,
+  group: ConfigurationGroup,
+): string {
   const floorText = (() => {
     if (unit.floorNo == null || String(unit.floorNo).trim() === "") return null;
     const str = String(unit.floorNo).trim();
@@ -99,9 +110,15 @@ function SpecCategory({ group }: { group: SpecGroup }) {
   return (
     <details className="group/spec">
       <summary className="list-none! [&::-webkit-details-marker]:hidden! cursor-pointer! flex! items-center! gap-3! py-3.5! rounded-md! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!">
-        <Icon className="w-4! h-4! shrink-0! text-[#1645bf]!" strokeWidth={1.75} aria-hidden="true" />
+        <Icon
+          className="w-4! h-4! shrink-0! text-[#1645bf]!"
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
         <span className="min-w-0! flex-1! sm:flex! sm:items-baseline! sm:justify-between! sm:gap-4!">
-          <span className="block! text-sm! font-semibold! text-gray-900!">{group.title}</span>
+          <span className="block! text-sm! font-semibold! text-gray-900!">
+            {group.title}
+          </span>
           {group.preview && (
             <span className="block! text-sm! text-gray-500! tabular-nums! truncate! group-open/spec:sm:invisible!">
               {group.preview}
@@ -138,7 +155,9 @@ function SpecCategory({ group }: { group: SpecGroup }) {
                   key={`${room.name}-${index}`}
                   className="flex! min-w-0! flex-col! gap-1! rounded-xl! bg-[#f7f9fc]! px-3.5! py-3! ring-1! ring-[#e6ebf2]!"
                 >
-                  <dt className="text-[13px]! leading-snug! text-[#5f6b80]! break-words!">{room.name}</dt>
+                  <dt className="text-[13px]! leading-snug! text-[#5f6b80]! break-words!">
+                    {room.name}
+                  </dt>
                   <dd className="m-0! text-[15px]! font-semibold! leading-tight! text-[#0a0f1c]! tabular-nums! break-words!">
                     {room.dimensions}
                   </dd>
@@ -149,7 +168,11 @@ function SpecCategory({ group }: { group: SpecGroup }) {
         )}
 
         {group.items.length > 0 && (
-          <div className={group.rows.length > 0 || group.rooms.length > 0 ? "mt-5!" : ""}>
+          <div
+            className={
+              group.rows.length > 0 || group.rooms.length > 0 ? "mt-5!" : ""
+            }
+          >
             <p className={LABEL}>Included</p>
             <ul className="mt-2! flex! flex-wrap! gap-2! list-none! p-0! m-0!">
               {group.items.map((item) => (
@@ -196,9 +219,12 @@ function UnitCard({
   const groups = unitSpecGroups(unit, project);
   const headingId = `unit-${unit.id}-name`;
   const floorPlans = unitFloorPlans(unit);
-  const selectedFloor = floorPlans[Math.min(floorIndex, Math.max(floorPlans.length - 1, 0))];
+  const selectedFloor =
+    floorPlans[Math.min(floorIndex, Math.max(floorPlans.length - 1, 0))];
 
-  const saleableNum = parseFloat(String(unit.superBuiltupAreaSqft ?? unit.builtupAreaSqft ?? ""));
+  const saleableNum = parseFloat(
+    String(unit.superBuiltupAreaSqft ?? unit.builtupAreaSqft ?? ""),
+  );
   const saleable =
     Number.isFinite(saleableNum) && saleableNum > 0
       ? `${Math.round(saleableNum).toLocaleString("en-IN")} sq.ft`
@@ -207,19 +233,40 @@ function UnitCard({
     const raw = (project.possessionDate || "").trim();
     const dt = raw ? new Date(raw) : null;
     if (dt && !isNaN(dt.getTime())) {
-      const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.getMonth()];
+      const mon = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ][dt.getMonth()];
       return `${mon}, ${dt.getFullYear()}`;
     }
-    return project.possessionStatus ? titleCase(project.possessionStatus) : null;
+    return project.possessionStatus
+      ? titleCase(project.possessionStatus)
+      : null;
   })();
 
   return (
-    <article aria-labelledby={headingId} className="py-6! first:pt-0! last:pb-0!">
+    <article
+      aria-labelledby={headingId}
+      className="py-6! first:pt-0! last:pb-0!"
+    >
       {/* Name first, as asked of every unit; price and status on the right
           so a buyer scanning down the page reads the same columns. */}
       <header className="flex! items-start! justify-between! gap-4!">
         <div className="min-w-0!">
-          <h3 id={headingId} className="text-lg! sm:text-xl! font-semibold! text-gray-900! break-words!">
+          <h3
+            id={headingId}
+            className="text-lg! sm:text-xl! font-semibold! text-gray-900! break-words!"
+          >
             {name}
           </h3>
           {meta && <p className="mt-1! text-sm! text-gray-500!">{meta}</p>}
@@ -228,7 +275,9 @@ function UnitCard({
           <p className="text-lg! sm:text-xl! font-semibold! text-gray-900! tabular-nums! tracking-tight!">
             {priced ? formatINR(unit.price) : "On request"}
           </p>
-          {area && <p className="text-sm! text-gray-500! tabular-nums!">{area}</p>}
+          {area && (
+            <p className="text-sm! text-gray-500! tabular-nums!">{area}</p>
+          )}
           <StatusChip status={unit.status} />
         </div>
       </header>
@@ -237,7 +286,11 @@ function UnitCard({
         {selectedFloor ? (
           <>
             {floorPlans.length > 1 && (
-              <div role="group" aria-label={`Choose a floor for ${name}`} className="mb-3! flex! flex-wrap! gap-2!">
+              <div
+                role="group"
+                aria-label={`Choose a floor for ${name}`}
+                className="mb-3! flex! flex-wrap! gap-2!"
+              >
                 {floorPlans.map((floor, index) => (
                   <button
                     key={`${floor.floorName}-${index}`}
@@ -257,7 +310,12 @@ function UnitCard({
             )}
             <FloorPlanLightbox
               items={slides}
-              index={slideIndex(unit.id, Math.min(floorIndex, floorPlans.length - 1)) ?? 0}
+              index={
+                slideIndex(
+                  unit.id,
+                  Math.min(floorIndex, floorPlans.length - 1),
+                ) ?? 0
+              }
             />
           </>
         ) : (
@@ -266,7 +324,10 @@ function UnitCard({
               aria-hidden="true"
               className="grid! place-items-center! w-10! h-10! rounded-xl! bg-white! ring-1! ring-gray-200!"
             >
-              <Grid3X3 className="w-5! h-5! text-gray-500!" strokeWidth={1.75} />
+              <Grid3X3
+                className="w-5! h-5! text-gray-500!"
+                strokeWidth={1.75}
+              />
             </span>
             <p className="text-sm! text-gray-600!">
               The {planNoun} for {name} is shared on request.
@@ -345,8 +406,15 @@ function ActiveUnitPanel({
         slideIndexByUnitFloor.set(`${unit.id}:${floorIndex}`, slides.length);
         slides.push({
           src: floor.imageUrl,
-          alt: floor.altText || `${name}${floor.floorName === "Floor plan" ? "" : ` ${floor.floorName}`} ${planNoun}, ${group.label}, ${project.name}`,
-          title: floor.floorName === "Floor plan" ? `${name} ${planNoun}` : `${name} · ${floor.floorName} ${planNoun}`,
+          titleText: floor.titleText,
+          caption: floor.caption,
+          alt:
+            floor.altText ||
+            `${name}${floor.floorName === "Floor plan" ? "" : ` ${floor.floorName}`} ${planNoun}, ${group.label}, ${project.name}`,
+          title:
+            floor.floorName === "Floor plan"
+              ? `${name} ${planNoun}`
+              : `${name} · ${floor.floorName} ${planNoun}`,
           subtitle: unitMeta(unit, name, group),
         });
       });
@@ -363,7 +431,9 @@ function ActiveUnitPanel({
               group={group}
               project={project}
               slides={slides}
-              slideIndex={(unitId, floorIndex) => slideIndexByUnitFloor.get(`${unitId}:${floorIndex}`)}
+              slideIndex={(unitId, floorIndex) =>
+                slideIndexByUnitFloor.get(`${unitId}:${floorIndex}`)
+              }
               floorIndex={floorIndex}
               onFloorChange={onFloorChange}
             />
@@ -374,7 +444,11 @@ function ActiveUnitPanel({
   );
 }
 
-export function ProjectFloorPlanSection({ project }: { project: ProjectDetail }) {
+export function ProjectFloorPlanSection({
+  project,
+}: {
+  project: ProjectDetail;
+}) {
   if (project.units.length === 0) {
     const plural = `${getFloorPlanLabel(project.projectType).toLowerCase()}s`;
     return (
@@ -401,9 +475,12 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
   const stripRef = useRef<HTMLDivElement>(null);
   const querySelectionApplied = useRef(false);
 
-  const activeGroup = groups.find((g) => g.key === activeConfigKey) ?? groups[0];
+  const activeGroup =
+    groups.find((g) => g.key === activeConfigKey) ?? groups[0];
   const activeUnit =
-    activeGroup?.units.find((u) => u.id === activeUnitId) ?? activeGroup?.units[0] ?? null;
+    activeGroup?.units.find((u) => u.id === activeUnitId) ??
+    activeGroup?.units[0] ??
+    null;
 
   // Overview teasers can point directly to the unit and floor they show.
   // Read the query after hydration so the server and first client render agree.
@@ -414,13 +491,17 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
     const unitId = Number(params.get("unitId"));
     const floorName = params.get("floor");
     if (!Number.isInteger(unitId)) return;
-    const group = groups.find((candidate) => candidate.units.some((unit) => unit.id === unitId));
+    const group = groups.find((candidate) =>
+      candidate.units.some((unit) => unit.id === unitId),
+    );
     const unit = group?.units.find((candidate) => candidate.id === unitId);
     if (!group || !unit) return;
     setActiveConfigKey(group.key);
     setActiveUnitId(unit.id);
     const plans = unitFloorPlans(unit);
-    const requestedIndex = plans.findIndex((plan) => plan.floorName === floorName);
+    const requestedIndex = plans.findIndex(
+      (plan) => plan.floorName === floorName,
+    );
     setActiveFloorIndex(requestedIndex >= 0 ? requestedIndex : 0);
   }, [groups]);
 
@@ -434,8 +515,13 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
   const scrollStrip = (dir: 1 | -1) => {
     const el = stripRef.current;
     if (!el) return;
-    const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    el.scrollBy({ left: dir * el.clientWidth, behavior: reduce ? "auto" : "smooth" });
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollBy({
+      left: dir * el.clientWidth,
+      behavior: reduce ? "auto" : "smooth",
+    });
   };
 
   // Duplicate areas get the unit code appended ("1910 SQ.FT · U2").
@@ -456,7 +542,11 @@ export function ProjectFloorPlanSection({ project }: { project: ProjectDetail })
     <>
       {/* Config tabs: one card per configuration. The page h1 names the
           section; the tablist carries the names. */}
-      <div role="tablist" aria-label="Configurations" className="mt-4! grid! grid-cols-2! sm:grid-cols-3! gap-3!">
+      <div
+        role="tablist"
+        aria-label="Configurations"
+        className="mt-4! grid! grid-cols-2! sm:grid-cols-3! gap-3!"
+      >
         {summarizeConfigurations(project).map((summary) => {
           const selected = summary.key === activeConfigKey;
           return (

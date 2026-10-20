@@ -142,6 +142,8 @@ export type SeoPropertyDetails = {
 } | null;
 
 export type SeoPropertyImage = {
+  titleText?: string;
+  caption?: string;
   altText?: string;
   id: number;
   imageUrl: string;
@@ -189,6 +191,7 @@ export type SeoPropertyFurnishing = {
 };
 
 export type SeoPropertyFloorPlanFile = {
+  id?: number;
   title: string | null;
   imageUrl: string;
   imageKey: string;
@@ -329,6 +332,7 @@ export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(sl
     }));
     // Map CRM-uploaded floor-plan files (resolved URLs from the backend)
     data.floorPlanFiles = (data.propertyFloorPlanFiles || data.__propertyFloorPlanFiles__ || []).map((f: any) => ({
+      id: f.id,
       title: f.title ?? null,
       imageUrl: f.imageUrl,
       imageKey: f.imageKey ?? null,

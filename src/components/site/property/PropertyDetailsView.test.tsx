@@ -618,7 +618,7 @@ describe("PropertyDetailsView redesigned hierarchy", () => {
       { id: 1, imageUrl: "/other.jpg", imageKey: "other", isPrimary: false, createdAt: "" },
       { id: 2, imageUrl: "/primary.jpg", imageKey: "primary", isPrimary: true, createdAt: "" },
     ] }} />);
-    const gallery = screen.getByRole("region", { name: `${baseProperty.title} photos` });
+    const gallery = screen.getByRole("figure", { name: `${baseProperty.title} photos` });
     const stage = within(gallery).getByRole("group", { name: "Property photos. Use left and right arrow keys to browse." });
     expect(within(gallery).getByRole("img").getAttribute("src")).toMatch(/\/primary\.jpg$/);
     fireEvent.keyDown(stage, { key: "ArrowLeft" });

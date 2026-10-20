@@ -98,7 +98,10 @@ export function withSeo<T extends Record<string, any>>(
     canonicalSlug: seo.path.replace(/^\//, ""),
     shouldRedirect: false,
   };
-  const altOverrides = seo.image_alt_overrides || {};
+  const altOverrides = {
+    ...(seo.image_alt_overrides || {}),
+    ...(seo.image_alts || {}),
+  };
   const findAlt = (url?: string | null, ids: string[] = []) => {
     const candidates = [
       ...(url ? [url, `url:${url}`, `url|${url}`] : []),
@@ -107,12 +110,40 @@ export function withSeo<T extends Record<string, any>>(
     for (const key of candidates) {
       const value = altOverrides[key];
       if (typeof value === "string" && value.trim()) return value.trim();
+      if (value && typeof value.alt_text === "string" && value.alt_text.trim())
+        return value.alt_text.trim();
     }
     return undefined;
   };
+  const mediaFields = (url?: string | null, ids: string[] = []) => {
+    const keys = [...(url ? [url, `url:${url}`, `url|${url}`] : []), ...ids];
+    const entry = keys
+      .map((key) => altOverrides[key])
+      .find((value) => value && typeof value === "object");
+    return entry
+      ? {
+          titleText: entry.title_text || undefined,
+          caption: entry.caption || undefined,
+        }
+      : {};
+  };
+  result.seoMedia = Object.fromEntries(
+    Object.entries(altOverrides).filter(
+      ([, value]) => value && typeof value === "object",
+    ),
+  );
+  if (seo.entity?.brochure_seo_title || seo.settings?.brochure_seo_title) {
+    result.brochureSeoTitle =
+      seo.entity?.brochure_seo_title || seo.settings?.brochure_seo_title;
+  }
   if (record.images)
     result.images = record.images.map((image: any) => ({
       ...image,
+      ...mediaFields(image.imageUrl, [
+        `property-image:${image.id}`,
+        `image:${image.id}`,
+        String(image.id),
+      ]),
       altText:
         findAlt(image.imageUrl, [
           `property-image:${image.id}`,
@@ -122,11 +153,20 @@ export function withSeo<T extends Record<string, any>>(
     }));
 
   const mapPropertyFloorPlans = (plans: any[] = []) =>
-    plans.map((plan: any) => ({
+    plans.map((plan: any, index: number) => ({
       ...plan,
+      ...mediaFields(plan.imageUrl, [
+        `property-file:${plan.id}`,
+        `property-floor:${index}`,
+        `property-floor:${plan.id}`,
+        `property-floor:${plan.imageKey}`,
+      ]),
       altText:
         findAlt(plan.imageUrl, [
-          ...(plan.id != null ? [`property-floor:${plan.id}`] : []),
+          ...(plan.id != null
+            ? [`property-file:${plan.id}`, `property-floor:${plan.id}`]
+            : []),
+          `property-floor:${index}`,
           ...(plan.imageKey ? [`property-floor:${plan.imageKey}`] : []),
         ]) || plan.altText,
     }));
@@ -140,24 +180,60 @@ export function withSeo<T extends Record<string, any>>(
   if (record.units)
     result.units = record.units.map((unit: any) => ({
       ...unit,
+      ...(() => {
+        const media = mediaFields(unit.floorPlanImageUrl, [
+          `property-unit:${unit.id}`,
+          `property-floor:${unit.floorPlanId}`,
+          `property-floor:${unit.floorPlanImageKey}`,
+        ]);
+        return {
+          floorPlanTitleText: media.titleText,
+          floorPlanCaption: media.caption,
+        };
+      })(),
       floorPlanAltText:
         findAlt(unit.floorPlanImageUrl, [
-          ...(unit.floorPlanId != null ? [`property-floor:${unit.floorPlanId}`] : []),
-          ...(unit.floorPlanImageKey ? [`property-floor:${unit.floorPlanImageKey}`] : []),
+          `property-unit:${unit.id}`,
+          ...(unit.floorPlanId != null
+            ? [`property-floor:${unit.floorPlanId}`]
+            : []),
+          ...(unit.floorPlanImageKey
+            ? [`property-floor:${unit.floorPlanImageKey}`]
+            : []),
         ]) || unit.floorPlanAltText,
     }));
 
   const isProject = typeof record.projectType === "string";
   if (isProject) {
+    const projectImageKeys = (url: string) => [
+      ...(url === record.coverImageUrl ? ["project-cover"] : []),
+      ...(url === record.mobileCoverImageUrl ? ["project-mobile-cover"] : []),
+      ...((record.galleryImageUrls || []).includes(url)
+        ? [`project-image:${record.galleryImageUrls.indexOf(url)}`]
+        : []),
+    ];
+    result.galleryImageSeo = Object.fromEntries(
+      [
+        record.coverImageUrl,
+        record.mobileCoverImageUrl,
+        ...(record.galleryImageUrls || []),
+      ]
+        .filter(Boolean)
+        .map((url: string) => [url, mediaFields(url, projectImageKeys(url))]),
+    );
     result.galleryImageAltOverrides = Object.fromEntries(
       [
         record.coverImageUrl,
         record.mobileCoverImageUrl,
-        ...(Array.isArray(record.galleryImageUrls) ? record.galleryImageUrls : []),
+        ...(Array.isArray(record.galleryImageUrls)
+          ? record.galleryImageUrls
+          : []),
       ]
-        .filter((url: unknown): url is string => typeof url === "string" && !!url)
+        .filter(
+          (url: unknown): url is string => typeof url === "string" && !!url,
+        )
         .flatMap((url: string) => {
-          const alt = findAlt(url);
+          const alt = findAlt(url, projectImageKeys(url));
           return alt ? [[url, alt]] : [];
         }),
     );
@@ -165,10 +241,26 @@ export function withSeo<T extends Record<string, any>>(
   if (record.units && isProject) {
     result.units = record.units.map((unit: any) => ({
       ...unit,
-      floorPlans: unit.floorPlans?.map((plan: any) => ({
+      ...(() => {
+        const media = mediaFields(unit.floorPlanImageUrl, [
+          `project-floor:${unit.id}`,
+        ]);
+        return {
+          floorPlanTitleText: media.titleText,
+          floorPlanCaption: media.caption,
+        };
+      })(),
+      floorPlans: unit.floorPlans?.map((plan: any, index: number) => ({
         ...plan,
+        ...mediaFields(plan.imageUrl, [
+          `project-floor:${unit.id}:${index}`,
+          `project-floor:${plan.id}`,
+          `project-floor:${plan.imageKey}`,
+          `project-floor:${unit.id}`,
+        ]),
         altText:
           findAlt(plan.imageUrl, [
+            `project-floor:${unit.id}:${index}`,
             ...(plan.id != null ? [`project-floor:${plan.id}`] : []),
             ...(plan.imageKey ? [`project-floor:${plan.imageKey}`] : []),
             `project-floor:${unit.id}`,
@@ -176,8 +268,13 @@ export function withSeo<T extends Record<string, any>>(
       })),
       floorPlanAltText:
         findAlt(unit.floorPlanImageUrl, [
-          ...(unit.floorPlanId != null ? [`project-floor:${unit.floorPlanId}`] : []),
-          ...(unit.floorPlanImageKey ? [`project-floor:${unit.floorPlanImageKey}`] : []),
+          `property-unit:${unit.id}`,
+          ...(unit.floorPlanId != null
+            ? [`project-floor:${unit.floorPlanId}`]
+            : []),
+          ...(unit.floorPlanImageKey
+            ? [`project-floor:${unit.floorPlanImageKey}`]
+            : []),
           `project-floor:${unit.id}`,
         ]) || unit.floorPlanAltText,
     }));

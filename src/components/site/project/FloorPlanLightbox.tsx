@@ -16,6 +16,8 @@ import {
 export type FloorPlanSlide = {
   src: string;
   alt: string;
+  titleText?: string;
+  caption?: string;
   title: string;
   subtitle?: string | null;
 };
@@ -47,7 +49,12 @@ export function FloorPlanLightbox({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ startX: number; startY: number; x: number; y: number } | null>(null);
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const touchRef = useRef<{ x: number; y: number } | null>(null);
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(index);
@@ -73,7 +80,9 @@ export function FloorPlanLightbox({
   }, []);
 
   const toggleZoom = useCallback(() => {
-    setZoom((z) => (z.scale === MIN_ZOOM ? { ...FIT, scale: DOUBLE_TAP_ZOOM } : FIT));
+    setZoom((z) =>
+      z.scale === MIN_ZOOM ? { ...FIT, scale: DOUBLE_TAP_ZOOM } : FIT,
+    );
   }, []);
 
   const clampPan = (x: number, y: number, scale: number): Pan => {
@@ -97,7 +106,7 @@ export function FloorPlanLightbox({
     return () => {
       root.style.overflow = previous;
     };
-  }, [open ]);
+  }, [open]);
 
   // Wheel zooms the plan; it must not scroll the page behind it, so the
   // listener is native and non-passive (React's onWheel cannot preventDefault).
@@ -143,25 +152,33 @@ export function FloorPlanLightbox({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={show}
-        aria-haspopup="dialog"
-        className="group/plan relative! block! w-full! rounded-xl! bg-gray-50! ring-1! ring-gray-200/70! overflow-hidden! aspect-[16/10]! cursor-zoom-in! transition-shadow! duration-150! ease-out-quint! hover:ring-[#1645bf]/40! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={items[safeIndex].src}
-          alt={items[safeIndex].alt}
-          loading="lazy"
-          decoding="async"
-          className="w-full! h-full! object-contain! p-4! sm:p-6!"
-        />
-        <span className="absolute! bottom-3! right-3! inline-flex! items-center! gap-1.5! rounded-full! bg-white/95! px-3! py-1.5! text-xs! font-medium! text-[#1645bf]! ring-1! ring-gray-200! shadow-sm! group-hover/plan:text-[#0f3596]!">
-          <Maximize2 className="w-3.5! h-3.5!" aria-hidden="true" />
-          View floor plan
-        </span>
-      </button>
+      <figure className="m-0!">
+        <button
+          type="button"
+          onClick={show}
+          aria-haspopup="dialog"
+          className="group/plan relative! block! w-full! rounded-xl! bg-gray-50! ring-1! ring-gray-200/70! overflow-hidden! aspect-[16/10]! cursor-zoom-in! transition-shadow! duration-150! ease-out-quint! hover:ring-[#1645bf]/40! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]!"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={items[safeIndex].src}
+            alt={items[safeIndex].alt}
+            title={items[safeIndex].titleText}
+            loading="lazy"
+            decoding="async"
+            className="w-full! h-full! object-contain! p-4! sm:p-6!"
+          />
+          <span className="absolute! bottom-3! right-3! inline-flex! items-center! gap-1.5! rounded-full! bg-white/95! px-3! py-1.5! text-xs! font-medium! text-[#1645bf]! ring-1! ring-gray-200! shadow-sm! group-hover/plan:text-[#0f3596]!">
+            <Maximize2 className="w-3.5! h-3.5!" aria-hidden="true" />
+            View floor plan
+          </span>
+        </button>
+        {items[safeIndex].caption && (
+          <figcaption className="mt-2! text-sm! text-gray-600!">
+            {items[safeIndex].caption}
+          </figcaption>
+        )}
+      </figure>
 
       <dialog
         ref={dialogRef}
@@ -184,7 +201,9 @@ export function FloorPlanLightbox({
                 {slide.title}
               </p>
               {slide.subtitle && (
-                <p className="text-sm! text-gray-500! truncate!">{slide.subtitle}</p>
+                <p className="text-sm! text-gray-500! truncate!">
+                  {slide.subtitle}
+                </p>
               )}
             </div>
             <div className="flex! items-center! gap-1! shrink-0!">
@@ -268,13 +287,16 @@ export function FloorPlanLightbox({
               key={slide.src}
               src={slide.src}
               alt={slide.alt}
+              title={slide.titleText}
               draggable={false}
               onDoubleClick={toggleZoom}
               style={{
                 transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})`,
               }}
               className={`mx-auto! block! max-w-full! max-h-[calc(100svh-16rem)]! object-contain! motion-safe:transition-transform! motion-safe:duration-150! motion-safe:ease-out-quint! ${
-                zoomed ? "cursor-grab! active:cursor-grabbing!" : "cursor-zoom-in!"
+                zoomed
+                  ? "cursor-grab! active:cursor-grabbing!"
+                  : "cursor-zoom-in!"
               }`}
             />
 

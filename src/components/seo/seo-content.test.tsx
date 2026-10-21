@@ -12,6 +12,7 @@ vi.mock("@/components/site/layout/breadcrumbs", () => ({
 }));
 import {
   SeoEntityDetails,
+  SeoListingPage,
   SeoLocalityBottom,
   SeoLocalityContent,
   SeoOffMarketPage,
@@ -79,6 +80,48 @@ describe("public SEO content", () => {
     expect(html).toContain("Business park — 0 km");
     expect(html).toContain("Who develops it?");
     expect(html).toContain("<summary");
+  });
+  it("keeps the visitor listing free of automatic SEO blocks while retaining source metadata", () => {
+    const html = renderToStaticMarkup(
+      <SeoListingPage
+        seo={{
+          path: "/apartments-for-sale-in-coimbatore",
+          h1: "Apartments for sale",
+          h2: "SEO-only subheading",
+          intro_content: "SEO-only introduction",
+          bottom_content: "SEO-only bottom guide",
+          stats: { total: 12 },
+          faqs: [
+            {
+              question: "Automatic market FAQ?",
+              answer: "An automatic answer",
+            },
+          ],
+          items: [
+            {
+              id: 1,
+              slug: "apartment-one",
+              title: "Apartment One",
+              type: "apartment",
+              price: 8300000,
+            },
+          ],
+          json_ld: {
+            "@context": "https://schema.org",
+            "@graph": [
+              { "@type": "FAQPage" },
+              { "@type": "WebPage", name: "Apartments for sale" },
+            ],
+          },
+        }}
+      />,
+    );
+    expect(html).toContain("Apartment One");
+    expect(html).toContain('type="application/ld+json"');
+    expect(html).not.toContain("Live inventory snapshot");
+    expect(html).not.toContain("Automatic market FAQ?");
+    expect(html).not.toContain("SEO-only");
+    expect(html).not.toContain("FAQPage");
   });
   it("retains unavailable inventory without claiming an active offer", () => {
     const html = renderToStaticMarkup(

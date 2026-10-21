@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { jsonLd, seoMetadata, withSeo } from "./seo-engine";
+import {
+  jsonLd,
+  seoMetadata,
+  withSeo,
+  listingStructuredData,
+} from "./seo-engine";
 
 describe("SEO engine output", () => {
   it("uses URL-specific overrides for property images and floor plans before IDs", () => {
@@ -133,5 +138,39 @@ describe("structured media SEO", () => {
     });
     expect(input.images[0]).not.toHaveProperty("caption");
     expect(output.status).toBe("available");
+  });
+});
+
+describe("listing schema follows the visible page", () => {
+  it("keeps metadata and breadcrumbs while excluding hidden FAQs and replacing old inventory results", () => {
+    const current = {
+      "@type": "ItemList",
+      itemListElement: [{ name: "Visible property" }],
+    };
+    const schema = listingStructuredData(
+      {
+        json_ld: {
+          "@context": "https://schema.org",
+          "@graph": [
+            { "@type": "WebPage", name: "Apartments for sale" },
+            { "@type": "BreadcrumbList", itemListElement: [] },
+            {
+              "@type": "FAQPage",
+              mainEntity: [{ name: "Hidden automatic question" }],
+            },
+            {
+              "@type": "ItemList",
+              itemListElement: [{ name: "Stale result" }],
+            },
+          ],
+        },
+      },
+      current,
+    );
+    expect(JSON.stringify(schema)).toContain("Apartments for sale");
+    expect(JSON.stringify(schema)).toContain("BreadcrumbList");
+    expect(JSON.stringify(schema)).toContain("Visible property");
+    expect(JSON.stringify(schema)).not.toContain("FAQPage");
+    expect(JSON.stringify(schema)).not.toContain("Stale result");
   });
 });

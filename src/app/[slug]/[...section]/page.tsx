@@ -69,17 +69,9 @@ import {
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
 
 export const dynamicParams = true;
-// Bound the ISR full-route cache: crawler/scanner garbage URLs must not
-// accumulate rendered pages in .next/cache indefinitely.
-export const revalidate = 300;
-
-export async function generateStaticParams(): Promise<
-  { slug: string; section: string[] }[]
-> {
-  // No build-time prerender (see [slug]/page.tsx): every section page
-  // renders on demand and ISR-caches per `revalidate`.
-  return [];
-}
+// Both inventory and SEO metadata are resolved per request. Direct child
+// routes must use the same rendering mode as the SEO rewrite routes.
+export const dynamic = "force-dynamic";
 
 const RESERVED_SECTION_SLUGS = new Set(["assets"]);
 

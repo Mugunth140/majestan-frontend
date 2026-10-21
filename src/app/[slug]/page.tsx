@@ -1,6 +1,6 @@
 import { SeoHeadingProvider } from '@/components/seo/core-heading';
-import { getSeo, getListingSeo, seoMetadata, withSeo, jsonLd } from '@/lib/seo-engine';
-import { SeoHighlights, SeoEntityDetails, SeoOffMarketBanner, SeoOffMarketPage, SeoJsonLd, SeoListingPage, SeoLocalityContent, SeoLocalityBottom } from '@/components/seo/seo-content';
+import { getSeo, getListingSeo, seoMetadata, withSeo, jsonLd, listingStructuredData } from '@/lib/seo-engine';
+import { SeoOffMarketBanner, SeoOffMarketPage, SeoListingPage } from '@/components/seo/seo-content';
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
@@ -490,7 +490,8 @@ export default async function SlugPage({
             <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
-            <SeoOffMarketBanner seo={engineSeo} /><SeoHighlights seo={engineSeo} /><SeoEntityDetails seo={engineSeo} /><PropertyDetailsView property={property} />
+            <SeoOffMarketBanner seo={engineSeo} />
+            <PropertyDetailsView property={property} />
           </div>
           <script
             type="application/ld+json"
@@ -584,7 +585,8 @@ export default async function SlugPage({
                   />
                 )}
                 <div id="overview" className="scroll-mt-40!">
-                  <SeoOffMarketBanner seo={engineSeo} /><SeoHighlights seo={engineSeo} /><SeoEntityDetails seo={engineSeo} /><ProjectDetailsView project={project} />
+                  <SeoOffMarketBanner seo={engineSeo} />
+                  <ProjectDetailsView project={project} />
                 </div>
               </div>
             </main>
@@ -729,7 +731,7 @@ async function PseoListingSection({
       <>
         <SiteHeader />
         <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
-        <SeoHeadingProvider heading={listingSeo?.h1}><SeoLocalityContent seo={listingSeo} heading={false} />
+        <SeoHeadingProvider heading={listingSeo?.h1}>
         <Suspense fallback={<ListingShellSkeleton />}>
           <PropertyListingShell
             adapterInit={{
@@ -743,10 +745,10 @@ async function PseoListingSection({
             initialData={initialData}
           />
         </Suspense>
-        </SeoHeadingProvider><SeoLocalityBottom seo={listingSeo} />
+        </SeoHeadingProvider>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLd(listingSeo?.json_ld ? {...listingSeo.json_ld,'@graph':[...listingSeo.json_ld['@graph'].filter((node:any)=>node['@type']!=='ItemList'),itemListJsonLd]} : itemListJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLd(listingStructuredData(listingSeo, itemListJsonLd)) }}
         />
         <SiteFooter />
       </>

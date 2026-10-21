@@ -309,3 +309,25 @@ export function jsonLd(value: unknown) {
     .replace(/\u2028/g, "\\u2028")
     .replace(/\u2029/g, "\\u2029");
 }
+
+/** JSON-LD for listings only describes the visible results, without hidden FAQs. */
+export function listingStructuredData(
+  seo: SeoSnapshot | null,
+  itemList: Record<string, unknown>,
+) {
+  const graph = seo?.json_ld?.["@graph"];
+  if (!Array.isArray(graph))
+    return { "@context": "https://schema.org", ...itemList };
+  return {
+    ...seo?.json_ld,
+    "@graph": [
+      ...graph.filter((node: any) => {
+        const types = Array.isArray(node?.["@type"])
+          ? node["@type"]
+          : [node?.["@type"]];
+        return !types.includes("FAQPage") && !types.includes("ItemList");
+      }),
+      itemList,
+    ],
+  };
+}

@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { jsonLd, type SeoSnapshot } from "@/lib/seo-engine";
+import {
+  jsonLd,
+  listingStructuredData,
+  type SeoSnapshot,
+} from "@/lib/seo-engine";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
@@ -321,24 +325,21 @@ export function SeoListingPage({
   const pages = Math.max(1, Math.ceil((seo.items?.length || 0) / 12)),
     current = Math.min(Math.max(page, 1), pages);
   const visible = (seo.items || []).slice((current - 1) * 12, current * 12);
+  // Listing FAQ text is not shown in the visitor layout, so its schema must
+  // not claim a visible FAQ section. Keep only the visible page of inventory.
   const listingSeo = {
     ...seo,
-    json_ld: {
-      ...seo.json_ld,
-      "@graph": (seo.json_ld?.["@graph"] || []).map((node: any) =>
-        node["@type"] === "ItemList"
-          ? {
-              ...node,
-              itemListElement: visible.map((p: any, i: number) => ({
-                "@type": "ListItem",
-                position: (current - 1) * 12 + i + 1,
-                url: "https://www.majestanrealty.com/" + p.slug,
-                name: p.title,
-              })),
-            }
-          : node,
-      ),
-    },
+    json_ld: listingStructuredData(seo, {
+      "@type": "ItemList",
+      name: seo.h1,
+      url: "https://www.majestanrealty.com" + seo.path,
+      itemListElement: visible.map((p: any, i: number) => ({
+        "@type": "ListItem",
+        position: (current - 1) * 12 + i + 1,
+        url: "https://www.majestanrealty.com/" + p.slug,
+        name: p.title,
+      })),
+    }),
   };
   return (
     <>
@@ -347,7 +348,7 @@ export function SeoListingPage({
         <div className="max-w-7xl! mx-auto! px-6! pt-6!">
           <Breadcrumbs items={[{ label: seo.h1 || "Properties" }]} />
         </div>
-        <SeoLocalityContent seo={seo} />
+        <SeoLocalityContent seo={{ h1: seo.h1 }} />
         <div className="max-w-7xl! mx-auto! px-6! pb-8!">
           <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-6!">
             {(seo.items || [])
@@ -393,7 +394,6 @@ export function SeoListingPage({
             )}
           </nav>
         </div>
-        <SeoLocalityBottom seo={seo} />
         <SeoJsonLd seo={listingSeo} />
       </main>
       <SiteFooter />

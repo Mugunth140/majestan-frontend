@@ -4,6 +4,13 @@ import { proxy } from "./proxy";
 
 afterEach(() => vi.unstubAllGlobals());
 describe("inventory rendering routes", () => {
+  it.each(["/PREMIER-ARIA-SQUARE-PA0019", "/Premier-Aria-Square-PA0019/photos"])("redirects uppercase inventory links before SEO lookup: %s", async path => {
+    const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);
+    const response = await proxy(new NextRequest(`https://example.com${path}?utm_source=test`));
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(`https://example.com${path.toLowerCase()}?utm_source=test`);
+    expect(fetch).not.toHaveBeenCalled();
+  });
   it("rewrites code-based detail URLs without a routing-table request", async () => {
     const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);
     const response = await proxy(new NextRequest("https://example.com/emerald-heights-pa0006?utm_source=test"));

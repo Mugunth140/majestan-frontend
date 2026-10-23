@@ -1,10 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  getSeoForDetail,
   jsonLd,
   seoMetadata,
   withSeo,
   listingStructuredData,
 } from "./seo-engine";
+
+vi.mock("next/navigation", () => ({
+  notFound: () => { throw new Error("NEXT_HTTP_ERROR_FALLBACK;404"); },
+}));
 
 describe("SEO engine output", () => {
   it("uses URL-specific overrides for property images and floor plans before IDs", () => {
@@ -172,5 +177,17 @@ describe("listing schema follows the visible page", () => {
     expect(JSON.stringify(schema)).toContain("Visible property");
     expect(JSON.stringify(schema)).not.toContain("FAQPage");
     expect(JSON.stringify(schema)).not.toContain("Stale result");
+  });
+});
+
+describe("strict detail SEO failures", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("turns invalid public paths into not found", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}", { status: 400 })));
+    await expect(getSeoForDetail("/invalid-path-ap001")).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+  });
+  it("keeps real upstream outages fatal instead of caching incomplete metadata", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}", { status: 500 })));
+    await expect(getSeoForDetail("/valid-ap001")).rejects.toThrow("Public SEO lookup failed: 500");
   });
 });

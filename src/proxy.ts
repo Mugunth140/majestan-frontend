@@ -11,6 +11,14 @@ export async function proxy(request: NextRequest) {
     url.pathname = path.replace(/^\/(detail-render|detail-section)/, "");
     return NextResponse.redirect(url, 308);
   }
+  // Inventory slugs are lowercase. Preserve a canonical redirect for shared
+  // uppercase links before the SEO API rejects them as an invalid path.
+  if (/^\/[^/]+-[a-z]{1,6}\d+(?:\/(?:amenities|floor-plans?|locality|photos|videos|price|specifications))?$/i.test(path)
+    && path !== path.toLowerCase()) {
+    const url = request.nextUrl.clone();
+    url.pathname = path.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
   if (/^\/[^/]+-[a-z]{1,6}\d+\/(amenities|floor-plans?|locality|photos|videos|price|specifications)$/i.test(path)) {
     const url = request.nextUrl.clone();
     url.pathname = "/detail-section" + path;

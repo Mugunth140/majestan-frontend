@@ -1,5 +1,6 @@
 import { SEO_API_BASE } from "./seo-api-base";
 import { cache } from "react";
+import { notFound } from "next/navigation";
 import { seoEndpointTags } from "./public-cache-tags";
 import type { Metadata } from "next";
 export const SEO_SITE = "https://www.majestanrealty.com";
@@ -13,6 +14,9 @@ const fetchPublicSeo = cache(async (endpoint: string): Promise<any> => {
     headers: process.env.INTERNAL_API_KEY ? { "x-internal-key": process.env.INTERNAL_API_KEY } : {},
     signal: AbortSignal.timeout(15000),
   });
+  // A rejected public path is a missing route, not a rendering outage.
+  // Keep server errors/timeouts fatal so incomplete SEO is never cached.
+  if (response.status === 400 && endpoint.startsWith("resolve?path=")) notFound();
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Public SEO lookup failed: ${response.status}`);
   const payload = await response.json();

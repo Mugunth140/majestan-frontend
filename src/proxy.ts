@@ -25,6 +25,10 @@ export async function proxy(request: NextRequest) {
       dest.search = request.nextUrl.search;
       return NextResponse.redirect(dest, 301);
     }
+    // Legal pages have dedicated routes; keep them out of the legacy view wrapper.
+    if (path === "/privacy-policy" || path === "/terms-and-conditions") {
+      return NextResponse.next();
+    }
     const sections = [
       "amenities",
       "floor-plan",

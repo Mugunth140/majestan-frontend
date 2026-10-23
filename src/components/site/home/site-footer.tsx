@@ -15,6 +15,7 @@ const footerColumns = [
       ["Blogs", "/blogs"],
       ["Contact Us", "/contact-us"],
       ["Privacy Policy", "/privacy-policy"],
+      ["Terms and Conditions", "/terms-and-conditions"],
     ],
   },
   {

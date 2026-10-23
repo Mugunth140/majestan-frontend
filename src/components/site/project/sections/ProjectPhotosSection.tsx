@@ -150,6 +150,7 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
             </span>
           </div>
 
+          {media[allImages[currentIndex]]?.caption && <p className="text-white!">{media[allImages[currentIndex]].caption}</p>}
           {count > 1 && (
             <button
               type="button"
@@ -169,6 +170,7 @@ export function ProjectPhotosSection({ project }: { project: ProjectDetail }) {
             <img
               src={allImages[currentIndex]}
               alt={altForImage(allImages[currentIndex], currentIndex)}
+              title={media[allImages[currentIndex]]?.titleText}
               draggable={false}
               className="max-w-full! max-h-[80vh]! object-contain! rounded-xl! select-none! border! border-gray-200!"
             />

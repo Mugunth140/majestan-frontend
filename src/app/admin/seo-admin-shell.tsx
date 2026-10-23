@@ -3,6 +3,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  Avatar,
+  Button,
+  IconButton,
+  Skeleton,
+  Text,
+  Heading,
+  Flex,
+} from "@radix-ui/themes";
+import {
   Building2,
   ExternalLink,
   Files,
@@ -13,10 +22,9 @@ import {
   PanelLeftOpen,
   Settings2,
 } from "lucide-react";
-
 const links = [
-  { title: "Projects SEO", url: "/admin/projects/seo", Icon: Building2 },
-  { title: "Properties SEO", url: "/admin/properties/seo", Icon: House },
+  { title: "Projects", url: "/admin/projects/seo", Icon: Building2 },
+  { title: "Properties", url: "/admin/properties/seo", Icon: House },
   { title: "Listing pages", url: "/admin/seo", Icon: MapPinned },
   { title: "Core & service pages", url: "/admin/pages", Icon: Files },
   { title: "Technical SEO", url: "/admin/technical", Icon: Settings2 },
@@ -37,31 +45,24 @@ export async function seoApi(path: string, body?: unknown, method?: string) {
     );
   return value.data ?? value;
 }
+
 export function SeoAdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(),
     router = useRouter(),
     login = pathname === "/admin/login";
   const [user, setUser] = useState<{ name: string; email: string } | null>(
-      null,
-    ),
-    [error, setError] = useState("");
+    null,
+  );
   const [collapsed, setCollapsed] = useState(false);
   useEffect(() => {
     if (login) return;
     let live = true;
     seoApi("auth/me")
-      .then((u) => {
-        if (live) {
-          setUser(u);
-          setError("");
-        }
+      .then((value) => {
+        if (live) setUser(value);
       })
-      .catch((e) => {
-        if (live) {
-          setError(e.message);
-          setUser(null);
-          router.replace("/admin/login");
-        }
+      .catch(() => {
+        if (live) router.replace("/admin/login");
       });
     return () => {
       live = false;
@@ -71,10 +72,10 @@ export function SeoAdminShell({ children }: { children: React.ReactNode }) {
     return <div className="seo-command seo-login-wrap">{children}</div>;
   if (!user)
     return (
-      <div className="seo-command">
-        <div className="seo-loading" role="status">
-          {error || "Checking your session…"}
-        </div>
+      <div className="seo-command seo-session-loading" role="status">
+        <Skeleton width="240px" height="32px" />
+        <Skeleton width="400px" height="120px" />
+        <Text size="2">Checking your session…</Text>
       </div>
     );
   return (
@@ -85,80 +86,107 @@ export function SeoAdminShell({ children }: { children: React.ReactNode }) {
       <div className={`seo-app${collapsed ? " seo-app-collapsed" : ""}`}>
         <aside className="seo-sidebar">
           <div className="seo-brand-row">
-            <Link href="/admin/projects/seo" className="seo-brand">
+            <Link
+              href="/admin/projects/seo"
+              className="seo-brand"
+              aria-label="Majestan SEO workspace"
+            >
               <img src="/assets/images/logo/logo.png" alt="Majestan Realty" />
-              <span>Admin Panel</span>
             </Link>
-            <button
-              type="button"
+            <IconButton
+              variant="ghost"
+              color="gray"
               className="seo-collapse"
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-pressed={collapsed}
-              onClick={() => setCollapsed((value) => !value)}
+              onClick={() => setCollapsed(!collapsed)}
             >
               {collapsed ? (
-                <PanelLeftOpen aria-hidden="true" />
+                <PanelLeftOpen size={18} />
               ) : (
-                <PanelLeftClose aria-hidden="true" />
+                <PanelLeftClose size={18} />
               )}
-            </button>
+            </IconButton>
           </div>
+          <Text size="1" weight="medium" className="seo-nav-caption">
+            SEO MANAGEMENT
+          </Text>
           <nav aria-label="SEO modules">
-            {links.map(({ title, url, Icon }) => (
-              <Link
-                href={url}
-                key={url}
-                aria-label={title}
-                title={title}
-                aria-current={
-                  pathname === url || pathname.startsWith(url + "/")
-                    ? "page"
-                    : undefined
-                }
-              >
-                <Icon className="seo-nav-icon" aria-hidden="true" />
-                <span className="seo-nav-label">{title}</span>
-              </Link>
-            ))}
+            {links.map(({ title, url, Icon }) => {
+              const active = pathname === url || pathname.startsWith(url + "/");
+              return (
+                <Button
+                  key={url}
+                  asChild
+                  variant={active ? "soft" : "ghost"}
+                  color={active ? "blue" : "gray"}
+                  size="3"
+                >
+                  <Link
+                    href={url}
+                    title={title}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    <Icon size={18} />
+                    <span className="seo-nav-label">{title}</span>
+                  </Link>
+                </Button>
+              );
+            })}
           </nav>
           <div className="seo-sidebar-foot">
-            <a href="/" target="_blank" rel="noreferrer">
-              <span>View website</span>
-              <ExternalLink className="seo-nav-icon" aria-hidden="true" />
-            </a>
+            <Button asChild variant="ghost" color="gray">
+              <a href="/" target="_blank" rel="noreferrer">
+                <ExternalLink size={16} />
+                <span className="seo-nav-label">View website</span>
+              </a>
+            </Button>
           </div>
         </aside>
         <div className="seo-workspace">
           <header className="seo-topbar">
-            <span className="seo-topbar-title">Admin Panel</span>
-            <div className="seo-profile">
-              <span className="seo-avatar" aria-hidden="true">
-                {user.name
-                  .trim()
-                  .split(/\s+/)
-                  .slice(0, 2)
-                  .map((part) => part.charAt(0))
-                  .join("")
-                  .toUpperCase() || "M"}
-              </span>
-              <span className="seo-user">
-                <span>{user.name}</span>
-                <small>{user.email}</small>
-              </span>
-              <button
-                className="seo-button seo-secondary seo-danger"
-                type="button"
+            <div>
+              <Heading as="h2" size="3">
+                SEO workspace
+              </Heading>
+              <Text size="1" color="gray">
+                Majestan Realty
+              </Text>
+            </div>
+            <Flex align="center" gap="3">
+              <Avatar
+                size="2"
+                radius="full"
+                fallback={
+                  user.name
+                    .trim()
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((p) => p[0])
+                    .join("")
+                    .toUpperCase() || "M"
+                }
+              />
+              <div className="seo-user">
+                <Text size="2" weight="medium" as="div">
+                  {user.name}
+                </Text>
+                <Text size="1" color="gray">
+                  {user.email}
+                </Text>
+              </div>
+              <Button
+                variant="soft"
+                color="red"
                 onClick={async () => {
                   await seoApi("auth/logout", {});
                   setUser(null);
                   router.replace("/admin/login");
                 }}
               >
-                <LogOut className="seo-nav-icon" aria-hidden="true" />
+                <LogOut size={16} />
                 Sign out
-              </button>
-            </div>
+              </Button>
+            </Flex>
           </header>
           <main id="seo-main">{children}</main>
         </div>

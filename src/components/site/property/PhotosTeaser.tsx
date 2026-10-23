@@ -42,10 +42,12 @@ export function PhotosTeaser({ images, title, photosHref }: PhotosTeaserProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={img.imageUrl}
-              alt={`${title} — photo ${i + 1}`}
+              alt={img.altText || `${title} — photo ${i + 1}`}
+              title={(img as any).titleText}
               className="w-full! h-full! object-cover!"
               loading="lazy"
             />
+            {(img as any).caption && <span className="block! text-sm!">{(img as any).caption}</span>}
             {i === visible.length - 1 && overflow > 0 && (
               <div className="absolute! inset-0! bg-black/55! flex! items-center! justify-center!">
                 <span className="text-white! text-xl! font-semibold!">+{overflow}</span>

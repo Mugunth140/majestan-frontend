@@ -44,6 +44,9 @@ async function forward(
   )
     return NextResponse.json({ message: "Invalid path" }, { status: 400 });
   try {
+    const requestBody = !["GET", "HEAD"].includes(request.method)
+      ? await request.text()
+      : undefined;
     const upstream = await fetch(
       `${base}/seo-admin/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`,
       {
@@ -53,13 +56,14 @@ async function forward(
           Cookie: request.headers.get("cookie") || "",
         },
         ...(!["GET", "HEAD"].includes(request.method)
-          ? { body: await request.text() }
+          ? { body: requestBody }
           : {}),
         cache: "no-store",
         signal: AbortSignal.timeout(60000),
       },
     );
-    const response = new NextResponse(await upstream.text(), {
+    const responseBody = await upstream.text();
+    const response = new NextResponse(responseBody, {
       status: upstream.status,
       headers: {
         "Content-Type":
@@ -73,8 +77,52 @@ async function forward(
       upstream.ok &&
       !["GET", "HEAD"].includes(request.method) &&
       path[0] !== "auth"
-    )
+    ) {
+      const paths = new Set<string>();
+      const collect = (raw: string | undefined) => {
+        try {
+          const visit = (value: any, depth = 0) => {
+            if (!value || typeof value !== "object" || depth > 4) return;
+            for (const [key, item] of Object.entries(value)) {
+              if (
+                [
+                  "public_path",
+                  "source_path",
+                  "destination_path",
+                  "redirect_target_path",
+                  "expired_redirect_path",
+                  "path",
+                ].includes(key) &&
+                typeof item === "string" &&
+                item.startsWith("/") &&
+                !item.startsWith("//") &&
+                item.length <= 1024 &&
+                !/[\\[\]#?]/.test(item)
+              )
+                paths.add(item);
+              else if (item && typeof item === "object") visit(item, depth + 1);
+            }
+          };
+          visit(JSON.parse(raw || "{}"));
+        } catch {
+          /* Empty/non-JSON success responses still use broad invalidation. */
+        }
+      };
+      collect(requestBody);
+      collect(responseBody);
+      if (path[0] === "configs" && path[1]?.startsWith("page:"))
+        paths.add(path[1].slice(5));
+      for (const affected of paths) {
+        revalidatePath(affected);
+        const parent = affected.replace(
+          /\/(floor-plans?|photos|amenities|locality)$/,
+          "",
+        );
+        if (parent !== affected) revalidatePath(parent);
+      }
+      // Includes old slug paths, deleted redirects, templates and rewritten destinations.
       revalidatePath("/", "layout");
+    }
     return response;
   } catch {
     return NextResponse.json(

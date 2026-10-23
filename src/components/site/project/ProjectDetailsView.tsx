@@ -1,3 +1,4 @@
+import { SeoEditorial } from "@/components/site/SeoEditorial";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { buildFacts } from "@/lib/project-overview";
 import { ProjectGallery } from "@/components/site/project/ProjectGallery";
@@ -34,7 +35,7 @@ import { ProjectHelpSection } from "@/components/site/project/overview/ProjectHe
  * leaving the buyer to wonder whether they missed it.
  */
 export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
-  const heading = project.seo?.seoData?.overview?.h1 || project.name;
+  const heading = project.name;
   const facts = buildFacts(project);
 
   return (
@@ -73,6 +74,7 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
       </section>
 
       <ProjectShell project={project}>
+        <SeoEditorial record={project} />
         <AboutSection project={project} />
         <ConfigurationSummary project={project} />
         <FloorPlanPreview project={project} />
@@ -81,9 +83,11 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
         <FurnishingSection project={project} />
         <MediaPreview project={project} />
         <LocationOverview project={project} />
+        <SeoEditorial record={project} locality />
         <BuilderSection project={project} />
         <CalculatorsSection project={project} />
         <FaqOverview project={project} />
+        <SeoEditorial record={project} footer />
         <ProjectHelpSection projectName={project.name} />
       </ProjectShell>
     </div>

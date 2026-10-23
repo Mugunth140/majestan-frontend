@@ -1,3 +1,4 @@
+import { getSeo, seoMetadata } from "@/lib/seo-engine";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
@@ -30,7 +31,7 @@ function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
   };
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+async function legacyMetadata({ params }: PageProps): Promise<Metadata> {
   const { projectSlug } = await params;
   const project = await getProjectBySlugUrl(projectSlug).catch(() => null);
   if (!project) return { title: "Not Found | Majestan Realty", robots: { index: false, follow: false } };
@@ -81,5 +82,10 @@ export default async function ProjectOverviewPage({ params }: PageProps) {
   const { projectSlug } = await params;
   const project = await getProjectBySlugUrl(projectSlug).catch(() => null);
   if (!project) notFound();
-  permanentRedirect(`/${project.canonicalSlug}`);
+  permanentRedirect((project as any).redirectDestination || `/${project.canonicalSlug}`);
+}
+
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+ const {projectSlug}=await props.params;
+ return seoMetadata(await getSeo('/'+projectSlug), await legacyMetadata(props));
 }

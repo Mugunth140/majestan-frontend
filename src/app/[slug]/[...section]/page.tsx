@@ -1,3 +1,5 @@
+import { SeoEditorial, RealEstateJsonLd } from "@/components/site/SeoEditorial";
+import { sectionMetadata } from "@/lib/seo-section-data";
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
@@ -346,7 +348,7 @@ function buildBreadcrumbItems(property: SeoProperty, sectionLabel: string) {
   ];
 }
 
-export async function generateMetadata({
+async function baseMetadata({
   params,
 }: PropertySectionPageProps): Promise<Metadata> {
   const { slug, section } = await params;
@@ -515,6 +517,7 @@ export async function generateMetadata({
   try {
     const project = await getProjectBySlugUrl(slug).catch(() => null);
     if (project) {
+    if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
       const sectionKey = section[0];
       const sectionConfig = PROJECT_SECTION_META[sectionKey];
       if (!sectionConfig || section.length !== 1) {
@@ -650,6 +653,8 @@ export default async function PropertySectionPage({
     notFound();
   }
 
+  const initialSeo = await getSeo(`/${slug}`);
+  if (initialSeo?.redirect) permanentRedirect(initialSeo.redirect);
   const inventorySeo = await getEffectiveRootSeo(slug);
   if (inventorySeo?.off_market && inventorySeo?.target_snapshot) {
     const allowed =
@@ -682,7 +687,7 @@ export default async function PropertySectionPage({
     }
 
     if (property.shouldRedirect) {
-      permanentRedirect(`/${property.canonicalSlug}/${sectionKey}`);
+      permanentRedirect((property as any).redirectDestination || `/${property.canonicalSlug}/${sectionKey}`);
     }
 
     const rootSeo = await getEffectiveRootSeo(slug);
@@ -759,6 +764,7 @@ export default async function PropertySectionPage({
             <h1 className="mb-5! mt-3! text-2xl! font-semibold! leading-tight! text-gray-900! md:text-3xl!">
               {sectionH1}
             </h1>
+            {childSeo.h2 && <h2>{childSeo.h2}</h2>}
             {field(childSeo, "intro_text", "introText") && (
               <TextBlock text={field(childSeo, "intro_text", "introText")!} />
             )}
@@ -767,6 +773,8 @@ export default async function PropertySectionPage({
               <PropertyTopActions property={property} />
               <div className={propertyStyles.columns}>
                 <div className={propertyStyles.sectionContent}>
+                  <RealEstateJsonLd record={property} section={sectionKey} />
+                  {sectionKey === "locality" && <SeoEditorial record={property} locality />}
                   <SectionContent sectionKey={sectionKey} property={property} />
                   <FaqSection
                     faqs={(property.faqs || []).filter(
@@ -817,6 +825,7 @@ export default async function PropertySectionPage({
     );
   }
   if (project) {
+    if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
     const sectionKey = section[0];
     if (!PROJECT_SECTION_META[sectionKey] || section.length !== 1) {
       notFound();
@@ -907,7 +916,10 @@ export default async function PropertySectionPage({
                 </div>
                 <ProjectTopActions project={project} />
               </div>
+              <RealEstateJsonLd record={project} section={sectionKey} />
+              {sectionKey === "locality" && <SeoEditorial record={project} locality />}
               <ProjectSectionTitle title={sectionH1} />
+              {childSeo.h2 && <h2>{childSeo.h2}</h2>}
               {field(childSeo, "intro_text", "introText") && (
                 <TextBlock text={field(childSeo, "intro_text", "introText")!} />
               )}
@@ -962,4 +974,11 @@ export default async function PropertySectionPage({
       <SiteFooter />
     </>
   );
+}
+
+export async function generateMetadata(props: PropertySectionPageProps): Promise<Metadata> {
+  const {slug, section} = await props.params;
+  const record = await getPropertyBySeoSlug(slug) || await getProjectBySlugUrl(slug).catch(() => null);
+  const metadata = await baseMetadata(props);
+  return record ? sectionMetadata(record, section[0], metadata) : metadata;
 }

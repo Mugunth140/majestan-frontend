@@ -1,3 +1,5 @@
+import { unstable_rethrow } from "next/navigation";
+import { buildRealEstateSchema } from "@/lib/schema-builder";
 import { SeoHeadingProvider } from '@/components/seo/core-heading';
 import { getSeo, getListingSeo, seoMetadata, withSeo, jsonLd, listingStructuredData } from '@/lib/seo-engine';
 import { SeoOffMarketBanner, SeoOffMarketPage, SeoListingPage } from '@/components/seo/seo-content';
@@ -253,6 +255,7 @@ export async function generateMetadata({
   try {
     const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch(() => null);
     if (project) {
+      if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
       const canonicalPath = `/${project.canonicalSlug}`;
       const seo = project.seo?.seoData?.overview;
       const typeLabel = project.projectType === "villa" ? "Villa" : project.projectType === "plot" ? "Plot" : "Apartment";
@@ -298,7 +301,8 @@ export async function generateMetadata({
         },
       };
     }
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     /* fall through to static/PSEO/404 */
   }
 
@@ -460,10 +464,10 @@ export default async function SlugPage({
 
   if (property) {
     if (property.shouldRedirect) {
-      permanentRedirect(`/${property.canonicalSlug}`);
+      permanentRedirect((property as any).redirectDestination || `/${property.canonicalSlug}`);
     }
 
-    const structuredData = engineSeo?.json_ld || buildPropertyStructuredData(property);
+    const structuredData = buildRealEstateSchema(property,engineSeo || undefined);
     const breadcrumbItems = buildBreadcrumbItems(property);
     // Every property page renders exactly one FAQ block (overview FAQs at
     // the end), so only those are marked up.
@@ -513,6 +517,7 @@ export default async function SlugPage({
   try {
     const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch(() => null);
     if (project) {
+      if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
       const breadcrumbItems = [
         { label: "Projects", href: "/projects" },
         { label: project.city, href: "/projects" },
@@ -552,28 +557,7 @@ export default async function SlugPage({
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
-                    __html: jsonLd(engineSeo?.json_ld || {
-                      "@context": "https://schema.org",
-                      "@type": "ApartmentComplex",
-                      name: project.name,
-                      url: `https://www.majestanrealty.com/${project.canonicalSlug}`,
-                      address: {
-                        "@type": "PostalAddress",
-                        addressLocality: project.sublocation || project.city,
-                        addressRegion: project.city,
-                      },
-                      ...(prices.length
-                        ? {
-                            offers: {
-                              "@type": "AggregateOffer",
-                              lowPrice: Math.min(...prices),
-                              highPrice: Math.max(...prices),
-                              priceCurrency: "INR",
-                              offerCount: units.length,
-                            },
-                          }
-                        : {}),
-                    }),
+                    __html: jsonLd(buildRealEstateSchema(project,engineSeo || undefined)),
                   }}
                 />
                 {faqJsonLd && (
@@ -596,7 +580,8 @@ export default async function SlugPage({
         </>
       );
     }
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     /* fall through to static/PSEO/404 */
   }
 

@@ -1,3 +1,4 @@
+import { RealEstateJsonLd } from "@/components/site/SeoEditorial";
 import Link from "next/link";
 import {
   jsonLd,
@@ -430,6 +431,7 @@ export function SeoOffMarketPage({
       <SiteHeader />
       <main className="pt-[var(--site-header-h)]! min-h-screen! font-manrope-page">
         <SeoOffMarketBanner seo={seo} />
+        <RealEstateJsonLd record={{...target, canonicalSlug:seo.path.replace(/^\//, ""), seoEngine:seo, projectType:seo.scope === "project" ? target.projectType || "apartment" : undefined}} section={section} />
         <div className="max-w-7xl! mx-auto! px-6! py-6! space-y-6!">
           <Breadcrumbs
             items={[

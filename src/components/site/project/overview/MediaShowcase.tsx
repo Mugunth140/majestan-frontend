@@ -23,6 +23,7 @@ export function MediaShowcase({
   name,
   photos,
   photoAltOverrides,
+  photoMetadata,
   videos,
   placeholder,
 }: {
@@ -30,6 +31,7 @@ export function MediaShowcase({
   name: string;
   photos: string[];
   photoAltOverrides?: Record<string, string>;
+  photoMetadata?: Record<string, {titleText?:string; caption?:string}>;
   videos: ProjectVideo[];
   placeholder: string;
 }) {
@@ -49,7 +51,7 @@ export function MediaShowcase({
             <YouTubeFacade videoId={leadVideo.id} title={leadVideo.title ?? `${name} video`} />
           ) : (
             leadPhoto && (
-              <PhotoTile slug={slug} src={leadPhoto} alt={photoAltOverrides?.[leadPhoto] || `${name} photo 1`} placeholder={placeholder} className="aspect-video!" />
+              <PhotoTile media={photoMetadata?.[leadPhoto]} slug={slug} src={leadPhoto} alt={photoAltOverrides?.[leadPhoto] || `${name} photo 1`} placeholder={placeholder} className="aspect-video!" />
             )
           )}
         </div>
@@ -58,6 +60,7 @@ export function MediaShowcase({
           return (
             <PhotoTile
               key={`${src}-${i}`}
+              media={photoMetadata?.[src]}
               slug={slug}
               src={src}
               alt={photoAltOverrides?.[src] || `${name} photo ${i + (leadVideo ? 1 : 2)}`}
@@ -94,6 +97,7 @@ export function MediaShowcase({
 }
 
 function PhotoTile({
+  media,
   slug,
   src,
   alt,
@@ -101,6 +105,7 @@ function PhotoTile({
   className,
   overlay,
 }: {
+  media?: {titleText?:string;caption?:string};
   slug: string;
   src: string;
   alt: string;
@@ -114,8 +119,9 @@ function PhotoTile({
       className={`group/tile relative! block! min-h-0! overflow-hidden! rounded-xl! bg-[var(--ov-sky)]! ${FOCUS_RING} ${className}`}
     >
       <span className="absolute! inset-0! block! transition-transform! duration-500! ease-out-quint! group-hover/tile:scale-[1.04]!">
-        <ListingImage src={src} placeholderSrc={placeholder} alt={alt} className="w-full! h-full! object-cover!" />
+        <ListingImage title={media?.titleText} src={src} placeholderSrc={placeholder} alt={alt} className="w-full! h-full! object-cover!" />
       </span>
+      {media?.caption && <span className="absolute! bottom-0! bg-white! text-sm!">{media.caption}</span>}
       {overlay && (
         <span className="absolute! inset-0! grid! place-items-center! bg-[linear-gradient(135deg,rgba(22,69,191,0.78),rgba(10,15,28,0.7))]! text-sm! font-semibold! text-white!">
           {overlay}

@@ -46,7 +46,13 @@ export function seoMetadata(
     description,
     alternates: {
       ...fallback.alternates,
-      canonical: seo.canonical_url || SEO_SITE + seo.path,
+      canonical: resolveCanonicalUrl({
+        canonicalType:
+          seo.canonical_type || (seo.canonical_url ? "custom" : "self"),
+        customCanonicalUrl: seo.canonical_url,
+        currentPath: seo.path,
+        parentPath: seo.parent_path,
+      }),
     },
     robots: {
       index: seo.robots_index,
@@ -61,7 +67,13 @@ export function seoMetadata(
       ...fallback.openGraph,
       title: ogTitle,
       description: ogDescription,
-      url: seo.canonical_url || SEO_SITE + seo.path,
+      url: resolveCanonicalUrl({
+        canonicalType:
+          seo.canonical_type || (seo.canonical_url ? "custom" : "self"),
+        customCanonicalUrl: seo.canonical_url,
+        currentPath: seo.path,
+        parentPath: seo.parent_path,
+      }),
       ...(seo.og_image_url ? { images: [seo.og_image_url] } : {}),
     },
     twitter: {
@@ -76,8 +88,43 @@ export function seoMetadata(
 export function withSeo<T extends Record<string, any>>(
   record: T,
   seo: SeoSnapshot | null,
-): T {
-  if (!record || !seo || seo.redirect || seo.gone) return record;
+): T & {
+  seoEngine?: SeoSnapshot;
+  shouldRedirect?: boolean;
+  redirectDestination?: string;
+} {
+  if (!record || !seo) return record;
+  if (seo.redirect)
+    return {
+      ...record,
+      shouldRedirect: true,
+      redirectDestination: seo.redirect,
+    };
+  const offMarket =
+    Boolean(seo.off_market) ||
+    ["sold", "rented", "expired", "inactive", "unpublished"].includes(
+      String(record.status).toLowerCase(),
+    );
+  const policy =
+    seo.settings?.expired_redirect_policy || seo.expired_redirect_policy;
+  const destination =
+    seo.settings?.redirect_target_path || seo.redirect_target_path;
+  if (
+    offMarket &&
+    (policy === "redirect_to_locality" || policy === "redirect_target_path") &&
+    destination
+  )
+    return {
+      ...record,
+      seoEngine: seo,
+      shouldRedirect: true,
+      redirectDestination: destination,
+    };
+  if (seo.gone || (offMarket && policy === "gone"))
+    return { ...record, seoEngine: { ...seo, gone: true } };
+  if (offMarket && policy === "keep_live_sold_banner")
+    seo = { ...seo, off_market: true };
+
   const overview = {
     ...record.seo?.seoData?.overview,
     ...seo.section_seo?.overview,
@@ -91,6 +138,7 @@ export function withSeo<T extends Record<string, any>>(
   };
   const result: any = {
     ...record,
+    seoEngine: seo,
     seo: {
       ...record.seo,
       seoData: { ...record.seo?.seoData, ...seo.section_seo, overview },
@@ -330,4 +378,47 @@ export function listingStructuredData(
       itemList,
     ],
   };
+}
+
+export function resolveCanonicalUrl(options: {
+  canonicalType?: "self" | "parent" | "custom";
+  customCanonicalUrl?: string | null;
+  currentPath: string;
+  parentPath?: string;
+  hasSectionContent?: boolean;
+}): string {
+  const site = (process.env.NEXT_PUBLIC_SEO_SITE || SEO_SITE).replace(
+    /\/$/,
+    "",
+  );
+  const clean = (p: string) =>
+    new URL(p, site).pathname.replace(/\/+$/, "") || "/";
+  if (
+    options.hasSectionContent === false &&
+    options.canonicalType !== "custom" &&
+    options.parentPath
+  )
+    return site + clean(options.parentPath);
+  if (
+    options.canonicalType === "custom" &&
+    options.customCanonicalUrl?.trim()
+  ) {
+    try {
+      const u = new URL(options.customCanonicalUrl, site);
+      if (
+        ["https:", "http:"].includes(u.protocol) &&
+        !u.username &&
+        !u.password
+      )
+        return u.href;
+    } catch {}
+  }
+  return (
+    site +
+    clean(
+      options.canonicalType === "parent"
+        ? options.parentPath || options.currentPath
+        : options.currentPath,
+    )
+  );
 }

@@ -184,7 +184,7 @@ export async function getProjectBySlugUrl(slug: string): Promise<ProjectDetail> 
   const project=await fetchProjectApi<ProjectDetail>(`/projects/by-slug/${encodeURIComponent(slug)}`);
   const mainSeo=await getSeo('/'+slug);
   const effectiveSeo=mainSeo?.redirect?await getSeo(mainSeo.redirect):mainSeo;
-  return withSeo(project,effectiveSeo);
+  return withSeo(withSeo(project,effectiveSeo),mainSeo?.redirect ? mainSeo : effectiveSeo);
 }
 
 export function listProjects(params: ProjectListParams = {}): Promise<ProjectListResponse> {

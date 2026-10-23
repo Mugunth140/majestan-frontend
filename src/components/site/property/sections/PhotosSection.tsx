@@ -127,12 +127,14 @@ export function PhotosSection({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={selected.imageUrl}
+                title={selected.titleText}
                 alt={
                   selected.altText ||
                   `${property.title} photo ${currentIndex + 1}`
                 }
                 className="max-h-full! max-w-full! object-contain!"
               />
+              {selected.caption && <p className="text-white!">{selected.caption}</p>}
               {count > 1 && (
                 <>
                   <button

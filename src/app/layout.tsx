@@ -1,3 +1,4 @@
+import { PublicStyles } from "@/components/site/layout/public-styles";
 import { seoFetch,jsonLd } from '@/lib/seo-engine';
 /* eslint-disable @next/next/no-css-tags */
 import type { Metadata, Viewport } from "next";
@@ -139,13 +140,7 @@ export default async function RootLayout({
   return (
     <html lang="en-IN" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.css" />
-        <link rel="stylesheet" type="text/css" href="/assets/css/animate.min.css" />
-        <link rel="stylesheet" type="text/css" href="/assets/css/magnific-popup.min.css" />
-        <link rel="stylesheet" type="text/css" href="/assets/css/odometer.min.css" />
-        <link rel="stylesheet" type="text/css" href="/assets/css/swiper-bundle.min.css" />
-        <link rel="stylesheet" type="text/css" href="/assets/css/sib-styles.css" />
-        <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
+        <PublicStyles />
         <link
           rel="preconnect"
           href="https://cdnjs.cloudflare.com"

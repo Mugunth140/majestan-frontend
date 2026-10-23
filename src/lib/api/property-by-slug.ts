@@ -341,5 +341,5 @@ export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(sl
 
   const mainSeo=await getSeo('/'+slug);
   const effectiveSeo=mainSeo?.redirect?await getSeo(mainSeo.redirect):mainSeo;
-  return withSeo(data as SeoProperty,effectiveSeo);
+  return withSeo(withSeo(data as SeoProperty,effectiveSeo),mainSeo?.redirect ? mainSeo : effectiveSeo);
 });

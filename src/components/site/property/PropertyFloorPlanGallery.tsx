@@ -175,6 +175,7 @@ export function PropertyFloorPlanGallery({
                   key={selected.key}
                   src={selected.src}
                   alt={selected.altText || `${selected.title} floor plan`}
+                  title={selected.titleText}
                   draggable={false}
                   onError={() => setFailedKey(selected.key)}
                   className={styles.drawing}

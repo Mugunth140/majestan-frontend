@@ -1,8 +1,23 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { AdminSelect, AdminCheckbox } from "./admin-controls";
+import { useEffect, useState } from "react";
 import { Search, SlidersHorizontal, X, Pencil, Trash2 } from "lucide-react";
+import { SeoWidthMeter, resolveSampleTokens } from "./seo-width-meter";
+import {
+  Button,
+  Dialog,
+  TextField,
+  TextArea,
+  Tabs,
+  Table,
+  Badge,
+  Skeleton,
+  Heading,
+  Avatar,
+} from "@radix-ui/themes";
 import { seoApi } from "./seo-admin-shell";
 import { AdvancedSeoEditor } from "./advanced-seo-editor";
+import { propertySampleVariables } from "./property-seo-profile";
 
 type Row = Record<string, any>;
 const labels: Record<string, string> = {
@@ -56,17 +71,33 @@ function Field({
     <label className="seo-field">
       {label}
       {area ? (
-        <textarea
+        <TextArea
+          size="2"
           value={form[name] ?? ""}
           onChange={(e) => set(name, e.target.value)}
           maxLength={max}
         />
       ) : (
-        <input
-          type={type}
+        <TextField.Root
+          size="2"
+          type={type as React.ComponentProps<typeof TextField.Root>["type"]}
           value={form[name] ?? ""}
           onChange={(e) => set(name, e.target.value)}
           maxLength={max}
+        />
+      )}
+      {/title|description/.test(name) && (
+        <SeoWidthMeter
+          text={resolveSampleTokens(
+            String(form[name] || ""),
+            form.settings?.scope === "property"
+              ? propertySampleVariables(
+                  form.settings.property_type,
+                  form.settings.intent,
+                )
+              : {},
+          )}
+          description={/description/.test(name)}
         />
       )}
       <small>
@@ -89,8 +120,7 @@ function Check({
 }) {
   return (
     <label className="seo-check">
-      <input
-        type="checkbox"
+      <AdminCheckbox
         checked={
           name === "show_live_market_snapshot" && form[name] === undefined
             ? true
@@ -115,7 +145,7 @@ function Faqs({
         <div className="seo-faq-row" key={i}>
           <label className="seo-field">
             Question
-            <input
+            <TextField.Root
               value={item.question}
               onChange={(e) =>
                 onChange(
@@ -128,7 +158,7 @@ function Faqs({
           </label>
           <label className="seo-field">
             Answer
-            <textarea
+            <TextArea
               value={item.answer}
               onChange={(e) =>
                 onChange(
@@ -139,22 +169,26 @@ function Faqs({
               }
             />
           </label>
-          <button
+          <Button
+            variant="soft"
+            color="red"
             className="seo-button seo-secondary seo-danger"
             type="button"
             onClick={() => onChange(items.filter((_, j) => i !== j))}
           >
             Remove question
-          </button>
+          </Button>
         </div>
       ))}
-      <button
+      <Button
         type="button"
+        variant="soft"
+        color="gray"
         className="seo-button seo-secondary"
         onClick={() => onChange([...items, { question: "", answer: "" }])}
       >
         Add question
-      </button>
+      </Button>
     </div>
   );
 }
@@ -187,6 +221,15 @@ function Editor({
   const initialConfig = initial.config || initial;
   const templateSections = initialConfig.section_seo || {};
   const templateSettings = initialConfig.settings || {};
+  const templateSamples =
+    templateSettings.scope === "property"
+      ? propertySampleVariables(
+          templateSettings.property_type,
+          templateSettings.intent,
+        )
+      : {};
+  const resolvePreview = (text: string) =>
+    resolveSampleTokens(text, templateSamples);
   const templateField = (key: string) => {
     if (key === "floor_plan_title_template")
       return (
@@ -212,7 +255,6 @@ function Editor({
       );
     return initialConfig[key.replace("_template", "")] || "";
   };
-  const ref = useRef<HTMLDivElement>(null);
   const listing = Boolean(initial.isListing || form.listing_id),
     technical = form.scope === "technical",
     template = form.scope === "template";
@@ -220,16 +262,6 @@ function Editor({
     setForm((f) => ({ ...f, [key]: value }));
   const setting = (key: string, value: any) =>
     setForm((f) => ({ ...f, settings: { ...f.settings, [key]: value } }));
-  useEffect(() => {
-    const previous = document.activeElement as HTMLElement;
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    ref.current?.focus();
-    return () => {
-      document.body.style.overflow = overflow;
-      previous?.focus();
-    };
-  }, []);
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -311,41 +343,19 @@ function Editor({
     }
   }
   return (
-    <div
-      className="seo-editor-backdrop"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget && !busy) onClose();
+    <Dialog.Root
+      open
+      onOpenChange={(open) => {
+        if (!open && !busy) onClose();
       }}
     >
-      <div
-        className="seo-editor"
-        ref={ref}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="seo-editor-title"
-        tabIndex={-1}
-        onKeyDown={(e) => {
-          if (e.key === "Escape" && !busy) onClose();
-          if (e.key === "Tab") {
-            const focusable = ref.current?.querySelectorAll<HTMLElement>(
-              "button:not(:disabled),input,select,textarea,a[href]",
-            );
-            if (!focusable?.length) return;
-            const first = focusable[0],
-              last = focusable[focusable.length - 1];
-            if (
-              e.shiftKey &&
-              (document.activeElement === first ||
-                document.activeElement === ref.current)
-            ) {
-              e.preventDefault();
-              last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-              e.preventDefault();
-              first.focus();
-            }
-          }
+      <Dialog.Content
+        className="seo-command seo-editor seo-generic-editor"
+        aria-describedby={undefined}
+        onEscapeKeyDown={(event) => {
+          if (busy) event.preventDefault();
         }}
+        onPointerDownOutside={(event) => event.preventDefault()}
       >
         <header>
           <div>
@@ -356,22 +366,24 @@ function Editor({
                   ? "TECHNICAL SETTINGS"
                   : "SEO EDITOR"}
             </div>
-            <h2 id="seo-editor-title">
+            <Dialog.Title as="h2" id="seo-editor-title">
               {initial.target?.name ||
                 initial.target?.title ||
                 form.public_path ||
                 form.config_key ||
                 "Create listing page"}
-            </h2>
+            </Dialog.Title>
           </div>
-          <button
+          <Button
+            variant="soft"
+            color="gray"
             className="seo-button seo-secondary"
             type="button"
             onClick={onClose}
             disabled={busy}
           >
             Close
-          </button>
+          </Button>
         </header>
         {initial.target && (
           <div className="seo-readonly">
@@ -393,7 +405,7 @@ function Editor({
               <div className="seo-form-grid">
                 <label className="seo-field">
                   Inventory
-                  <select
+                  <AdminSelect
                     value={form.inventory_kind || "property"}
                     onChange={(e) => {
                       set("inventory_kind", e.target.value);
@@ -403,27 +415,26 @@ function Editor({
                   >
                     <option value="property">Individual properties</option>
                     <option value="project">Projects</option>
-                  </select>
+                  </AdminSelect>
                 </label>
                 <label className="seo-field">
                   Transaction intent
-                  <select
+                  <AdminSelect
                     value={form.transaction_intent || "buy"}
                     onChange={(e) => set("transaction_intent", e.target.value)}
                   >
-                    {intents
-                      .map(([v, l]) => (
-                        <option key={v} value={v}>
-                          {l}
-                        </option>
-                      ))}
-                  </select>
+                    {intents.map(([v, l]) => (
+                      <option key={v} value={v}>
+                        {l}
+                      </option>
+                    ))}
+                  </AdminSelect>
                 </label>
                 <label className="seo-field">
                   {form.inventory_kind === "project"
                     ? "Project type"
                     : "Property type"}
-                  <select
+                  <AdminSelect
                     value={
                       form.inventory_kind === "project"
                         ? form.project_type || ""
@@ -452,11 +463,11 @@ function Editor({
                           {l}
                         </option>
                       ))}
-                  </select>
+                  </AdminSelect>
                 </label>
                 <label className="seo-field">
                   City
-                  <select
+                  <AdminSelect
                     value={form.city_id || ""}
                     onChange={(e) => {
                       set("city_id", Number(e.target.value));
@@ -470,11 +481,11 @@ function Editor({
                         {c.name}
                       </option>
                     ))}
-                  </select>
+                  </AdminSelect>
                 </label>
                 <label className="seo-field">
                   Sub-locality
-                  <select
+                  <AdminSelect
                     value={form.sublocation_id || ""}
                     onChange={(e) =>
                       set("sublocation_id", Number(e.target.value) || null)
@@ -488,11 +499,11 @@ function Editor({
                           {l.name}
                         </option>
                       ))}
-                  </select>
+                  </AdminSelect>
                 </label>
                 <label className="seo-field">
                   Bedrooms
-                  <select
+                  <AdminSelect
                     value={form.bedrooms ?? ""}
                     onChange={(e) =>
                       set(
@@ -506,7 +517,7 @@ function Editor({
                     <option value="2">2 BHK</option>
                     <option value="3">3 BHK</option>
                     <option value="4">4+ BHK</option>
-                  </select>
+                  </AdminSelect>
                 </label>
                 <Check
                   label="Show live market snapshot"
@@ -525,7 +536,7 @@ function Editor({
                   <p className="seo-muted">
                     Variables:{" "}
                     {
-                      "{BHK}, {SqFt}, {Property_Type}, {Transaction_Type}, {Sub_Locality}, {Location}, {City}, {Price}, {Project_Name}, {Builder}"
+                      "{BHK}, {SqFt}, {Property_Type}, {Transaction_Type}, {Sub_Locality}, {Location}, {City}, {Price}, {Project_Name}, {Property_Name}, {Locality}, {Builder}, {Builder_Name}, {RERA_ID}, {Min_Price}, {Max_Price}"
                     }
                   </p>
                 )}
@@ -561,7 +572,7 @@ function Editor({
                       : form
                   }
                   set={set}
-                  max={255}
+                  max={template ? undefined : 80}
                   hint="Aim for about 50–60 characters."
                 />
                 <Field
@@ -583,7 +594,7 @@ function Editor({
                   }
                   set={set}
                   area
-                  max={320}
+                  max={template ? undefined : 200}
                   hint="Aim for about 140–160 characters."
                 />
                 <div className="seo-preview">
@@ -666,9 +677,128 @@ function Editor({
                     ))}
                   </div>
                 )}
+                {template && (
+                  <section className="seo-panel">
+                    <h3>Section template formulas</h3>
+                    {["amenities", "locality"].map((key) => (
+                      <div key={key}>
+                        <h4>{key}</h4>
+                        {[
+                          "meta_title",
+                          "meta_description",
+                          "h1",
+                          "intro_text",
+                        ].map((field) => (
+                          <label className="seo-field" key={field}>
+                            {field}
+                            <TextArea
+                              value={(() => {
+                                try {
+                                  return (
+                                    JSON.parse(sections)[key]?.[field] || ""
+                                  );
+                                } catch {
+                                  return "";
+                                }
+                              })()}
+                              onChange={(event) => {
+                                try {
+                                  const next = JSON.parse(sections);
+                                  setSections(
+                                    JSON.stringify(
+                                      {
+                                        ...next,
+                                        [key]: {
+                                          ...next[key],
+                                          [field]: event.target.value,
+                                        },
+                                      },
+                                      null,
+                                      2,
+                                    ),
+                                  );
+                                } catch {
+                                  setError(
+                                    "Correct the section JSON before editing formulas.",
+                                  );
+                                }
+                              }}
+                            />
+                            {["meta_title", "meta_description"].includes(
+                              field,
+                            ) && (
+                              <SeoWidthMeter
+                                text={resolvePreview(
+                                  (() => {
+                                    try {
+                                      return (
+                                        JSON.parse(sections)[key]?.[field] || ""
+                                      );
+                                    } catch {
+                                      return "";
+                                    }
+                                  })(),
+                                )}
+                                description={field === "meta_description"}
+                              />
+                            )}
+                            <small>
+                              Sample:{" "}
+                              {resolvePreview(
+                                (() => {
+                                  try {
+                                    return (
+                                      JSON.parse(sections)[key]?.[field] || ""
+                                    );
+                                  } catch {
+                                    return "";
+                                  }
+                                })(),
+                              )}
+                            </small>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                    <p>
+                      Sample inventory:{" "}
+                      {templateSamples.Property_Name || "Alamo Turin"} ·{" "}
+                      {templateSamples.Property_Type || "Apartment"} ·{" "}
+                      {templateSamples.Transaction_Type || "Sale"} ·
+                      Gandhipuram, Coimbatore ·{" "}
+                      {templateSamples.Price || "₹89 Lakh"}
+                    </p>
+                    {[
+                      "meta_title_template",
+                      "meta_description_template",
+                      "h1_template",
+                      "floor_plan_title_template",
+                      "floor_plan_description_template",
+                      "photos_title_template",
+                      "photos_description_template",
+                    ].map((key) => (
+                      <div key={key}>
+                        <strong>{key}</strong>
+                        <p>
+                          {resolvePreview(
+                            String(form[key] ?? templateField(key)),
+                          )}
+                        </p>
+                        {/title|description/.test(key) && (
+                          <SeoWidthMeter
+                            text={resolvePreview(
+                              String(form[key] ?? templateField(key)),
+                            )}
+                            description={key.includes("description")}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </section>
+                )}
                 <label className="seo-field">
                   AI summary / key highlights
-                  <textarea
+                  <TextArea
                     value={(form.highlights || []).join("\n")}
                     onChange={(e) =>
                       set("highlights", e.target.value.split("\n"))
@@ -709,7 +839,7 @@ function Editor({
                   <div className="seo-form-grid">
                     <label className="seo-field">
                       RERA ID override
-                      <input
+                      <TextField.Root
                         value={form.settings?.rera_id || ""}
                         placeholder={initial.target?.rera_number || ""}
                         onChange={(e) => setting("rera_id", e.target.value)}
@@ -717,7 +847,7 @@ function Editor({
                     </label>
                     <label className="seo-field">
                       Builder entity override
-                      <input
+                      <TextField.Root
                         value={form.settings?.builder_entity_name || ""}
                         placeholder={initial.target?.builder_name || ""}
                         onChange={(e) =>
@@ -735,7 +865,7 @@ function Editor({
                     <label className="seo-field" key={image.id}>
                       Image #{image.id}
                       <small>{image.image_url.split("/").pop()}</small>
-                      <input
+                      <TextField.Root
                         value={form.image_alt_overrides?.[image.id] || ""}
                         onChange={(e) =>
                           set("image_alt_overrides", {
@@ -798,7 +928,7 @@ function Editor({
                   {form.scope === "property" && (
                     <label className="seo-field">
                       Sold, expired or deleted: 301 destination
-                      <input
+                      <TextField.Root
                         value={form.settings?.expired_redirect_path || ""}
                         onChange={(e) =>
                           setting("expired_redirect_path", e.target.value)
@@ -842,7 +972,7 @@ function Editor({
                   )}
                   <label className="seo-field">
                     Additional JSON-LD (JSON object)
-                    <textarea
+                    <TextArea
                       className="seo-code"
                       value={schema}
                       onChange={(e) => setSchema(e.target.value)}
@@ -852,7 +982,7 @@ function Editor({
                     <summary>Section SEO overrides</summary>
                     <label className="seo-field">
                       Preserved section settings (JSON)
-                      <textarea
+                      <TextArea
                         className="seo-code"
                         value={sections}
                         onChange={(e) => setSections(e.target.value)}
@@ -869,7 +999,7 @@ function Editor({
                 <h3>Crawler access</h3>
                 <label className="seo-field">
                   robots.txt
-                  <textarea
+                  <TextArea
                     className="seo-code"
                     rows={16}
                     value={form.settings?.robots_txt || ""}
@@ -879,7 +1009,7 @@ function Editor({
                 </label>
                 <label className="seo-field">
                   llms.txt override
-                  <textarea
+                  <TextArea
                     className="seo-code"
                     rows={10}
                     value={form.settings?.llms_txt || ""}
@@ -903,7 +1033,7 @@ function Editor({
                 ].map((key) => (
                   <label className="seo-field" key={key}>
                     {key}
-                    <input
+                    <TextField.Root
                       value={form.settings?.organization?.[key] || ""}
                       onChange={(e) =>
                         setting("organization", {
@@ -923,28 +1053,32 @@ function Editor({
             </p>
           )}
           <div className="seo-form-actions">
-            <button
+            <Button
+              variant="soft"
+              color="red"
               className="seo-button seo-secondary seo-danger"
               type="button"
               onClick={onClose}
               disabled={busy}
             >
               Cancel
-            </button>
-            <button className="seo-button" disabled={busy}>
+            </Button>
+            <Button type="submit" className="seo-button" disabled={busy}>
               {busy ? "Saving…" : "Save SEO changes"}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 }
 
 export function SeoWorkspace({
   module,
+  initialId,
 }: {
   module: "project" | "property" | "listing" | "page" | "technical";
+  initialId?: string;
 }) {
   const [options, setOptions] = useState<Row>({}),
     [items, setItems] = useState<Row[]>([]),
@@ -969,6 +1103,25 @@ export function SeoWorkspace({
       source_path: "",
       destination_path: "",
     });
+  useEffect(() => {
+    if (
+      !initialId ||
+      !/^[1-9]\d*$/.test(initialId) ||
+      !["project", "property"].includes(module)
+    )
+      return;
+    let live = true;
+    seoApi(`inventory/${module}/${initialId}`)
+      .then((value) => {
+        if (live) setEditor(value);
+      })
+      .catch((error) => {
+        if (live) setError(error.message);
+      });
+    return () => {
+      live = false;
+    };
+  }, [module, initialId]);
   const inventory = module === "property" || module === "project";
   useEffect(() => {
     seoApi("options")
@@ -1042,10 +1195,23 @@ export function SeoWorkspace({
       <div className="seo-page-toolbar">
         <div className="seo-heading">
           <div>
-            <h1>{titles[module]}</h1>
+            <Heading as="h1" size="6">
+              {titles[module]}
+            </Heading>
+            <p className="seo-page-description">
+              {module === "project"
+                ? "Manage search appearance for your live projects."
+                : module === "property"
+                  ? "Manage search appearance for your live properties."
+                  : module === "listing"
+                    ? "Match search pages to inventory and manage locality SEO."
+                    : module === "page"
+                      ? "Manage SEO for your core website and service pages."
+                      : "Manage redirects, crawler access and sitemap settings."}
+            </p>
           </div>
           {module === "listing" && (
-            <button
+            <Button
               className="seo-button"
               onClick={() =>
                 setEditor({
@@ -1068,33 +1234,24 @@ export function SeoWorkspace({
               }
             >
               Create listing rule
-            </button>
+            </Button>
           )}
         </div>
         {(inventory || module === "listing") && (
-          <div className="seo-tabs" role="tablist">
-            <button
-              role="tab"
-              aria-selected={tab === "inventory"}
-              onClick={() => {
-                setTab("inventory");
-                setPage(1);
-              }}
-            >
-              {" "}
-              {inventory ? "Live inventory" : "Listing rules"}
-            </button>
-            <button
-              role="tab"
-              aria-selected={tab === "templates"}
-              onClick={() => {
-                setTab("templates");
-                setPage(1);
-              }}
-            >
-              Auto SEO templates
-            </button>
-          </div>
+          <Tabs.Root
+            value={tab}
+            onValueChange={(next) => {
+              setTab(next);
+              setPage(1);
+            }}
+          >
+            <Tabs.List aria-label="Inventory views">
+              <Tabs.Trigger value="inventory">
+                {inventory ? "Live inventory" : "Listing rules"}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="templates">Auto SEO templates</Tabs.Trigger>
+            </Tabs.List>
+          </Tabs.Root>
         )}
       </div>
       {success && (
@@ -1105,22 +1262,26 @@ export function SeoWorkspace({
       {error && (
         <div className="seo-error" role="alert">
           {error}{" "}
-          <button onClick={() => setRevision((n) => n + 1)}>Retry</button>
+          <Button onClick={() => setRevision((n) => n + 1)}>Retry</Button>
         </div>
       )}
       {inventory && tab === "inventory" && (
         <div className="seo-filters">
-          <label className="seo-filter-search">
-            <Search size={14} aria-hidden="true" />
-            <input
-              aria-label="Search inventory"
-              placeholder="Search name or city…"
-              value={filters.search}
-              onChange={(e) => filter("search", e.target.value)}
-            />
-          </label>
-          <button
+          <TextField.Root
+            className="seo-filter-search"
+            aria-label="Search inventory"
+            placeholder="Search by name or city"
+            value={filters.search}
+            onChange={(event) => filter("search", event.target.value)}
+          >
+            <TextField.Slot>
+              <Search size={16} />
+            </TextField.Slot>
+          </TextField.Root>
+          <Button
             type="button"
+            variant="soft"
+            color="gray"
             className="seo-button seo-secondary seo-filter-toggle"
             aria-expanded={showFilters}
             aria-controls="seo-inventory-filters"
@@ -1133,10 +1294,10 @@ export function SeoWorkspace({
             ).length
               ? ` (${Object.entries(filters).filter(([key, value]) => key !== "search" && value).length})`
               : ""}
-          </button>
+          </Button>
           {showFilters && (
             <div className="seo-filter-options" id="seo-inventory-filters">
-              <select
+              <AdminSelect
                 aria-label="Property type"
                 value={filters.type}
                 onChange={(e) => filter("type", e.target.value)}
@@ -1154,9 +1315,9 @@ export function SeoWorkspace({
                       {l}
                     </option>
                   ))}
-              </select>
+              </AdminSelect>
               {module === "property" && (
-                <select
+                <AdminSelect
                   aria-label="Transaction intent"
                   value={filters.intent}
                   onChange={(e) => filter("intent", e.target.value)}
@@ -1167,9 +1328,9 @@ export function SeoWorkspace({
                       {l}
                     </option>
                   ))}
-                </select>
+                </AdminSelect>
               )}
-              <select
+              <AdminSelect
                 aria-label="Sub-locality"
                 value={filters.locality}
                 onChange={(e) => filter("locality", e.target.value)}
@@ -1180,8 +1341,8 @@ export function SeoWorkspace({
                     {l.name}
                   </option>
                 ))}
-              </select>
-              <select
+              </AdminSelect>
+              <AdminSelect
                 aria-label="SEO status"
                 value={filters.seo}
                 onChange={(e) => filter("seo", e.target.value)}
@@ -1189,11 +1350,11 @@ export function SeoWorkspace({
                 <option value="">All SEO</option>
                 <option value="auto">Auto template</option>
                 <option value="custom">Custom override</option>
-              </select>
+              </AdminSelect>
             </div>
           )}
           {Object.values(filters).some(Boolean) && (
-            <button
+            <Button
               className="seo-row-action seo-clear-filters"
               type="button"
               onClick={() => {
@@ -1209,7 +1370,7 @@ export function SeoWorkspace({
             >
               <X size={12} aria-hidden="true" />
               Clear
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -1219,7 +1380,9 @@ export function SeoWorkspace({
             <section className="seo-panel seo-card">
               <h2>Crawlers & AI search</h2>
               <p>Edit robots.txt, llms.txt and your local business identity.</p>
-              <button
+              <Button
+                variant="soft"
+                color="gray"
                 className="seo-button seo-secondary"
                 onClick={async () => {
                   try {
@@ -1230,7 +1393,7 @@ export function SeoWorkspace({
                 }}
               >
                 Edit technical settings
-              </button>
+              </Button>
               <a href="/llms.txt" target="_blank" rel="noreferrer">
                 Preview llms.txt ↗
               </a>
@@ -1251,7 +1414,9 @@ export function SeoWorkspace({
                 "localities",
                 "pages",
               ].map((g) => (
-                <button
+                <Button
+                  variant="soft"
+                  color="gray"
                   className="seo-button seo-secondary"
                   key={g}
                   onClick={async () => {
@@ -1265,19 +1430,21 @@ export function SeoWorkspace({
                   }}
                 >
                   Preview sitemap-{g}.xml
-                </button>
+                </Button>
               ))}
             </section>
           </div>
           {preview && (
             <div className="seo-panel">
               <pre className="seo-code">{preview}</pre>
-              <button
+              <Button
+                variant="soft"
+                color="gray"
                 className="seo-button seo-secondary"
                 onClick={() => setPreview("")}
               >
                 Close preview
-              </button>
+              </Button>
             </div>
           )}
           <section className="seo-panel">
@@ -1295,7 +1462,7 @@ export function SeoWorkspace({
                 }
               }}
             >
-              <input
+              <TextField.Root
                 aria-label="Old URL path"
                 placeholder="/old-property-url"
                 value={redirectForm.source_path}
@@ -1307,7 +1474,7 @@ export function SeoWorkspace({
                 }
                 required
               />
-              <input
+              <TextField.Root
                 aria-label="New URL path"
                 placeholder="/new-destination"
                 value={redirectForm.destination_path}
@@ -1319,7 +1486,7 @@ export function SeoWorkspace({
                 }
                 required
               />
-              <button className="seo-button">Save redirect</button>
+              <Button type="submit">Save redirect</Button>
             </form>
           </section>
         </>
@@ -1327,6 +1494,10 @@ export function SeoWorkspace({
       <section className="seo-data-section">
         {loading ? (
           <div className="seo-loading" role="status">
+            <Skeleton height="40px" />
+            <Skeleton height="56px" />
+            <Skeleton height="56px" />
+            <Skeleton height="56px" />
             Loading{" "}
             {tab === "templates"
               ? "SEO templates"
@@ -1352,20 +1523,28 @@ export function SeoWorkspace({
           </div>
         ) : (
           <div className="seo-table-wrap">
-            <table
+            <Table.Root
+              size="2"
+              variant="surface"
               className={`seo-table${inventory && tab === "inventory" ? " seo-inventory-table" : ""}`}
               aria-label={
                 tab === "templates" ? "SEO templates" : titles[module]
               }
             >
-              <thead>
-                <tr>
+              <caption className="seo-visually-hidden">
+                {tab === "templates" ? "SEO templates" : titles[module]}
+              </caption>
+              <Table.Header>
+                <Table.Row>
                   {inventory && tab === "inventory" && (
-                    <th scope="col" className="seo-ref-cell">
+                    <Table.ColumnHeaderCell
+                      scope="col"
+                      className="seo-ref-cell"
+                    >
                       Ref.
-                    </th>
+                    </Table.ColumnHeaderCell>
                   )}
-                  <th scope="col">
+                  <Table.ColumnHeaderCell scope="col">
                     {tab === "templates"
                       ? "Template"
                       : inventory
@@ -1375,8 +1554,8 @@ export function SeoWorkspace({
                         : module === "technical"
                           ? "Old URL"
                           : "Page URL"}
-                  </th>
-                  <th
+                  </Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell
                     scope="col"
                     className={
                       inventory && tab === "inventory"
@@ -1389,32 +1568,46 @@ export function SeoWorkspace({
                       : module === "technical"
                         ? "Destination"
                         : "Search title"}
-                  </th>
+                  </Table.ColumnHeaderCell>
                   {inventory && tab === "inventory" && (
-                    <th scope="col" className="seo-type-cell">
+                    <Table.ColumnHeaderCell
+                      scope="col"
+                      className="seo-type-cell"
+                    >
                       Type
-                    </th>
+                    </Table.ColumnHeaderCell>
                   )}
                   {inventory && tab === "inventory" && (
-                    <th scope="col" className="seo-price-cell">
+                    <Table.ColumnHeaderCell
+                      scope="col"
+                      className="seo-price-cell"
+                    >
                       Price
-                    </th>
+                    </Table.ColumnHeaderCell>
                   )}
-                  <th scope="col" className="seo-status-cell">
+                  <Table.ColumnHeaderCell
+                    scope="col"
+                    className="seo-status-cell"
+                  >
                     {module === "technical" ? "Rule" : "SEO"}
-                  </th>
-                  <th scope="col" className="seo-actions-cell">
+                  </Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell
+                    scope="col"
+                    className="seo-actions-cell"
+                  >
                     <span className="seo-muted">Action</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  </Table.ColumnHeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
                 {items.map((row) => (
-                  <tr key={row.config_key || row.id}>
+                  <Table.Row key={row.config_key || row.id}>
                     {inventory && tab === "inventory" && (
-                      <td className="seo-ref-cell">#{row.id}</td>
+                      <Table.Cell className="seo-ref-cell">
+                        #{row.id}
+                      </Table.Cell>
                     )}
-                    <td className="seo-record-cell">
+                    <Table.Cell className="seo-record-cell">
                       {inventory &&
                       tab === "inventory" &&
                       row.canonical_slug ? (
@@ -1426,12 +1619,12 @@ export function SeoWorkspace({
                           rel="noreferrer"
                         >
                           {row.thumbnail_url && (
-                            <img
-                              className="seo-record-thumb"
+                            <Avatar
+                              size="3"
+                              radius="medium"
                               src={row.thumbnail_url}
-                              alt=""
-                              loading="lazy"
-                              decoding="async"
+                              fallback={String(row.name || "M").slice(0, 1)}
+                              color="gray"
                             />
                           )}
                           <span>{row.name}</span>
@@ -1467,8 +1660,8 @@ export function SeoWorkspace({
                           {row.transaction_intent === "rent" ? "Rent" : "Sale"}
                         </span>
                       ) : null}
-                    </td>
-                    <td
+                    </Table.Cell>
+                    <Table.Cell
                       className={
                         inventory && tab === "inventory"
                           ? "seo-city-cell"
@@ -1487,9 +1680,9 @@ export function SeoWorkspace({
                             "Automatic fallback"}
                         </span>
                       )}
-                    </td>
+                    </Table.Cell>
                     {inventory && tab === "inventory" && (
-                      <td
+                      <Table.Cell
                         className="seo-type-cell"
                         title={[
                           labels[row.type],
@@ -1510,10 +1703,10 @@ export function SeoWorkspace({
                               ? "Rent"
                               : "Sale"}
                         </small>
-                      </td>
+                      </Table.Cell>
                     )}
                     {inventory && tab === "inventory" && (
-                      <td className="seo-price-cell">
+                      <Table.Cell className="seo-price-cell">
                         <span>
                           {amount(
                             module === "project" ? row.min_price : row.price,
@@ -1526,10 +1719,18 @@ export function SeoWorkspace({
                         {row.listing_type === "Rent" && (
                           <small className="seo-inline-fact">/ mo</small>
                         )}
-                      </td>
+                      </Table.Cell>
                     )}
-                    <td className="seo-status-cell">
-                      <span
+                    <Table.Cell className="seo-status-cell">
+                      <Badge
+                        variant="soft"
+                        color={
+                          module === "technical"
+                            ? "amber"
+                            : row.seo_id
+                              ? "blue"
+                              : "gray"
+                        }
                         className={
                           "seo-badge " +
                           (module === "technical"
@@ -1547,13 +1748,15 @@ export function SeoWorkspace({
                               ? "Template"
                               : "Custom"
                             : "Auto"}
-                      </span>
-                    </td>
-                    <td
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell
                       className={`seo-actions-cell${module === "listing" && tab !== "templates" ? " seo-actions-multiple" : ""}`}
                     >
                       {module === "technical" ? (
-                        <button
+                        <Button
+                          variant="soft"
+                          color="red"
                           className="seo-row-action seo-danger"
                           onClick={async () => {
                             try {
@@ -1569,18 +1772,21 @@ export function SeoWorkspace({
                           }}
                         >
                           <Trash2 size={12} aria-hidden="true" /> Remove
-                        </button>
+                        </Button>
                       ) : (
-                        <button
+                        <Button
+                          variant="soft"
                           className="seo-row-action seo-edit-action"
                           onClick={() => open(row)}
                           aria-label={`Edit SEO for ${row.name || row.public_path || (tab === "templates" ? templateName(row) : row.config_key)}`}
                         >
                           <Pencil size={12} aria-hidden="true" /> Edit
-                        </button>
+                        </Button>
                       )}
                       {module === "listing" && tab !== "templates" && (
-                        <button
+                        <Button
+                          variant="soft"
+                          color="red"
                           className="seo-row-action seo-danger"
                           onClick={async () => {
                             try {
@@ -1596,13 +1802,13 @@ export function SeoWorkspace({
                           }}
                         >
                           <Trash2 size={12} aria-hidden="true" /> Remove rule
-                        </button>
+                        </Button>
                       )}
-                    </td>
-                  </tr>
+                    </Table.Cell>
+                  </Table.Row>
                 ))}
-              </tbody>
-            </table>
+              </Table.Body>
+            </Table.Root>
           </div>
         )}
         <div className="seo-pagination">
@@ -1620,20 +1826,24 @@ export function SeoWorkspace({
           </span>
           {inventory && tab === "inventory" && (
             <div>
-              <button
+              <Button
+                variant="soft"
+                color="gray"
                 className="seo-button seo-secondary"
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((p) => p - 1)}
               >
                 Previous
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="soft"
+                color="gray"
                 className="seo-button seo-secondary"
                 disabled={page * 30 >= total || loading}
                 onClick={() => setPage((p) => p + 1)}
               >
                 Next
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -1641,7 +1851,9 @@ export function SeoWorkspace({
       {editor &&
         (inventory &&
         tab === "inventory" &&
-        ["project", "property"].includes(editor.scope) ? (
+        ["project", "property"].includes(
+          editor.config?.scope || editor.scope,
+        ) ? (
           <AdvancedSeoEditor
             initial={editor}
             onClose={() => setEditor(null)}

@@ -1,12 +1,28 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, Eye, EyeOff, LoaderCircle, LockKeyhole, Mail } from "lucide-react";
+import {
+  Button,
+  TextField,
+  IconButton,
+  Callout,
+  Heading,
+  Text,
+} from "@radix-ui/themes";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  TriangleAlert,
+} from "lucide-react";
 import { seoApi } from "../seo-admin-shell";
 export default function SeoLogin() {
   const [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+    [busy, setBusy] = useState(false),
+    [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   return (
     <section className="seo-login" aria-labelledby="login-heading">
@@ -14,10 +30,15 @@ export default function SeoLogin() {
         <img src="/assets/images/logo/logo.png" alt="Majestan Realty" />
       </header>
       <div className="seo-login-heading">
-        <h1 id="login-heading">Admin Panel</h1>
-        <p>Sign in to manage your website.</p>
+        <Heading as="h1" size="6" id="login-heading">
+          SEO workspace
+        </Heading>
+        <Text as="p" size="2" color="gray">
+          Sign in with your Sierra account.
+        </Text>
       </div>
       <form
+        aria-busy={busy}
         onSubmit={async (e) => {
           e.preventDefault();
           setBusy(true);
@@ -29,52 +50,85 @@ export default function SeoLogin() {
               password: data.get("password"),
             });
             router.replace("/admin/projects/seo");
-          } catch (e) {
-            setError((e as Error).message);
+          } catch (cause) {
+            setError((cause as Error).message);
           } finally {
             setBusy(false);
           }
         }}
-        aria-busy={busy}
       >
         <div className="seo-login-field">
           <label htmlFor="login-email">Email address</label>
-          <div className="seo-login-input">
-            <Mail size={16} aria-hidden="true" />
-            <input id="login-email" name="email" type="email" autoComplete="username" placeholder="you@company.com" disabled={busy} required />
-          </div>
+          <TextField.Root
+            id="login-email"
+            name="email"
+            type="email"
+            autoComplete="username"
+            placeholder="you@company.com"
+            size="3"
+            required
+            disabled={busy}
+          >
+            <TextField.Slot>
+              <Mail size={18} />
+            </TextField.Slot>
+          </TextField.Root>
         </div>
         <div className="seo-login-field">
           <label htmlFor="login-password">Password</label>
-          <div className="seo-login-input">
-            <LockKeyhole size={16} aria-hidden="true" />
-          <input
+          <TextField.Root
             id="login-password"
             name="password"
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             placeholder="Enter your password"
+            size="3"
             minLength={6}
-            disabled={busy}
             required
-          />
-            <button type="button" className="seo-login-reveal" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} disabled={busy}>
-              {showPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
-            </button>
-          </div>
+            disabled={busy}
+          >
+            <TextField.Slot>
+              <LockKeyhole size={18} />
+            </TextField.Slot>
+            <TextField.Slot side="right">
+              <IconButton
+                type="button"
+                variant="ghost"
+                color="gray"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                disabled={busy}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </IconButton>
+            </TextField.Slot>
+          </TextField.Root>
         </div>
         {error && (
-          <p role="alert" className="seo-error">
-            {error}
-          </p>
+          <Callout.Root color="red" role="alert">
+            <Callout.Icon>
+              <TriangleAlert size={16} />
+            </Callout.Icon>
+            <Callout.Text>{error}</Callout.Text>
+          </Callout.Root>
         )}
-        <button type="submit" className="seo-button seo-login-submit" disabled={busy}>
+        <Button
+          type="submit"
+          className="seo-login-submit"
+          size="3"
+          loading={busy}
+          disabled={busy}
+        >
           {busy ? "Signing in…" : "Sign in"}
-          {busy ? <LoaderCircle size={16} className="seo-login-spinner" aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}
-        </button>
+          <ArrowRight size={18} />
+        </Button>
       </form>
       <footer className="seo-login-footer">
-        <a href="/" target="_blank" rel="noreferrer">View website <ArrowUpRight size={14} aria-hidden="true" /></a>
+        <a href="/" target="_blank" rel="noreferrer">
+          View website
+          <ArrowUpRight size={14} />
+        </a>
       </footer>
     </section>
   );

@@ -114,3 +114,19 @@ describe("SEO admin proxy route", () => {
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
+
+it("revalidates the saved public path and its parent only after a successful upstream save", async () => {
+  const upstreamFetch = vi
+    .fn()
+    .mockResolvedValue(
+      new Response(JSON.stringify({ data: { public_path: "/home/photos" } }), {
+        status: 200,
+      }),
+    );
+  vi.stubGlobal("fetch", upstreamFetch);
+  const path = ["configs", "property:1"];
+  const response = await PUT(requestFor(path), routeContext(path));
+  expect(response.status).toBe(200);
+  expect(revalidatePath).toHaveBeenCalledWith("/home/photos");
+  expect(revalidatePath).toHaveBeenCalledWith("/home");
+});

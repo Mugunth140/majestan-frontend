@@ -63,6 +63,7 @@ export function MediaPreview({ project }: { project: ProjectDetail }) {
         slug={slug}
         name={project.name}
         photos={photos}
+        photoMetadata={(project as ProjectDetail & {galleryImageSeo?: Record<string,{titleText?:string;caption?:string}>}).galleryImageSeo}
         photoAltOverrides={(
           project as ProjectDetail & { galleryImageAltOverrides?: Record<string, string> }
         ).galleryImageAltOverrides}

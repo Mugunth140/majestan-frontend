@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { canOptimizeImage } from "@/lib/responsive-images";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { SeoProperty } from "@/lib/api/property-by-slug";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
@@ -117,7 +118,8 @@ export function PropertyGallery({
           }
           title={images[index]?.titleText}
           fill
-          unoptimized
+          unoptimized={!canOptimizeImage(imageSrc)}
+          sizes="(max-width: 1023px) 100vw, (max-width: 1400px) 65vw, 820px"
           loading="eager"
           fetchPriority="high"
           onError={() => {

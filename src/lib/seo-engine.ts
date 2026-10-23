@@ -1,25 +1,28 @@
 import { SEO_API_BASE } from "./seo-api-base";
 import { cache } from "react";
+import { seoEndpointTags } from "./public-cache-tags";
 import type { Metadata } from "next";
 export const SEO_SITE = "https://www.majestanrealty.com";
 export type SeoSnapshot = Record<string, any>;
 const base = SEO_API_BASE;
-export const seoFetch = cache(async (endpoint: string): Promise<any> => {
-  try {
-    const r = await fetch(base + "/seo-engine/" + endpoint, {
-      cache: "no-store",
-      headers: process.env.INTERNAL_API_KEY
-        ? { "x-internal-key": process.env.INTERNAL_API_KEY }
-        : {},
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!r.ok) return null;
-    const b = await r.json();
-    return b && "data" in b ? b.data : b;
-  } catch {
-    return null;
-  }
+// Request memoization is shared by metadata, the page and strict detail checks.
+// Fetch caching then reuses public snapshots between requests.
+const fetchPublicSeo = cache(async (endpoint: string): Promise<any> => {
+  const response = await fetch(base + "/seo-engine/" + endpoint, {
+    next: { revalidate: endpoint === "organization" ? 3600 : 60, tags: seoEndpointTags(endpoint) },
+    headers: process.env.INTERNAL_API_KEY ? { "x-internal-key": process.env.INTERNAL_API_KEY } : {},
+    signal: AbortSignal.timeout(15000),
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`Public SEO lookup failed: ${response.status}`);
+  const payload = await response.json();
+  return payload && "data" in payload ? payload.data : payload;
 });
+export const seoFetch = cache(async (endpoint: string): Promise<any> => {
+  try { return await fetchPublicSeo(endpoint); } catch { return null; }
+});
+// A transient API failure must not generate a cached detail page with missing SEO.
+export const getSeoForDetail = cache((path: string) => fetchPublicSeo("resolve?path=" + encodeURIComponent(path)));
 export const getSeo = cache(
   async (path: string): Promise<SeoSnapshot | null> =>
     seoFetch("resolve?path=" + encodeURIComponent(path)),

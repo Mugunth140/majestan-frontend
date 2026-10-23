@@ -6,6 +6,9 @@ import type { SeoProperty } from "@/lib/api/property-by-slug";
 
 afterEach(cleanup);
 
+// Async server locality lookup is verified in the rendered-page checks.
+vi.mock("@/components/site/locality/LocalityTeaserServer", () => ({ LocalityTeaserServer: () => null }));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "",
@@ -620,9 +623,9 @@ describe("PropertyDetailsView redesigned hierarchy", () => {
     ] }} />);
     const gallery = screen.getByRole("figure", { name: `${baseProperty.title} photos` });
     const stage = within(gallery).getByRole("group", { name: "Property photos. Use left and right arrow keys to browse." });
-    expect(within(gallery).getByRole("img").getAttribute("src")).toMatch(/\/primary\.jpg$/);
+    expect(within(gallery).getByRole("img").getAttribute("src")).toContain(encodeURIComponent("/primary.jpg"));
     fireEvent.keyDown(stage, { key: "ArrowLeft" });
-    expect(within(gallery).getByRole("img").getAttribute("src")).toMatch(/\/other\.jpg$/);
+    expect(within(gallery).getByRole("img").getAttribute("src")).toContain(encodeURIComponent("/other.jpg"));
     expect(within(gallery).getByText("2 / 2")).toBeDefined();
     fireEvent.click(within(gallery).getByRole("button", { name: "Next photo" }));
     expect(within(gallery).getByText("1 / 2")).toBeDefined();

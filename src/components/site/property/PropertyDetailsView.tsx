@@ -1,7 +1,5 @@
-"use client";
 import { SeoEditorial } from "@/components/site/SeoEditorial";
 
-import { useState } from "react";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import { formatDate, formatFurnishing } from "@/lib/property-format";
 import {
@@ -46,10 +44,8 @@ import {
   Panel,
   PanelLink,
   IconMark,
-  EYEBROW,
-  INK,
 } from "@/components/site/project/overview/overview-ui";
-import { TEXT_LINK } from "@/components/site/project/project-ui";
+import { PropertyStatsPreview } from "./PropertyStatsPreview";
 import { PropertyFinanceSection } from "./PropertyFinanceSection";
 import { PropertyFurnishingSection } from "./PropertyFurnishingSection";
 import styles from "./property-details.module.css";
@@ -57,7 +53,7 @@ import { PropertyInfoSidebar } from "@/components/site/property/PropertyInfoSide
 import { PropertyDescriptionPreview } from "@/components/site/property/PropertyDescriptionPreview";
 import { PropertyTopActions } from "@/components/site/property/PropertyTopActions";
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
-import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
+import { LocalityTeaserServer as LocalityTeaser } from "@/components/site/locality/LocalityTeaserServer";
 import {
   capFirst,
   getSublocation,
@@ -69,7 +65,6 @@ type PropertyDetailsViewProps = {
 };
 
 export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
-  const [showAllPropertyDetails, setShowAllPropertyDetails] = useState(false);
   // Single-page types stack every section on this overview with anchor ids;
   // multi-page types keep the teaser cards linking out to subpages.
   const isSingle = isSinglePageType(property.propertyType);
@@ -320,60 +315,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
           )}
           {detailGroups.length === 0 && overviewStats.length > 0 && (
             <Panel id="property-details" title="Property details">
-              <div
-                id="property-details-grid"
-                className="mt-6! pt-6! border-t! border-gray-100! grid! grid-cols-2! sm:grid-cols-3! gap-x-4! gap-y-6!"
-              >
-                {overviewStats.map((stat, index) => {
-                  const collapsedVisibility = showAllPropertyDetails
-                    ? ""
-                    : index >= 6
-                      ? "hidden!"
-                      : index >= 4
-                        ? "hidden! sm:flex!"
-                        : "";
-                  return (
-                    <div
-                      key={stat.label}
-                      className={`flex! items-start! gap-3! min-w-0! ${stat.wide ? "col-span-2! sm:col-span-3!" : ""} ${collapsedVisibility}`}
-                    >
-                      <div className="w-8! h-8! rounded-lg! bg-[#eef4ff]! flex! items-center! justify-center! text-[#1645bf]! shrink-0!">
-                        {stat.icon}
-                      </div>
-                      <div className="min-w-0!">
-                        <p className={`m-0! ${EYEBROW}`}>{stat.label}</p>
-                        <p
-                          className={`m-0! text-[15px]! font-semibold! ${INK} mt-0.5! leading-snug! break-words! ${stat.wide ? "whitespace-pre-line!" : ""}`}
-                        >
-                          {stat.value}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {overviewStats.length > 4 && (
-                <button
-                  type="button"
-                  aria-controls="property-details-grid"
-                  aria-expanded={showAllPropertyDetails}
-                  onClick={() => setShowAllPropertyDetails((show) => !show)}
-                  className={`${TEXT_LINK} mt-5! inline-flex! text-sm! font-semibold! sm:hidden!`}
-                >
-                  {showAllPropertyDetails ? "Show less" : "View more"}
-                </button>
-              )}
-              {overviewStats.length > 6 && (
-                <button
-                  type="button"
-                  aria-controls="property-details-grid"
-                  aria-expanded={showAllPropertyDetails}
-                  onClick={() => setShowAllPropertyDetails((show) => !show)}
-                  className={`${TEXT_LINK} mt-5! hidden! text-sm! font-semibold! sm:inline-flex!`}
-                >
-                  {showAllPropertyDetails ? "Show less" : "View more"}
-                </button>
-              )}
+              <PropertyStatsPreview stats={overviewStats} />
             </Panel>
           )}
 

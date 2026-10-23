@@ -44,3 +44,6 @@ next-env.d.ts
 # Isolated local SEO verification output
 /.next-seo-verify/
 /.next-seo-build/
+
+# Isolated production performance verification
+/.next-perf/

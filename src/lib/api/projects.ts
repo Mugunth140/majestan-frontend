@@ -1,4 +1,5 @@
 import {getSeo,withSeo} from '@/lib/seo-engine';
+import { cache } from 'react';
 export type ProjectFurnishingItem = { id: number; name: string; icon?: string | null };
 
 export type ProjectUnit = {
@@ -167,12 +168,16 @@ const SERVER_API_BASE =
 const API_BASE =
   typeof window === "undefined" ? SERVER_API_BASE : "/site-api";
 
+export class ProjectApiError extends Error {
+  constructor(public readonly status: number) { super(`Projects API failed: ${status}`); }
+}
+
 async function fetchProjectApi<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
-    next: (init as any)?.next ?? { revalidate: 300 },
+    next: (init as any)?.next ?? { revalidate: 300, tags: ["public-inventory"] },
   });
-  if (!res.ok) throw new Error(`Projects API failed: ${res.status}`);
+  if (!res.ok) throw new ProjectApiError(res.status);
   const payload = (await res.json()) as ApiEnvelope<T> | T;
   if (typeof payload === "object" && payload !== null && "success" in payload && "data" in payload) {
     return (payload as ApiEnvelope<T>).data;
@@ -180,12 +185,12 @@ async function fetchProjectApi<T>(path: string, init?: RequestInit): Promise<T> 
   return payload as T;
 }
 
-export async function getProjectBySlugUrl(slug: string): Promise<ProjectDetail> {
+export const getProjectBySlugUrl = cache(async function getProjectBySlugUrl(slug: string): Promise<ProjectDetail> {
   const project=await fetchProjectApi<ProjectDetail>(`/projects/by-slug/${encodeURIComponent(slug)}`);
   const mainSeo=await getSeo('/'+slug);
   const effectiveSeo=mainSeo?.redirect?await getSeo(mainSeo.redirect):mainSeo;
   return withSeo(withSeo(project,effectiveSeo),mainSeo?.redirect ? mainSeo : effectiveSeo);
-}
+});
 
 export function listProjects(params: ProjectListParams = {}): Promise<ProjectListResponse> {
   const q = new URLSearchParams();

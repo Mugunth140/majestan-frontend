@@ -294,7 +294,7 @@ const unwrapPayload = async <T>(response: Response): Promise<T> => {
 
 export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(slug: string): Promise<SeoProperty | null> {
   const response = await fetch(`${API_BASE_URL}/properties/by-slug/${encodeURIComponent(slug)}`, {
-    next: { revalidate: 300 }, // Bounded staleness; on-demand ISR is primary
+    next: { revalidate: 300, tags: ["public-inventory"] }, // CRM updates expire inventory pages
   });
 
   if (response.status === 404) {

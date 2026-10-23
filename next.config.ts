@@ -185,6 +185,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "cdn.majestanrealty.com", pathname: "/**" },
       { protocol: "https", hostname: "prismarkcrm.in", pathname: "/**" },
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],

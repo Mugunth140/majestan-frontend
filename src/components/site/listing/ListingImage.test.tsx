@@ -15,23 +15,19 @@ function imgs(container: HTMLElement): HTMLImageElement[] {
 }
 
 describe("ListingImage", () => {
-  it("shows the placeholder instantly before the real photo loads", () => {
-    const { container } = render(
-      <ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />
-    );
-    const [placeholder, real] = imgs(container);
-    expect(placeholder).toHaveAttribute("src", PLACEHOLDER);
-    expect(real).toHaveAttribute("src", PHOTO);
-    expect(real.className).toContain("opacity-0");
+  it("renders the photo immediately without waiting for hydration or an onLoad fade", () => {
+    const { container } = render(<ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />);
+    expect(imgs(container)).toHaveLength(1);
+    expect(screen.getByAltText("Listing")).toHaveAttribute("src", PHOTO);
+    expect(screen.getByAltText("Listing").className).not.toContain("opacity-0");
+    expect(screen.getByAltText("Listing")).toHaveAttribute("loading", "lazy");
   });
 
-  it("fades the real photo in on load and drops the placeholder", () => {
-    const { container } = render(
-      <ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />
-    );
-    fireEvent.load(screen.getByAltText("Listing"));
-    expect(screen.getByAltText("Listing").className).toContain("opacity-100");
-    expect(imgs(container)).toHaveLength(1);
+  it("does not prefetch lazy photos through the Image constructor", () => {
+    const prefetch = vi.spyOn(window, "Image");
+    render(<ListingImage src={PHOTO} placeholderSrc={PLACEHOLDER} alt="Listing" />);
+    expect(prefetch).not.toHaveBeenCalled();
+    prefetch.mockRestore();
   });
 
   it("retries once, then settles on the placeholder when the real photo fails", () => {
@@ -49,18 +45,18 @@ describe("ListingImage", () => {
 
     // Second failure on the retried node falls back to the placeholder.
     fireEvent.error(screen.getByAltText("Listing"));
-    expect(screen.queryByAltText("Listing")).toBeNull();
+    expect(screen.getByAltText("Listing")).toHaveAttribute("src", expect.stringContaining(encodeURIComponent(PLACEHOLDER)));
     const [only] = imgs(container);
-    expect(only).toHaveAttribute("src", PLACEHOLDER);
+    expect(only).toHaveAttribute("src", expect.stringContaining(encodeURIComponent(PLACEHOLDER)));
   });
 
   it("renders placeholder only when there is no photo", () => {
     const { container } = render(
       <ListingImage src={null} placeholderSrc={PLACEHOLDER} alt="Listing" className="object-cover" />
     );
-    expect(screen.queryByAltText("Listing")).toBeNull();
+    expect(screen.getByAltText("Listing")).toHaveAttribute("src", expect.stringContaining(encodeURIComponent(PLACEHOLDER)));
     const [only] = imgs(container);
-    expect(only).toHaveAttribute("src", PLACEHOLDER);
+    expect(only).toHaveAttribute("src", expect.stringContaining(encodeURIComponent(PLACEHOLDER)));
   });
 
   it("loads eagerly with high priority when asked", () => {

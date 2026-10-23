@@ -31,6 +31,7 @@ import type { FilterValues } from "@/components/search/PropertySearchFilters";
 import { searchProperties } from "@/lib/api";
 import {
   getProjectBySlugUrl,
+  ProjectApiError,
   formatINR as formatProjectINR,
 } from "@/lib/api/projects";
 import { ProjectNavigation } from "@/components/site/project/project-navigation";
@@ -161,7 +162,7 @@ export async function generateMetadata({
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
+    property = engineSeo?.scope === "project" ? null : withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
   } catch (err) {
     console.error(`[generateMetadata] Failed to fetch property for slug "${slug}":`, err);
     return {
@@ -253,7 +254,10 @@ export async function generateMetadata({
   }
 
   try {
-    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch(() => null);
+    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch((error: unknown) => {
+      if (error instanceof ProjectApiError && error.status === 404) return null;
+      throw error;
+    });
     if (project) {
       if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
       const canonicalPath = `/${project.canonicalSlug}`;
@@ -303,7 +307,8 @@ export async function generateMetadata({
     }
   } catch (error) {
     unstable_rethrow(error);
-    /* fall through to static/PSEO/404 */
+    // Never cache a temporary project API failure as a missing listing.
+    throw error;
   }
 
   const pathname = `/${slug}`;
@@ -453,7 +458,7 @@ export default async function SlugPage({
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
+    property = engineSeo?.scope === "project" ? null : withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
   } catch (err) {
     console.error(`[SlugPage] Failed to fetch property for slug "${slug}":`, err);
     // Rethrow so error.tsx renders with a 5xx status: a 200 "Service
@@ -515,7 +520,10 @@ export default async function SlugPage({
   }
 
   try {
-    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch(() => null);
+    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch((error: unknown) => {
+      if (error instanceof ProjectApiError && error.status === 404) return null;
+      throw error;
+    });
     if (project) {
       if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
       const breadcrumbItems = [
@@ -582,7 +590,8 @@ export default async function SlugPage({
     }
   } catch (error) {
     unstable_rethrow(error);
-    /* fall through to static/PSEO/404 */
+    // Never cache a temporary project API failure as a missing listing.
+    throw error;
   }
 
   const pathname = `/${slug}`;

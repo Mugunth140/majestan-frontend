@@ -32,7 +32,7 @@ import { projectFaqItems } from "@/components/site/project/overview/faq-items";
 import { FaqOverview } from "@/components/site/project/overview/FaqOverview";
 import { ProjectHelpSection } from "@/components/site/project/overview/ProjectHelpSection";
 import { OV_ROOT } from "@/components/site/project/overview/overview-ui";
-import { getProjectBySlugUrl } from "@/lib/api/projects";
+import { getProjectBySlugUrl, ProjectApiError } from "@/lib/api/projects";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
 import { amenitiesPageLabel, hasFurnishing } from "@/lib/project-overview";
@@ -515,7 +515,10 @@ async function baseMetadata({
   // Project sub-page metadata (no per-section SEO rows — fallback copy).
   // Checked before static views, mirroring the property branch above.
   try {
-    const project = await getProjectBySlugUrl(slug).catch(() => null);
+    const project = await getProjectBySlugUrl(slug).catch((error: unknown) => {
+      if (error instanceof ProjectApiError && error.status === 404) return null;
+      throw error;
+    });
     if (project) {
     if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
       const sectionKey = section[0];
@@ -817,12 +820,16 @@ export default async function PropertySectionPage({
   // so /{projectSlug}/{section} never falls into the view 404 gate.
   let project: ProjectDetail | null = null;
   try {
-    project = await getProjectBySlugUrl(slug).catch(() => null);
+    project = await getProjectBySlugUrl(slug).catch((error: unknown) => {
+      if (error instanceof ProjectApiError && error.status === 404) return null;
+      throw error;
+    });
   } catch (err) {
     console.error(
       `[ProjectSectionPage] Failed to fetch project for slug "${slug}":`,
       err,
     );
+    throw err;
   }
   if (project) {
     if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
@@ -978,7 +985,10 @@ export default async function PropertySectionPage({
 
 export async function generateMetadata(props: PropertySectionPageProps): Promise<Metadata> {
   const {slug, section} = await props.params;
-  const record = await getPropertyBySeoSlug(slug) || await getProjectBySlugUrl(slug).catch(() => null);
+  const record = await getPropertyBySeoSlug(slug) || await getProjectBySlugUrl(slug).catch((error: unknown) => {
+      if (error instanceof ProjectApiError && error.status === 404) return null;
+      throw error;
+    });
   const metadata = await baseMetadata(props);
   return record ? sectionMetadata(record, section[0], metadata) : metadata;
 }

@@ -1,150 +1,53 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-/**
- * Progressive listing photo with a cached type placeholder.
- *
- * The placeholder renders instantly (it is tiny and cached after the first
- * load), the real photo fades in over it once decoded, and any load failure
- * settles back on the placeholder. A session-level prefetch map deduplicates
- * parallel requests for the same URL across cards (back-nav, pagination,
- * wishlist ↔ listing) so each photo is fetched at most once per session —
- * repeat views resolve from the browser HTTP cache.
- *
- * The wrapper is `display: contents`, so both images participate in the
- * parent layout exactly like the single <img> this replaces (absolute
- * positioning, aspect boxes, group-hover zoom all keep working).
- */
-
-// Session-level cache: each distinct real URL is prefetched at most once.
-const pendingLoads = new Map<string, Promise<void>>();
-
-function prefetchReal(src: string): Promise<void> {
-  const existing = pendingLoads.get(src);
-  if (existing) return existing;
-  const promise = new Promise<void>((resolve) => {
-    if (typeof window === "undefined" || typeof window.Image === "undefined") {
-      resolve();
-      return;
-    }
-    const probe = new window.Image();
-    probe.onload = () => resolve();
-    // Resolve (don't reject) on failure — the <img> onError below decides
-    // the visual outcome; the cache just records "attempted".
-    probe.onerror = () => resolve();
-    probe.src = src;
-  });
-  pendingLoads.set(src, promise);
-  return promise;
-}
+import { responsiveImage } from "@/lib/responsive-images";
 
 type ListingImageProps = {
-  /** Real photo URL. Null/empty renders the placeholder only. */
   src: string | null | undefined;
-  /** Instant type placeholder shown until the real photo is ready. */
   placeholderSrc: string;
   alt: string;
   title?: string;
-  /** Layout classes shared by both images (positioning, object-fit, zoom). */
   className?: string;
-  /** Render the real photo eagerly with high fetch priority (first card). */
   eager?: boolean;
+  sizes?: string;
+  /** A portrait crop served by picture, so phones never request both covers. */
+  mobileSrc?: string | null;
   "aria-label"?: string;
 };
 
-export function ListingImage({
-  src,
-  placeholderSrc,
-  alt,
-  className,
-  eager = false,
-  ...rest
-}: ListingImageProps) {
-  const [loaded, setLoaded] = useState(false);
+/** Native lazy loading and cache handling; photos are visible before hydration. */
+export function ListingImage(props: ListingImageProps) {
+  return <NativeListingImage key={`${props.src || ""}:${props.mobileSrc || ""}`} {...props} />;
+}
+
+function NativeListingImage({ src, placeholderSrc, alt, className, eager = false,
+  sizes = "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 320px", mobileSrc, ...rest }: ListingImageProps) {
   const [failed, setFailed] = useState(false);
-  const [prevSrc, setPrevSrc] = useState(src);
-  // One delayed retry before the placeholder becomes final: transient
-  // blips must not permanently swap a tile. The remount key refetches the
-  // identical URL (failures are not HTTP-cached), so signed URLs keep working.
-  const RETRY_MS = 1500;
-  const attemptsRef = useRef(0);
-  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const attempts = useRef(0);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (retryTimer.current) clearTimeout(retryTimer.current);
+  }, []);
 
-  // Reset on src change during render (React-endorsed pattern — no effect).
-  if (prevSrc !== src) {
-    setPrevSrc(src);
-    setLoaded(false);
-    setFailed(false);
-    attemptsRef.current = 0;
-    if (retryTimer.current) {
-      clearTimeout(retryTimer.current);
-      retryTimer.current = null;
-    }
-  }
-
-  useEffect(() => {
-    // Warm the session cache; the visible swap still waits for this
-    // instance's own onLoad so the fade never plays over a broken image.
-    if (src) void prefetchReal(src);
-  }, [src]);
-
-  useEffect(
-    () => () => {
-      if (retryTimer.current) clearTimeout(retryTimer.current);
-    },
-    [],
-  );
-
-  const showReal = Boolean(src) && !failed;
-  // Blur-up only while a real photo is still loading. When the placeholder
-  // is the final image (no photo, or the photo failed), render it sharp.
-  const placeholderIsFinal = !showReal;
-  const placeholderLook = placeholderIsFinal ? "" : " blur-[2px] scale-105";
-
+  const photo = src && !failed ? src : placeholderSrc;
+  const image = responsiveImage(photo, sizes);
+  const portrait = mobileSrc && !failed ? responsiveImage(mobileSrc, sizes) : null;
   return (
-    <span className="contents">
-      {!loaded && (
-        <img
-          src={placeholderSrc}
-          alt=""
-          aria-hidden="true"
-          loading="eager"
-          decoding="async"
-          draggable={false}
-          className={`${className ?? ""}${placeholderLook}`}
-        />
-      )}
-      {showReal && (
-        <img
-          key={attempt}
-          src={src as string}
-          alt={alt}
-          loading={eager ? "eager" : "lazy"}
-          fetchPriority={eager ? "high" : "auto"}
-          decoding="async"
-          draggable={false}
-          onLoad={() => setLoaded(true)}
-          onError={(e) => {
-            // One-shot guard per node: a broken placeholder must not ping-pong.
-            const el = e.currentTarget;
-            if (el.dataset.listingFallback === "1") return;
-            el.dataset.listingFallback = "1";
-            if (attemptsRef.current < 1) {
-              attemptsRef.current += 1;
-              retryTimer.current = setTimeout(
-                () => setAttempt((a) => a + 1),
-                RETRY_MS,
-              );
-              return;
-            }
-            setFailed(true);
-          }}
-          className={`${className ?? ""} transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
-          {...rest}
-        />
-      )}
-    </span>
+    <picture className="contents">
+      {portrait && <source media="(max-width: 639px)" srcSet={portrait.srcSet || portrait.src} sizes={sizes} />}
+      {/* getImageProps supplies responsive optimizer URLs without another image runtime. */}
+      <img {...image} key={`${src}-${attempt}`} alt={alt} className={className}
+        loading={eager ? "eager" : "lazy"} fetchPriority={eager ? "high" : "auto"}
+        decoding="async" draggable={false} {...rest}
+        onError={() => {
+          if (!src || failed) return;
+          if (attempts.current === 0) {
+            attempts.current = 1;
+            retryTimer.current = setTimeout(() => setAttempt(value => value + 1), 1500);
+          } else setFailed(true);
+        }} />
+    </picture>
   );
 }

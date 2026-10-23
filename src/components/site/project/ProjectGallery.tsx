@@ -79,59 +79,17 @@ export function ProjectGallery({ project }: { project: ProjectDetail }) {
         className="relative! overflow-hidden! aspect-[4/5]! sm:aspect-video! lg:aspect-[21/9]! bg-gray-100! group/stage! outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-inset!"
       >
         <div className="absolute! inset-0!">
-          {count > 0 ? (
-            images.map((img, index) => (
-              // Position in the key: the cover often repeats inside the
-              // gallery, and same-key slides would merge into one.
-              <div
-                key={`${img}-${index}`}
-                aria-hidden={index !== active}
-                className={`absolute! inset-0! transition-opacity! duration-250! ease-out-quint! ${
-                  index === active ? "opacity-100! z-10!" : "opacity-0! z-0!"
-                }`}
-              >
-                {/* Only the cover has a dedicated portrait crop, so only the
-                  cover pays for two <img> nodes. */}
-                {index === 0 && mobileCover ? (
-                  <>
-                    <ListingImage
-                      src={img}
-                      placeholderSrc={placeholder}
-                      alt={altFor(img, `${project.name} — cover`)}
-                      title={media[img]?.titleText}
-                      eager
-                      className="w-full! h-full! object-cover! hidden! sm:block!"
-                    />
-                    <ListingImage
-                      src={mobileCover}
-                      placeholderSrc={placeholder}
-                      alt={altFor(mobileCover, `${project.name} — cover`)}
-                      title={media[mobileCover]?.titleText}
-                      eager
-                      className="w-full! h-full! object-cover! sm:hidden!"
-                    />
-                  </>
-                ) : (
-                  <ListingImage
-                    src={img}
-                    placeholderSrc={placeholder}
-                    alt={altFor(img, `${project.name} — photo ${index + 1}`)}
-                    title={media[img]?.titleText}
-                    eager={index === 0}
-                    className="w-full! h-full! object-cover!"
-                  />
-                )}
-              </div>
-            ))
-          ) : (
-            <ListingImage
-              src={null}
-              placeholderSrc={placeholder}
-              alt={project.name}
-              eager
-              className="w-full! h-full! object-cover!"
-            />
-          )}
+          <ListingImage
+            key={active}
+            src={images[active] || null}
+            mobileSrc={active === 0 ? mobileCover : null}
+            placeholderSrc={placeholder}
+            alt={altFor(images[active], `${project.name} — photo ${active + 1}`)}
+            title={media[images[active]]?.titleText}
+            eager
+            sizes="(max-width: 1250px) 100vw, 1200px"
+            className="w-full! h-full! object-cover!"
+          />
         </div>
 
         {count > 1 && (

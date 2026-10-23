@@ -1,6 +1,7 @@
 import { SEO_API_BASE } from "@/lib/seo-api-base";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { SEO_CONTENT_TAG, SEO_ORGANIZATION_TAG } from "@/lib/public-cache-tags";
 export const dynamic = "force-dynamic";
 const base = SEO_API_BASE;
 async function forward(
@@ -78,6 +79,8 @@ async function forward(
       !["GET", "HEAD"].includes(request.method) &&
       path[0] !== "auth"
     ) {
+      revalidateTag(SEO_CONTENT_TAG, { expire: 0 });
+      revalidateTag(SEO_ORGANIZATION_TAG, { expire: 0 });
       const paths = new Set<string>();
       const collect = (raw: string | undefined) => {
         try {

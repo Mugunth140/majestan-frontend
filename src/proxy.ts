@@ -5,6 +5,24 @@ export async function proxy(request: NextRequest) {
   if (path === "/site-api" || path.startsWith("/site-api/"))
     return siteApiProxy(request);
   if (path.startsWith("/admin")) return NextResponse.next();
+  // Hide the internal rendering route; public URLs and canonicals stay unchanged.
+  if (path.startsWith("/detail-render/") || path.startsWith("/detail-section/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = path.replace(/^\/(detail-render|detail-section)/, "");
+    return NextResponse.redirect(url, 308);
+  }
+  if (/^\/[^/]+-[a-z]{1,6}\d+\/(amenities|floor-plans?|locality|photos|videos|price|specifications)$/i.test(path)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/detail-section" + path;
+    return NextResponse.rewrite(url);
+  }
+  // Code-suffixed inventory URLs resolve redirects and off-market policies in
+  // the detail renderer itself. Avoid a second routing-table API round trip.
+  if (/^\/[^/]+-[a-z]{1,6}\d+$/i.test(path)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/detail-render" + path;
+    return NextResponse.rewrite(url);
+  }
   const base = SEO_API_BASE;
   try {
     const res = await fetch(base + "/seo-engine/routing", {
@@ -47,7 +65,12 @@ export async function proxy(request: NextRequest) {
       )
     ) {
       const url = request.nextUrl.clone();
-      url.pathname = "/seo-section" + path;
+      url.pathname = "/detail-section" + path;
+      return NextResponse.rewrite(url);
+    }
+    if (data.inventory_paths?.includes(path)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/detail-render" + path;
       return NextResponse.rewrite(url);
     }
     if (data.paths?.includes(path)) {

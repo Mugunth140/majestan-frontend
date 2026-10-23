@@ -520,7 +520,11 @@ async function baseMetadata({
       throw error;
     });
     if (project) {
-    if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
+      if (
+        (project as any).shouldRedirect &&
+        (project as any).redirectDestination
+      )
+        permanentRedirect((project as any).redirectDestination);
       const sectionKey = section[0];
       const sectionConfig = PROJECT_SECTION_META[sectionKey];
       if (!sectionConfig || section.length !== 1) {
@@ -690,7 +694,10 @@ export default async function PropertySectionPage({
     }
 
     if (property.shouldRedirect) {
-      permanentRedirect((property as any).redirectDestination || `/${property.canonicalSlug}/${sectionKey}`);
+      permanentRedirect(
+        (property as any).redirectDestination ||
+          `/${property.canonicalSlug}/${sectionKey}`,
+      );
     }
 
     const rootSeo = await getEffectiveRootSeo(slug);
@@ -777,8 +784,10 @@ export default async function PropertySectionPage({
               <div className={propertyStyles.columns}>
                 <div className={propertyStyles.sectionContent}>
                   <RealEstateJsonLd record={property} section={sectionKey} />
-                  {sectionKey === "locality" && <SeoEditorial record={property} locality />}
                   <SectionContent sectionKey={sectionKey} property={property} />
+                  {sectionKey === "locality" && (
+                    <SeoEditorial record={property} locality />
+                  )}
                   <FaqSection
                     faqs={(property.faqs || []).filter(
                       (faq) => faq.section === sectionKey,
@@ -832,7 +841,8 @@ export default async function PropertySectionPage({
     throw err;
   }
   if (project) {
-    if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
+    if ((project as any).shouldRedirect && (project as any).redirectDestination)
+      permanentRedirect((project as any).redirectDestination);
     const sectionKey = section[0];
     if (!PROJECT_SECTION_META[sectionKey] || section.length !== 1) {
       notFound();
@@ -924,7 +934,6 @@ export default async function PropertySectionPage({
                 <ProjectTopActions project={project} />
               </div>
               <RealEstateJsonLd record={project} section={sectionKey} />
-              {sectionKey === "locality" && <SeoEditorial record={project} locality />}
               <ProjectSectionTitle title={sectionH1} />
               {childSeo.h2 && <h2>{childSeo.h2}</h2>}
               {field(childSeo, "intro_text", "introText") && (
@@ -936,6 +945,9 @@ export default async function PropertySectionPage({
                   sectionKey={sectionKey}
                   project={project}
                 />
+                {sectionKey === "locality" && (
+                  <SeoEditorial record={project} locality />
+                )}
                 <FaqOverview
                   project={project}
                   section={sectionKey}
@@ -983,12 +995,16 @@ export default async function PropertySectionPage({
   );
 }
 
-export async function generateMetadata(props: PropertySectionPageProps): Promise<Metadata> {
-  const {slug, section} = await props.params;
-  const record = await getPropertyBySeoSlug(slug) || await getProjectBySlugUrl(slug).catch((error: unknown) => {
+export async function generateMetadata(
+  props: PropertySectionPageProps,
+): Promise<Metadata> {
+  const { slug, section } = await props.params;
+  const record =
+    (await getPropertyBySeoSlug(slug)) ||
+    (await getProjectBySlugUrl(slug).catch((error: unknown) => {
       if (error instanceof ProjectApiError && error.status === 404) return null;
       throw error;
-    });
+    }));
   const metadata = await baseMetadata(props);
   return record ? sectionMetadata(record, section[0], metadata) : metadata;
 }

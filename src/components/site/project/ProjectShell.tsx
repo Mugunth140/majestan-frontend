@@ -124,7 +124,7 @@ export function ProjectTitleRow({
 export function ProjectSectionTitle({ title }: { title: string }) {
   return (
     <header>
-      <h1 className="m-0! text-[32px]! md:text-[44px]! font-semibold! text-[#0a0f1c]! tracking-[-0.035em]! leading-[1.05]! text-balance!">
+      <h1 className="m-0! text-2xl! md:text-3xl! font-semibold! text-[#0a0f1c]! tracking-[-0.035em]! leading-tight! text-balance!">
         {title}
       </h1>
     </header>

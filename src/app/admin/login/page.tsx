@@ -6,12 +6,10 @@ import {
   TextField,
   IconButton,
   Callout,
-  Heading,
   Text,
 } from "@radix-ui/themes";
 import {
   ArrowRight,
-  ArrowUpRight,
   Eye,
   EyeOff,
   LockKeyhole,
@@ -26,15 +24,15 @@ export default function SeoLogin() {
   const router = useRouter();
   return (
     <section className="seo-login" aria-labelledby="login-heading">
-      <header className="seo-login-brand">
+      <header className="h-15 flex items-center justify-center p-8">
         <img src="/assets/images/logo/logo.png" alt="Majestan Realty" />
       </header>
-      <div className="seo-login-heading">
-        <Heading as="h1" size="6" id="login-heading">
-          SEO workspace
-        </Heading>
+      <div className="seo-login-heading pt-5">
+        {/* <Heading as="h1" size="6" id="login-heading">
+          Welcome back
+        </Heading> */}
         <Text as="p" size="2" color="gray">
-          Sign in with your Sierra account.
+          Sign in with your account
         </Text>
       </div>
       <form
@@ -124,12 +122,6 @@ export default function SeoLogin() {
           <ArrowRight size={18} />
         </Button>
       </form>
-      <footer className="seo-login-footer">
-        <a href="/" target="_blank" rel="noreferrer">
-          View website
-          <ArrowUpRight size={14} />
-        </a>
-      </footer>
     </section>
   );
 }

@@ -2,15 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Sublocation, UnitType } from "@/lib/api";
 import { Building2, MapPin, ChevronDown, Search, Home } from "lucide-react";
 import {
   buildPseoSlug,
-  PROPERTY_TYPES,
   type PropertyTypeSlug,
 } from "@/lib/seo-urls";
+
+import styles from "./home-search.module.css";
+import { POST_PROPERTY_BUTTON, PostPropertyHover } from "@/components/site/shared/brand-cta";
 
 // Map home-search form property type values (API/form slugs) to PSEO URL slugs
 const HOME_SEARCH_PROPERTY_TYPE_MAP: Record<string, PropertyTypeSlug> = {
@@ -43,6 +45,39 @@ const projectTypeOptions = [
 ] as const;
 
 
+// Portaled menus stay above the hero and follow their trigger when scrolling.
+  function useAnchoredMenu(open: boolean, triggerRef: React.RefObject<HTMLElement | null>) {
+    const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
+
+    useEffect(() => {
+      if (!open) return;
+
+      const update = () => {
+        const el = triggerRef.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        // Fixed panel width hugging the trigger (floored so narrow triggers
+        // still fit content, capped so long names can't blow it wide).
+        // Clamp to the viewport so a trigger near the right edge does not push
+        // the panel off-screen.
+        const width = Math.min(Math.max(r.width, 224), 320);
+        const left = Math.min(r.left, document.documentElement.clientWidth - width - 12);
+        setRect({ top: r.bottom + 8, left: Math.max(12, left), width });
+      };
+
+      const frame = window.requestAnimationFrame(update);
+      window.addEventListener("scroll", update, true);
+      window.addEventListener("resize", update);
+      return () => {
+        window.cancelAnimationFrame(frame);
+        window.removeEventListener("scroll", update, true);
+        window.removeEventListener("resize", update);
+      };
+    }, [open, triggerRef]);
+
+    return open ? rect : null;
+  }
+
 export function HomeSearch({
   sublocations,
 }: {
@@ -55,6 +90,7 @@ export function HomeSearch({
   const [isProjectMode, setIsProjectMode] = useState(false);
   const [propertyType, setPropertyType] = useState("");
   const [locality, setLocality] = useState("");
+  const [localityQuery, setLocalityQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
   const [isLocalityMenuOpen, setIsLocalityMenuOpen] = useState(false);
@@ -79,8 +115,20 @@ export function HomeSearch({
     const citySublocations = sublocations.filter(
       (item) => item.city.toLowerCase() === selectedCity.toLowerCase(),
     );
-    return citySublocations.slice(0, 8);
-  }, [selectedCity, sublocations]);
+    return citySublocations.filter((item) => item.sublocation.toLowerCase().includes(localityQuery.trim().toLowerCase()));
+  }, [selectedCity, sublocations, localityQuery]);
+
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (isLocalityMenuOpen) localityMenuRef.current?.querySelector("button")?.focus();
+      else if (isPropertyMenuOpen) propertyMenuRef.current?.querySelector("button")?.focus();
+      setIsLocalityMenuOpen(false);
+      setIsPropertyMenuOpen(false);
+    };
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [isLocalityMenuOpen, isPropertyMenuOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -109,45 +157,6 @@ export function HomeSearch({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  /* Row 1 scrolls horizontally on mobile, and an overflow container clips
-     absolutely-positioned children — so the open menus used to be cut off and
-     slide under row 2. Both menus therefore render in a portal, positioned
-     against the trigger's viewport rect, and re-anchor on scroll/resize instead
-     of closing. */
-  function useAnchoredMenu(open: boolean, triggerRef: React.RefObject<HTMLElement | null>) {
-    const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
-
-    useEffect(() => {
-      if (!open) {
-        setRect(null);
-        return;
-      }
-
-      const update = () => {
-        const el = triggerRef.current;
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        // Fixed panel width hugging the trigger (floored so narrow triggers
-        // still fit content, capped so long names can't blow it wide).
-        // Clamp to the viewport so a trigger near the right edge does not push
-        // the panel off-screen.
-        const width = Math.min(Math.max(r.width, 224), 320);
-        const left = Math.min(r.left, window.innerWidth - width - 12);
-        setRect({ top: r.bottom + 8, left: Math.max(12, left), width });
-      };
-
-      update();
-      window.addEventListener("scroll", update, true);
-      window.addEventListener("resize", update);
-      return () => {
-        window.removeEventListener("scroll", update, true);
-        window.removeEventListener("resize", update);
-      };
-    }, [open, triggerRef]);
-
-    return rect;
-  }
 
   const propertyAnchor = useAnchoredMenu(isPropertyMenuOpen, propertyMenuRef);
   const localityAnchor = useAnchoredMenu(isLocalityMenuOpen, localityMenuRef);
@@ -299,7 +308,7 @@ export function HomeSearch({
               aria-haspopup="listbox"
               aria-expanded={isPropertyMenuOpen}
               className="flex! items-center! gap-2! bg-white! border! border-gray-200! hover:border-gray-300! rounded-full! px-5! h-[38px]! transition-colors!"
-              onClick={() => setIsPropertyMenuOpen((open) => !open)}
+              onClick={() => { setIsPropertyMenuOpen((open) => !open); setIsLocalityMenuOpen(false); }}
               onKeyDown={(event) => {
                 if (event.key === "Escape") setIsPropertyMenuOpen(false);
               }}
@@ -351,7 +360,7 @@ export function HomeSearch({
               aria-haspopup="listbox"
               aria-expanded={isLocalityMenuOpen}
               className="flex! items-center! gap-2! bg-white! border! border-gray-200! hover:border-gray-300! rounded-full! px-5! h-[38px]! transition-colors!"
-              onClick={() => setIsLocalityMenuOpen((open) => !open)}
+              onClick={() => { setLocalityQuery(""); setIsLocalityMenuOpen((open) => !open); setIsPropertyMenuOpen(false); }}
               onKeyDown={(event) => {
                 if (event.key === "Escape") setIsLocalityMenuOpen(false);
               }}
@@ -365,11 +374,19 @@ export function HomeSearch({
 
             {isLocalityMenuOpen && localityAnchor && createPortal(
               <div
-                role="listbox"
+                role="dialog"
+                aria-label="Choose locality"
                 data-search-menu
                 style={{ top: localityAnchor.top, left: localityAnchor.left, width: localityAnchor.width }}
                 className="fixed! z-[60]! max-h-72! overflow-y-auto! overflow-x-hidden! rounded-2xl! border! border-gray-100! bg-white! p-2! shadow-[0_20px_50px_rgba(0,0,0,0.12)]!"
               >
+                <div className={styles.localitySearch}>
+                  <Search size={18} aria-hidden="true" />
+                  <input autoFocus type="search" aria-label="Search localities" placeholder="Search localities…"
+                    value={localityQuery} onChange={(event) => setLocalityQuery(event.target.value)}
+                    onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }} />
+                </div>
+                <div role="listbox" aria-label="Localities">
                 {filteredSublocations.length > 0 ? (
                   filteredSublocations.map((item) => (
                     <button
@@ -385,16 +402,18 @@ export function HomeSearch({
                       onClick={() => {
                         setLocality(item.sublocation);
                         setIsLocalityMenuOpen(false);
+                        localityMenuRef.current?.querySelector("button")?.focus();
                       }}
                     >
                       {item.sublocation}
                     </button>
                   ))
                 ) : (
-                  <p className="m-0! px-4! py-2.5! text-sm! font-medium! text-gray-400!">
+                  <p role="status" className="m-0! px-4! py-2.5! text-sm! font-medium! text-gray-400!">
                     No matching locations
                   </p>
                 )}
+                </div>
               </div>,
               document.body,
             )}
@@ -456,8 +475,9 @@ export function HomeSearch({
               type="submit"
               disabled={isSearching}
               aria-label="Search"
-              className="flex! items-center! justify-center! bg-[#27427f]! hover:bg-[#ffc900]! text-white! hover:text-[#27427f]! rounded-full! font-semibold! transition-all! shadow-md! gap-2! h-[52px]! disabled:opacity-70! w-[52px]! md:w-auto! md:px-12! py-3.5! md:py-0! text-[15px]!"
+              className={`${POST_PROPERTY_BUTTON} gap-2! h-[52px]! disabled:opacity-70! w-[52px]! md:w-auto! md:px-12! py-3.5! md:py-0! text-[15px]! focus-visible:outline-2! focus-visible:outline-offset-2! focus-visible:outline-[#27427f]!`}
             >
+              <PostPropertyHover />
               <Search className="md:hidden! shrink-0!" size={20} strokeWidth={2.5} />
               <span className="hidden! md:inline!">{isSearching ? "..." : "Search"}</span>
             </button>

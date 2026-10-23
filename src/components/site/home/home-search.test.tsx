@@ -21,7 +21,9 @@ function renderSearch() {
   return render(
     <HomeSearch
       sublocations={[
-        { id: 1, cityId: 1, sublocation: "Townhall", city: "Coimbatore", state: "TN", postalCode: null },
+        ...Array.from({ length: 9 }, (_, index) => ({ id: index + 1, cityId: 1, sublocation: `Locality ${index + 1}`, city: "Coimbatore", state: "TN", postalCode: null })),
+        { id: 10, cityId: 1, sublocation: "Townhall", city: "Coimbatore", state: "TN", postalCode: null },
+        { id: 11, cityId: 2, sublocation: "Chennai locality", city: "Chennai", state: "TN", postalCode: null },
       ]}
       unitTypes={[]}
     />,
@@ -32,7 +34,7 @@ describe("HomeSearch responsive search bar", () => {
   it("keeps the search input and an icon-only submit button", () => {
     const { container } = renderSearch();
 
-    const input = screen.getByPlaceholderText("Search by Project or Builder...");
+    const input = screen.getByPlaceholderText("Search by area, landmark or keyword...");
     expect(input).toBeDefined();
 
     // Submit button is always reachable by its accessible name, on both layouts.
@@ -59,9 +61,9 @@ describe("HomeSearch responsive search bar", () => {
 
     await user.click(trigger);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    expect(screen.getByRole("option", { name: "Apartment" })).toBeDefined();
+    expect(await screen.findByRole("option", { name: "Apartment" })).toBeDefined();
 
-    await user.click(screen.getByRole("option", { name: "Apartment" }));
+    await user.click(await screen.findByRole("option", { name: "Apartment" }));
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(within(trigger).getByText("Apartment")).toBeDefined();
   });
@@ -71,7 +73,7 @@ describe("HomeSearch responsive search bar", () => {
     renderSearch();
 
     await user.click(screen.getByRole("button", { name: /property type/i }));
-    const panel = screen.getByRole("listbox");
+    const panel = await screen.findByRole("listbox");
     // Fixed pixel width (trigger width clamped to 224–320), never w-max.
     expect(panel.style.width).toMatch(/^\d+px$/);
     expect(parseInt(panel.style.width, 10)).toBeLessThanOrEqual(320);
@@ -86,7 +88,7 @@ describe("HomeSearch responsive search bar", () => {
     renderSearch();
 
     await user.click(screen.getByRole("button", { name: /property type/i }));
-    await user.click(screen.getByRole("option", { name: "Apartment" }));
+    await user.click(await screen.findByRole("option", { name: "Apartment" }));
 
     expect(screen.getByRole("button", { name: /apartment/i })).toBeDefined();
   });
@@ -96,4 +98,21 @@ describe("HomeSearch responsive search bar", () => {
     expect(screen.getByRole("button", { name: "Buy" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Rent" })).toBeDefined();
   });
+  it("searches all localities in the selected city and supports escape", async () => {
+    const user = userEvent.setup();
+    renderSearch();
+    await user.click(screen.getByRole("button", { name: "Locality" }));
+    const input = await screen.findByRole("searchbox", { name: "Search localities" });
+    expect(screen.queryByRole("option", { name: "Chennai locality" })).toBeNull();
+    await user.type(input, "TOWN");
+    await user.click(screen.getByRole("option", { name: "Townhall" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Townhall" }));
+    expect(await screen.findByRole("option", { name: "Locality 9" })).toBeDefined();
+    await user.type(screen.getByRole("searchbox"), "nonexistent");
+    expect(screen.getByRole("status").textContent).toContain("No matching locations");
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
 });

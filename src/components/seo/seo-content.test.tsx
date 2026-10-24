@@ -129,6 +129,14 @@ describe("public SEO content", () => {
         seo={{
           path: "/retained",
           off_market: true,
+          h1: "SEO-only heading",
+          highlights: ["SEO-only highlight"],
+          faqs: [{ question: "SEO-only FAQ", answer: "SEO-only answer" }],
+          settings: {
+            ai_summary: "SEO-only summary",
+            intro_content: "SEO-only introduction",
+            bottom_content: "SEO-only footer",
+          },
           target_snapshot: {
             title: "Retained property",
             description: "Original description",
@@ -149,7 +157,9 @@ describe("public SEO content", () => {
     expect(html).toContain("currently unavailable");
     expect(html).toContain("Original description");
     expect(html).toContain('alt="View of property"');
-    expect(html).toContain("<figcaption>Entrance</figcaption>");
+    expect(html).not.toContain("<figcaption>");
+    expect(html).not.toContain("SEO-only");
+    expect(html).not.toContain("FAQPage");
     expect(html).not.toContain("InStock");
   });
 });

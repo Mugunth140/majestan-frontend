@@ -978,8 +978,9 @@ export function AdvancedSeoEditor({
                   <section className="seo-panel">
                     <h3>Page content</h3>
                     <p className="seo-edit-intro">
-                      Write useful copy for the live page. Keep facts consistent
-                      with the inventory.
+                      These editorial notes are saved for staff reference and do
+                      not appear on public project or property pages. Search
+                      metadata is managed in Search and Subpages.
                     </p>
                     <Field
                       label="Overview introduction"

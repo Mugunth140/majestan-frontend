@@ -107,8 +107,7 @@ export function ProjectTitleRow({
               className="inline-flex! shrink-0! items-center! gap-2! rounded-full! bg-white! px-3! py-2! text-xs! font-semibold! text-[#0a0f1c]! ring-1! ring-[#cfdcf0]! no-underline! whitespace-nowrap! transition-[box-shadow,color,transform]! duration-150! ease-out-quint! hover:ring-[#0a0f1c]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#0a0f1c]! focus-visible:ring-offset-2!"
             >
               <Download className="w-4! h-4!" aria-hidden="true" />
-              {(project as ProjectDetail & { brochureSeoTitle?: string })
-                .brochureSeoTitle || "Download brochure"}
+              {"Download brochure"}
             </a>
           )}
         </div>

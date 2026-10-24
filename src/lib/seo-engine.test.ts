@@ -8,7 +8,9 @@ import {
 } from "./seo-engine";
 
 vi.mock("next/navigation", () => ({
-  notFound: () => { throw new Error("NEXT_HTTP_ERROR_FALLBACK;404"); },
+  notFound: () => {
+    throw new Error("NEXT_HTTP_ERROR_FALLBACK;404");
+  },
 }));
 
 describe("SEO engine output", () => {
@@ -108,7 +110,7 @@ describe("SEO engine output", () => {
 });
 
 describe("structured media SEO", () => {
-  it("applies alt, title and caption without changing inventory", () => {
+  it("applies accessible media attributes without injecting visible SEO captions", () => {
     const input = {
       title: "Original title",
       status: "available",
@@ -134,14 +136,14 @@ describe("structured media SEO", () => {
     expect(output.images[0]).toMatchObject({
       altText: "Entry",
       titleText: "Main entrance",
-      caption: "East-facing entrance",
     });
     expect(output.floorPlanFiles[0]).toMatchObject({
       altText: "Ground floor",
       titleText: "Ground floor layout",
-      caption: "Two bedrooms",
     });
     expect(input.images[0]).not.toHaveProperty("caption");
+    expect(output.images[0]).not.toHaveProperty("caption");
+    expect(output.floorPlanFiles[0]).not.toHaveProperty("caption");
     expect(output.status).toBe("available");
   });
 });
@@ -183,11 +185,21 @@ describe("listing schema follows the visible page", () => {
 describe("strict detail SEO failures", () => {
   afterEach(() => vi.unstubAllGlobals());
   it("turns invalid public paths into not found", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}", { status: 400 })));
-    await expect(getSeoForDetail("/invalid-path-ap001")).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("{}", { status: 400 })),
+    );
+    await expect(getSeoForDetail("/invalid-path-ap001")).rejects.toThrow(
+      "NEXT_HTTP_ERROR_FALLBACK;404",
+    );
   });
   it("keeps real upstream outages fatal instead of caching incomplete metadata", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}", { status: 500 })));
-    await expect(getSeoForDetail("/valid-ap001")).rejects.toThrow("Public SEO lookup failed: 500");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("{}", { status: 500 })),
+    );
+    await expect(getSeoForDetail("/valid-ap001")).rejects.toThrow(
+      "Public SEO lookup failed: 500",
+    );
   });
 });

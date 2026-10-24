@@ -1,4 +1,4 @@
-import { SeoEditorial, RealEstateJsonLd } from "@/components/site/SeoEditorial";
+import { RealEstateJsonLd } from "@/components/site/SeoEditorial";
 import { sectionMetadata } from "@/lib/seo-section-data";
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
@@ -64,7 +64,6 @@ function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
 }
 
 import {
-  TextBlock,
   SeoOffMarketBanner,
   SeoOffMarketPage,
 } from "@/components/seo/seo-content";
@@ -703,12 +702,11 @@ export default async function PropertySectionPage({
     const rootSeo = await getEffectiveRootSeo(slug);
     const childSeo = getSectionSeo(rootSeo, sectionKey);
     const sectionH1 =
-      field(childSeo, "h1") ||
-      (sectionKey === "floor-plan"
+      sectionKey === "floor-plan"
         ? `${property.title} 2D Floor Plan & Dimensions`
         : sectionKey === "photos"
           ? `${property.title} Photos`
-          : `${property.title} ${sectionConfig.titlePrefix}`);
+          : `${property.title} ${sectionConfig.titlePrefix}`;
     const canonicalUrl = absoluteUrl(
       field(childSeo, "canonical_url", "canonicalUrl", "canonical") ||
         `/${property.canonicalSlug}/${sectionKey}`,
@@ -774,10 +772,6 @@ export default async function PropertySectionPage({
             <h1 className="mb-5! mt-3! text-2xl! font-semibold! leading-tight! text-gray-900! md:text-3xl!">
               {sectionH1}
             </h1>
-            {childSeo.h2 && <h2>{childSeo.h2}</h2>}
-            {field(childSeo, "intro_text", "introText") && (
-              <TextBlock text={field(childSeo, "intro_text", "introText")!} />
-            )}
             <SeoOffMarketBanner seo={rootSeo} />
             <div className={`${OV_ROOT} ${propertyStyles.root}`}>
               <PropertyTopActions property={property} />
@@ -785,9 +779,6 @@ export default async function PropertySectionPage({
                 <div className={propertyStyles.sectionContent}>
                   <RealEstateJsonLd record={property} section={sectionKey} />
                   <SectionContent sectionKey={sectionKey} property={property} />
-                  {sectionKey === "locality" && (
-                    <SeoEditorial record={property} locality />
-                  )}
                   <FaqSection
                     faqs={(property.faqs || []).filter(
                       (faq) => faq.section === sectionKey,
@@ -857,12 +848,11 @@ export default async function PropertySectionPage({
     const rootSeo = await getEffectiveRootSeo(slug);
     const childSeo = getSectionSeo(rootSeo, sectionKey);
     const sectionH1 =
-      field(childSeo, "h1") ||
-      (sectionKey === "floor-plans"
+      sectionKey === "floor-plans"
         ? `${project.name} Floor Plans & Carpet Area`
         : sectionKey === "photos"
           ? `${project.name} Interior, Exterior & Site Photos`
-          : `${project.name} ${projectSectionHeading(sectionKey, project.projectType)}`);
+          : `${project.name} ${projectSectionHeading(sectionKey, project.projectType)}`;
     const sectionDescription =
       field(childSeo, "meta_description", "metaDescription", "description") ||
       projectSectionDescription(sectionKey, project);
@@ -935,19 +925,12 @@ export default async function PropertySectionPage({
               </div>
               <RealEstateJsonLd record={project} section={sectionKey} />
               <ProjectSectionTitle title={sectionH1} />
-              {childSeo.h2 && <h2>{childSeo.h2}</h2>}
-              {field(childSeo, "intro_text", "introText") && (
-                <TextBlock text={field(childSeo, "intro_text", "introText")!} />
-              )}
               <SeoOffMarketBanner seo={rootSeo} />
               <ProjectShell project={project}>
                 <ProjectSectionContent
                   sectionKey={sectionKey}
                   project={project}
                 />
-                {sectionKey === "locality" && (
-                  <SeoEditorial record={project} locality />
-                )}
                 <FaqOverview
                   project={project}
                   section={sectionKey}

@@ -1,4 +1,3 @@
-import { SeoEditorial } from "@/components/site/SeoEditorial";
 import type { ProjectDetail } from "@/lib/api/projects";
 import { buildFacts } from "@/lib/project-overview";
 import { ProjectGallery } from "@/components/site/project/ProjectGallery";
@@ -39,7 +38,9 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
   const facts = buildFacts(project);
 
   return (
-    <div className={`${OV_ROOT} ${PAGE_CONTAINER} w-full! flex! flex-col! gap-6!`}>
+    <div
+      className={`${OV_ROOT} ${PAGE_CONTAINER} w-full! flex! flex-col! gap-6!`}
+    >
       {/* Keyed by project: the gallery's position must not ride along
           across client-side project-to-project navigation. */}
       <ProjectGallery key={project.canonicalSlug} project={project} />
@@ -67,14 +68,17 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
               <dd className="m-0! mt-2! text-lg! md:text-[22px]! font-semibold! tracking-[-0.02em]! leading-tight! text-[#0a0f1c]! tabular-nums! break-words!">
                 {fact.value}
               </dd>
-              {fact.note && <dd className="m-0! mt-1! text-xs! text-[#5f6b80]!">{fact.note}</dd>}
+              {fact.note && (
+                <dd className="m-0! mt-1! text-xs! text-[#5f6b80]!">
+                  {fact.note}
+                </dd>
+              )}
             </div>
           ))}
         </dl>
       </section>
 
       <ProjectShell project={project}>
-        <SeoEditorial record={project} />
         <AboutSection project={project} />
         <ConfigurationSummary project={project} />
         <FloorPlanPreview project={project} />
@@ -83,11 +87,11 @@ export function ProjectDetailsView({ project }: { project: ProjectDetail }) {
         <FurnishingSection project={project} />
         <MediaPreview project={project} />
         <LocationOverview project={project} />
-        <SeoEditorial record={project} locality />
+
         <BuilderSection project={project} />
         <CalculatorsSection project={project} />
         <FaqOverview project={project} />
-        <SeoEditorial record={project} footer />
+
         <ProjectHelpSection projectName={project.name} />
       </ProjectShell>
     </div>

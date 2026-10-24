@@ -10,26 +10,38 @@ const base = SEO_API_BASE;
 // Fetch caching then reuses public snapshots between requests.
 const fetchPublicSeo = cache(async (endpoint: string): Promise<any> => {
   const response = await fetch(base + "/seo-engine/" + endpoint, {
-    next: { revalidate: endpoint === "organization" ? 3600 : 60, tags: seoEndpointTags(endpoint) },
-    headers: process.env.INTERNAL_API_KEY ? { "x-internal-key": process.env.INTERNAL_API_KEY } : {},
+    next: {
+      revalidate: endpoint === "organization" ? 3600 : 60,
+      tags: seoEndpointTags(endpoint),
+    },
+    headers: process.env.INTERNAL_API_KEY
+      ? { "x-internal-key": process.env.INTERNAL_API_KEY }
+      : {},
     signal: AbortSignal.timeout(15000),
   });
   // A rejected public path is a missing route, not a rendering outage.
   // Keep server errors/timeouts fatal so incomplete SEO is never cached.
-  if (response.status === 400 && endpoint.startsWith("resolve?path=")) notFound();
+  if (response.status === 400 && endpoint.startsWith("resolve?path="))
+    notFound();
   if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`Public SEO lookup failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Public SEO lookup failed: ${response.status}`);
   const payload = await response.json();
   return payload && "data" in payload ? payload.data : payload;
 });
 export const seoFetch = cache(async (endpoint: string): Promise<any> => {
-  try { return await fetchPublicSeo(endpoint); } catch { return null; }
+  try {
+    return await fetchPublicSeo(endpoint);
+  } catch {
+    return null;
+  }
 });
 // A transient API failure must not generate a cached detail page with missing SEO.
-export const getSeoForDetail = cache((path: string) => fetchPublicSeo("resolve?path=" + encodeURIComponent(path)));
-export const getSeo = cache(
-  async (path: string): Promise<SeoSnapshot | null> =>
-    seoFetch("resolve?path=" + encodeURIComponent(path)),
+export const getSeoForDetail = cache((path: string) =>
+  fetchPublicSeo("resolve?path=" + encodeURIComponent(path)),
+);
+export const getSeo = cache(async (path: string): Promise<SeoSnapshot | null> =>
+  seoFetch("resolve?path=" + encodeURIComponent(path)),
 );
 export const getListingSeo = cache(
   async (path: string): Promise<SeoSnapshot | null> =>
@@ -148,7 +160,7 @@ export function withSeo<T extends Record<string, any>>(
     seoEngine: seo,
     seo: {
       ...record.seo,
-      seoData: { ...record.seo?.seoData, ...seo.section_seo, overview },
+      seoData: { ...record.seo?.seoData, overview },
     },
     canonicalSlug: seo.path.replace(/^\//, ""),
     shouldRedirect: false,
@@ -178,7 +190,6 @@ export function withSeo<T extends Record<string, any>>(
     return entry
       ? {
           titleText: entry.title_text || undefined,
-          caption: entry.caption || undefined,
         }
       : {};
   };
@@ -243,7 +254,7 @@ export function withSeo<T extends Record<string, any>>(
         ]);
         return {
           floorPlanTitleText: media.titleText,
-          floorPlanCaption: media.caption,
+          floorPlanCaption: unit.floorPlanCaption,
         };
       })(),
       floorPlanAltText:
@@ -302,7 +313,7 @@ export function withSeo<T extends Record<string, any>>(
         ]);
         return {
           floorPlanTitleText: media.titleText,
-          floorPlanCaption: media.caption,
+          floorPlanCaption: unit.floorPlanCaption,
         };
       })(),
       floorPlans: unit.floorPlans?.map((plan: any, index: number) => ({
@@ -334,28 +345,8 @@ export function withSeo<T extends Record<string, any>>(
         ]) || unit.floorPlanAltText,
     }));
   }
-  if (seo.faqs?.length)
-    result.faqs = [
-      ...(record.faqs || []).filter((f: any) => f.section !== "overview"),
-      ...seo.faqs.map((f: any, i: number) => ({
-        ...f,
-        id: -i - 1,
-        section: "overview",
-        sortOrder: i,
-      })),
-    ];
-  if (record.projectFaqs && seo.faqs?.length)
-    result.projectFaqs = [
-      ...record.projectFaqs.filter(
-        (f: any) => (f.section || "overview") !== "overview",
-      ),
-      ...seo.faqs.map((f: any, i: number) => ({
-        ...f,
-        id: -i - 1,
-        section: "overview",
-        sortOrder: i,
-      })),
-    ];
+  // SEO-only FAQs remain in the editor snapshot. Visible FAQs and their
+  // FAQPage markup must describe the inventory's actual public content.
   return result;
 }
 export function jsonLd(value: unknown) {

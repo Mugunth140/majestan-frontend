@@ -411,18 +411,8 @@ export function SeoOffMarketPage({
   section?: string;
 }) {
   const target = seo.target_snapshot || {};
-  const name = target.name || target.title || seo.h1 || "Property";
-  const aliases =
-    section === "floor-plans"
-      ? ["floor_plans", "floor_plan"]
-      : section === "floor-plan"
-        ? ["floor_plan", "floor_plans"]
-        : [section || "overview"];
-  const child =
-    aliases.map((key) => seo.section_seo?.[key]).find(Boolean) || {};
-  const heading = section
-    ? child.h1 || `${name} ${section.replaceAll("-", " ")}`
-    : seo.h1 || name;
+  const name = target.name || target.title || "Property";
+  const heading = section ? `${name} ${section.replaceAll("-", " ")}` : name;
   const media = (seo.media || target.media || []).filter((image: any) =>
     section?.startsWith("floor-plan") ? /floor/.test(image.kind || "") : true,
   );
@@ -431,7 +421,18 @@ export function SeoOffMarketPage({
       <SiteHeader />
       <main className="pt-[var(--site-header-h)]! min-h-screen! font-manrope-page">
         <SeoOffMarketBanner seo={seo} />
-        <RealEstateJsonLd record={{...target, canonicalSlug:seo.path.replace(/^\//, ""), seoEngine:seo, projectType:seo.scope === "project" ? target.projectType || "apartment" : undefined}} section={section} />
+        <RealEstateJsonLd
+          record={{
+            ...target,
+            canonicalSlug: seo.path.replace(/^\//, ""),
+            seoEngine: seo,
+            projectType:
+              seo.scope === "project"
+                ? target.projectType || "apartment"
+                : undefined,
+          }}
+          section={section}
+        />
         <div className="max-w-7xl! mx-auto! px-6! py-6! space-y-6!">
           <Breadcrumbs
             items={[
@@ -440,7 +441,6 @@ export function SeoOffMarketPage({
             ]}
           />
           <h1 className="text-3xl! font-semibold!">{heading}</h1>
-          {child.intro_text && <TextBlock text={child.intro_text} />}
           {target.description && <TextBlock text={target.description} />}
           <div className="grid! grid-cols-1! sm:grid-cols-2! gap-4!">
             {media.map((image: any, i: number) => {
@@ -461,16 +461,11 @@ export function SeoOffMarketPage({
                       className="w-full! rounded-lg!"
                     />
                   )}
-                  {entry.caption && <figcaption>{entry.caption}</figcaption>}
                 </figure>
               );
             })}
           </div>
         </div>
-        <SeoHighlights seo={seo} />
-        <SeoEntityDetails seo={seo} />
-        <SeoLocalityBottom seo={seo} />
-        <SeoJsonLd seo={seo} />
       </main>
       <SiteFooter />
     </>

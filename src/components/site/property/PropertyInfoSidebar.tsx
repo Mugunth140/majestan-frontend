@@ -13,7 +13,11 @@ import {
   Compass,
 } from "lucide-react";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
-import { formatDate, formatFurnishing, formatPrice } from "@/lib/property-format";
+import {
+  formatDate,
+  formatFurnishing,
+  formatPrice,
+} from "@/lib/property-format";
 import { PROPERTY_TYPES } from "@/lib/seo-urls";
 import {
   getCommercialSpecs,
@@ -23,7 +27,13 @@ import {
   getLandPricePerUnit,
   getPlotSpecs,
 } from "@/lib/property-sections";
-import { capFirst, formatAddressLines, getPincode, getSublocation, type LocationRecord } from "@/lib/location-display";
+import {
+  capFirst,
+  formatAddressLines,
+  getPincode,
+  getSublocation,
+  type LocationRecord,
+} from "@/lib/location-display";
 import { emi } from "@/lib/emi";
 import { PROJECT_FINANCE_ASSUMPTIONS } from "@/lib/project-finance";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
@@ -48,7 +58,7 @@ export function PropertyInfoSidebar({
 }: PropertyInfoSidebarProps) {
   const propertyTypeLabel =
     Object.values(PROPERTY_TYPES).find(
-      (p) => p.apiValue === property.propertyType
+      (p) => p.apiValue === property.propertyType,
     )?.label ||
     property.propertyType
       .replace(/_/g, " ")
@@ -61,15 +71,24 @@ export function PropertyInfoSidebar({
     property.propertyType === "apartment" ||
     property.propertyType === "villa" ||
     property.propertyType === "individual_portion";
-  const isSale = !["rent", "rental", "lease"].includes(property.listingType?.toLowerCase()) && !property.status.toLowerCase().includes("rent");
+  const isSale =
+    !["rent", "rental", "lease"].includes(
+      property.listingType?.toLowerCase(),
+    ) && !property.status.toLowerCase().includes("rent");
 
   const locRow = property.locations?.[0] as LocationRecord | undefined;
   const locData = locRow?.localityData as LocationRecord | undefined;
   const fullAddress = String(
     locRow?.address || locRow?.landmark || locData?.address || "",
   ).trim();
-  const rawSub = (property as SeoProperty & { sublocation?: string }).sublocation || (property as SeoProperty & { locality?: string }).locality || getSublocation(locRow);
-  const subLocation = rawSub && rawSub.toLowerCase() !== property.city.toLowerCase() ? capFirst(rawSub) : "";
+  const rawSub =
+    (property as SeoProperty & { sublocation?: string }).sublocation ||
+    (property as SeoProperty & { locality?: string }).locality ||
+    getSublocation(locRow);
+  const subLocation =
+    rawSub && rawSub.toLowerCase() !== property.city.toLowerCase()
+      ? capFirst(rawSub)
+      : "";
   const pincode = getPincode(locRow);
   const locationLines = formatAddressLines(fullAddress, {
     sublocation: subLocation,
@@ -77,11 +96,14 @@ export function PropertyInfoSidebar({
     pincode,
   });
 
-  const areaNum = property.details?.areaSqft ? parseFloat(property.details.areaSqft) : NaN;
+  const areaNum = property.details?.areaSqft
+    ? parseFloat(property.details.areaSqft)
+    : NaN;
   const priceNum = parseFloat(property.price);
   // Land types curate their own spec rows (area, facing, dimensions, water,
   // crop…) instead of the generic Listed + Property Type pair.
-  const isLand = property.propertyType === "plot" || property.propertyType === "farmland";
+  const isLand =
+    property.propertyType === "plot" || property.propertyType === "farmland";
   const landSpecs =
     property.propertyType === "plot"
       ? getPlotSpecs(property.details)
@@ -102,8 +124,15 @@ export function PropertyInfoSidebar({
           : [];
   // Land is priced per cent or not at all — never per sq.ft.
   const perSqft =
-    getLandPricePerUnit(property.price, property.details, property.propertyType) ??
-    (!isLand && Number.isFinite(areaNum) && areaNum > 0 && Number.isFinite(priceNum)
+    getLandPricePerUnit(
+      property.price,
+      property.details,
+      property.propertyType,
+    ) ??
+    (!isLand &&
+    Number.isFinite(areaNum) &&
+    areaNum > 0 &&
+    Number.isFinite(priceNum)
       ? `₹ ${Math.round(priceNum / areaNum).toLocaleString("en-IN")} / sq.ft`
       : null);
 
@@ -115,46 +144,82 @@ export function PropertyInfoSidebar({
     return String(Math.round(n));
   };
 
-  const title = property.seo?.seoData?.overview?.h1 || property.title;
+  const title = property.title;
   const PropertyHeading = headingLevel === 2 ? "h2" : "h1";
 
-  const sidebarSpecs: { icon: React.ReactNode; label: string; value: string | null }[] = (
+  const sidebarSpecs: {
+    icon: React.ReactNode;
+    label: string;
+    value: string | null;
+  }[] = (
     isLand
       ? landSpecs.slice(0, 4).map((spec) => {
           const Icon = spec.icon;
-          return { icon: <Icon className="w-4.5! h-4.5!" />, label: spec.label, value: spec.value };
+          return {
+            icon: <Icon className="w-4.5! h-4.5!" />,
+            label: spec.label,
+            value: spec.value,
+          };
         })
       : isWorkspace
         ? workspaceSpecs.slice(0, 4).map((spec) => {
             const Icon = spec.icon;
-            return { icon: <Icon className="w-4.5! h-4.5!" />, label: spec.label, value: spec.value };
+            return {
+              icon: <Icon className="w-4.5! h-4.5!" />,
+              label: spec.label,
+              value: spec.value,
+            };
           })
         : [
-          property.details?.bedrooms
-            ? { icon: <BedDouble className="w-4.5! h-4.5!" />, label: "BHK", value: `${property.details.bedrooms} BHK` }
-            : null,
-          property.details?.areaSqft
-            ? { icon: <Ruler className="w-4.5! h-4.5!" />, label: "Built-Up Area", value: `${trimArea(property.details.areaSqft)} Sq Ft` }
-            : null,
-          ...(isHomeType
-            ? [
-                formatFurnishing(property.details)
-                  ? {
-                      icon: <Sofa className="w-4.5! h-4.5!" />,
-                      label: "Furnishing",
-                      value: formatFurnishing(property.details) as string,
-                    }
-                  : null,
-                property.details?.propertyFacing
-                  ? { icon: <Compass className="w-4.5! h-4.5!" />, label: "Facing", value: property.details.propertyFacing }
-                  : null,
-              ]
-            : [
-                { icon: <Calendar className="w-4.5! h-4.5!" />, label: "Listed", value: formatDate(property.createdAt) },
-                { icon: <Building2 className="w-4.5! h-4.5!" />, label: "Property Type", value: propertyTypeLabel },
-              ]),
-        ]
-  ).filter((s) => s && s.value) as { icon: React.ReactNode; label: string; value: string }[];
+            property.details?.bedrooms
+              ? {
+                  icon: <BedDouble className="w-4.5! h-4.5!" />,
+                  label: "BHK",
+                  value: `${property.details.bedrooms} BHK`,
+                }
+              : null,
+            property.details?.areaSqft
+              ? {
+                  icon: <Ruler className="w-4.5! h-4.5!" />,
+                  label: "Built-Up Area",
+                  value: `${trimArea(property.details.areaSqft)} Sq Ft`,
+                }
+              : null,
+            ...(isHomeType
+              ? [
+                  formatFurnishing(property.details)
+                    ? {
+                        icon: <Sofa className="w-4.5! h-4.5!" />,
+                        label: "Furnishing",
+                        value: formatFurnishing(property.details) as string,
+                      }
+                    : null,
+                  property.details?.propertyFacing
+                    ? {
+                        icon: <Compass className="w-4.5! h-4.5!" />,
+                        label: "Facing",
+                        value: property.details.propertyFacing,
+                      }
+                    : null,
+                ]
+              : [
+                  {
+                    icon: <Calendar className="w-4.5! h-4.5!" />,
+                    label: "Listed",
+                    value: formatDate(property.createdAt),
+                  },
+                  {
+                    icon: <Building2 className="w-4.5! h-4.5!" />,
+                    label: "Property Type",
+                    value: propertyTypeLabel,
+                  },
+                ]),
+          ]
+  ).filter((s) => s && s.value) as {
+    icon: React.ReactNode;
+    label: string;
+    value: string;
+  }[];
 
   return (
     <div className="lg:sticky! lg:top-[calc(var(--site-header-h)+69px)]! flex! flex-col! gap-4!">
@@ -171,10 +236,7 @@ export function PropertyInfoSidebar({
             <MapPin className="w-4! h-4! shrink-0! mt-1! text-[#0a0f1c]!" />
             <span className="min-w-0!">
               {locationLines.map((line, index) => (
-                <span
-                  className="block!"
-                  key={`${line}-${index}`}
-                >
+                <span className="block!" key={`${line}-${index}`}>
                   {line}
                 </span>
               ))}
@@ -187,22 +249,39 @@ export function PropertyInfoSidebar({
             <p className="m-0! text-3xl! font-manrope! font-semibold! text-[#0a0f1c]! tracking-tight! tabular-nums!">
               {formatPrice(property.price)}
               {!isSale && (
-                <span className="text-sm! font-normal! text-[#5f6b80]!"> / mo</span>
+                <span className="text-sm! font-normal! text-[#5f6b80]!">
+                  {" "}
+                  / mo
+                </span>
               )}
             </p>
             {perSqft && (
-              <p className="text-sm! font-manrope! font-normal! text-[#5f6b80]! mt-1!">{perSqft}</p>
+              <p className="text-sm! font-manrope! font-normal! text-[#5f6b80]! mt-1!">
+                {perSqft}
+              </p>
             )}
           </div>
           {(() => {
             // Same 20% down payment, rate and tenure as the embedded calculator.
             const priceNum = parseFloat(property.price);
             const emiStarts =
-              isSale && Number.isFinite(priceNum) && priceNum > 0 ? emi(priceNum * (1 - PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct / 100), PROJECT_FINANCE_ASSUMPTIONS.annualRatePct, PROJECT_FINANCE_ASSUMPTIONS.years) : null;
+              isSale && Number.isFinite(priceNum) && priceNum > 0
+                ? emi(
+                    priceNum *
+                      (1 - PROJECT_FINANCE_ASSUMPTIONS.downPaymentPct / 100),
+                    PROJECT_FINANCE_ASSUMPTIONS.annualRatePct,
+                    PROJECT_FINANCE_ASSUMPTIONS.years,
+                  )
+                : null;
             return emiStarts ? (
               <div className="flex! items-baseline! justify-between! gap-4! w-full!">
-                <span className="text-sm! font-manrope! font-normal! text-[#5f6b80]!">EMI from</span>
-                <a href={`/${property.canonicalSlug}#calculators`} className="text-sm! font-manrope! font-semibold! text-[#1c2433]! tabular-nums! no-underline! hover:underline! underline-offset-4! rounded-sm! focus-visible:outline-2! focus-visible:outline-[#2563eb]! focus-visible:outline-offset-4!">
+                <span className="text-sm! font-manrope! font-normal! text-[#5f6b80]!">
+                  EMI from
+                </span>
+                <a
+                  href={`/${property.canonicalSlug}#calculators`}
+                  className="text-sm! font-manrope! font-semibold! text-[#1c2433]! tabular-nums! no-underline! hover:underline! underline-offset-4! rounded-sm! focus-visible:outline-2! focus-visible:outline-[#2563eb]! focus-visible:outline-offset-4!"
+                >
                   ₹{Math.round(emiStarts).toLocaleString("en-IN")}/mo
                 </a>
               </div>
@@ -242,9 +321,9 @@ export function PropertyInfoSidebar({
 
         <div className="mt-5! pt-3! border-t! border-[#e2e9f4]! flex! items-center! justify-center! gap-1! text-sm! font-manrope! font-normal! text-[#465066]!">
           <Coins className="w-4! h-4! text-emerald-600! shrink-0!" />
-          {!property.brokerageType || property.brokerageType === 'no_brokerage'
-            ? 'No brokerage for this property'
-            : property.brokerageType === 'percentage'
+          {!property.brokerageType || property.brokerageType === "no_brokerage"
+            ? "No brokerage for this property"
+            : property.brokerageType === "percentage"
               ? `Brokerage: Only ${property.brokerageValue}% on Sale Value`
               : `Brokerage: Just ${property.brokerageValue} Days Rent`}
         </div>

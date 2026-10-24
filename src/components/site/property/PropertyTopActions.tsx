@@ -19,13 +19,13 @@ type PropertyTopActionsProps = {
 export function PropertyTopActions({ property }: PropertyTopActionsProps) {
   const [copied, setCopied] = useState(false);
 
-  const title = property.seo?.seoData?.overview?.h1 || property.title;
+  const title = property.title;
   const listingType = property.status.toLowerCase().includes("rent")
     ? "for-rent"
     : "for-sale";
   const propertyTypeSlug =
     Object.entries(PROPERTY_TYPES).find(
-      ([, data]) => data.apiValue === property.propertyType
+      ([, data]) => data.apiValue === property.propertyType,
     )?.[0] || property.propertyType;
 
   const handleShare = async () => {
@@ -58,10 +58,18 @@ export function PropertyTopActions({ property }: PropertyTopActionsProps) {
           onClick={handleShare}
           className="inline-flex! items-center! gap-2! px-5! py-2! rounded-xl! border! border-gray-200! bg-white! text-sm! font-medium! text-gray-600! hover:border-gray-300! hover:text-gray-900! transition-colors! duration-200! ease-out-quint! shadow-sm! cursor-pointer! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-offset-2! active:scale-[0.98]!"
         >
-          {copied ? <Check className="w-4! h-4! text-green-600!" /> : <Share2 className="w-4! h-4!" />}
+          {copied ? (
+            <Check className="w-4! h-4! text-green-600!" />
+          ) : (
+            <Share2 className="w-4! h-4!" />
+          )}
           {copied ? "Copied" : "Share"}
         </button>
-        <WishlistButton propertyId={property.id} propertyType={property.propertyType} variant="pill" />
+        <WishlistButton
+          propertyId={property.id}
+          propertyType={property.propertyType}
+          variant="pill"
+        />
       </div>
     </div>
   );

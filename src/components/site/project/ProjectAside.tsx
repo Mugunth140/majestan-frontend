@@ -118,8 +118,7 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
             className="mt-2.5! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-transparent! px-4! py-3! text-base! font-semibold! text-[#0a0f1c]! no-underline! cursor-pointer! transition-[color,background-color,transform]! duration-150! ease-out-quint! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]!"
           >
             <Download className="w-4! h-4!" aria-hidden="true" />
-            {(project as ProjectDetail & { brochureSeoTitle?: string })
-              .brochureSeoTitle || "Download brochure"}
+            {"Download brochure"}
           </a>
         )}
       </div>

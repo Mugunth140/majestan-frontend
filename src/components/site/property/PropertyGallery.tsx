@@ -26,7 +26,7 @@ export function PropertyGallery({
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const count = images.length;
   const index = Math.min(active, Math.max(0, count - 1));
-  const title = property.seo?.seoData?.overview?.h1 || property.title;
+  const title = property.title;
   const placeholder = getPlaceholderImage({
     propertyType: property.propertyType,
   });

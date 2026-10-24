@@ -1,5 +1,3 @@
-import { SeoEditorial } from "@/components/site/SeoEditorial";
-
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import { formatDate, formatFurnishing } from "@/lib/property-format";
 import {
@@ -290,8 +288,7 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
   return (
     <div className={`${OV_ROOT} ${styles.root}`}>
       <PropertyTopActions property={property} />
-      <SeoEditorial record={property} />
-      <SeoEditorial record={property} locality />
+
       <div className={styles.columns}>
         <div className={styles.content}>
           <div
@@ -443,7 +440,6 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
           <PropertyInfoSidebar property={property} />
         </aside>
       </div>
-      <SeoEditorial record={property} footer />
     </div>
   );
 }

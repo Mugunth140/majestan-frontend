@@ -46,7 +46,6 @@ export function hasSectionData(record: RecordData, section: string): boolean {
       record.address ||
       record.sublocation ||
       record.locations?.length ||
-      record.seoEngine?.settings?.nearby_landmarks?.length ||
       (record.latitude != null && record.longitude != null),
     );
   return true;
@@ -58,7 +57,7 @@ export function sectionMetadata(
 ): Metadata {
   const child = sectionSeo(record, key);
   const parent = SEO_SITE + "/" + record.canonicalSlug;
-  const empty = !hasSectionData(record, key) && !child.intro_text?.trim();
+  const empty = !hasSectionData(record, key);
   const image = sectionImages(record, key)[0];
   const canonical = resolveCanonicalUrl({
     canonicalType:

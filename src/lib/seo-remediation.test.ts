@@ -48,3 +48,15 @@ describe('audited public SEO regressions', () => {
     expect(input.details.areaSqft).toBe('1');
   });
 });
+
+it('publishes saved JSON-LD only on its own overview or child page', () => {
+  const record = { title: 'Home', canonicalSlug: 'home', propertyType: 'villa' };
+  const root = { '@type': 'Service', name: 'Overview only' };
+  const child = { '@graph': [{ '@type': 'ImageGallery', name: 'Photos only' }] };
+  const seo = { schema_overrides: root, section_seo: { photos: { schema_overrides: child } } };
+  expect(JSON.stringify(buildRealEstateSchema(record, seo))).toContain('Overview only');
+  expect(JSON.stringify(buildRealEstateSchema(record, seo))).not.toContain('Photos only');
+  expect(JSON.stringify(buildRealEstateSchema(record, seo, 'photos'))).toContain('Photos only');
+  expect(JSON.stringify(buildRealEstateSchema(record, seo, 'photos'))).not.toContain('Overview only');
+  expect(JSON.stringify(buildRealEstateSchema(record, seo, 'amenities'))).not.toContain('Overview only');
+});

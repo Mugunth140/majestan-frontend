@@ -221,3 +221,57 @@ it("edits section fields without losing untouched sections and saves editorial a
 function render(ui: React.ReactNode) {
   return renderBase(<Theme>{ui}</Theme>);
 }
+
+it("reloads and preserves overview and independent child JSON-LD across unrelated saves", async () => {
+  const user = userEvent.setup();
+  const root = { "@type": "Service", name: "Main schema" };
+  const photo = { "@type": "ImageGallery", name: "Saved photo schema" };
+  const initial = makeInitial("project");
+  Object.assign(initial.config, { schema_overrides: root, section_seo: { photos: { schema_overrides: photo } } });
+  vi.mocked(seoApi).mockResolvedValue({});
+  const view = render(<AdvancedSeoEditor initial={initial} onSaved={vi.fn()} onClose={vi.fn()} />);
+  await user.click(screen.getByRole("tab", { name: "Subpages" }));
+  await user.click(screen.getByRole("tab", { name: "Photos" }));
+  expect(JSON.parse((screen.getByLabelText("Additional JSON-LD") as HTMLTextAreaElement).value)).toEqual(photo);
+  await user.clear(screen.getByLabelText("Additional JSON-LD"));
+  // paste avoids keyboard interpretation of JSON braces.
+  await user.click(screen.getByLabelText("Additional JSON-LD"));
+  const updated = { ...photo, name: "Updated photo schema" };
+  await user.paste(JSON.stringify(updated));
+  await user.click(screen.getByRole("tab", { name: "Amenities" }));
+  expect(JSON.parse((screen.getByLabelText("Additional JSON-LD") as HTMLTextAreaElement).value)).toEqual({});
+  await user.click(screen.getByRole("tab", { name: "Photos" }));
+  expect(JSON.parse((screen.getByLabelText("Additional JSON-LD") as HTMLTextAreaElement).value)).toEqual(updated);
+  await user.click(screen.getByLabelText("Advanced Raw JSON"));
+  expect(JSON.parse((screen.getByLabelText("Section SEO JSON") as HTMLTextAreaElement).value).photos.schema_overrides).toEqual(updated);
+  await user.click(screen.getByLabelText("Advanced Raw JSON"));
+  await user.click(screen.getByRole("button", { name: "Save SEO changes" }));
+  const payload = vi.mocked(seoApi).mock.calls.at(-1)?.[1] as Record<string, any>;
+  expect(payload.schema_overrides).toEqual(root);
+  expect(payload.section_seo.photos.schema_overrides).toEqual(updated);
+  view.unmount();
+  render(<AdvancedSeoEditor initial={{ ...initial, config: payload }} onSaved={vi.fn()} onClose={vi.fn()} />);
+  await user.click(screen.getByRole("tab", { name: "Subpages" }));
+  await user.click(screen.getByRole("tab", { name: "Photos" }));
+  expect(JSON.parse((screen.getByLabelText("Additional JSON-LD") as HTMLTextAreaElement).value)).toEqual(updated);
+  cleanup();
+});
+
+it("blocks invalid JSON-LD and lets an administrator clear saved schema", async () => {
+  const user = userEvent.setup();
+  const initial = makeInitial("property");
+  Object.assign(initial.config, { schema_overrides: { "@type": "Service" } });
+  vi.mocked(seoApi).mockClear();
+  render(<AdvancedSeoEditor initial={initial} onSaved={vi.fn()} onClose={vi.fn()} />);
+  await user.click(screen.getByRole("tab", { name: "Sharing & indexing" }));
+  await user.clear(screen.getByLabelText("Additional JSON-LD"));
+  await user.click(screen.getByLabelText("Additional JSON-LD"));
+  await user.paste('{broken');
+  await user.click(screen.getByRole("button", { name: "Save SEO changes" }));
+  expect(seoApi).not.toHaveBeenCalled();
+  expect(screen.getByText(/Main page JSON-LD must contain/)).toBeInTheDocument();
+  await user.clear(screen.getByLabelText("Additional JSON-LD"));
+  await user.click(screen.getByRole("button", { name: "Save SEO changes" }));
+  expect(vi.mocked(seoApi).mock.calls.at(-1)?.[1]).toMatchObject({ schema_overrides: {}, custom_schema_json: {} });
+  cleanup();
+});

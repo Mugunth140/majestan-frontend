@@ -44,10 +44,39 @@ function parseArray(value: unknown): Row[] {
 function parseJsonText(value: string, label: string): Row {
   if (!value.trim()) return {};
   try {
-    return JSON.parse(value);
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+      throw new Error();
+    return parsed;
   } catch {
-    throw new Error(`${label} must contain valid JSON.`);
+    throw new Error(`${label} must contain a valid JSON object (use @graph for multiple nodes).`);
   }
+}
+function schemaText(value: Row): string {
+  const schema = value.schema_overrides ?? value.custom_schema_json ??
+    value.json_ld ?? value.jsonLd ?? {};
+  return typeof schema === "string" ? schema : JSON.stringify(schema, null, 2);
+}
+function JsonLdField({ value, onChange }: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="seo-field seo-wide">
+      <span>Additional JSON-LD</span>
+      <TextArea
+        aria-label="Additional JSON-LD"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={10}
+      />
+      <small>
+        Enter a JSON object, without script tags. Use @graph for multiple nodes.
+        Saved schema applies only to this page; generated schema remains available.
+        Clear this field to remove the custom schema.
+      </small>
+    </label>
+  );
 }
 function InventoryImagePreview({ src, alt }: { src: string; alt: string }) {
   const [failed, setFailed] = useState(false);
@@ -333,8 +362,31 @@ export function AdvancedSeoEditor({
   const [activeSection, setActiveSection] = useState(
     isProject ? "floor_plans" : "floor_plan",
   );
+  const [rootSchemaText, setRootSchemaText] = useState(() => schemaText(original));
+  const [sectionSchemaDrafts, setSectionSchemaDrafts] = useState<Record<string, string>>({});
+  function sectionsWithSchemaDrafts() {
+    const result = { ...sections };
+    for (const [key, text] of Object.entries(sectionSchemaDrafts))
+      result[key] = {
+        ...asObject(result[key]),
+        schema_overrides: parseJsonText(text, `${key} JSON-LD`),
+      };
+    return result;
+  }
   const [rawSections, setRawSections] = useState(false);
   const [rawSectionText, setRawSectionText] = useState("");
+  function previewJson(text: string) {
+    try { return JSON.parse(text || "{}"); } catch { return text; }
+  }
+  const reviewSections = rawSections ? previewJson(rawSectionText) : {
+    ...sections,
+    ...Object.fromEntries(
+      Object.entries(sectionSchemaDrafts).map(([key, text]) => [key, {
+        ...asObject(sections[key]),
+        schema_overrides: previewJson(text),
+      }]),
+    ),
+  };
   const faq: Row[] = Array.isArray(form.faqs) ? form.faqs : [];
   const variables = asObject(initial.effective?.variables);
   const effectiveTitle =
@@ -467,7 +519,8 @@ export function AdvancedSeoEditor({
     try {
       const savedSections = rawSections
         ? parseJsonText(rawSectionText, "Section SEO")
-        : sections;
+        : sectionsWithSchemaDrafts();
+      const rootSchema = parseJsonText(rootSchemaText, "Main page JSON-LD");
       const nextEntity = {
         ...entity,
         nearby_landmarks: landmarks
@@ -508,7 +561,8 @@ export function AdvancedSeoEditor({
           .split("\n")
           .map((line: string) => line.trim())
           .filter(Boolean),
-        schema_overrides: {},
+        schema_overrides: rootSchema,
+        custom_schema_json: rootSchema,
         ...(isProject
           ? { canonical_type: "self", canonical_url: null, og_image_url: null }
           : {}),
@@ -895,16 +949,20 @@ export function AdvancedSeoEditor({
                         <AdminCheckbox
                           checked={rawSections}
                           onChange={(e) => {
-                            if (e.target.checked)
-                              setRawSectionText(
-                                JSON.stringify(sections, null, 2),
-                              );
-                            else {
+                            if (e.target.checked) {
+                              try {
+                                setRawSectionText(JSON.stringify(sectionsWithSchemaDrafts(), null, 2));
+                              } catch (error) {
+                                setError((error as Error).message);
+                                return;
+                              }
+                            } else {
                               try {
                                 set(
                                   "section_seo",
                                   parseJsonText(rawSectionText, "Section SEO"),
                                 );
+                                setSectionSchemaDrafts({});
                               } catch (error) {
                                 setError((error as Error).message);
                                 return;
@@ -939,36 +997,41 @@ export function AdvancedSeoEditor({
                                   ],
                               );
                               return (
-                                <SectionFields
-                                  key={key}
-                                  path={
-                                    overviewPath +
-                                    "/" +
-                                    key.replaceAll("_", "-")
-                                  }
-                                  parent={overviewPath}
-                                  readOnlyCanonical={isProject}
-                                  title={`${label} page`}
-                                  value={asObject(sections[key])}
-                                  fallback={{
-                                    meta_title:
-                                      fallback.meta_title || fallback.metaTitle,
-                                    meta_description:
-                                      fallback.meta_description ||
-                                      fallback.metaDescription,
-                                    h1: fallback.h1,
-                                    canonical_url:
-                                      fallback.canonical_url ||
-                                      fallback.canonicalUrl,
-                                    intro_text:
-                                      fallback.intro_text ||
-                                      fallback.introText ||
-                                      fallback.intro_content,
-                                  }}
-                                  onChange={(field, value) =>
-                                    setSection(key, field, value)
-                                  }
-                                />
+                                <div key={key}>
+                                  <SectionFields
+                                    path={
+                                      overviewPath +
+                                      "/" +
+                                      key.replaceAll("_", "-")
+                                    }
+                                    parent={overviewPath}
+                                    readOnlyCanonical={isProject}
+                                    title={`${label} page`}
+                                    value={asObject(sections[key])}
+                                    fallback={{
+                                      meta_title:
+                                        fallback.meta_title || fallback.metaTitle,
+                                      meta_description:
+                                        fallback.meta_description ||
+                                        fallback.metaDescription,
+                                      h1: fallback.h1,
+                                      canonical_url:
+                                        fallback.canonical_url ||
+                                        fallback.canonicalUrl,
+                                      intro_text:
+                                        fallback.intro_text ||
+                                        fallback.introText ||
+                                        fallback.intro_content,
+                                    }}
+                                    onChange={(field, value) =>
+                                      setSection(key, field, value)
+                                    }
+                                  />
+                                  <JsonLdField
+                                    value={sectionSchemaDrafts[key] ?? schemaText(asObject(sections[key]))}
+                                    onChange={(text) => setSectionSchemaDrafts((current) => ({ ...current, [key]: text }))}
+                                  />
+                                </div>
                               );
                             })(),
                           )}
@@ -1224,6 +1287,10 @@ export function AdvancedSeoEditor({
                       />
                     </section>
                     <section className="seo-panel">
+                      <h3>Main page structured data</h3>
+                      <JsonLdField value={rootSchemaText} onChange={setRootSchemaText} />
+                    </section>
+                    <section className="seo-panel">
                       <h3>Social sharing</h3>
                       <div className="seo-form-grid">
                         <Field
@@ -1345,7 +1412,17 @@ export function AdvancedSeoEditor({
                   </>
                 )}
 
-                <SeoReview initial={initial.config || initial} current={{ ...form, settings, highlights: highlightsText.split("\n").filter(Boolean), section_seo: sections }} target={target} onRestored={() => { onSaved(); onClose(); }} />
+                <SeoReview
+                  initial={initial.config || initial}
+                  current={{
+                    ...form, settings,
+                    highlights: highlightsText.split("\n").filter(Boolean),
+                    schema_overrides: previewJson(rootSchemaText),
+                    section_seo: reviewSections,
+                  }}
+                  target={target}
+                  onRestored={() => { onSaved(); onClose(); }}
+                />
                 {error && (
                   <p className="seo-error" role="alert">
                     {error}

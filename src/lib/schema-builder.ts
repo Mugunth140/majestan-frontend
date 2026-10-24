@@ -1,5 +1,6 @@
 import { SEO_SITE } from './seo-engine';
 import { usableArea } from './seo-quality';
+import { sectionSeo } from './seo-section-data';
 // Inventory payloads differ by property type and are normalized by the API.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Data = Record<string, any>;
@@ -44,7 +45,8 @@ export function buildRealEstateSchema(record: Data, seo: Data = record.seoEngine
   if (area) home.floorSize={'@type':'QuantitativeValue',value:area,unitCode:'FTK'};
   const graph: Data[] = [{'@type':'BreadcrumbList',itemListElement:crumbs.map((c,i)=>({'@type':'ListItem',position:i+1,...c}))},home];
   graph.push({'@type':'RealEstateListing',name,url:parent,mainEntity:{'@id':homeId},...(record.projectType ? (low>0 ? {offers:{'@type':'AggregateOffer',lowPrice:low,highPrice:high,priceCurrency:'INR',availability}} : {}) : price>0 ? {offers:{'@type':'Offer',price,priceCurrency:'INR',availability,itemOffered:{'@id':homeId}}} : {})});
-  let custom = seo.schema_overrides;
+  const pageSeo = section ? sectionSeo({ ...record, seoEngine: seo }, section) : seo;
+  let custom = pageSeo.schema_overrides ?? pageSeo.custom_schema_json ?? pageSeo.json_ld ?? pageSeo.jsonLd;
   if(typeof custom==='string') {try {custom=JSON.parse(custom);} catch {custom=null;}}
   if(custom && typeof custom==='object') graph.push(...(Array.isArray(custom['@graph']) ? custom['@graph'] : Array.isArray(custom) ? custom : Object.keys(custom).length ? [custom] : []));
   return {'@context':'https://schema.org','@graph':graph};

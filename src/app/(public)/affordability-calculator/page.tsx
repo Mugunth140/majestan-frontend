@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AffordabilityCalculator } from "@/components/site/emi/AffordabilityCalculator";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/affordability-calculator" },
   title: "Home Affordability Calculator — What Home Value Your Income Supports",
   description:
     "Find the home value your income supports from your salary, existing EMIs, interest rate, tenure and down payment. Bank-style 50% FOIR estimate with max loan and EMI.",

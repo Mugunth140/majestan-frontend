@@ -81,12 +81,12 @@ export function sectionMetadata(
     description: child.meta_description || fallback.description,
     alternates: { ...fallback.alternates, canonical },
     robots:
-      empty || record.seoEngine?.gone
+      empty || record.seoEngine?.gone || record.seoEngine?.robots_index === false || record.seoEngine?.robots_index === 0
         ? { index: false, follow: true }
         : child.robots_index !== undefined
           ? {
               index: Boolean(child.robots_index),
-              follow: child.robots_follow !== false,
+              follow: child.robots_follow !== false && child.robots_follow !== 0,
             }
           : fallback.robots,
     openGraph: {

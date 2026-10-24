@@ -37,9 +37,6 @@ export const metadata: Metadata = {
       { rel: "shortcut icon", url: "/favicon/favicon.ico" },
     ],
   },
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -134,11 +131,7 @@ export default async function RootLayout({
     url: "https://www.majestanrealty.com",
     name: "Majestan Realty",
     publisher: { "@id": "https://www.majestanrealty.com#organization" },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: "https://www.majestanrealty.com/search?q={search_term_string}",
-      "query-input": "required name=search_term_string",
-    },
+
   };
 
   return (
@@ -147,7 +140,7 @@ export default async function RootLayout({
         <PublicStyles />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Manrope:wght@200..800&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300..700&family=Manrope:wght@400..700&family=Mulish:wght@400..700&family=Poppins:wght@300;400;500;600;700&display=swap" />
         <link
           rel="preconnect"
           href="https://cdnjs.cloudflare.com"

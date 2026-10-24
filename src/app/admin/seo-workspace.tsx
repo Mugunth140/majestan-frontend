@@ -1,4 +1,5 @@
 "use client";
+import { SeoReview } from "./seo-review";
 import { AdminSelect, AdminCheckbox } from "./admin-controls";
 import { useEffect, useState } from "react";
 import { Search, SlidersHorizontal, X, Pencil, Trash2 } from "lucide-react";
@@ -201,7 +202,7 @@ function Editor({
   initial: Row;
   options: Row;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (saved?: Row) => void;
 }) {
   const [form, setForm] = useState<Row>(initial.config || initial),
     [busy, setBusy] = useState(false),
@@ -327,14 +328,13 @@ function Editor({
         };
         body.section_seo = nextSections;
       }
-      if (listing) await seoApi("listing-pages", body);
-      else
+      const saved = listing ? await seoApi("listing-pages", body) :
         await seoApi(
           "configs/" + encodeURIComponent(form.config_key),
           body,
           "PUT",
         );
-      onSaved();
+      onSaved(saved);
       onClose();
     } catch (e) {
       setError((e as Error).message);
@@ -1005,7 +1005,7 @@ function Editor({
                     value={form.settings?.robots_txt || ""}
                     onChange={(e) => setting("robots_txt", e.target.value)}
                   />
-                  <small>Keep /admin and /api blocked.</small>
+                  <small>Keep public pages crawlable. Every user agent group must block /admin and /api.</small>
                 </label>
                 <label className="seo-field">
                   llms.txt override
@@ -1047,6 +1047,7 @@ function Editor({
               </section>
             </>
           )}
+          <SeoReview initial={initialConfig} current={form} onRestored={() => { onSaved(); onClose(); }} />
           {error && (
             <p className="seo-error" role="alert">
               {error}
@@ -1163,9 +1164,17 @@ export function SeoWorkspace({
       clearTimeout(timeout);
     };
   }, [module, inventory, filters, page, revision, tab]);
-  const refresh = () => {
+  const refresh = async (saved?: Row) => {
     setRevision((n) => n + 1);
-    setSuccess("SEO changes saved. The live page now uses these settings.");
+    const path = saved?.public_path;
+    if (!path) { setSuccess("SEO changes saved."); return; }
+    setSuccess("SEO changes saved. Checking the public page…");
+    try {
+      const response = await fetch('/api/seo-verify?path=' + encodeURIComponent(path), { cache: 'no-store' });
+      const check = await response.json();
+      if (!response.ok) throw new Error(check.message || 'Verification unavailable');
+      setSuccess(`SEO saved. Public page: HTTP ${check.status}. Canonical: ${check.canonical || 'missing'}. Robots: ${check.robots || 'not specified'}.`);
+    } catch { setSuccess("SEO changes saved. Public verification is unavailable; use Verify saved public page to retry."); }
   };
   const titles = {
     project: "Projects SEO",

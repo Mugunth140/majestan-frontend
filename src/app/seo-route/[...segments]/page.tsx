@@ -4,11 +4,11 @@ type Props = {
   params: Promise<{ segments: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params, searchParams }: Props) {
   const { segments } = await params;
   return slugMetadata({
     params: Promise.resolve({ slug: segments.join("/") }),
-    searchParams: Promise.resolve({}),
+    searchParams,
   });
 }
 export default async function SeoRoute({ params, searchParams }: Props) {

@@ -1,8 +1,9 @@
+import { listingPageNumber, listingMetadata } from "@/lib/seo-pagination";
 import { unstable_rethrow } from "next/navigation";
 import { buildRealEstateSchema } from "@/lib/schema-builder";
 import { SeoHeadingProvider } from '@/components/seo/core-heading';
-import { getSeo, getListingSeo, seoMetadata, withSeo, jsonLd, listingStructuredData } from '@/lib/seo-engine';
-import { SeoOffMarketBanner, SeoOffMarketPage, SeoListingPage } from '@/components/seo/seo-content';
+import { getSeo, getSeoForDetail, seoMetadata, withSeo, jsonLd, listingStructuredData } from '@/lib/seo-engine';
+import { SeoOffMarketBanner, SeoOffMarketPage, SeoListingPage, SeoLocalityContent, SeoLocalityBottom, InventoryEditorial } from '@/components/seo/seo-content';
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
@@ -145,6 +146,7 @@ const buildPropertyDescription = (
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: SlugPageProps): Promise<Metadata> {
   const { slug } = await params;
   const engineSeo = await getSeo('/'+slug);
@@ -157,7 +159,19 @@ export async function generateMetadata({
     };
   }
 
-  if (engineSeo && !engineSeo.redirect) return seoMetadata(engineSeo);
+  if (engineSeo?.redirect) {
+    const destination = await getSeoForDetail(engineSeo.redirect);
+    return seoMetadata(destination, { robots: { index: false, follow: true } });
+  }
+  if (engineSeo && !engineSeo.redirect) {
+    if (engineSeo.scope === 'listing') return listingMetadata(engineSeo, listingPageNumber((await searchParams)?.page));
+    return seoMetadata(engineSeo);
+  }
+  if (parsePseoSlug(slug)) {
+    const validated = await getSeoForDetail('/' + slug);
+    if (!validated || validated.gone || validated.scope !== 'listing') notFound();
+    return listingMetadata(validated, listingPageNumber((await searchParams)?.page));
+  }
 
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
@@ -447,12 +461,16 @@ export default async function SlugPage({
     notFound();
   }
 
+  if (parsePseoSlug(slug) && !engineSeo) {
+    const validated = await getSeoForDetail('/' + slug);
+    if (!validated || validated.gone || validated.scope !== 'listing') notFound();
+  }
   if (engineSeo?.redirect) permanentRedirect(engineSeo.redirect);
   if (engineSeo?.gone) notFound();
   if (engineSeo?.off_market && engineSeo?.target_snapshot) return <SeoOffMarketPage seo={engineSeo} />;
   if (engineSeo?.scope === 'listing' && engineSeo.config_key) {
     const query = await searchParams;
-    return <SeoListingPage seo={engineSeo} page={Number(query?.page)||1}/>;
+    return <SeoListingPage seo={engineSeo} page={listingPageNumber(query?.page)}/>;
   }
 
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
@@ -501,6 +519,7 @@ export default async function SlugPage({
             </div>
             <SeoOffMarketBanner seo={engineSeo} />
             <PropertyDetailsView property={property} />
+            <InventoryEditorial seo={engineSeo} />
           </div>
           <script
             type="application/ld+json"
@@ -579,6 +598,7 @@ export default async function SlugPage({
                 <div id="overview" className="scroll-mt-40!">
                   <SeoOffMarketBanner seo={engineSeo} />
                   <ProjectDetailsView project={project} />
+                  <InventoryEditorial seo={engineSeo} />
                 </div>
               </div>
             </main>
@@ -644,14 +664,15 @@ async function PseoListingSection({
   {
     // Resolve the sublocation slug ("saravanampatti") → canonical name
     // ("Saravanampatti") so the filter dropdown and syncUrl comparisons match.
-    const listingSeo = await getListingSeo('/'+slug);
+    const listingSeo = await getSeoForDetail('/'+slug);
+    if (!listingSeo || listingSeo.gone || listingSeo.scope !== 'listing') notFound();
     const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
 
     const qOrUndef = (v: string) => (v.trim() !== "" ? v : undefined);
     const qBedrooms = qsFirst(query.bedrooms);
     const qLocation = qsFirst(query.location);
     const qSort = qsFirst(query.sort);
-    const qPage = Math.max(1, parseInt(qsFirst(query.page), 10) || 1);
+    const qPage = listingPageNumber(query.page);
     const seedLocation = qLocation || canonicalSubloc;
     const seedBedrooms =
       qBedrooms || (pseo.bedrooms != null ? String(pseo.bedrooms) : "");
@@ -683,7 +704,10 @@ async function PseoListingSection({
       );
     } catch (error) {
       console.error("Failed to fetch initial PSEO properties:", error);
+      throw error;
     }
+
+    if (initialData && qPage > Math.max(1, Math.ceil(initialData.total / 12))) notFound();
 
     const cityLabel = pseo.city
       ? pseo.city.charAt(0).toUpperCase() + pseo.city.slice(1)
@@ -698,10 +722,10 @@ async function PseoListingSection({
       "@context": "https://schema.org",
       "@type": "ItemList",
       name: `${bhkPart}${pseo.propertyLabel} ${listingWord} in ${subLabel ? subLabel + ", " : ""}${cityLabel}`,
-      url: `https://www.majestanrealty.com/${slug}`,
+      url: `https://www.majestanrealty.com/${slug}${qPage > 1 ? "?page=" + qPage : ""}`,
       itemListElement: (initialData?.items || []).map((item: any, index: number) => ({
         "@type": "ListItem",
-        position: index + 1,
+        position: (qPage - 1) * 12 + index + 1,
         url: `https://www.majestanrealty.com/${item.canonicalSlug || item.slug_url || item.slug || ""}`,
       })),
     };
@@ -725,6 +749,7 @@ async function PseoListingSection({
       <>
         <SiteHeader />
         <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
+        <SeoLocalityContent seo={listingSeo} heading={false} />
         <SeoHeadingProvider heading={listingSeo?.h1}>
         <Suspense fallback={<ListingShellSkeleton />}>
           <PropertyListingShell
@@ -740,6 +765,7 @@ async function PseoListingSection({
           />
         </Suspense>
         </SeoHeadingProvider>
+        <SeoLocalityBottom seo={listingSeo} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLd(listingStructuredData(listingSeo, itemListJsonLd)) }}

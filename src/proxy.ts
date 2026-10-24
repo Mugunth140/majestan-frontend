@@ -6,9 +6,9 @@ export async function proxy(request: NextRequest) {
     return siteApiProxy(request);
   if (path.startsWith("/admin")) return NextResponse.next();
   // Hide the internal rendering route; public URLs and canonicals stay unchanged.
-  if (path.startsWith("/detail-render/") || path.startsWith("/detail-section/")) {
+  if (/^\/(detail-render|detail-section|seo-route|seo-section)\//.test(path)) {
     const url = request.nextUrl.clone();
-    url.pathname = path.replace(/^\/(detail-render|detail-section)/, "");
+    url.pathname = path.replace(/^\/(detail-render|detail-section|seo-route|seo-section)/, "");
     return NextResponse.redirect(url, 308);
   }
   // Inventory slugs are lowercase. Preserve a canonical redirect for shared
@@ -20,6 +20,27 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
   if (/^\/[^/]+-[a-z]{1,6}\d+\/(amenities|floor-plans?|locality|photos|videos|price|specifications)$/i.test(path)) {
+    // Resolve configured alias redirects before rendering. Redirect exceptions raised
+    // from both metadata and a cached page can otherwise duplicate Location headers.
+    try {
+      const result = await fetch(SEO_API_BASE + '/seo-engine/routing', {
+        headers: process.env.INTERNAL_API_KEY ? { 'x-internal-key': process.env.INTERNAL_API_KEY } : {},
+        signal: AbortSignal.timeout(4000),
+      });
+      if (result.ok) {
+        const payload = await result.json(), routing = payload.data ?? payload;
+        const root = path.slice(0, path.lastIndexOf('/'));
+        const suffix = path.slice(path.lastIndexOf('/'));
+        const direct = routing.redirects?.find((rule: { source: string }) => rule.source === path);
+        const parent = routing.redirects?.find((rule: { source: string }) => rule.source === root);
+        if (direct || parent) {
+          const destination = direct?.destination || parent.destination + (routing.inventory_paths?.includes(parent.destination) ? suffix : '');
+          const url = new URL(destination, request.url);
+          url.search = request.nextUrl.search;
+          return NextResponse.redirect(url, 301);
+        }
+      }
+    } catch { /* The detail renderer still resolves redirects if routing is unavailable. */ }
     const url = request.nextUrl.clone();
     url.pathname = "/detail-section" + path;
     return NextResponse.rewrite(url);
@@ -65,6 +86,15 @@ export async function proxy(request: NextRequest) {
       "price",
       "specifications",
     ];
+    const parentPath = path.slice(0, path.lastIndexOf('/'));
+    const section = path.slice(path.lastIndexOf('/') + 1);
+    const parentRedirect = sections.includes(section) && data.redirects?.find((rule: { source: string }) => rule.source === parentPath);
+    if (parentRedirect) {
+      const destination = parentRedirect.destination + (data.inventory_paths?.includes(parentRedirect.destination) ? '/' + section : '');
+      const url = new URL(destination, request.url);
+      url.search = request.nextUrl.search;
+      return NextResponse.redirect(url, 301);
+    }
     if (
       data.inventory_paths?.some(
         (base: string) =>
@@ -94,7 +124,11 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/site-api/:path*",
-    "/((?!api|_next|assets|favicon|seo-route|seo-section|.*\\.).*)",
+    "/seo-route/:path*",
+    "/seo-section/:path*",
+    "/detail-render/:path*",
+    "/detail-section/:path*",
+    "/((?!api|_next|assets|favicon|.*\\.).*)",
   ],
 };
 

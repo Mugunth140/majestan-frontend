@@ -47,3 +47,5 @@ next-env.d.ts
 
 # Isolated production performance verification
 /.next-perf/
+
+/.next-seo-audit-verify/

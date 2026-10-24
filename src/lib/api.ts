@@ -1,3 +1,4 @@
+import { sanitizePublicAreas } from "./seo-quality";
 import { getSublocation, type LocationRecord } from "./location-display";
 import type { ProjectListItem } from "./api/projects";
 
@@ -345,6 +346,7 @@ export async function searchProperties(
   if (res && Array.isArray(res.items)) {
     res.items = res.items.map((item: any) => {
       if (item.listingKind === "project") return item;
+      item = sanitizePublicAreas(item);
       // Skip if already mapped
       if (item.propertyname !== undefined && item.propertyname === item.title) return item;
       

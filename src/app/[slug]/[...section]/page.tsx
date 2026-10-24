@@ -1,3 +1,4 @@
+import { childRedirect } from "@/lib/seo-pagination";
 import { RealEstateJsonLd } from "@/components/site/SeoEditorial";
 import { sectionMetadata } from "@/lib/seo-section-data";
 import { SitePage } from "@/components/site/layout/site-page";
@@ -388,7 +389,7 @@ async function baseMetadata({
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = await getPropertyBySeoSlug(slug);
+    property = await getPropertyBySeoSlug((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug);
   } catch (err) {
     console.error(
       `[generateMetadata] Failed to fetch property for slug "${slug}":`,
@@ -514,16 +515,11 @@ async function baseMetadata({
   // Project sub-page metadata (no per-section SEO rows — fallback copy).
   // Checked before static views, mirroring the property branch above.
   try {
-    const project = await getProjectBySlugUrl(slug).catch((error: unknown) => {
+    const project = await getProjectBySlugUrl((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug).catch((error: unknown) => {
       if (error instanceof ProjectApiError && error.status === 404) return null;
       throw error;
     });
     if (project) {
-      if (
-        (project as any).shouldRedirect &&
-        (project as any).redirectDestination
-      )
-        permanentRedirect((project as any).redirectDestination);
       const sectionKey = section[0];
       const sectionConfig = PROJECT_SECTION_META[sectionKey];
       if (!sectionConfig || section.length !== 1) {
@@ -660,7 +656,7 @@ export default async function PropertySectionPage({
   }
 
   const initialSeo = await getSeo(`/${slug}`);
-  if (initialSeo?.redirect) permanentRedirect(initialSeo.redirect);
+  if (initialSeo?.redirect) permanentRedirect(await childRedirect(initialSeo.redirect, section[0]));
   const inventorySeo = await getEffectiveRootSeo(slug);
   if (inventorySeo?.off_market && inventorySeo?.target_snapshot) {
     const allowed =
@@ -672,7 +668,7 @@ export default async function PropertySectionPage({
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = await getPropertyBySeoSlug(slug);
+    property = await getPropertyBySeoSlug((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug);
   } catch (err) {
     console.error(
       `[PropertySectionPage] Failed to fetch property for slug "${slug}":`,
@@ -692,7 +688,7 @@ export default async function PropertySectionPage({
       notFound();
     }
 
-    if (property.shouldRedirect) {
+    if (property.shouldRedirect && property.canonicalSlug !== slug) {
       permanentRedirect(
         (property as any).redirectDestination ||
           `/${property.canonicalSlug}/${sectionKey}`,
@@ -820,7 +816,7 @@ export default async function PropertySectionPage({
   // so /{projectSlug}/{section} never falls into the view 404 gate.
   let project: ProjectDetail | null = null;
   try {
-    project = await getProjectBySlugUrl(slug).catch((error: unknown) => {
+    project = await getProjectBySlugUrl((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug).catch((error: unknown) => {
       if (error instanceof ProjectApiError && error.status === 404) return null;
       throw error;
     });
@@ -832,7 +828,7 @@ export default async function PropertySectionPage({
     throw err;
   }
   if (project) {
-    if ((project as any).shouldRedirect && (project as any).redirectDestination)
+    if ((project as any).shouldRedirect && (project as any).redirectDestination && project.canonicalSlug !== slug)
       permanentRedirect((project as any).redirectDestination);
     const sectionKey = section[0];
     if (!PROJECT_SECTION_META[sectionKey] || section.length !== 1) {
@@ -983,8 +979,8 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug, section } = await props.params;
   const record =
-    (await getPropertyBySeoSlug(slug)) ||
-    (await getProjectBySlugUrl(slug).catch((error: unknown) => {
+    (await getPropertyBySeoSlug((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug)) ||
+    (await getProjectBySlugUrl((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug).catch((error: unknown) => {
       if (error instanceof ProjectApiError && error.status === 404) return null;
       throw error;
     }));

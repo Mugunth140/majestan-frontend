@@ -4,6 +4,7 @@ import { EmiCalculator } from "@/components/site/emi/EmiCalculator";
 import { BANK_RATES, BANK_RATES_UPDATED } from "@/lib/emi-bank-rates";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/emi-calculator" },
   title: "Home Loan EMI Calculator — Monthly EMI at the Lowest Interest Rates",
   description:
     "Estimate your home loan EMI with sliders for loan amount, interest rate and tenure. Compare starting home loan rates from Indian banks and see a year-wise repayment schedule.",

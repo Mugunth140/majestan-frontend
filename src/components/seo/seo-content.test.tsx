@@ -11,6 +11,7 @@ vi.mock("@/components/site/layout/breadcrumbs", () => ({
   Breadcrumbs: () => null,
 }));
 import {
+  InventoryEditorial,
   SeoEntityDetails,
   SeoListingPage,
   SeoLocalityBottom,
@@ -81,7 +82,7 @@ describe("public SEO content", () => {
     expect(html).toContain("Who develops it?");
     expect(html).toContain("<summary");
   });
-  it("keeps the visitor listing free of automatic SEO blocks while retaining source metadata", () => {
+  it("publishes saved locality copy and visible FAQs alongside the current inventory", () => {
     const html = renderToStaticMarkup(
       <SeoListingPage
         seo={{
@@ -118,10 +119,16 @@ describe("public SEO content", () => {
     );
     expect(html).toContain("Apartment One");
     expect(html).toContain('type="application/ld+json"');
-    expect(html).not.toContain("Live inventory snapshot");
-    expect(html).not.toContain("Automatic market FAQ?");
-    expect(html).not.toContain("SEO-only");
+    expect(html).toContain("Live inventory snapshot");
+    expect(html).toContain("Automatic market FAQ?");
+    expect(html).toContain("SEO-only introduction");
+    expect(html).toContain("SEO-only bottom guide");
     expect(html).not.toContain("FAQPage");
+  });
+  it("keeps existing staff notes private until explicitly published", () => {
+    const seo = { settings: {}, intro_content: 'Staff draft', bottom_content: 'Reviewed guide' };
+    expect(renderToStaticMarkup(<InventoryEditorial seo={seo} />)).toBe('');
+    expect(renderToStaticMarkup(<InventoryEditorial seo={{ ...seo, settings: { publish_editorial_content: true } }} />)).toContain('Staff draft');
   });
   it("retains unavailable inventory without claiming an active offer", () => {
     const html = renderToStaticMarkup(

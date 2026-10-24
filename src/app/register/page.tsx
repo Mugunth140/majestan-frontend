@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Register | Majestan Realty",
+  title: { absolute: "Register | Majestan Realty" },
   description: "Create a Majestan Realty account.",
   alternates: {
     canonical: "/register",

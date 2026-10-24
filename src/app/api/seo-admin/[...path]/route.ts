@@ -31,8 +31,7 @@ async function forward(
       // Core config keys contain their fixed route, e.g. page:/about-us.
       // They remain a single encoded upstream parameter, never a route.
       const coreConfigKey =
-        path.length === 2 &&
-        path[0] === "configs" &&
+        ["configs", "history"].includes(path[0]) &&
         index === 1 &&
         /^page:\/?(?:[a-z0-9]+(?:-[a-z0-9]+)*\/?)*$/.test(s);
       return (

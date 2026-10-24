@@ -7,23 +7,8 @@ import { getHomePageData, type Sublocation } from "@/lib/api";
 import { useLocationContext } from "@/contexts/LocationContext";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 
-export type ProjectFilterValues = {
-  city: string;
-  keyword: string;
-  projectType: string;
-  minPrice: string;
-  maxPrice: string;
-  bhk: string;
-  minArea: string;
-  maxArea: string;
-  possession: string;
-  reraVerified: string;
-};
-
-export const EMPTY_PROJECT_FILTERS: ProjectFilterValues = {
-  city: "", keyword: "", projectType: "", minPrice: "", maxPrice: "", bhk: "",
-  minArea: "", maxArea: "", possession: "", reraVerified: "",
-};
+import { EMPTY_PROJECT_FILTERS, type ProjectFilterValues } from "@/lib/project-listing-data";
+export { EMPTY_PROJECT_FILTERS, type ProjectFilterValues } from "@/lib/project-listing-data";
 
 const fieldClass =
   "w-full! block! bg-white! border! border-gray-200! rounded-lg! py-2.5! text-[13px]! font-medium! text-gray-800! focus:outline-none! focus:ring-2! focus:ring-[#1645bf]/20! focus:border-[#1645bf]! transition-all! placeholder:text-gray-400! placeholder:font-normal!";

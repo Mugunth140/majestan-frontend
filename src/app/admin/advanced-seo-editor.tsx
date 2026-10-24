@@ -1,4 +1,5 @@
 "use client";
+import { SeoReview } from "./seo-review";
 import { AdminSelect, AdminCheckbox } from "./admin-controls";
 
 import { useMemo, useState } from "react";
@@ -233,7 +234,7 @@ export function AdvancedSeoEditor({
 }: {
   initial: Row;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (saved?: Row) => void;
 }) {
   const original = initial.config || initial;
   const target = initial.target || {};
@@ -537,12 +538,12 @@ export function AdvancedSeoEditor({
           ),
         ),
       };
-      await seoApi(
+      const saved = await seoApi(
         "configs/" + encodeURIComponent(form.config_key),
         payload,
         "PUT",
       );
-      onSaved();
+      onSaved(saved);
       onClose();
     } catch (cause) {
       setError((cause as Error).message || "Could not save SEO settings.");
@@ -628,7 +629,7 @@ export function AdvancedSeoEditor({
                 {
                   key: 2,
                   label: "Content",
-                  hint: "Editorial copy and FAQs",
+                  hint: "Editorial copy and publication",
                   icon: AlignLeft,
                 },
                 {
@@ -976,12 +977,17 @@ export function AdvancedSeoEditor({
                 )}
                 {tab === 2 && (
                   <section className="seo-panel">
-                    <h3>Page content</h3>
+                    <h3>Editorial content</h3>
                     <p className="seo-edit-intro">
-                      These editorial notes are saved for staff reference and do
-                      not appear on public project or property pages. Search
-                      metadata is managed in Search and Subpages.
+                      These notes stay private until you enable publication below.
+                      Published copy appears on the public overview. Inventory facts
+                      and the original FAQs remain managed in the CRM.
                     </p>
+                    <label className="seo-check">
+                      <AdminCheckbox checked={settings.publish_editorial_content === true}
+                        onChange={event => setSetting("publish_editorial_content", event.target.checked)} />
+                      Publish this editorial content on the public overview
+                    </label>
                     <Field
                       label="Overview introduction"
                       value={settings.intro_content}
@@ -1339,6 +1345,7 @@ export function AdvancedSeoEditor({
                   </>
                 )}
 
+                <SeoReview initial={initial.config || initial} current={{ ...form, settings, highlights: highlightsText.split("\n").filter(Boolean), section_seo: sections }} target={target} onRestored={() => { onSaved(); onClose(); }} />
                 {error && (
                   <p className="seo-error" role="alert">
                     {error}

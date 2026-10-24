@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { listingPageNumber } from "@/lib/seo-pagination";
 import { RealEstateJsonLd } from "@/components/site/SeoEditorial";
 import Link from "next/link";
 import {
@@ -10,6 +12,15 @@ import { SiteFooter } from "@/components/site/layout/site-footer";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 const money = (value: unknown) =>
   value == null ? "Not available" : "₹" + Number(value).toLocaleString("en-IN");
+/** Publishing is explicit so pre-existing private staff notes never become public on upgrade. */
+export function InventoryEditorial({ seo }: { seo: SeoSnapshot | null }) {
+  if (seo?.settings?.publish_editorial_content !== true) return null;
+  return <section aria-label="Property guide">
+    {seo.intro_content && <div className="max-w-7xl! mx-auto! px-6! py-6!"><TextBlock text={seo.intro_content} /></div>}
+    <SeoHighlights seo={seo} />
+    <SeoLocalityBottom seo={seo} />
+  </section>;
+}
 export function SeoJsonLd({ seo }: { seo: SeoSnapshot | null }) {
   return seo?.json_ld ? (
     <script
@@ -324,16 +335,17 @@ export function SeoListingPage({
   page?: number;
 }) {
   const pages = Math.max(1, Math.ceil((seo.items?.length || 0) / 12)),
-    current = Math.min(Math.max(page, 1), pages);
+    current = listingPageNumber(String(page));
+  if (current > pages) notFound();
   const visible = (seo.items || []).slice((current - 1) * 12, current * 12);
-  // Listing FAQ text is not shown in the visitor layout, so its schema must
-  // not claim a visible FAQ section. Keep only the visible page of inventory.
+  // Keep the inventory schema aligned with this visible page of results.
+  // Editorial FAQs are visible plain content; no FAQ search enhancement is assumed.
   const listingSeo = {
     ...seo,
     json_ld: listingStructuredData(seo, {
       "@type": "ItemList",
       name: seo.h1,
-      url: "https://www.majestanrealty.com" + seo.path,
+      url: "https://www.majestanrealty.com" + seo.path + (current > 1 ? "?page=" + current : ""),
       itemListElement: visible.map((p: any, i: number) => ({
         "@type": "ListItem",
         position: (current - 1) * 12 + i + 1,
@@ -349,7 +361,7 @@ export function SeoListingPage({
         <div className="max-w-7xl! mx-auto! px-6! pt-6!">
           <Breadcrumbs items={[{ label: seo.h1 || "Properties" }]} />
         </div>
-        <SeoLocalityContent seo={{ h1: seo.h1 }} />
+        <SeoLocalityContent seo={seo} />
         <div className="max-w-7xl! mx-auto! px-6! pb-8!">
           <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-6!">
             {(seo.items || [])
@@ -395,6 +407,7 @@ export function SeoListingPage({
             )}
           </nav>
         </div>
+        <SeoLocalityBottom seo={seo} />
         <SeoJsonLd seo={listingSeo} />
       </main>
       <SiteFooter />

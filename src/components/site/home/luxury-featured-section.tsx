@@ -1,5 +1,6 @@
 "use client";
 
+import { usableArea } from "@/lib/seo-quality";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
@@ -172,7 +173,8 @@ function LuxuryCard({ property, photo, onContact }: { property: FeaturedProperty
   const router = useRouter();
   const price = formatPrice(property);
   const priceParts = formatPriceParts(property);
-  const perSqft = formatPerSqftLabel(property.pricePerSqft);
+  const area = usableArea(property.areaSqft, property.propertyType);
+  const perSqft = area ? formatPerSqftLabel(property.pricePerSqft) : null;
   const goToDetail = () => router.push(property.detailPath);
 
   return (
@@ -265,13 +267,13 @@ function LuxuryCard({ property, photo, onContact }: { property: FeaturedProperty
           {typeof property.bedrooms === "number" && property.bedrooms > 0 && (
             <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
           )}
-          {property.areaSqft?.trim() && (
+          {area !== null && (
             <span className="inline-flex! min-w-0! flex-[0_1_auto]! items-center! justify-center! gap-1! pl-1.5!" title={formatArea(property.areaSqft)}>
               <Ruler className="w-4! h-4! shrink-0! text-gray-700!" strokeWidth={2} aria-hidden="true" />
               <span className="truncate! whitespace-nowrap! text-base!">{formatArea(property.areaSqft)}</span>
             </span>
           )}
-          {property.areaSqft?.trim() && (
+          {area !== null && (
             <span className="w-px! self-stretch! my-1! bg-gray-200! shrink-0!" aria-hidden="true" />
           )}
           <span className="inline-flex! min-w-0! flex-[0_1_auto]! items-center! justify-center! pl-1.5!">

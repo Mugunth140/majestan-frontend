@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AuthPage } from "@/components/site/auth/auth-page";
 
 export const metadata: Metadata = {
-  title: "Login | Majestan Realty",
+  title: { absolute: "Login | Majestan Realty" },
   description: "Login to your Majestan Realty account.",
   alternates: {
     canonical: "/login",

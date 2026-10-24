@@ -1,3 +1,4 @@
+import { sanitizePublicAreas } from "@/lib/seo-quality";
 import {getSeo,withSeo} from '@/lib/seo-engine';
 import { cache } from "react";
 import { API_BASE_URL } from "@/lib/api";
@@ -341,5 +342,5 @@ export const getPropertyBySeoSlug = cache(async function getPropertyBySeoSlug(sl
 
   const mainSeo=await getSeo('/'+slug);
   const effectiveSeo=mainSeo?.redirect?await getSeo(mainSeo.redirect):mainSeo;
-  return withSeo(withSeo(data as SeoProperty,effectiveSeo),mainSeo?.redirect ? mainSeo : effectiveSeo);
+  return withSeo(withSeo(sanitizePublicAreas(data) as SeoProperty,effectiveSeo),mainSeo?.redirect ? mainSeo : effectiveSeo);
 });

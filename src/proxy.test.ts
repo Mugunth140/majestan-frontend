@@ -32,6 +32,12 @@ describe("inventory rendering routes", () => {
     const response = await proxy(new NextRequest(`https://example.com${path}`));
     expect(response.headers.get("x-middleware-rewrite")).toBe(destination ? `https://example.com${destination}` : null);
   });
+  it("preserves sections when a custom inventory root is renamed", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ redirects: [{ source: "/old-custom", destination: "/new-custom" }], inventory_paths: ["/new-custom"] }))));
+    const response = await proxy(new NextRequest("https://example.com/old-custom/photos"));
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe("https://example.com/new-custom/photos");
+  });
   it("preserves configured custom redirects", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ redirects: [{ source: "/old-custom", destination: "/new-custom" }] }))));
     const response = await proxy(new NextRequest("https://example.com/old-custom"));

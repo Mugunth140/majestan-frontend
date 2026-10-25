@@ -1,74 +1,43 @@
 .badgeWrap {
-  position: relative;
   display: inline-flex;
   align-self: flex-start;
   min-width: 0;
   max-width: 100%;
-  isolation: isolate;
   margin-right: -1rem;
+}
+
+.badgeSlot {
+  max-width: 100%;
 }
 
 .badge {
   position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
-  isolation: isolate;
-  overflow: hidden;
   min-width: 0;
-  min-height: 26px;
-  padding: 6px 14px 6px 18px;
+  padding: 6px 12px 6px 20px;
   background: #e5e7eb;
-  color: #4b5563;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: 0.045em;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.025em;
   white-space: nowrap;
   clip-path: polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%);
-}
-
-/* The fold: the ribbon's tail corner turned back on itself. It hangs
-   downward, not sideways — the badge sits flush against the card's right
-   edge (negative margins) and the card's overflow-hidden would slice off
-   anything past it. */
-.badgeFold {
-  position: absolute;
-  right: 0;
-  bottom: -10px;
-  width: 24px;
-  height: 10px;
-  z-index: -1;
-  pointer-events: none;
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
-  background: linear-gradient(200deg, #e6ebf1 0%, #b4bdc9 55%, #8c96a4 100%);
-  filter: drop-shadow(-1px 1px 2px rgb(15 23 42 / 30%));
-}
-
-/* Crease where the tail bends, so the flap reads as folded paper rather
-   than a drop shadow. */
-.badgeWrap::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 18px;
-  height: 12px;
-  pointer-events: none;
-  background: linear-gradient(210deg, transparent 40%, rgb(15 23 42 / 14%) 100%);
 }
 
 .badge::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
   pointer-events: none;
   background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 65%) 50%, transparent 65%);
   transform: translateX(-120%);
-  animation: ribbon-sheen 8s var(--ease-in-out-quint, cubic-bezier(0.77, 0, 0.175, 1)) 1.5s infinite;
+  animation: badge-shimmer 8s var(--ease-in-out-quint, cubic-bezier(0.77, 0, 0.175, 1)) 1.5s infinite;
 }
 
-@keyframes ribbon-sheen {
+@keyframes badge-shimmer {
   0% { transform: translateX(-120%); }
   15%, 100% { transform: translateX(120%); }
 }
@@ -106,7 +75,6 @@
 @media (min-width: 1024px) {
   .badgeWrap { align-self: center; margin-right: 0; }
   .badgeSlot { margin-right: -1.25rem; }
-  .badge { min-height: 28px; font-size: 12px; line-height: 1.2; }
   .specs { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem 0.75rem; overflow: visible; }
   .spec { min-width: 0; padding-right: 0; border-right: 0; }
   .specValue { white-space: normal !important; }

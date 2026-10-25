@@ -199,3 +199,10 @@ describe("ProjectEnquiryActions", () => {
     expect(await screen.findByPlaceholderText(/your full name/i)).toBeInTheDocument();
   });
 });
+
+it.each([['booked', 'Sold Out'], ['sold', 'Sold Out'], ['unavailable', 'Sold Out'], ['rented', 'Sold Out']])('shows %s in place of enquiry actions', (status, label) => {
+  render(<ProjectEnquiryActions project={{...PROJECT, status}} />);
+  expect(screen.getByRole('status')).toHaveTextContent(label);
+  expect(screen.queryByRole('button', {name: /enquire now/i})).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', {name: /schedule visit/i})).not.toBeInTheDocument();
+});

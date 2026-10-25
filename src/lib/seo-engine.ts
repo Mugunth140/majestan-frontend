@@ -1,3 +1,4 @@
+import { inventoryAvailability } from "./inventory-availability";
 import { SEO_API_BASE } from "./seo-api-base";
 import { cache } from "react";
 import { notFound } from "next/navigation";
@@ -119,30 +120,7 @@ export function withSeo<T extends Record<string, any>>(
       shouldRedirect: true,
       redirectDestination: seo.redirect,
     };
-  const offMarket =
-    Boolean(seo.off_market) ||
-    ["sold", "rented", "expired", "inactive", "unpublished"].includes(
-      String(record.status).toLowerCase(),
-    );
-  const policy =
-    seo.settings?.expired_redirect_policy || seo.expired_redirect_policy;
-  const destination =
-    seo.settings?.redirect_target_path || seo.redirect_target_path;
-  if (
-    offMarket &&
-    (policy === "redirect_to_locality" || policy === "redirect_target_path") &&
-    destination
-  )
-    return {
-      ...record,
-      seoEngine: seo,
-      shouldRedirect: true,
-      redirectDestination: destination,
-    };
-  if (seo.gone || (offMarket && policy === "gone"))
-    return { ...record, seoEngine: { ...seo, gone: true } };
-  if (offMarket && policy === "keep_live_sold_banner")
-    seo = { ...seo, off_market: true };
+  seo = { ...seo, off_market: Boolean(inventoryAvailability(record.status)) };
 
   const overview = {
     ...record.seo?.seoData?.overview,

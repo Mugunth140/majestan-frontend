@@ -22,7 +22,7 @@ describe("public SEO behavior", () => {
       ).shouldRedirect,
     ).toBe(false);
   });
-  it("redirects expired inventory to its configured fallback", () => {
+  it("keeps off-market inventory live despite a saved redirect policy", () => {
     expect(
       withSeo(
         { status: "expired" },
@@ -33,8 +33,8 @@ describe("public SEO behavior", () => {
             redirect_target_path: "/apartments",
           },
         },
-      ).redirectDestination,
-    ).toBe("/apartments");
+      ).shouldRedirect,
+    ).toBe(false);
   });
   it("noindexes an empty floor plan and canonicalizes it to the overview", () => {
     const r = { canonicalSlug: "home", units: [] };
@@ -75,6 +75,7 @@ describe("public SEO behavior", () => {
         title: "Home",
         canonicalSlug: "home",
         propertyType: "apartment",
+        status: "sold",
         price: "5000000",
         city: "Coimbatore",
         locations: [{ latitude: 11, longitude: 77 }],

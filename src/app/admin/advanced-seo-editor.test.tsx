@@ -196,15 +196,12 @@ it("edits section fields without losing untouched sections and saves editorial a
     "Overview introduction text",
   );
   await user.click(screen.getByRole("tab", { name: "Sharing & indexing" }));
-  await user.click(screen.getByLabelText("When this listing expires"));
-  await user.click(
-    screen.getByRole("option", { name: "410 Gone / Remove from Index" }),
-  );
+  expect(screen.queryByText("Expired listing behavior")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("When this listing expires")).not.toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Save SEO changes" }));
   expect(vi.mocked(seoApi).mock.calls.at(-1)?.[1]).toMatchObject({
     settings: {
       intro_content: "Overview introduction text",
-      expired_redirect_policy: "gone",
     },
     section_seo: {
       photos: { meta_title: "Existing photos title" },
@@ -273,5 +270,21 @@ it("blocks invalid JSON-LD and lets an administrator clear saved schema", async 
   await user.clear(screen.getByLabelText("Additional JSON-LD"));
   await user.click(screen.getByRole("button", { name: "Save SEO changes" }));
   expect(vi.mocked(seoApi).mock.calls.at(-1)?.[1]).toMatchObject({ schema_overrides: {}, custom_schema_json: {} });
+  cleanup();
+});
+
+it('does not expose or resubmit old expiry behavior', async () => {
+  const user = userEvent.setup();
+  const initial = makeInitial('property');
+  initial.config.settings = {expired_redirect_policy: 'gone', expired_redirect_path: '/old', redirect_target_path: '/old'};
+  render(<AdvancedSeoEditor initial={initial} onSaved={vi.fn()} onClose={vi.fn()} />);
+  await user.click(screen.getByRole('tab', {name: 'Sharing & indexing'}));
+  expect(screen.queryByText('Expired listing behavior')).not.toBeInTheDocument();
+  expect(screen.queryByText('410 Gone / Remove from Index')).not.toBeInTheDocument();
+  await user.click(screen.getByRole('button', {name: 'Save SEO changes'}));
+  const settings = (vi.mocked(seoApi).mock.calls.at(-1)?.[1] as any).settings;
+  expect(settings.expired_redirect_policy).toBeUndefined();
+  expect(settings.expired_redirect_path).toBeUndefined();
+  expect(settings.redirect_target_path).toBeUndefined();
   cleanup();
 });

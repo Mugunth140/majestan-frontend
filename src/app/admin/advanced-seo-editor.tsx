@@ -329,15 +329,7 @@ export function AdvancedSeoEditor({
     settings: {
       ...initialSettings,
       entity: initialEntity,
-      expired_redirect_policy:
-        initialSettings.expired_redirect_policy ||
-        initial.effective?.expired_redirect_policy ||
-        "redirect_to_locality",
-      redirect_target_path:
-        initialSettings.redirect_target_path ??
-        initialSettings.expired_redirect_path ??
-        initial.effective?.redirect_target_path ??
-        "",
+
     },
     og_image_url: original.og_image_url || "",
   }));
@@ -557,10 +549,13 @@ export function AdvancedSeoEditor({
               : {}),
           })),
       };
+      const cleanSettings = { ...settings };
+      for (const key of ["expired_redirect_policy", "expired_redirect_path", "redirect_target_path"])
+        delete cleanSettings[key];
       const payload = {
         ...form,
         settings: {
-          ...settings,
+          ...cleanSettings,
           entity: {},
           nearby_landmarks: nextEntity.nearby_landmarks,
           focus_keyword: settings.focus_keyword ?? form.focus_keyword ?? "",
@@ -568,16 +563,7 @@ export function AdvancedSeoEditor({
             .split(",")
             .map((word: string) => word.trim())
             .filter(Boolean),
-          expired_redirect_policy:
-            settings.expired_redirect_policy || "redirect_to_locality",
-          redirect_target_path:
-            settings.redirect_target_path ||
-            settings.expired_redirect_path ||
-            "",
-          expired_redirect_path:
-            settings.redirect_target_path ||
-            settings.expired_redirect_path ||
-            "",
+
         },
         highlights: highlightsText
           .split("\n")
@@ -1396,54 +1382,7 @@ export function AdvancedSeoEditor({
                         )}
                       </div>
                     </section>
-                    <section className="seo-panel">
-                      <h3>Expired listing behavior</h3>
-                      {(isProperty || isProject) && (
-                        <label className="seo-field">
-                          <span className="seo-field-label">
-                            When this listing expires
-                          </span>
-                          <AdminSelect
-                            value={
-                              settings.expired_redirect_policy ||
-                              "redirect_to_locality"
-                            }
-                            onChange={(event) => {
-                              const policy = event.target.value;
-                              setSetting("expired_redirect_policy", policy);
-                            }}
-                          >
-                            <option value="gone">
-                              410 Gone / Remove from Index
-                            </option>
-                            <option value="redirect_to_locality">
-                              Redirect to locality listings
-                            </option>
-                            <option value="keep_live_sold_banner">
-                              Keep live with sold banner
-                            </option>
-                          </AdminSelect>
-                        </label>
-                      )}
-                      {(isProject || isProperty) && (
-                        <Field
-                          label="Redirect target path"
-                          value={
-                            settings.redirect_target_path ||
-                            settings.expired_redirect_path ||
-                            ""
-                          }
-                          placeholder={
-                            initial.effective?.redirect_target_path ||
-                            "/apartments-for-sale-in-coimbatore"
-                          }
-                          onChange={(value) => {
-                            setSetting("redirect_target_path", value);
-                            setSetting("expired_redirect_path", value);
-                          }}
-                        />
-                      )}
-                    </section>
+
                   </>
                 )}
 

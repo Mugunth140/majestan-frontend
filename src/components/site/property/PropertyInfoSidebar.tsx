@@ -316,6 +316,7 @@ export function PropertyInfoSidebar({
             propertyType: property.propertyType,
             listingType: property.listingType,
             city: property.city,
+            status: property.status,
           }}
         />
 

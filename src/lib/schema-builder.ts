@@ -1,3 +1,4 @@
+import { inventoryAvailability } from "./inventory-availability";
 import { SEO_SITE } from './seo-engine';
 import { usableArea } from './seo-quality';
 import { sectionSeo } from './seo-section-data';
@@ -29,7 +30,7 @@ export function buildRealEstateSchema(record: Data, seo: Data = record.seoEngine
   const validGeo = lat != null && lng != null && String(lat).trim() !== '' && String(lng).trim() !== '' && Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180 && !(latitude === 0 && longitude === 0);
   const address = {'@type':'PostalAddress',addressLocality:city, ...(locality ? {streetAddress: record.address || locality} : {}), ...(record.state ? {addressRegion:record.state} : {}),postalCode:entity.pincode || record.pincode,addressCountry:record.country || 'IN'};
   const geo = validGeo ? {'@type':'GeoCoordinates',latitude,longitude} : undefined;
-  const sold = seo.off_market || ['sold','rented','expired','inactive','unpublished'].includes(String(record.status).toLowerCase());
+  const sold = Boolean(inventoryAvailability(record.status));
   const renting = record.listingType === 'Rent';
   const units = (record.units || []).filter((u: Data) => (!u.status || u.status === 'available') && (!u.listingMode || u.listingMode === (renting ? 'rent' : 'sale')));
   const prices = units.map((u:Data)=>Number(renting ? u.monthlyRent : u.price)).filter((p:number)=>p>0);

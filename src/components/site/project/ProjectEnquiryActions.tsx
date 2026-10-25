@@ -1,5 +1,8 @@
 "use client";
 
+import { inventoryAvailability } from "@/lib/inventory-availability";
+import { InventoryAvailabilityNotice } from "@/components/site/shared/InventoryAvailabilityNotice";
+
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, Phone } from "lucide-react";
@@ -30,6 +33,7 @@ export type EnquiryProjectRef = {
   name: string;
   projectType: string;
   city: string;
+  status?: string;
 };
 
 type Intent = EnquiryIntent;
@@ -282,6 +286,8 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
       />
     </ContactDetailsSection>
   );
+
+  if (inventoryAvailability(project.status)) return <InventoryAvailabilityNotice status={project.status} />;
 
   return (
     <>

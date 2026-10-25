@@ -11,8 +11,6 @@ import {
   listingStructuredData,
 } from "@/lib/seo-engine";
 import {
-  SeoOffMarketBanner,
-  SeoOffMarketPage,
   SeoListingPage,
 } from "@/components/seo/seo-content";
 import { SitePage } from "@/components/site/layout/site-page";
@@ -242,9 +240,8 @@ export async function generateMetadata({
     const ogTitle = seoPage?.og_title || `${property.title} | Majestan Realty`;
     const ogDescription = seoPage?.og_description || description;
     const baseRobots = parseRobots(seoPage?.robots);
-    const isIndexableStatus = property.status?.toLowerCase() === "available";
     const robots = {
-      index: isIndexableStatus ? baseRobots.index : false,
+      index: baseRobots.index,
       follow: baseRobots.follow,
     };
 
@@ -519,8 +516,6 @@ export default async function SlugPage({
   }
   if (engineSeo?.redirect) permanentRedirect(engineSeo.redirect);
   if (engineSeo?.gone) notFound();
-  if (engineSeo?.off_market && engineSeo?.target_snapshot)
-    return <SeoOffMarketPage seo={engineSeo} />;
   if (engineSeo?.scope === "listing" && engineSeo.config_key) {
     const query = await searchParams;
     return (
@@ -585,7 +580,7 @@ export default async function SlugPage({
             <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
             </div>
-            <SeoOffMarketBanner seo={engineSeo} />
+
             <PropertyDetailsView property={property} />
           </div>
           <script
@@ -676,7 +671,7 @@ export default async function SlugPage({
                   />
                 )}
                 <div id="overview" className="scroll-mt-40!">
-                  <SeoOffMarketBanner seo={engineSeo} />
+
                   <ProjectDetailsView project={project} />
                 </div>
               </div>

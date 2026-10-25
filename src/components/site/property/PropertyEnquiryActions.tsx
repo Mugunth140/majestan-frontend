@@ -1,5 +1,8 @@
 "use client";
 
+import { inventoryAvailability } from "@/lib/inventory-availability";
+import { InventoryAvailabilityNotice } from "@/components/site/shared/InventoryAvailabilityNotice";
+
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -21,6 +24,7 @@ export type EnquiryPropertyRef = {
   propertyType: string;
   listingType: string;
   city: string;
+  status?: string;
 };
 
 export type EnquiryIntent = "enquire" | "visit";
@@ -543,6 +547,8 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
       />
     </ContactDetailsSection>
   );
+
+  if (inventoryAvailability(property.status)) return <InventoryAvailabilityNotice status={property.status} />;
 
   return (
     <>

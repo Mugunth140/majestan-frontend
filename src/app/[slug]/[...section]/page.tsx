@@ -65,8 +65,6 @@ function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
 }
 
 import {
-  SeoOffMarketBanner,
-  SeoOffMarketPage,
 } from "@/components/seo/seo-content";
 import { FaqSection } from "@/components/site/property/sections/FaqSection";
 
@@ -361,30 +359,7 @@ async function baseMetadata({
     };
   }
 
-  if (rootSeo?.off_market && rootSeo?.target_snapshot) {
-    const allowed =
-      rootSeo.scope === "project" ? PROJECT_SECTION_META : SECTION_META;
-    if (section.length !== 1 || !allowed[section[0]])
-      return { robots: { index: false, follow: false } };
-    const child = getSectionSeo(rootSeo, section[0]);
-    return seoMetadata({
-      ...rootSeo,
-      ...child,
-      meta_title:
-        field(child, "meta_title", "metaTitle", "title") ||
-        `${rootSeo.target_snapshot.name || rootSeo.target_snapshot.title} ${allowed[section[0]].titlePrefix} | Majestan Realty`,
-      canonical_url: absoluteUrl(
-        field(child, "canonical_url", "canonicalUrl") ||
-          `${rootSeo.path}/${section[0]}`,
-      ),
-      ...Object.fromEntries(
-        Object.entries(childRobots(rootSeo, child)).map(([key, value]) => [
-          `robots_${key}`,
-          value,
-        ]),
-      ),
-    });
-  }
+
 
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
@@ -450,9 +425,8 @@ async function baseMetadata({
     const ogDescription =
       field(legacySectionSeo || {}, "og_description") || description;
     const baseRobots = childRobots(rootSeo, childSeo, seoPage);
-    const isIndexableStatus = property.status?.toLowerCase() === "available";
     const robots = {
-      index: isIndexableStatus ? baseRobots.index : false,
+      index: baseRobots.index,
       follow: baseRobots.follow,
     };
 
@@ -658,12 +632,7 @@ export default async function PropertySectionPage({
   const initialSeo = await getSeo(`/${slug}`);
   if (initialSeo?.redirect) permanentRedirect(await childRedirect(initialSeo.redirect, section[0]));
   const inventorySeo = await getEffectiveRootSeo(slug);
-  if (inventorySeo?.off_market && inventorySeo?.target_snapshot) {
-    const allowed =
-      inventorySeo.scope === "project" ? PROJECT_SECTION_META : SECTION_META;
-    if (section.length !== 1 || !allowed[section[0]]) notFound();
-    return <SeoOffMarketPage seo={inventorySeo} section={section[0]} />;
-  }
+
 
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
@@ -768,7 +737,7 @@ export default async function PropertySectionPage({
             <h1 className="mb-5! mt-3! text-2xl! font-semibold! leading-tight! text-gray-900! md:text-3xl!">
               {sectionH1}
             </h1>
-            <SeoOffMarketBanner seo={rootSeo} />
+
             <div className={`${OV_ROOT} ${propertyStyles.root}`}>
               <PropertyTopActions property={property} />
               <div className={propertyStyles.columns}>
@@ -921,7 +890,7 @@ export default async function PropertySectionPage({
               </div>
               <RealEstateJsonLd record={project} section={sectionKey} />
               <ProjectSectionTitle title={sectionH1} />
-              <SeoOffMarketBanner seo={rootSeo} />
+
               <ProjectShell project={project}>
                 <ProjectSectionContent
                   sectionKey={sectionKey}

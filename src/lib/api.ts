@@ -224,6 +224,7 @@ export type PropertySearchParams = {
 
 export type PropertySearchItem = {
   id: number;
+  status?: string;
   listingKind?: 'property' | 'project';
   project?: ProjectListItem;
   propertyType: string;

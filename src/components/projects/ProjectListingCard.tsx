@@ -16,6 +16,7 @@ import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryActions";
 import { formatLocationLine } from "@/lib/location-display";
 import { emi } from "@/lib/emi";
+import { inventoryAvailability } from "@/lib/inventory-availability";
 
 // "EMI starts at" basis: lowest current starting rate, 20-year tenure,
 // full range-floor price as the loan (no down-payment assumption).
@@ -132,6 +133,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     name: item.name ?? "Project",
     projectType: item.projectType ?? "",
     city: item.city ?? "",
+    status: item.status,
   };
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -452,7 +454,10 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           onClick={(e) => e.stopPropagation()}
         >
           <button
-            onClick={() => setEnquireToken(Date.now())}
+            onClick={() => {
+              if (inventoryAvailability(item.status)) router.push(detailPath);
+              else setEnquireToken(Date.now());
+            }}
             className="flex! min-h-[44px]! lg:min-h-0! flex-1! items-center! justify-center! gap-2! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-[#0a0f1c]! bg-white! border! border-[#cfd6e2]! hover:border-[#2563eb]! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! transition-[border-color,background-color,color,transform]! duration-150! ease-out-quint! cursor-pointer!"
           >
             <Phone className="w-4! h-4!" />

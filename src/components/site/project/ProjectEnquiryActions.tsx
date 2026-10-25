@@ -287,7 +287,7 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
     </ContactDetailsSection>
   );
 
-  if (inventoryAvailability(project.status)) return <InventoryAvailabilityNotice status={project.status} />;
+  if (inventoryAvailability(project.status)) return hideTriggers ? null : <InventoryAvailabilityNotice status={project.status} />;
 
   return (
     <>

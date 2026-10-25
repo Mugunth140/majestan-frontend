@@ -548,7 +548,7 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
     </ContactDetailsSection>
   );
 
-  if (inventoryAvailability(property.status)) return <InventoryAvailabilityNotice status={property.status} />;
+  if (inventoryAvailability(property.status)) return hideTriggers ? null : <InventoryAvailabilityNotice status={property.status} />;
 
   return (
     <>

@@ -18,6 +18,7 @@ import {
 } from "@/lib/property-sections";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { emi } from "@/lib/emi";
+import { inventoryAvailability } from "@/lib/inventory-availability";
 import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/site/property/PropertyEnquiryActions";
 import {
   PROPERTY_TYPES,
@@ -513,6 +514,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
     title: item.propertyname ?? "Property",
     propertyType: item.propertyType,
     listingType: item.posttype ?? "",
+    status: item.status,
     city: item.city ?? item.sublocation ?? "",
   };
 
@@ -689,7 +691,10 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
           </Link>
           <button
             type="button"
-            onClick={() => setEnquireToken(Date.now())}
+            onClick={() => {
+              if (inventoryAvailability(item.status)) router.push(detailPath);
+              else setEnquireToken(Date.now());
+            }}
             className="flex! flex-1! items-center! justify-center! gap-2! min-h-[44px]! lg:min-h-0! px-4! py-2.5! rounded-xl! text-sm! font-semibold! text-white! bg-[linear-gradient(115deg,#2563eb,#1645bf)]! shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)]! hover:brightness-110! active:scale-[0.98]! transition-[filter,transform]! duration-150! ease-out-quint! cursor-pointer! focus-visible:outline-2! focus-visible:outline-[#1645bf]! focus-visible:outline-offset-2!"
           >
             <Phone className="w-4! h-4!" />

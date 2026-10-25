@@ -1,12 +1,13 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectListingCard } from "./ProjectListingCard";
 import type { ProjectListItem } from "@/lib/api/projects";
 
-afterEach(cleanup);
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push }),
   usePathname: () => "",
 }));
 
@@ -55,6 +56,19 @@ function item(overrides: Partial<ProjectListItem> = {}): ProjectListItem {
 }
 
 describe("ProjectListingCard", () => {
+  it.each(["booked", "sold", "rented"])("opens the detail page from Enquire for %s projects", (status) => {
+    render(<ProjectListingCard item={item({ status })} />);
+    fireEvent.click(screen.getByRole("button", { name: /^enquire$/i }));
+    expect(push).toHaveBeenCalledWith("/emerald-heights-coimbatore-pa0006");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps the enquiry login flow for published projects", async () => {
+    render(<ProjectListingCard item={item()} />);
+    fireEvent.click(screen.getByRole("button", { name: /^enquire$/i }));
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
   it("shows monthly rent without sale EMI or condition badges in rental listings", () => {
     render(<ProjectListingCard item={item({ listingType: "Rent", ranges: { ...item().ranges, minPrice: 45000, maxPrice: 45000 } })} />);
     expect(screen.getByText("₹ 45,000")).toBeInTheDocument();

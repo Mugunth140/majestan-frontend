@@ -1,16 +1,18 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import {
   getCardSectionLinks,
   getCardSpecCells,
   isRentListing,
+  createPropertyAdapter,
 } from "./property-listing-adapter";
 import type { PropertySearchItem } from "@/lib/api";
 
-afterEach(cleanup);
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push }),
   usePathname: () => "",
 }));
 
@@ -36,6 +38,24 @@ const withDetails = (propertyType: string, details: Record<string, unknown>) =>
     legacyPropertyType: propertyType,
     __propertyDetails__: details,
   }) as unknown as PropertySearchItem;
+
+describe("listing card enquiry availability", () => {
+  const adapter = createPropertyAdapter({ initialListingType: "Sell", initialPropertyType: "apartment", initialCity: "Coimbatore" });
+
+  it.each(["sold", "rented", "booked"])("opens the detail page from Enquire for %s properties", (status) => {
+    render(adapter.renderCard({ ...baseItem, slug_url: "test-apartment-ap001", status }));
+    fireEvent.click(screen.getByRole("button", { name: /^enquire$/i }));
+    expect(push).toHaveBeenCalledWith("/test-apartment-ap001");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps the enquiry login flow for available properties", async () => {
+    render(adapter.renderCard({ ...baseItem, status: "available" }));
+    fireEvent.click(screen.getByRole("button", { name: /^enquire$/i }));
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
+});
 
 describe("getCardSpecCells", () => {
   it("curates commercial cells: washrooms and furnishing, no floors occupied", () => {

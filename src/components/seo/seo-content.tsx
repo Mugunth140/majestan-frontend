@@ -15,11 +15,17 @@ const money = (value: unknown) =>
 /** Publishing is explicit so pre-existing private staff notes never become public on upgrade. */
 export function InventoryEditorial({ seo }: { seo: SeoSnapshot | null }) {
   if (seo?.settings?.publish_editorial_content !== true) return null;
-  return <section aria-label="Property guide">
-    {seo.intro_content && <div className="max-w-7xl! mx-auto! px-6! py-6!"><TextBlock text={seo.intro_content} /></div>}
-    <SeoHighlights seo={seo} />
-    <SeoLocalityBottom seo={seo} />
-  </section>;
+  return (
+    <section aria-label="Property guide">
+      {seo.intro_content && (
+        <div className="max-w-7xl! mx-auto! px-6! py-6!">
+          <TextBlock text={seo.intro_content} />
+        </div>
+      )}
+      <SeoHighlights seo={seo} />
+      <SeoLocalityBottom seo={seo} />
+    </section>
+  );
 }
 export function SeoJsonLd({ seo }: { seo: SeoSnapshot | null }) {
   return seo?.json_ld ? (
@@ -243,64 +249,6 @@ export function SeoHighlights({ seo }: { seo: SeoSnapshot | null }) {
     </section>
   );
 }
-export function SeoLocalityContent({
-  seo,
-  heading = true,
-}: {
-  seo: SeoSnapshot | null;
-  heading?: boolean;
-}) {
-  if (!seo) return null;
-  const stats = seo.stats,
-    rent = stats?.intent === "rent";
-  return (
-    <section className="max-w-7xl! mx-auto! px-6! py-8! space-y-6! font-manrope-page">
-      {heading && seo.h1 && (
-        <h1 className="text-3xl! md:text-4xl! font-semibold! text-balance!">
-          {seo.h1}
-        </h1>
-      )}
-      {seo.h2 && <h2 className="text-2xl! font-semibold!">{seo.h2}</h2>}
-      {seo.intro_content && <TextBlock text={seo.intro_content} />}
-      {stats &&
-        seo.show_live_market_snapshot !== false &&
-        seo.rule?.show_live_market_snapshot !== false && (
-          <div className="overflow-auto! rounded-xl! border! border-slate-200! bg-white! p-6!">
-            <table className="w-full! text-left! text-sm!">
-              <caption className="text-left! text-lg! font-semibold! mb-4! text-slate-900!">
-                Live inventory snapshot
-              </caption>
-              <tbody>
-                <tr>
-                  <th className="p-3!">Total active matching listings</th>
-                  <td className="p-3!">{stats.total}</td>
-                </tr>
-                <tr>
-                  <th className="p-3!">
-                    {rent ? "Monthly rent range" : "Asking price range"}
-                  </th>
-                  <td className="p-3!">
-                    {money(stats.min_price)} – {money(stats.max_price)}
-                  </td>
-                </tr>
-                <tr>
-                  <th className="p-3!">
-                    Average {rent ? "monthly rent" : "asking price"} / sq.ft
-                  </th>
-                  <td className="p-3!">{money(stats.average_price_sqft)}</td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="text-xs! text-slate-500! mt-4!">
-              Source: Majestan Realty live inventory. Prices are asking prices.
-              Area statistics use {stats.price_sqft_sample_count} listings with
-              known price and area.
-            </p>
-          </div>
-        )}
-    </section>
-  );
-}
 export function SeoLocalityBottom({ seo }: { seo: SeoSnapshot | null }) {
   if (!seo) return null;
   return (
@@ -339,13 +287,16 @@ export function SeoListingPage({
   if (current > pages) notFound();
   const visible = (seo.items || []).slice((current - 1) * 12, current * 12);
   // Keep the inventory schema aligned with this visible page of results.
-  // Editorial FAQs are visible plain content; no FAQ search enhancement is assumed.
+  // SEO editorial copy and FAQs are not rendered on listing pages.
   const listingSeo = {
     ...seo,
     json_ld: listingStructuredData(seo, {
       "@type": "ItemList",
       name: seo.h1,
-      url: "https://www.majestanrealty.com" + seo.path + (current > 1 ? "?page=" + current : ""),
+      url:
+        "https://www.majestanrealty.com" +
+        seo.path +
+        (current > 1 ? "?page=" + current : ""),
       itemListElement: visible.map((p: any, i: number) => ({
         "@type": "ListItem",
         position: (current - 1) * 12 + i + 1,
@@ -361,7 +312,11 @@ export function SeoListingPage({
         <div className="max-w-7xl! mx-auto! px-6! pt-6!">
           <Breadcrumbs items={[{ label: seo.h1 || "Properties" }]} />
         </div>
-        <SeoLocalityContent seo={seo} />
+        <div className="max-w-7xl! mx-auto! px-6! py-6!">
+          <h1 className="text-3xl! md:text-4xl! font-semibold! text-balance!">
+            {seo.h1 || "Properties"}
+          </h1>
+        </div>
         <div className="max-w-7xl! mx-auto! px-6! pb-8!">
           <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-6!">
             {(seo.items || [])
@@ -407,7 +362,6 @@ export function SeoListingPage({
             )}
           </nav>
         </div>
-        <SeoLocalityBottom seo={seo} />
         <SeoJsonLd seo={listingSeo} />
       </main>
       <SiteFooter />

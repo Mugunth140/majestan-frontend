@@ -15,7 +15,6 @@ import {
   SeoEntityDetails,
   SeoListingPage,
   SeoLocalityBottom,
-  SeoLocalityContent,
   SeoOffMarketPage,
   TextBlock,
 } from "./seo-content";
@@ -52,19 +51,6 @@ describe("public SEO content", () => {
     expect(html).toContain("[Unsafe](javascript:evil)");
     expect(html).toContain("&lt;img src=x onerror=evil&gt;");
   });
-  it("hides the snapshot while preserving introduction", () => {
-    const html = renderToStaticMarkup(
-      <SeoLocalityContent
-        seo={{
-          show_live_market_snapshot: false,
-          intro_content: "Local guide",
-          stats: { total: 12 },
-        }}
-      />,
-    );
-    expect(html).toContain("Local guide");
-    expect(html).not.toContain("Live inventory snapshot");
-  });
   it("renders entity overrides, zero-distance landmarks and visible FAQs", () => {
     const seo = {
       entity: { builder_name: "Actual Builder" },
@@ -82,7 +68,7 @@ describe("public SEO content", () => {
     expect(html).toContain("Who develops it?");
     expect(html).toContain("<summary");
   });
-  it("publishes saved locality copy and visible FAQs alongside the current inventory", () => {
+  it("keeps listing SEO copy and market statistics out of the public page while retaining inventory and schema", () => {
     const html = renderToStaticMarkup(
       <SeoListingPage
         seo={{
@@ -91,6 +77,8 @@ describe("public SEO content", () => {
           h2: "SEO-only subheading",
           intro_content: "SEO-only introduction",
           bottom_content: "SEO-only bottom guide",
+          show_live_market_snapshot: true,
+          settings: { publish_editorial_content: true },
           stats: { total: 12 },
           faqs: [
             {
@@ -119,16 +107,27 @@ describe("public SEO content", () => {
     );
     expect(html).toContain("Apartment One");
     expect(html).toContain('type="application/ld+json"');
-    expect(html).toContain("Live inventory snapshot");
-    expect(html).toContain("Automatic market FAQ?");
-    expect(html).toContain("SEO-only introduction");
-    expect(html).toContain("SEO-only bottom guide");
+    expect(html).not.toContain("Live inventory snapshot");
+    expect(html).not.toContain("Automatic market FAQ?");
+    expect(html).not.toContain("SEO-only subheading");
+    expect(html).not.toContain("SEO-only introduction");
+    expect(html).not.toContain("SEO-only bottom guide");
     expect(html).not.toContain("FAQPage");
   });
   it("keeps existing staff notes private until explicitly published", () => {
-    const seo = { settings: {}, intro_content: 'Staff draft', bottom_content: 'Reviewed guide' };
-    expect(renderToStaticMarkup(<InventoryEditorial seo={seo} />)).toBe('');
-    expect(renderToStaticMarkup(<InventoryEditorial seo={{ ...seo, settings: { publish_editorial_content: true } }} />)).toContain('Staff draft');
+    const seo = {
+      settings: {},
+      intro_content: "Staff draft",
+      bottom_content: "Reviewed guide",
+    };
+    expect(renderToStaticMarkup(<InventoryEditorial seo={seo} />)).toBe("");
+    expect(
+      renderToStaticMarkup(
+        <InventoryEditorial
+          seo={{ ...seo, settings: { publish_editorial_content: true } }}
+        />,
+      ),
+    ).toContain("Staff draft");
   });
   it("retains unavailable inventory without claiming an active offer", () => {
     const html = renderToStaticMarkup(

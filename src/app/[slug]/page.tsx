@@ -1,13 +1,28 @@
 import { listingPageNumber, listingMetadata } from "@/lib/seo-pagination";
 import { unstable_rethrow } from "next/navigation";
 import { buildRealEstateSchema } from "@/lib/schema-builder";
-import { SeoHeadingProvider } from '@/components/seo/core-heading';
-import { getSeo, getSeoForDetail, seoMetadata, withSeo, jsonLd, listingStructuredData } from '@/lib/seo-engine';
-import { SeoOffMarketBanner, SeoOffMarketPage, SeoListingPage, SeoLocalityContent, SeoLocalityBottom, InventoryEditorial } from '@/components/seo/seo-content';
+import { SeoHeadingProvider } from "@/components/seo/core-heading";
+import {
+  getSeo,
+  getSeoForDetail,
+  seoMetadata,
+  withSeo,
+  jsonLd,
+  listingStructuredData,
+} from "@/lib/seo-engine";
+import {
+  SeoOffMarketBanner,
+  SeoOffMarketPage,
+  SeoListingPage,
+  InventoryEditorial,
+} from "@/components/seo/seo-content";
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
-import { SimilarProjects, SimilarProperties } from "@/components/site/listing/SimilarListings";
+import {
+  SimilarProjects,
+  SimilarProperties,
+} from "@/components/site/listing/SimilarListings";
 import { PropertyNavigation } from "@/components/site/property/property-navigation";
 import { PropertyDetailsView } from "@/components/site/property/PropertyDetailsView";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
@@ -65,7 +80,10 @@ const API_BASE =
  * the canonical display name stored in the backend (e.g. "saravanampatti" →
  * "Saravanampatti").  Falls back to the slug itself if lookup fails.
  */
-async function resolveSublocName(slug: string | undefined, city: string): Promise<string | undefined> {
+async function resolveSublocName(
+  slug: string | undefined,
+  city: string,
+): Promise<string | undefined> {
   if (!slug) return undefined;
   try {
     const res = await fetch(`${API_BASE}/metadata/sublocations`, {
@@ -73,14 +91,17 @@ async function resolveSublocName(slug: string | undefined, city: string): Promis
     });
     if (!res.ok) return slug;
     const data = await res.json();
-    const list: Array<{ sublocation: string; city: string }> =
-      Array.isArray(data) ? data : data.data || data.items || [];
+    const list: Array<{ sublocation: string; city: string }> = Array.isArray(
+      data,
+    )
+      ? data
+      : data.data || data.items || [];
     const match = list.find(
       (s) =>
         toLocationSlug(s.city) === toLocationSlug(city) &&
         // Compare as slugs so multi-word names match: "sai-baba-colony"
         // ↔ "Sai Baba Colony".
-        toLocationSlug(s.sublocation) === toLocationSlug(slug)
+        toLocationSlug(s.sublocation) === toLocationSlug(slug),
     );
     return match?.sublocation ?? slug;
   } catch {
@@ -131,7 +152,7 @@ function parseRobots(robotsStr?: string): { index: boolean; follow: boolean } {
 const buildPropertyDescription = (
   description: string,
   city: string,
-  propertyType: string
+  propertyType: string,
 ): string => {
   const trimmed = description.replace(/<[^>]*>/g, "").trim();
   if (trimmed.length > 0) {
@@ -149,8 +170,8 @@ export async function generateMetadata({
   searchParams,
 }: SlugPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const engineSeo = await getSeo('/'+slug);
-  const sourceSlug = engineSeo?.source_path?.replace(/^\//,'') || slug;
+  const engineSeo = await getSeo("/" + slug);
+  const sourceSlug = engineSeo?.source_path?.replace(/^\//, "") || slug;
 
   if (RESERVED_SLUGS.has(slug)) {
     return {
@@ -164,21 +185,35 @@ export async function generateMetadata({
     return seoMetadata(destination, { robots: { index: false, follow: true } });
   }
   if (engineSeo && !engineSeo.redirect) {
-    if (engineSeo.scope === 'listing') return listingMetadata(engineSeo, listingPageNumber((await searchParams)?.page));
+    if (engineSeo.scope === "listing")
+      return listingMetadata(
+        engineSeo,
+        listingPageNumber((await searchParams)?.page),
+      );
     return seoMetadata(engineSeo);
   }
   if (parsePseoSlug(slug)) {
-    const validated = await getSeoForDetail('/' + slug);
-    if (!validated || validated.gone || validated.scope !== 'listing') notFound();
-    return listingMetadata(validated, listingPageNumber((await searchParams)?.page));
+    const validated = await getSeoForDetail("/" + slug);
+    if (!validated || validated.gone || validated.scope !== "listing")
+      notFound();
+    return listingMetadata(
+      validated,
+      listingPageNumber((await searchParams)?.page),
+    );
   }
 
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = engineSeo?.scope === "project" ? null : withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
+    property =
+      engineSeo?.scope === "project"
+        ? null
+        : withSeo((await getPropertyBySeoSlug(sourceSlug)) as any, engineSeo);
   } catch (err) {
-    console.error(`[generateMetadata] Failed to fetch property for slug "${slug}":`, err);
+    console.error(
+      `[generateMetadata] Failed to fetch property for slug "${slug}":`,
+      err,
+    );
     return {
       title: "Majestan Realty",
       description: "Browse premium properties in India.",
@@ -192,7 +227,7 @@ export async function generateMetadata({
 
     const typeLabel =
       Object.values(PROPERTY_TYPES).find(
-        (p) => p.apiValue === property.propertyType
+        (p) => p.apiValue === property.propertyType,
       )?.label || property.propertyType;
 
     const title =
@@ -203,7 +238,7 @@ export async function generateMetadata({
       buildPropertyDescription(
         property.description,
         property.city,
-        property.propertyType
+        property.propertyType,
       );
     const ogTitle = seoPage?.og_title || `${property.title} | Majestan Realty`;
     const ogDescription = seoPage?.og_description || description;
@@ -268,15 +303,27 @@ export async function generateMetadata({
   }
 
   try {
-    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch((error: unknown) => {
-      if (error instanceof ProjectApiError && error.status === 404) return null;
-      throw error;
-    });
+    const project = await getProjectBySlugUrl(sourceSlug)
+      .then((p) => withSeo(p, engineSeo))
+      .catch((error: unknown) => {
+        if (error instanceof ProjectApiError && error.status === 404)
+          return null;
+        throw error;
+      });
     if (project) {
-      if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
+      if (
+        (project as any).shouldRedirect &&
+        (project as any).redirectDestination
+      )
+        permanentRedirect((project as any).redirectDestination);
       const canonicalPath = `/${project.canonicalSlug}`;
       const seo = project.seo?.seoData?.overview;
-      const typeLabel = project.projectType === "villa" ? "Villa" : project.projectType === "plot" ? "Plot" : "Apartment";
+      const typeLabel =
+        project.projectType === "villa"
+          ? "Villa"
+          : project.projectType === "plot"
+            ? "Plot"
+            : "Apartment";
       const bhkLabel = project.ranges.bhk.length
         ? `${project.ranges.bhk.join(", ")} BHK `
         : "";
@@ -308,7 +355,11 @@ export async function generateMetadata({
           url: canonicalPath,
           type: "article",
           ...(ogImage
-            ? { images: [{ url: ogImage, width: 1200, height: 630, alt: project.name }] }
+            ? {
+                images: [
+                  { url: ogImage, width: 1200, height: 630, alt: project.name },
+                ],
+              }
             : {}),
         },
         twitter: {
@@ -334,10 +385,11 @@ export async function generateMetadata({
   // PSEO metadata — now uses canonical parsePseoSlug from seo-urls.ts
   const pseo = parsePseoSlug(slug);
   if (pseo) {
-    const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
-    const locPart = canonicalSubloc
-      ? `${canonicalSubloc}, `
-      : "";
+    const canonicalSubloc = await resolveSublocName(
+      pseo.sublocation,
+      pseo.city || "coimbatore",
+    );
+    const locPart = canonicalSubloc ? `${canonicalSubloc}, ` : "";
     const cityText = pseo.city
       ? pseo.city.charAt(0).toUpperCase() + pseo.city.slice(1)
       : "Coimbatore";
@@ -367,11 +419,11 @@ export async function generateMetadata({
 }
 
 function buildPropertyStructuredData(
-  property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>
+  property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>,
 ) {
   const typeLabel =
     Object.values(PROPERTY_TYPES).find(
-      (p) => p.apiValue === property.propertyType
+      (p) => p.apiValue === property.propertyType,
     )?.label || property.propertyType;
 
   return {
@@ -381,7 +433,7 @@ function buildPropertyStructuredData(
     description: buildPropertyDescription(
       property.description,
       property.city,
-      property.propertyType
+      property.propertyType,
     ),
     url: `https://www.majestanrealty.com/${property.canonicalSlug}`,
     image: property.images?.map((image: any) => image.imageUrl) || [],
@@ -417,7 +469,7 @@ function buildPropertyStructuredData(
 }
 
 function buildBreadcrumbItems(
-  property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>
+  property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>,
 ) {
   const isSale = !property.status.toLowerCase().includes("rent");
   const listingType = isSale ? ("Sell" as const) : ("Rent" as const);
@@ -425,7 +477,7 @@ function buildBreadcrumbItems(
 
   // Find the property type slug
   const ptEntry = Object.entries(PROPERTY_TYPES).find(
-    ([, data]) => data.apiValue === property.propertyType
+    ([, data]) => data.apiValue === property.propertyType,
   );
   const ptSlug = (ptEntry?.[0] || "apartments") as PropertyTypeSlug;
   const typeLabel = ptEntry?.[1].label || property.propertyType;
@@ -434,7 +486,7 @@ function buildBreadcrumbItems(
   const parentSlug = buildPseoSlug(
     listingType,
     ptSlug,
-    property.city.toLowerCase()
+    property.city.toLowerCase(),
   );
 
   return [
@@ -450,8 +502,8 @@ export default async function SlugPage({
   searchParams,
 }: SlugPageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
-  const engineSeo = await getSeo('/'+slug);
-  const sourceSlug = engineSeo?.source_path?.replace(/^\//,'') || slug;
+  const engineSeo = await getSeo("/" + slug);
+  const sourceSlug = engineSeo?.source_path?.replace(/^\//, "") || slug;
   // NOTE: searchParams must NOT be awaited here. Reading it at the top level
   // of the page poisons static prerendering (DYNAMIC_SERVER_USAGE → 500 on
   // every slug URL). It is awaited inside <PseoListingSection> below, which
@@ -462,23 +514,33 @@ export default async function SlugPage({
   }
 
   if (parsePseoSlug(slug) && !engineSeo) {
-    const validated = await getSeoForDetail('/' + slug);
-    if (!validated || validated.gone || validated.scope !== 'listing') notFound();
+    const validated = await getSeoForDetail("/" + slug);
+    if (!validated || validated.gone || validated.scope !== "listing")
+      notFound();
   }
   if (engineSeo?.redirect) permanentRedirect(engineSeo.redirect);
   if (engineSeo?.gone) notFound();
-  if (engineSeo?.off_market && engineSeo?.target_snapshot) return <SeoOffMarketPage seo={engineSeo} />;
-  if (engineSeo?.scope === 'listing' && engineSeo.config_key) {
+  if (engineSeo?.off_market && engineSeo?.target_snapshot)
+    return <SeoOffMarketPage seo={engineSeo} />;
+  if (engineSeo?.scope === "listing" && engineSeo.config_key) {
     const query = await searchParams;
-    return <SeoListingPage seo={engineSeo} page={listingPageNumber(query?.page)}/>;
+    return (
+      <SeoListingPage seo={engineSeo} page={listingPageNumber(query?.page)} />
+    );
   }
 
   let property: Awaited<ReturnType<typeof getPropertyBySeoSlug>> = null;
 
   try {
-    property = engineSeo?.scope === "project" ? null : withSeo(await getPropertyBySeoSlug(sourceSlug) as any, engineSeo);
+    property =
+      engineSeo?.scope === "project"
+        ? null
+        : withSeo((await getPropertyBySeoSlug(sourceSlug)) as any, engineSeo);
   } catch (err) {
-    console.error(`[SlugPage] Failed to fetch property for slug "${slug}":`, err);
+    console.error(
+      `[SlugPage] Failed to fetch property for slug "${slug}":`,
+      err,
+    );
     // Rethrow so error.tsx renders with a 5xx status: a 200 "Service
     // Unavailable" page got indexed and shown to visitors whenever the
     // backend was briefly unreachable or rate-limited.
@@ -487,18 +549,25 @@ export default async function SlugPage({
 
   if (property) {
     if (property.shouldRedirect) {
-      permanentRedirect((property as any).redirectDestination || `/${property.canonicalSlug}`);
+      permanentRedirect(
+        (property as any).redirectDestination || `/${property.canonicalSlug}`,
+      );
     }
 
-    const structuredData = buildRealEstateSchema(property,engineSeo || undefined);
+    const structuredData = buildRealEstateSchema(
+      property,
+      engineSeo || undefined,
+    );
     const breadcrumbItems = buildBreadcrumbItems(property);
     // Every property page renders exactly one FAQ block (overview FAQs at
     // the end), so only those are marked up.
     const isSingle = isSinglePageType(property.propertyType);
-    const faqJsonLd = engineSeo ? null : buildFaqPageJsonLd(
-      (property.faqs || []).filter((f) => f.section === "overview"),
-      `https://www.majestanrealty.com/${property.canonicalSlug}`,
-    );
+    const faqJsonLd = engineSeo
+      ? null
+      : buildFaqPageJsonLd(
+          (property.faqs || []).filter((f) => f.section === "overview"),
+          `https://www.majestanrealty.com/${property.canonicalSlug}`,
+        );
 
     return (
       <>
@@ -539,12 +608,19 @@ export default async function SlugPage({
   }
 
   try {
-    const project = await getProjectBySlugUrl(sourceSlug).then(p => withSeo(p,engineSeo)).catch((error: unknown) => {
-      if (error instanceof ProjectApiError && error.status === 404) return null;
-      throw error;
-    });
+    const project = await getProjectBySlugUrl(sourceSlug)
+      .then((p) => withSeo(p, engineSeo))
+      .catch((error: unknown) => {
+        if (error instanceof ProjectApiError && error.status === 404)
+          return null;
+        throw error;
+      });
     if (project) {
-      if ((project as any).shouldRedirect && (project as any).redirectDestination) permanentRedirect((project as any).redirectDestination);
+      if (
+        (project as any).shouldRedirect &&
+        (project as any).redirectDestination
+      )
+        permanentRedirect((project as any).redirectDestination);
       const breadcrumbItems = [
         { label: "Projects", href: "/projects" },
         { label: project.city, href: "/projects" },
@@ -556,10 +632,12 @@ export default async function SlugPage({
         .filter((n: number) => Number.isFinite(n) && n > 0);
       // The overview shows exactly one FAQ block (overview FAQs at the end),
       // so only those are marked up.
-      const faqJsonLd = engineSeo ? null : buildFaqPageJsonLd(
-        projectFaqItems(project).filter((f) => f.section === "overview"),
-        `https://www.majestanrealty.com/${project.canonicalSlug}`,
-      );
+      const faqJsonLd = engineSeo
+        ? null
+        : buildFaqPageJsonLd(
+            projectFaqItems(project).filter((f) => f.section === "overview"),
+            `https://www.majestanrealty.com/${project.canonicalSlug}`,
+          );
       return (
         <>
           <SiteHeader />
@@ -575,7 +653,9 @@ export default async function SlugPage({
                 so each block below sets its own page container instead. */}
             <main className="pt-3! pb-24! scroll-smooth!">
               <div className="flex! flex-col! gap-4!">
-                <div className={`${PAGE_CONTAINER} w-full! flex! items-center! justify-between! gap-4! min-w-0!`}>
+                <div
+                  className={`${PAGE_CONTAINER} w-full! flex! items-center! justify-between! gap-4! min-w-0!`}
+                >
                   <div className="min-w-0! flex-1!">
                     <Breadcrumbs items={breadcrumbItems} jsonLd />
                   </div>
@@ -584,7 +664,9 @@ export default async function SlugPage({
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
-                    __html: jsonLd(buildRealEstateSchema(project,engineSeo || undefined)),
+                    __html: jsonLd(
+                      buildRealEstateSchema(project, engineSeo || undefined),
+                    ),
                   }}
                 />
                 {faqJsonLd && (
@@ -629,7 +711,7 @@ export default async function SlugPage({
   }
 
   // ── PSEO page handler ─────────────────────────────────────────────────────
-  if (engineSeo?.scope === 'page') return <SeoListingPage seo={engineSeo}/>;
+  if (engineSeo?.scope === "page") return <SeoListingPage seo={engineSeo} />;
 
   // searchParams is read inside <PseoListingSection> (always under Suspense)
   // so the page shell stays statically prerenderable.
@@ -637,7 +719,11 @@ export default async function SlugPage({
   if (pseo) {
     return (
       <Suspense fallback={<ListingShellSkeleton />}>
-        <PseoListingSection slug={slug} pseo={pseo} searchParams={searchParams} />
+        <PseoListingSection
+          slug={slug}
+          pseo={pseo}
+          searchParams={searchParams}
+        />
       </Suspense>
     );
   }
@@ -664,9 +750,13 @@ async function PseoListingSection({
   {
     // Resolve the sublocation slug ("saravanampatti") → canonical name
     // ("Saravanampatti") so the filter dropdown and syncUrl comparisons match.
-    const listingSeo = await getSeoForDetail('/'+slug);
-    if (!listingSeo || listingSeo.gone || listingSeo.scope !== 'listing') notFound();
-    const canonicalSubloc = await resolveSublocName(pseo.sublocation, pseo.city || "coimbatore");
+    const listingSeo = await getSeoForDetail("/" + slug);
+    if (!listingSeo || listingSeo.gone || listingSeo.scope !== "listing")
+      notFound();
+    const canonicalSubloc = await resolveSublocName(
+      pseo.sublocation,
+      pseo.city || "coimbatore",
+    );
 
     const qOrUndef = (v: string) => (v.trim() !== "" ? v : undefined);
     const qBedrooms = qsFirst(query.bedrooms);
@@ -699,15 +789,16 @@ async function PseoListingSection({
           page: qPage,
           limit: 12,
         },
-        undefined,   // no ISR tags (avoids 429 via fetch deduplication)
-        300,         // time-based ISR: revalidate every 5 min (matches page revalidate)
+        undefined, // no ISR tags (avoids 429 via fetch deduplication)
+        300, // time-based ISR: revalidate every 5 min (matches page revalidate)
       );
     } catch (error) {
       console.error("Failed to fetch initial PSEO properties:", error);
       throw error;
     }
 
-    if (initialData && qPage > Math.max(1, Math.ceil(initialData.total / 12))) notFound();
+    if (initialData && qPage > Math.max(1, Math.ceil(initialData.total / 12)))
+      notFound();
 
     const cityLabel = pseo.city
       ? pseo.city.charAt(0).toUpperCase() + pseo.city.slice(1)
@@ -723,11 +814,13 @@ async function PseoListingSection({
       "@type": "ItemList",
       name: `${bhkPart}${pseo.propertyLabel} ${listingWord} in ${subLabel ? subLabel + ", " : ""}${cityLabel}`,
       url: `https://www.majestanrealty.com/${slug}${qPage > 1 ? "?page=" + qPage : ""}`,
-      itemListElement: (initialData?.items || []).map((item: any, index: number) => ({
-        "@type": "ListItem",
-        position: (qPage - 1) * 12 + index + 1,
-        url: `https://www.majestanrealty.com/${item.canonicalSlug || item.slug_url || item.slug || ""}`,
-      })),
+      itemListElement: (initialData?.items || []).map(
+        (item: any, index: number) => ({
+          "@type": "ListItem",
+          position: (qPage - 1) * 12 + index + 1,
+          url: `https://www.majestanrealty.com/${item.canonicalSlug || item.slug_url || item.slug || ""}`,
+        }),
+      ),
     };
 
     const pseoInitialFilters: FilterValues = {
@@ -749,26 +842,26 @@ async function PseoListingSection({
       <>
         <SiteHeader />
         <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
-        <SeoLocalityContent seo={listingSeo} heading={false} />
         <SeoHeadingProvider heading={listingSeo?.h1}>
-        <Suspense fallback={<ListingShellSkeleton />}>
-          <PropertyListingShell
-            adapterInit={{
-              initialListingType: pseo.listingType,
-              initialPropertyType: pseo.propertyType,
-              initialCity: pseo.city || "coimbatore",
-              initialLocality: canonicalSubloc,
-              initialBedrooms: pseo.bedrooms,
-            }}
-            initialFilters={pseoInitialFilters}
-            initialData={initialData}
-          />
-        </Suspense>
+          <Suspense fallback={<ListingShellSkeleton />}>
+            <PropertyListingShell
+              adapterInit={{
+                initialListingType: pseo.listingType,
+                initialPropertyType: pseo.propertyType,
+                initialCity: pseo.city || "coimbatore",
+                initialLocality: canonicalSubloc,
+                initialBedrooms: pseo.bedrooms,
+              }}
+              initialFilters={pseoInitialFilters}
+              initialData={initialData}
+            />
+          </Suspense>
         </SeoHeadingProvider>
-        <SeoLocalityBottom seo={listingSeo} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLd(listingStructuredData(listingSeo, itemListJsonLd)) }}
+          dangerouslySetInnerHTML={{
+            __html: jsonLd(listingStructuredData(listingSeo, itemListJsonLd)),
+          }}
         />
         <SiteFooter />
       </>

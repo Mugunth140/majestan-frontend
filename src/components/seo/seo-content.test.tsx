@@ -11,7 +11,6 @@ vi.mock("@/components/site/layout/breadcrumbs", () => ({
   Breadcrumbs: () => null,
 }));
 import {
-  InventoryEditorial,
   SeoEntityDetails,
   SeoListingPage,
   SeoLocalityBottom,
@@ -113,21 +112,6 @@ describe("public SEO content", () => {
     expect(html).not.toContain("SEO-only introduction");
     expect(html).not.toContain("SEO-only bottom guide");
     expect(html).not.toContain("FAQPage");
-  });
-  it("keeps existing staff notes private until explicitly published", () => {
-    const seo = {
-      settings: {},
-      intro_content: "Staff draft",
-      bottom_content: "Reviewed guide",
-    };
-    expect(renderToStaticMarkup(<InventoryEditorial seo={seo} />)).toBe("");
-    expect(
-      renderToStaticMarkup(
-        <InventoryEditorial
-          seo={{ ...seo, settings: { publish_editorial_content: true } }}
-        />,
-      ),
-    ).toContain("Staff draft");
   });
   it("retains unavailable inventory without claiming an active offer", () => {
     const html = renderToStaticMarkup(

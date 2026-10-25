@@ -14,7 +14,6 @@ import {
   SeoOffMarketBanner,
   SeoOffMarketPage,
   SeoListingPage,
-  InventoryEditorial,
 } from "@/components/seo/seo-content";
 import { SitePage } from "@/components/site/layout/site-page";
 import { SiteHeader } from "@/components/site/layout/site-header";
@@ -588,7 +587,6 @@ export default async function SlugPage({
             </div>
             <SeoOffMarketBanner seo={engineSeo} />
             <PropertyDetailsView property={property} />
-            <InventoryEditorial seo={engineSeo} />
           </div>
           <script
             type="application/ld+json"
@@ -680,7 +678,6 @@ export default async function SlugPage({
                 <div id="overview" className="scroll-mt-40!">
                   <SeoOffMarketBanner seo={engineSeo} />
                   <ProjectDetailsView project={project} />
-                  <InventoryEditorial seo={engineSeo} />
                 </div>
               </div>
             </main>

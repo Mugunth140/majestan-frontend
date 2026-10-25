@@ -14,7 +14,35 @@ export async function CoreSeoBoundary({
   children: React.ReactNode;
 }) {
   const seo = await getSeo(path);
-  const footerContent = (
+  // Listings keep their inventory-derived heading and body. The shared footer
+  // must not inject admin editorial copy or FAQ markup into these routes.
+  const isListing = path === "/projects" || seo?.scope === "listing";
+  const schema = seo?.json_ld;
+  const nodes = Array.isArray(schema?.["@graph"])
+    ? schema["@graph"]
+    : Array.isArray(schema)
+      ? schema
+      : schema
+        ? [schema]
+        : [];
+  const metadataSeo =
+    isListing && seo
+      ? {
+          ...seo,
+          json_ld: {
+            "@context": schema?.["@context"] || "https://schema.org",
+            "@graph": nodes.filter((node: Record<string, any>) => {
+              const types = Array.isArray(node["@type"])
+                ? node["@type"]
+                : [node["@type"]];
+              return !types.includes("FAQPage");
+            }),
+          },
+        }
+      : seo;
+  const footerContent = isListing ? (
+    <SeoJsonLd seo={metadataSeo} />
+  ) : (
     <>
       {seo?.intro_content && (
         <section
@@ -32,7 +60,7 @@ export async function CoreSeoBoundary({
   const footerIsOutside = ["/about-us", "/contact-us"].includes(path);
   return (
     <SeoHeadingProvider
-      heading={seo?.h1}
+      heading={isListing ? undefined : seo?.h1}
       footerContent={footerIsOutside ? null : footerContent}
     >
       {children}

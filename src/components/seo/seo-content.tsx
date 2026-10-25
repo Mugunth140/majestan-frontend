@@ -12,21 +12,6 @@ import { SiteFooter } from "@/components/site/layout/site-footer";
 import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 const money = (value: unknown) =>
   value == null ? "Not available" : "₹" + Number(value).toLocaleString("en-IN");
-/** Publishing is explicit so pre-existing private staff notes never become public on upgrade. */
-export function InventoryEditorial({ seo }: { seo: SeoSnapshot | null }) {
-  if (seo?.settings?.publish_editorial_content !== true) return null;
-  return (
-    <section aria-label="Property guide">
-      {seo.intro_content && (
-        <div className="max-w-7xl! mx-auto! px-6! py-6!">
-          <TextBlock text={seo.intro_content} />
-        </div>
-      )}
-      <SeoHighlights seo={seo} />
-      <SeoLocalityBottom seo={seo} />
-    </section>
-  );
-}
 export function SeoJsonLd({ seo }: { seo: SeoSnapshot | null }) {
   return seo?.json_ld ? (
     <script

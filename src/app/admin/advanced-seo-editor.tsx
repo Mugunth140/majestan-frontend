@@ -49,15 +49,24 @@ function parseJsonText(value: string, label: string): Row {
       throw new Error();
     return parsed;
   } catch {
-    throw new Error(`${label} must contain a valid JSON object (use @graph for multiple nodes).`);
+    throw new Error(
+      `${label} must contain a valid JSON object (use @graph for multiple nodes).`,
+    );
   }
 }
 function schemaText(value: Row): string {
-  const schema = value.schema_overrides ?? value.custom_schema_json ??
-    value.json_ld ?? value.jsonLd ?? {};
+  const schema =
+    value.schema_overrides ??
+    value.custom_schema_json ??
+    value.json_ld ??
+    value.jsonLd ??
+    {};
   return typeof schema === "string" ? schema : JSON.stringify(schema, null, 2);
 }
-function JsonLdField({ value, onChange }: {
+function JsonLdField({
+  value,
+  onChange,
+}: {
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -72,8 +81,8 @@ function JsonLdField({ value, onChange }: {
       />
       <small>
         Enter a JSON object, without script tags. Use @graph for multiple nodes.
-        Saved schema applies only to this page; generated schema remains available.
-        Clear this field to remove the custom schema.
+        Saved schema applies only to this page; generated schema remains
+        available. Clear this field to remove the custom schema.
       </small>
     </label>
   );
@@ -362,8 +371,12 @@ export function AdvancedSeoEditor({
   const [activeSection, setActiveSection] = useState(
     isProject ? "floor_plans" : "floor_plan",
   );
-  const [rootSchemaText, setRootSchemaText] = useState(() => schemaText(original));
-  const [sectionSchemaDrafts, setSectionSchemaDrafts] = useState<Record<string, string>>({});
+  const [rootSchemaText, setRootSchemaText] = useState(() =>
+    schemaText(original),
+  );
+  const [sectionSchemaDrafts, setSectionSchemaDrafts] = useState<
+    Record<string, string>
+  >({});
   function sectionsWithSchemaDrafts() {
     const result = { ...sections };
     for (const [key, text] of Object.entries(sectionSchemaDrafts))
@@ -376,17 +389,26 @@ export function AdvancedSeoEditor({
   const [rawSections, setRawSections] = useState(false);
   const [rawSectionText, setRawSectionText] = useState("");
   function previewJson(text: string) {
-    try { return JSON.parse(text || "{}"); } catch { return text; }
+    try {
+      return JSON.parse(text || "{}");
+    } catch {
+      return text;
+    }
   }
-  const reviewSections = rawSections ? previewJson(rawSectionText) : {
-    ...sections,
-    ...Object.fromEntries(
-      Object.entries(sectionSchemaDrafts).map(([key, text]) => [key, {
-        ...asObject(sections[key]),
-        schema_overrides: previewJson(text),
-      }]),
-    ),
-  };
+  const reviewSections = rawSections
+    ? previewJson(rawSectionText)
+    : {
+        ...sections,
+        ...Object.fromEntries(
+          Object.entries(sectionSchemaDrafts).map(([key, text]) => [
+            key,
+            {
+              ...asObject(sections[key]),
+              schema_overrides: previewJson(text),
+            },
+          ]),
+        ),
+      };
   const faq: Row[] = Array.isArray(form.faqs) ? form.faqs : [];
   const variables = asObject(initial.effective?.variables);
   const effectiveTitle =
@@ -951,7 +973,13 @@ export function AdvancedSeoEditor({
                           onChange={(e) => {
                             if (e.target.checked) {
                               try {
-                                setRawSectionText(JSON.stringify(sectionsWithSchemaDrafts(), null, 2));
+                                setRawSectionText(
+                                  JSON.stringify(
+                                    sectionsWithSchemaDrafts(),
+                                    null,
+                                    2,
+                                  ),
+                                );
                               } catch (error) {
                                 setError((error as Error).message);
                                 return;
@@ -1010,7 +1038,8 @@ export function AdvancedSeoEditor({
                                     value={asObject(sections[key])}
                                     fallback={{
                                       meta_title:
-                                        fallback.meta_title || fallback.metaTitle,
+                                        fallback.meta_title ||
+                                        fallback.metaTitle,
                                       meta_description:
                                         fallback.meta_description ||
                                         fallback.metaDescription,
@@ -1028,8 +1057,16 @@ export function AdvancedSeoEditor({
                                     }
                                   />
                                   <JsonLdField
-                                    value={sectionSchemaDrafts[key] ?? schemaText(asObject(sections[key]))}
-                                    onChange={(text) => setSectionSchemaDrafts((current) => ({ ...current, [key]: text }))}
+                                    value={
+                                      sectionSchemaDrafts[key] ??
+                                      schemaText(asObject(sections[key]))
+                                    }
+                                    onChange={(text) =>
+                                      setSectionSchemaDrafts((current) => ({
+                                        ...current,
+                                        [key]: text,
+                                      }))
+                                    }
                                   />
                                 </div>
                               );
@@ -1042,15 +1079,10 @@ export function AdvancedSeoEditor({
                   <section className="seo-panel">
                     <h3>Editorial content</h3>
                     <p className="seo-edit-intro">
-                      These notes stay private until you enable publication below.
-                      Published copy appears on the public overview. Inventory facts
-                      and the original FAQs remain managed in the CRM.
+                      These editorial notes are saved for staff reference and do
+                      not appear on public project or property pages. Search
+                      metadata is managed in Search and Subpages.
                     </p>
-                    <label className="seo-check">
-                      <AdminCheckbox checked={settings.publish_editorial_content === true}
-                        onChange={event => setSetting("publish_editorial_content", event.target.checked)} />
-                      Publish this editorial content on the public overview
-                    </label>
                     <Field
                       label="Overview introduction"
                       value={settings.intro_content}
@@ -1288,7 +1320,10 @@ export function AdvancedSeoEditor({
                     </section>
                     <section className="seo-panel">
                       <h3>Main page structured data</h3>
-                      <JsonLdField value={rootSchemaText} onChange={setRootSchemaText} />
+                      <JsonLdField
+                        value={rootSchemaText}
+                        onChange={setRootSchemaText}
+                      />
                     </section>
                     <section className="seo-panel">
                       <h3>Social sharing</h3>
@@ -1415,13 +1450,17 @@ export function AdvancedSeoEditor({
                 <SeoReview
                   initial={initial.config || initial}
                   current={{
-                    ...form, settings,
+                    ...form,
+                    settings,
                     highlights: highlightsText.split("\n").filter(Boolean),
                     schema_overrides: previewJson(rootSchemaText),
                     section_seo: reviewSections,
                   }}
                   target={target}
-                  onRestored={() => { onSaved(); onClose(); }}
+                  onRestored={() => {
+                    onSaved();
+                    onClose();
+                  }}
                 />
                 {error && (
                   <p className="seo-error" role="alert">

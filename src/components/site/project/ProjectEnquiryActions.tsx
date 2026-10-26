@@ -72,6 +72,7 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
 
   const [authOpen, setAuthOpen] = useState(false);
   const [pendingIntent, setPendingIntent] = useState<Intent | null>(null);
+  const resumingExpiredSession = useRef(false);
   const [dialog, setDialog] = useState<Intent | null>(null);
 
   // Contact details — phone is always locked (it's the auth identity)
@@ -127,12 +128,15 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
   // After OTP login, resume the pending intent (with its event message)
   useEffect(() => {
     if (isAuthenticated && pendingIntent) {
-      seedFromUser();
+      if (!resumingExpiredSession.current) seedFromUser();
       setStatus("idle");
       setErrorMsg("");
-      setVisitSlot("");
-      setVisitDate(firstBookableDate());
-      setMessage(pendingMessage);
+      if (!resumingExpiredSession.current) {
+        setVisitSlot("");
+        setVisitDate(firstBookableDate());
+        setMessage(pendingMessage);
+      }
+      resumingExpiredSession.current = false;
       setDialog(pendingIntent);
       setPendingIntent(null);
       setPendingMessage("");
@@ -247,8 +251,20 @@ export function ProjectEnquiryActions({ project, hideTriggers, externalOpen }: P
         token!,
       );
       setStatus("success");
-    } catch {
-      setErrorMsg("Something went wrong. Please try again.");
+    } catch (error) {
+      if (error && typeof error === "object" && "status" in error && error.status === 401) {
+        resumingExpiredSession.current = true;
+        useUserAuthStore.getState().logout();
+        setDialog(null);
+        setPendingIntent(intent === "site_visit" ? "visit" : "enquire");
+        setAuthOpen(true);
+        setStatus("idle");
+        return;
+      }
+      const detail = error && typeof error === "object" && "status" in error &&
+        typeof error.status === "number" && error.status < 500 && error instanceof Error
+        ? error.message : "We could not submit your request. Please try again.";
+      setErrorMsg(detail);
       setStatus("error");
     }
   }

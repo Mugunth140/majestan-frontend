@@ -1,5 +1,5 @@
 // site/majestan-frontend/src/components/site/property/PropertyEnquiryActions.test.tsx
-import { render, screen, cleanup } from "@testing-library/react";
+import { act, render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
@@ -34,6 +34,25 @@ afterEach(() => {
 });
 
 describe("PropertyEnquiryActions", () => {
+  it("reopens sign-in after a 401 and resumes the enquiry with the new session", async () => {
+    const user = userEvent.setup();
+    useUserAuthStore.setState({
+      token: "expired", isAuthenticated: true,
+      user: { id: 7, name: "Rahul", email: "r@x.com", phone: "9876543210", role: "user" },
+    });
+    vi.mocked(createPropertyEnquiry).mockRejectedValueOnce(Object.assign(new Error("Session expired"), { status: 401 }));
+    render(<PropertyEnquiryActions property={PROP} />);
+    await user.click(screen.getByRole("button", { name: /enquire now/i }));
+    await user.click(await screen.findByRole("button", { name: /submit enquiry/i }));
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
+    expect(useUserAuthStore.getState().isAuthenticated).toBe(false);
+    act(() => useUserAuthStore.getState().login("renewed", { id: 7, name: "Rahul", email: "r@x.com", phone: "9876543210", role: "user" }));
+    vi.mocked(createPropertyEnquiry).mockResolvedValueOnce({ id: 80, submitted: true });
+    await user.click(await screen.findByRole("button", { name: /submit enquiry/i }));
+    expect(createPropertyEnquiry).toHaveBeenLastCalledWith(expect.objectContaining({ intent: "enquiry" }), "renewed");
+    expect(await screen.findByText(/thank you/i)).toBeInTheDocument();
+  });
+
   it("asks logged-out visitors to log in first, then opens the prefilled form", async () => {
     const user = userEvent.setup();
     render(<PropertyEnquiryActions property={PROP} />);

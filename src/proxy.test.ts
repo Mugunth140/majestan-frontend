@@ -4,6 +4,12 @@ import { proxy } from "./proxy";
 
 afterEach(() => vi.unstubAllGlobals());
 describe("inventory rendering routes", () => {
+  it.each(["x", "cachefn", "r2s", "0"])("rejects invalid Server Action IDs without reaching the backend: %s", async (action) => {
+    const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);
+    const response = await proxy(new NextRequest("https://example.com/", { method: "POST", headers: { "Next-Action": action } }));
+    expect(response.status).toBe(404);
+    expect(fetch).not.toHaveBeenCalled();
+  });
   it.each(["/PREMIER-ARIA-SQUARE-PA0019", "/Premier-Aria-Square-PA0019/photos"])("redirects uppercase inventory links before SEO lookup: %s", async path => {
     const fetch = vi.fn(); vi.stubGlobal("fetch", fetch);
     const response = await proxy(new NextRequest(`https://example.com${path}?utm_source=test`));

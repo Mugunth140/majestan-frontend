@@ -47,6 +47,25 @@ afterEach(() => {
 });
 
 describe("ProjectEnquiryActions", () => {
+  it("reopens sign-in after a 401 and resumes the enquiry with the new session", async () => {
+    const user = userEvent.setup();
+    useUserAuthStore.setState({
+      token: "expired", isAuthenticated: true,
+      user: { id: 7, name: "Rahul", email: "r@x.com", phone: "9876543210", role: "user" },
+    });
+    vi.mocked(createProjectEnquiry).mockRejectedValueOnce(Object.assign(new Error("Session expired"), { status: 401 }));
+    render(<ProjectEnquiryActions project={PROJECT} />);
+    await user.click(screen.getByRole("button", { name: /enquire now/i }));
+    await user.click(await screen.findByRole("button", { name: /submit enquiry/i }));
+    expect(await screen.findByRole("dialog", { name: /welcome back/i })).toBeInTheDocument();
+    expect(useUserAuthStore.getState().isAuthenticated).toBe(false);
+    act(() => useUserAuthStore.getState().login("renewed", { id: 7, name: "Rahul", email: "r@x.com", phone: "9876543210", role: "user" }));
+    vi.mocked(createProjectEnquiry).mockResolvedValueOnce({ id: 80, submitted: true });
+    await user.click(await screen.findByRole("button", { name: /submit enquiry/i }));
+    expect(createProjectEnquiry).toHaveBeenLastCalledWith(expect.objectContaining({ intent: "enquiry" }), "renewed");
+    expect(await screen.findByText(/thank you/i)).toBeInTheDocument();
+  });
+
   it("asks logged-out visitors to log in first, rather than opening the form", async () => {
     const user = userEvent.setup();
     render(<ProjectEnquiryActions project={PROJECT} />);

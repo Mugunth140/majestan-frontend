@@ -1,6 +1,11 @@
 import { SEO_API_BASE } from "@/lib/seo-api-base";
 import { NextRequest, NextResponse } from "next/server";
 export async function proxy(request: NextRequest) {
+  // Server Action IDs are hashes. Reject scanner payloads before RSC handling.
+  const action = request.headers.get("next-action");
+  if (request.method === "POST" && action !== null && !/^[a-f0-9]{40,64}$/i.test(action)) {
+    return new NextResponse(null, { status: 404 });
+  }
   const path = request.nextUrl.pathname;
   if (path === "/site-api" || path.startsWith("/site-api/"))
     return siteApiProxy(request);

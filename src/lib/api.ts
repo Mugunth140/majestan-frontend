@@ -1,6 +1,14 @@
 import { sanitizePublicAreas } from "./seo-quality";
 import { getSublocation, type LocationRecord } from "./location-display";
 import type { ProjectListItem } from "./api/projects";
+import { useUserAuthStore } from "@/store/userAuthStore";
+
+export class ApiRequestError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
 
 export type Sublocation = {
   id: number;
@@ -132,11 +140,9 @@ export async function fetchApi<T>(
 
     if (response.status === 401) {
       if (typeof window !== "undefined") {
-        window.localStorage.removeItem("majestan_access_token");
-        window.localStorage.removeItem("majestan_user");
-        window.location.href = "/login";
+        useUserAuthStore.getState().logout();
       }
-      throw new Error("Session expired");
+      throw new ApiRequestError("Your session expired. Please sign in again.", 401);
     }
 
     // 429 Too Many Requests — back off and retry once (server-side only).
@@ -153,7 +159,13 @@ export async function fetchApi<T>(
 
     if (!response.ok) {
       const method = (init?.method || "GET").toUpperCase();
-      throw new Error(`API request failed: ${response.status} ${response.statusText} for ${method} ${path}`);
+      const error = await response.json().catch(() => null);
+      const detail = Array.isArray(error?.message) ? error.message.join(". ") : error?.message;
+      throw new ApiRequestError(
+        response.status < 500 && typeof detail === "string" ? detail :
+          `API request failed: ${response.status} ${response.statusText} for ${method} ${path}`,
+        response.status,
+      );
     }
 
     const payload = (await response.json()) as ApiEnvelope<T> | T;
@@ -406,9 +418,7 @@ export async function createProjectEnquiry(
   },
   token: string,
 ) {
-  // Same session requirement as the property endpoint: the OTP wall on the
-  // client guarantees a live token, and fetchApi's 401 handling (redirect to
-  // /login) is the desired behavior on expiry.
+  // A 401 clears the visitor session; the form resumes after OTP sign-in.
   return fetchApi<{ id: number; submitted: boolean }>("/leads/project-enquiry", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -432,8 +442,7 @@ export async function createPropertyEnquiry(
   },
   token: string,
 ) {
-  // fetchApi's 401 handling (redirect to /login) is the desired behavior
-  // here: this endpoint requires a live session.
+  // A 401 clears the visitor session; the form resumes after OTP sign-in.
   return fetchApi<{ id: number; submitted: boolean }>("/leads/property-enquiry", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },

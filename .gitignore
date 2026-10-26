@@ -49,3 +49,6 @@ next-env.d.ts
 /.next-perf/
 
 /.next-seo-audit-verify/
+
+# Isolated blog browser verification
+/.next-blog-qa/

@@ -1,3 +1,4 @@
+import { blogFetch, type Post } from '@/lib/blog';
 import { getSeo,seoMetadata } from '@/lib/seo-engine';
 import { CoreSeoBoundary } from '@/components/seo/core-seo';
 import type { Metadata } from "next";
@@ -36,10 +37,11 @@ export default async function Page() {
     homeData = emptyHomeData;
   }
 
-  const [banners, offers] = await Promise.all([
+  const [banners, offers, articles] = await Promise.all([
     getAdsBanners("hero").catch(() => []),
     getAdsBanners("offers").catch(() => []),
+    blogFetch<{items: Post[]}>("?limit=3").then(result => result.items).catch(() => []),
   ]);
 
-  return <CoreSeoBoundary path="/"><HomePage data={homeData} banners={banners} offers={offers} /></CoreSeoBoundary>;
+  return <CoreSeoBoundary path="/"><HomePage data={homeData} banners={banners} offers={offers} articles={articles} /></CoreSeoBoundary>;
 }

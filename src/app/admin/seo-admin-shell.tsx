@@ -13,6 +13,7 @@ import {
 } from "@radix-ui/themes";
 import {
   Building2,
+  BookOpen,
   ExternalLink,
   Files,
   House,
@@ -27,6 +28,7 @@ const links = [
   { title: "Properties", url: "/admin/properties/seo", Icon: House },
   { title: "Listing pages", url: "/admin/seo", Icon: MapPinned },
   { title: "Core & service pages", url: "/admin/pages", Icon: Files },
+  { title: "Blogs", url: "/admin/blogs", Icon: BookOpen },
   { title: "Technical SEO", url: "/admin/technical", Icon: Settings2 },
 ];
 export async function seoApi(path: string, body?: unknown, method?: string) {

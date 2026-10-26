@@ -409,9 +409,6 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
 
   return (
     <div className="min-h-screen! bg-[#f4f6f9]! font-manrope-page">
-      {/* Header spacer */}
-      <div className="h-[54px]!" aria-hidden="true" />
-
       {/* ── Mobile filter bar ── */}
       <MobileFilterBar
         locationLabel={getLocationLabel(filtersAsRecord)}
@@ -508,7 +505,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
         <div className="flex! gap-6! items-start!">
 
           {/* ── Sidebar (xl+) ── */}
-          <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! sticky! top-[62px]! max-h-[calc(100vh-62px)]! overflow-y-auto! pt-4! pb-6! pr-1!">
+          <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! sticky! top-[68px]! max-h-[calc(100vh-68px)]! overflow-y-auto! pt-4! pb-6! pr-1!">
             {adapter.renderFilters({
               values: filters,
               onChange: handleFilterChange,

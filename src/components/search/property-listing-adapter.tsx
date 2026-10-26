@@ -183,24 +183,39 @@ function getParking(item: PropertySearchItem): string | null {
   return null;
 }
 
-// "2026-10-02" → "2nd Oct 2026" for the photo overlay.
-function fmtOrdinalDate(v: unknown): string | null {
+// "2026-10-02" → "Oct 2026" for the photo overlay.
+function fmtMonthYear(v: unknown): string | null {
   if (typeof v !== "string" || !v.trim()) return null;
   const dt = new Date(v);
   if (isNaN(dt.getTime())) return null;
-  const day = dt.getDate();
-  const suffix =
-    day % 10 === 1 && day !== 11 ? "st"
-    : day % 10 === 2 && day !== 12 ? "nd"
-    : day % 10 === 3 && day !== 13 ? "rd"
-    : "th";
-  const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.getMonth()];
-  return `${day}${suffix} ${mon} ${dt.getFullYear()}`;
+  const mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][dt.getMonth()];
+  return `${mon} ${dt.getFullYear()}`;
 }
 
 function getAvailableFromLabel(item: PropertySearchItem): string | null {
   const d = getDetails(item);
-  return fmtOrdinalDate(d.availableFrom ?? (item as any).availableFrom ?? (item as any).available_from);
+  // possessionStatus enum wins over date arithmetic when present
+  const status = typeof (item as any).possessionStatus === "string"
+    ? (item as any).possessionStatus.trim().toLowerCase()
+    : "";
+  if (status === "ready_to_move") {
+    const raw = d.availableFrom ?? (item as any).availableFrom ?? (item as any).available_from;
+    const label = fmtMonthYear(raw);
+    return label ? `Ready to Move · Since ${label}` : "Ready to Move";
+  }
+  if (status === "under_construction") {
+    const raw = d.availableFrom ?? (item as any).availableFrom ?? (item as any).available_from;
+    const label = fmtMonthYear(raw);
+    return label ? `Under Construction · Launching ${label}` : "Under Construction";
+  }
+  // No status or unrecognised — fall back to date comparison
+  const raw = d.availableFrom ?? (item as any).availableFrom ?? (item as any).available_from;
+  const label = fmtMonthYear(raw);
+  if (!label || typeof raw !== "string" || !raw.trim()) return null;
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const target = raw.trim().slice(0, 10);
+  return today < target ? `Under Construction · Launching ${label}` : `Ready to Move · Since ${label}`;
 }
 
 function getTypeLabel(item: PropertySearchItem): string | null {
@@ -569,7 +584,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             return availableFrom ? (
               <div className="absolute! inset-x-0! bottom-0! h-[10%]! min-h-[34px]! flex! items-end! justify-center! pb-1.5! bg-gradient-to-t! from-black/85! via-black/40! to-transparent! pointer-events-none!">
                 <span className="text-[11px]! font-semibold! tracking-wide! text-white! drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]!">
-                  Available from {availableFrom}
+                  {availableFrom}
                 </span>
               </div>
             ) : null;

@@ -204,23 +204,36 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     formatPossessionStatus(item.possessionStatus) ?? fmtShortDate(item.possessionDate);
   const conditionBadge = isRent ? null : getConditionBadge(item.possessionStatus);
 
-  // Availability strip, wired to the possession date: before it shows
-  // "Available from {date}"; once it passes, it flips to "Ready to Move".
+  // Availability strip: possessionStatus enum wins; date is the fallback.
+  // "ready_to_move"       → "Ready to Move · Since <possessionDate month/year>"
+  // "under_construction"  → "Under Construction · Launching <possessionDate month/year>"
+  // "new_launch"          → nothing (conditionBadge already shows "NEW LAUNCH")
+  // no status, date only  → date comparison decides which label to use
   const availabilityStrip = (() => {
-    const ymd = (v: unknown): string | null => {
-      if (typeof v !== "string" || !v.trim()) return null;
-      const m = v.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
-      return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+    const fmtMY = (iso: string | null | undefined): string | null => {
+      if (!iso || !iso.trim()) return null;
+      const dt = new Date(iso);
+      if (isNaN(dt.getTime())) return null;
+      const mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][dt.getMonth()];
+      return `${mon} ${dt.getFullYear()}`;
     };
-    const target = ymd(item.possessionDate);
-    if (!target) return null;
+    const status = typeof item.possessionStatus === "string" ? item.possessionStatus.trim().toLowerCase() : "";
+    const dateLabel = fmtMY(item.possessionDate);
+    if (status === "ready_to_move") {
+      return dateLabel ? `Ready to Move · Since ${dateLabel}` : "Ready to Move";
+    }
+    if (status === "under_construction") {
+      return dateLabel ? `Under Construction · Launching ${dateLabel}` : "Under Construction";
+    }
+    // new_launch → strip hidden (badge handles it); unknown status → date fallback
+    if (status === "new_launch") return null;
+    if (!dateLabel || !item.possessionDate) return null;
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    if (today < target) {
-      const label = fmtOrdinalDate(target);
-      return label ? `Available from ${label}` : null;
-    }
-    return "Ready to Move";
+    const target = String(item.possessionDate).trim().slice(0, 10);
+    return today < target
+      ? `Under Construction · Launching ${dateLabel}`
+      : `Ready to Move · Since ${dateLabel}`;
   })();
 
   // Total unit count: apartment/villa cards read the stored Total Units

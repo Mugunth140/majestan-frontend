@@ -1,5 +1,6 @@
 "use client";
 
+import type { Post } from "@/lib/blog";
 import Link from "next/link";
 import { Search, Handshake, TrendingUp, BarChart3, Home, BadgePercent, Store, ArrowUpRight } from "lucide-react";
 import { useLocationContext } from "@/contexts/LocationContext";
@@ -20,7 +21,7 @@ import { toLocationSlug } from "@/lib/seo-urls";
 
 
 
-export function HomePage({ data, banners, offers }: { data: HomePageData; banners: AdHeroBanner[]; offers: AdHeroBanner[] }) {
+export function HomePage({ data, banners, offers, articles = [] }: { data: HomePageData; banners: AdHeroBanner[]; offers: AdHeroBanner[]; articles?: Post[] }) {
   const { location } = useLocationContext();
   const citySlug = toLocationSlug(location);
   
@@ -242,6 +243,13 @@ export function HomePage({ data, banners, offers }: { data: HomePageData; banner
             </div>
 
           </div>
+        </section>
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="home-blog-heading">
+          <div className="flex flex-wrap justify-between items-end gap-6 mb-8"><div><p className="text-sm text-[#27427f] mb-3">The Majestan journal</p><h2 id="home-blog-heading" className="text-4xl font-semibold">Realty check</h2><p className="mt-4 text-base text-[#667085]">Local insights for your next property decision.</p></div><Link href="/blogs" className="text-base font-semibold underline underline-offset-4">Explore the journal →</Link></div>
+          {articles.length > 0 && <div className="grid gap-6 md:grid-cols-3">{articles.map(article => <article className="rounded-xl border overflow-hidden" key={article.id}>
+            {article.cover_image && <Link href={`/blogs/${article.slug}`} tabIndex={-1} aria-hidden="true"><img src={article.cover_image} alt={article.cover_alt} loading="lazy" width={1200} height={630} className="aspect-[1.9] w-full object-cover" /></Link>}
+            <div className="p-6"><p className="text-xs text-[#27427f] mb-3">{article.category}</p><h3 className="text-2xl font-semibold"><Link href={`/blogs/${article.slug}`}>{article.title}</Link></h3><p className="text-base text-[#667085] mt-4">{article.excerpt}</p><Link href={`/blogs/${article.slug}`} className="inline-block text-sm font-semibold mt-6">Read article ↗</Link></div>
+          </article>)}</div>}
         </section>
         {/* Google reviews: the last section, right above the footer's Popular Searches */}
         <GoogleReviewsSection data={data.googleReviews ?? null} />

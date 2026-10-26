@@ -9,6 +9,25 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   if (path === "/site-api" || path.startsWith("/site-api/"))
     return siteApiProxy(request);
+  if (path === "/blogs" || path.startsWith("/blogs/")) {
+    const blogSlug = /^\/blogs\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(path)?.[1];
+    if (blogSlug) {
+      try {
+        const response = await fetch(`${SEO_API_BASE}/editorial/routing/resolve?slug=${encodeURIComponent(blogSlug)}`, {
+          cache: 'no-store', signal: AbortSignal.timeout(4000),
+          headers: process.env.INTERNAL_API_KEY ? {'x-internal-key':process.env.INTERNAL_API_KEY} : {},
+        });
+        if (response.ok) {
+          const payload = await response.json(), target = (payload.data ?? payload).slug;
+          if (typeof target === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target) && target !== blogSlug) {
+            const url = request.nextUrl.clone(); url.pathname = '/blogs/' + target;
+            return NextResponse.redirect(url, 301);
+          }
+        }
+      } catch { /* The page still handles missing articles and upstream errors. */ }
+    }
+    return NextResponse.next();
+  }
   if (path.startsWith("/admin")) return NextResponse.next();
   // Hide the internal rendering route; public URLs and canonicals stay unchanged.
   if (/^\/(detail-render|detail-section|seo-route|seo-section)\//.test(path)) {

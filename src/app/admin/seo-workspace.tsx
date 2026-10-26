@@ -1,4 +1,5 @@
 "use client";
+import { OgImageUpload } from "./og-image-upload";
 import { SeoReview } from "./seo-review";
 import { AdminSelect, AdminCheckbox } from "./admin-controls";
 import { useEffect, useState } from "react";
@@ -208,6 +209,8 @@ function Editor({
   const [form, setForm] = useState<Row>(initial.config || initial),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const locked = busy || uploadingImage;
   const [schema, setSchema] = useState(
     JSON.stringify(
       (initial.config || initial).custom_schema_json ||
@@ -266,6 +269,7 @@ function Editor({
     setForm((f) => ({ ...f, settings: { ...f.settings, [key]: value } }));
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (uploadingImage) return;
     setBusy(true);
     setError("");
     try {
@@ -347,14 +351,14 @@ function Editor({
     <Dialog.Root
       open
       onOpenChange={(open) => {
-        if (!open && !busy) onClose();
+        if (!open && !locked) onClose();
       }}
     >
       <Dialog.Content
         className="seo-command seo-editor seo-generic-editor"
         aria-describedby={undefined}
         onEscapeKeyDown={(event) => {
-          if (busy) event.preventDefault();
+          if (locked) event.preventDefault();
         }}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
@@ -381,7 +385,7 @@ function Editor({
             className="seo-button seo-secondary"
             type="button"
             onClick={onClose}
-            disabled={busy}
+            disabled={locked}
           >
             Close
           </Button>
@@ -902,12 +906,13 @@ function Editor({
                       set={set}
                     />
                   </div>
-                  <Field
-                    label="OpenGraph image URL"
-                    name="og_image_url"
-                    form={form}
-                    set={set}
-                  />
+                  {form.scope === "page" ? (
+                    <OgImageUpload value={form.og_image_url || ""}
+                      onChange={(url) => set("og_image_url", url)}
+                      disabled={busy} onUploadingChange={setUploadingImage} />
+                  ) : (
+                    <Field label="OpenGraph image URL" name="og_image_url" form={form} set={set} />
+                  )}
                   <Check
                     label="Allow indexing"
                     name="robots_index"
@@ -1061,11 +1066,11 @@ function Editor({
               className="seo-button seo-secondary seo-danger"
               type="button"
               onClick={onClose}
-              disabled={busy}
+              disabled={locked}
             >
               Cancel
             </Button>
-            <Button type="submit" className="seo-button" disabled={busy}>
+            <Button type="submit" className="seo-button" disabled={locked}>
               {busy ? "Saving…" : "Save SEO changes"}
             </Button>
           </div>

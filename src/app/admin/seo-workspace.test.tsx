@@ -88,7 +88,7 @@ describe('core and service page editor', () => {
       if (path === 'configs?scope=page') return [page];
       if (path.startsWith('configs/')) {
         if (saveError) throw new Error(saveError);
-        return { ...body, revision: 4 };
+        return { ...(body as Record<string, unknown>), revision: 4 };
       }
       return [];
     });
@@ -124,6 +124,28 @@ describe('core and service page editor', () => {
     ));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     await waitFor(() => expect(fetch).toHaveBeenCalledWith('/api/seo-verify?path=' + encodeURIComponent(page.public_path), { cache: 'no-store' }));
+  });
+  it('uploads a core page image before allowing save and persists the returned R2 URL', async () => {
+    api();
+    let finishUpload!: (response: Response) => void;
+    const uploadResponse = new Promise<Response>((resolve) => { finishUpload = resolve; });
+    const fetch = vi.fn().mockImplementation((url: string) => url === '/api/seo-admin/media/opengraph'
+      ? uploadResponse : Promise.resolve(new Response('{}')));
+    vi.stubGlobal('fetch', fetch);
+    const dialog = await openEditor();
+    expect(dialog.queryByLabelText('OpenGraph image URL')).not.toBeInTheDocument();
+    const file = new File(['image-bytes'], 'social.png', { type: 'image/png' });
+    await userEvent.upload(dialog.getByLabelText('OpenGraph image'), file);
+    expect(dialog.getByRole('button', { name: 'Save SEO changes' })).toBeDisabled();
+    finishUpload(new Response(JSON.stringify({ data: { url: 'https://cdn.example/uploads/seo/opengraph/new.png' } })));
+    await waitFor(() => expect(dialog.getByRole('button', { name: 'Save SEO changes' })).toBeEnabled());
+    expect(dialog.getByAltText('OpenGraph image preview')).toHaveAttribute('src', 'https://cdn.example/uploads/seo/opengraph/new.png');
+    await userEvent.click(dialog.getByRole('button', { name: 'Save SEO changes' }));
+    await waitFor(() => expect(seoApi).toHaveBeenCalledWith(
+      'configs/' + encodeURIComponent(page.config_key),
+      expect.objectContaining({ og_image_url: 'https://cdn.example/uploads/seo/opengraph/new.png', revision: 3 }),
+      'PUT',
+    ));
   });
   it('retains unsaved edits and shows a rejected save', async () => {
     api('Someone changed this SEO. Reload before saving');

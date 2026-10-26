@@ -57,7 +57,7 @@ export async function CoreSeoBoundary({
       <SeoJsonLd seo={seo} />
     </>
   );
-  const footerIsOutside = ["/about-us", "/contact-us"].includes(path);
+  const footerIsOutside = ["/about-us", "/contact-us", "/emi-calculator", "/affordability-calculator"].includes(path);
   return (
     <SeoHeadingProvider
       heading={isListing ? undefined : seo?.h1}

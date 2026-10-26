@@ -2,20 +2,28 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmiCalculator } from "@/components/site/emi/EmiCalculator";
 import { BANK_RATES, BANK_RATES_UPDATED } from "@/lib/emi-bank-rates";
+import { getSeo, seoMetadata } from "@/lib/seo-engine";
+import { CoreSeoBoundary } from "@/components/seo/core-seo";
+import { SeoH1 } from "@/components/seo/core-heading";
 
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   alternates: { canonical: "/emi-calculator" },
   title: "Home Loan EMI Calculator — Monthly EMI at the Lowest Interest Rates",
   description:
     "Estimate your home loan EMI with sliders for loan amount, interest rate and tenure. Compare starting home loan rates from Indian banks and see a year-wise repayment schedule.",
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  return seoMetadata(await getSeo('/emi-calculator'), defaultMetadata);
+}
+
 export default function EmiCalculatorPage() {
   return (
+    <CoreSeoBoundary path="/emi-calculator">
     <main className="font-manrope-page mx-auto! w-full! max-w-6xl! px-4! pb-10! pt-[calc(var(--site-header-h,64px)+24px)]! md:px-8!">
-      <h1 className="text-3xl! md:text-4xl! font-semibold! text-gray-900! tracking-tight! text-balance!">
+      <SeoH1 className="text-3xl! md:text-4xl! font-semibold! text-gray-900! tracking-tight! text-balance!">
         Home loan EMI calculator
-      </h1>
+      </SeoH1>
       <p className="mt-2! max-w-2xl! text-base! text-gray-600!">
         Move the sliders to see your monthly EMI, total interest, and how each year&apos;s
         payment splits between principal and interest.{" "}
@@ -61,5 +69,6 @@ export default function EmiCalculatorPage() {
         </div>
       </section>
     </main>
+    </CoreSeoBoundary>
   );
 }

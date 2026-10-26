@@ -19,6 +19,7 @@ import {
 import { seoApi } from "./seo-admin-shell";
 import { AdvancedSeoEditor } from "./advanced-seo-editor";
 import { propertySampleVariables } from "./property-seo-profile";
+import { CanonicalControl, countEditorialWords } from "./canonical-control";
 
 type Row = Record<string, any>;
 const labels: Record<string, string> = {
@@ -881,11 +882,11 @@ function Editor({
               {!template && (
                 <section className="seo-panel">
                   <h3>Indexing & sharing</h3>
-                  <Field
-                    label="Canonical URL"
-                    name="canonical_url"
-                    form={form}
-                    set={set}
+                  <CanonicalControl
+                    value={form}
+                    onChange={set}
+                    path={form.public_path || '/'}
+                    words={countEditorialWords([form.intro_content, form.bottom_content])}
                   />
                   <div className="seo-form-grid">
                     <Field

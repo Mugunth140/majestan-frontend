@@ -25,6 +25,19 @@ const editorial = {
   },
 };
 describe("listing SEO cannot inject copy through the shared footer", () => {
+  it.each(['/about-us', '/contact-us', '/emi-calculator', '/affordability-calculator'])(
+    'renders editorial content once when %s has a footer in its parent layout', async (path) => {
+      vi.mocked(getSeo).mockResolvedValue({ ...editorial, scope: 'page' });
+      const html = renderToStaticMarkup(await CoreSeoBoundary({
+        path,
+        children: <main><SeoH1>Default heading</SeoH1></main>,
+      }));
+      expect(html).toContain('<h1>SEO-only heading</h1>');
+      expect(html.split('SEO-only introduction')).toHaveLength(2);
+      expect(html).toContain('SEO-only footer');
+      expect(html).toContain('SEO-only answer');
+    },
+  );
   it.each([
     { path: "/projects", scope: "page" },
     { path: "/villas-for-sale-in-coimbatore", scope: "listing" },

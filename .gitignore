@@ -52,3 +52,6 @@ next-env.d.ts
 
 # Isolated blog browser verification
 /.next-blog-qa/
+
+# Any isolated NEXT_DIST_DIR build/verify output (.next-*)
+/.next-*/

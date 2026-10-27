@@ -138,6 +138,7 @@ export function WhatsAppPopup({
   return (
     <div
       ref={rootRef}
+      data-floating-whatsapp
       className="fixed! z-[9999]! flex! flex-col! items-end! gap-3!
                  right-4! sm:right-6!
                  bottom-[calc(1.25rem+env(safe-area-inset-bottom))]! sm:bottom-6!"

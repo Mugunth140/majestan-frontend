@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Building2, Factory, House, LandPlot, KeyRound, FileCheck2 } from "lucide-react";
+import { Building2, Factory, House, LandPlot, KeyRound, FileCheck2 } from "lucide-react";
 import styles from "./about.module.css";
 
 const SERVICES = [
@@ -15,7 +15,7 @@ export function AboutServices() {
   return (
     <section className={`${styles.container} ${styles.section}`} aria-labelledby="about-services">
       <div className={styles.sectionHeader}>
-        <div><p className={styles.eyebrow}>What we can help with</p><h2 id="about-services" className={styles.heading}>More than finding a property.</h2></div>
+        <div><h2 id="about-services" className={styles.heading}>More than finding a property.</h2></div>
         <p className={styles.sectionDescription}>Practical support for buying, selling, leasing and looking after your property.</p>
       </div>
       <div className={styles.servicesGrid}>
@@ -23,11 +23,11 @@ export function AboutServices() {
           <Link href={href} key={title} className={styles.serviceCard}>
             <span className={styles.icon}><Icon size={22} aria-hidden="true" /></span>
             <div><h3>{title}</h3><p>{description}</p></div>
-            <ArrowUpRight size={20} className={styles.serviceArrow} aria-hidden="true" />
+
           </Link>
         ))}
       </div>
-      <p className={styles.landNote}>Looking for agricultural land? <Link href="/farmlands-for-sale-in-coimbatore">Explore farmlands<ArrowUpRight size={14} aria-hidden="true" /></Link></p>
+      <p className={styles.landNote}>Looking for agricultural land? <Link href="/farmlands-for-sale-in-coimbatore">Explore farmlands</Link></p>
     </section>
   );
 }

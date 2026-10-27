@@ -37,7 +37,7 @@ import {
 import { emi } from "@/lib/emi";
 import { PROJECT_FINANCE_ASSUMPTIONS } from "@/lib/project-finance";
 import { PropertyEnquiryActions } from "./PropertyEnquiryActions";
-import { LISTING_SUMMARY_CARD } from "@/components/site/shared/listing-summary-styles";
+import { DetailEnquiryPanel } from "@/components/site/shared/DetailEnquiryPanel";
 
 type PropertyInfoSidebarProps = {
   property: SeoProperty;
@@ -222,9 +222,59 @@ export function PropertyInfoSidebar({
   }[];
 
   return (
-    <div className="lg:sticky! lg:top-[calc(var(--site-header-h)+69px)]! flex! flex-col! gap-4!">
-      {/* Title and enquiry stay beside the cover, as on the original property layout. */}
-      <div className={LISTING_SUMMARY_CARD}>
+    <DetailEnquiryPanel
+      key={property.id}
+      title={title}
+      price={`${formatPrice(property.price)}${isSale ? "" : " / mo"}`}
+      actions={<PropertyEnquiryActions
+          property={{
+            id: property.id,
+            propertyCode: property.propertyCode,
+            slug: property.slug,
+            title: property.title,
+            propertyType: property.propertyType,
+            listingType: property.listingType,
+            city: property.city,
+            status: property.status,
+          }}
+        />}
+      footer={<><div className="mt-5! pt-3! border-t! border-[#e2e9f4]! flex! items-center! justify-center! gap-1! text-sm! font-manrope! font-normal! text-[#465066]!">
+          <Coins className="w-4! h-4! text-emerald-600! shrink-0!" />
+          {!property.brokerageType || property.brokerageType === "no_brokerage"
+            ? "No brokerage for this property"
+            : property.brokerageType === "percentage"
+              ? `Brokerage: Only ${property.brokerageValue}% on Sale Value`
+              : `Brokerage: Just ${property.brokerageValue} Days Rent`}
+        </div>
+
+        {property.propertyCode && (
+          <p className="mt-2! flex! items-center! justify-center! gap-2! text-xs! font-manrope! text-[#5f6b80]!">
+            <Info className="w-3.5! h-3.5!" />
+            ID: {property.propertyCode}
+          </p>
+        )}</>}
+      listedBy={<div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! p-6! flex! items-center! gap-4!">
+        <Image
+          width={56}
+          height={56}
+          src="/favicon/android-chrome-512x512.png"
+          alt="Majestan Realty"
+          className="w-14! h-14! rounded-full! object-cover! shrink-0!"
+        />
+        <div>
+          <p className="text-xs! font-manrope! text-[#5f6b80]! font-normal! uppercase! tracking-wider! mb-0.5!">
+            Listed By
+          </p>
+          <p className="font-manrope! font-medium! text-base! text-gray-900!">
+            Majestan Realty
+          </p>
+          <p className="text-xs! font-manrope! font-normal! text-[#5f6b80]! mt-1! flex! items-center! gap-1.5!">
+            <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
+            Verified
+          </p>
+        </div>
+      </div>}
+    >
         <div className="flex! items-start! justify-between! gap-3!">
           <PropertyHeading className="m-0! text-xl! font-manrope! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]! text-balance!">
             {isApartment ? title : `${title} ${property.city}`}
@@ -307,58 +357,6 @@ export function PropertyInfoSidebar({
           </div>
         )}
 
-        <PropertyEnquiryActions
-          property={{
-            id: property.id,
-            propertyCode: property.propertyCode,
-            slug: property.slug,
-            title: property.title,
-            propertyType: property.propertyType,
-            listingType: property.listingType,
-            city: property.city,
-            status: property.status,
-          }}
-        />
-
-        <div className="mt-5! pt-3! border-t! border-[#e2e9f4]! flex! items-center! justify-center! gap-1! text-sm! font-manrope! font-normal! text-[#465066]!">
-          <Coins className="w-4! h-4! text-emerald-600! shrink-0!" />
-          {!property.brokerageType || property.brokerageType === "no_brokerage"
-            ? "No brokerage for this property"
-            : property.brokerageType === "percentage"
-              ? `Brokerage: Only ${property.brokerageValue}% on Sale Value`
-              : `Brokerage: Just ${property.brokerageValue} Days Rent`}
-        </div>
-
-        {property.propertyCode && (
-          <p className="mt-2! flex! items-center! justify-center! gap-2! text-xs! font-manrope! text-[#5f6b80]!">
-            <Info className="w-3.5! h-3.5!" />
-            ID: {property.propertyCode}
-          </p>
-        )}
-      </div>
-
-      {/* Listed-by card */}
-      <div className="bg-white! rounded-2xl! border! border-[#e6ebf2]! p-6! flex! items-center! gap-4!">
-        <Image
-          width={56}
-          height={56}
-          src="/favicon/android-chrome-512x512.png"
-          alt="Majestan Realty"
-          className="w-14! h-14! rounded-full! object-cover! shrink-0!"
-        />
-        <div>
-          <p className="text-xs! font-manrope! text-[#5f6b80]! font-normal! uppercase! tracking-wider! mb-0.5!">
-            Listed By
-          </p>
-          <p className="font-manrope! font-medium! text-base! text-gray-900!">
-            Majestan Realty
-          </p>
-          <p className="text-xs! font-manrope! font-normal! text-[#5f6b80]! mt-1! flex! items-center! gap-1.5!">
-            <ShieldCheck className="w-3.5! h-3.5! text-emerald-500!" />
-            Verified
-          </p>
-        </div>
-      </div>
-    </div>
+    </DetailEnquiryPanel>
   );
 }

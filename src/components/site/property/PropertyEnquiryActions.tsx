@@ -570,7 +570,7 @@ export function PropertyEnquiryActions({ property, hideTriggers, externalOpen }:
     <>
       {/* Trigger buttons */}
       {!hideTriggers && (
-      <div className="mt-4! flex! flex-col! gap-2.5!">
+      <div data-enquiry-actions className="mt-4! flex! flex-col! gap-2.5!">
         <button
           onClick={() => openIntent("enquire")}
           className={LISTING_ENQUIRY_BUTTON}

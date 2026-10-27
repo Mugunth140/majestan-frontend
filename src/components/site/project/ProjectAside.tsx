@@ -7,7 +7,7 @@ import { ProjectEnquiryActions } from "@/components/site/project/ProjectEnquiryA
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { LABEL } from "@/components/site/project/project-ui";
 import { formatAddressLines } from "@/lib/location-display";
-import { LISTING_SUMMARY_CARD } from "@/components/site/shared/listing-summary-styles";
+import { DetailEnquiryPanel } from "@/components/site/shared/DetailEnquiryPanel";
 
 /**
  * The enquiry card: what it costs, who builds it, and the two actions.
@@ -27,7 +27,22 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
   });
 
   return (
-    <div className={LISTING_SUMMARY_CARD}>
+    <DetailEnquiryPanel
+      key={project.id}
+      title={project.name}
+      price={priceRangeLabel(project)}
+      actions={<ProjectEnquiryActions project={project} />}
+      secondary={project.brochureUrl && <a
+          href={project.brochureUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          download
+          title={(project as ProjectDetail & { brochureSeoTitle?: string }).brochureSeoTitle || project.brochureName || undefined}
+          className="mt-2! flex! items-center! justify-center! gap-2! rounded-xl! px-3! py-2! text-sm! font-semibold! text-[#1645bf]! no-underline! hover:bg-[#eef4ff]! focus-visible:outline-2! focus-visible:outline-[#2563eb]!"
+        ><Download className="w-4! h-4!" aria-hidden="true" />Download brochure</a>}
+      footer={<EnquiryFooter project={project} />}
+      listedBy={<ListedByCard />}
+    >
       <div className="flex! items-start! justify-between! gap-3!">
         <h2 className="m-0! min-w-0! text-xl! font-semibold! text-[#0a0f1c]! tracking-[-0.025em]! text-balance!">
           {project.name}
@@ -101,27 +116,12 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
         )}
       </div>
 
-      <div className="mt-6!">
-        <ProjectEnquiryActions project={project} />
-        {project.brochureUrl && (
-          <a
-            href={project.brochureUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download
-            title={
-              (project as ProjectDetail & { brochureSeoTitle?: string })
-                .brochureSeoTitle ||
-              project.brochureName ||
-              undefined
-            }
-            className="mt-2.5! w-full! inline-flex! items-center! justify-center! gap-2! rounded-xl! bg-transparent! px-4! py-3! text-base! font-semibold! text-[#0a0f1c]! no-underline! cursor-pointer! transition-[color,background-color,transform]! duration-150! ease-out-quint! hover:bg-[#eef4ff]! hover:text-[#1645bf]! active:scale-[0.98]! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#2563eb]!"
-          >
-            <Download className="w-4! h-4!" aria-hidden="true" />
-            {"Download brochure"}
-          </a>
-        )}
-      </div>
+    </DetailEnquiryPanel>
+  );
+}
+
+function EnquiryFooter({ project }: { project: ProjectDetail }) {
+  return (
 
       <div className="mt-4! pt-4! border-t! border-[#e2e9f4]! flex! flex-col! items-center! gap-1.5! text-center!">
         <p className="m-0! flex! items-center! gap-1.5! text-[13px]! text-[#465066]!">
@@ -138,7 +138,6 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
           </p>
         )}
       </div>
-    </div>
   );
 }
 
@@ -179,10 +178,7 @@ function ListedByCard() {
 export function ProjectAside({ project }: { project: ProjectDetail }) {
   return (
     <aside aria-label="Enquire about this project" className="min-w-0!">
-      <div className="lg:sticky! lg:top-[calc(var(--site-header-h)+69px)]! flex! flex-col! gap-4!">
-        <EnquiryCard project={project} />
-        <ListedByCard />
-      </div>
+      <EnquiryCard project={project} />
     </aside>
   );
 }

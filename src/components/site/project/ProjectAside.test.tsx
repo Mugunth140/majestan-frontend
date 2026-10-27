@@ -34,7 +34,7 @@ describe("ProjectAside", () => {
 it('keeps the project sidebar but replaces enquiries with Sold Out', () => {
   render(<ProjectAside project={{...mockProject, status: 'booked'}} />);
   expect(screen.getByRole('status')).toHaveTextContent('Sold Out');
-  expect(screen.getByText('Green Acres')).toBeInTheDocument();
+  expect(screen.getByRole('heading', {name: 'Green Acres'})).toBeInTheDocument();
   expect(screen.queryByRole('button', {name: /enquire now/i})).not.toBeInTheDocument();
   expect(screen.queryByRole('button', {name: /schedule visit/i})).not.toBeInTheDocument();
 });

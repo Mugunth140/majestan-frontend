@@ -2,7 +2,7 @@ import { MapPinned, HeartHandshake, ShieldCheck } from "lucide-react";
 import styles from "./about.module.css";
 
 const VALUES = [
-  { Icon: MapPinned, title: "Knowledge that stays local", description: "An understanding of Coimbatore’s neighbourhoods, business corridors and land markets helps us find options that fit your needs." },
+  { Icon: MapPinned, title: "Knowledge that stays local", description: "An understanding of neighbourhoods, business corridors and land markets in the cities we serve helps us find options that fit your needs." },
   { Icon: ShieldCheck, title: "Clarity at every step", description: "Straightforward conversations about your options, the process and the next steps, so you can make an informed decision." },
   { Icon: HeartHandshake, title: "Your priorities come first", description: "A family home, a place for your business or an investment. We take the time to understand what matters to you." },
 ];
@@ -11,7 +11,7 @@ export function AboutValues() {
   return (
     <section className={`${styles.container} ${styles.section}`} aria-labelledby="about-values">
       <div className={styles.sectionHeader}>
-        <div><p className={styles.eyebrow}>The way we work</p><h2 id="about-values" className={styles.heading}>Good property advice starts with trust.</h2></div>
+        <div><h2 id="about-values" className={styles.heading}>Good property advice starts with trust.</h2></div>
         <p className={styles.sectionDescription}>These principles guide how we work with you, from the first conversation to what comes after.</p>
       </div>
       <div className={styles.valuesGrid}>

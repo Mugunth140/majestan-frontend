@@ -25,17 +25,22 @@ const editorial = {
   },
 };
 describe("listing SEO cannot inject copy through the shared footer", () => {
-  it.each(['/about-us', '/contact-us', '/emi-calculator', '/affordability-calculator'])(
-    'renders editorial content once when %s has a footer in its parent layout', async (path) => {
+  it.each(['/', '/contact-us', '/about-us', '/services/liaisoning'])(
+    'renders only the SEO heading and schema on core page %s, never editorial copy', async (path) => {
       vi.mocked(getSeo).mockResolvedValue({ ...editorial, scope: 'page' });
       const html = renderToStaticMarkup(await CoreSeoBoundary({
         path,
-        children: <main><SeoH1>Default heading</SeoH1></main>,
+        children: <main><SeoH1>Default heading</SeoH1><SeoFooterContent /></main>,
       }));
       expect(html).toContain('<h1>SEO-only heading</h1>');
-      expect(html.split('SEO-only introduction')).toHaveLength(2);
-      expect(html).toContain('SEO-only footer');
-      expect(html).toContain('SEO-only answer');
+      expect(html).toContain('Listing metadata');
+      expect(html).not.toContain('SEO-only introduction');
+      expect(html).not.toContain('SEO-only subheading');
+      expect(html).not.toContain('SEO-only summary');
+      expect(html).not.toContain('SEO-only highlight');
+      expect(html).not.toContain('SEO-only footer');
+      expect(html).not.toContain('SEO-only answer');
+      expect(html).not.toContain('FAQPage');
     },
   );
   it.each([

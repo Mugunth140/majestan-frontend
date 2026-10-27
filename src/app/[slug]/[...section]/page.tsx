@@ -43,7 +43,8 @@ import {
 } from "@/lib/api/property-by-slug";
 import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
-import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { PROPERTY_TYPES, decodeRouteSegment } from "@/lib/seo-urls";
+import { propertySectionBreadcrumbItems } from "@/lib/property-breadcrumbs";
 import { workspaceAmenitySuffix } from "@/lib/property-sections";
 import {
   getSeo,
@@ -315,41 +316,11 @@ function projectSectionTitlePrefix(
   return PROJECT_SECTION_META[sectionKey]?.titlePrefix ?? sectionKey;
 }
 
-function buildBreadcrumbItems(property: SeoProperty, sectionLabel: string) {
-  const isSale = !property.status.toLowerCase().includes("rent");
-  const listingType = isSale ? "for-sale" : "for-rent";
-  const listingLabel = isSale ? "For Sale" : "For Rent";
-  const typeLabel =
-    Object.values(PROPERTY_TYPES).find(
-      (p) => p.apiValue === property.propertyType,
-    )?.label || property.propertyType;
-
-  const propertyTypeSlug =
-    Object.entries(PROPERTY_TYPES).find(
-      ([, data]) => data.apiValue === property.propertyType,
-    )?.[0] || property.propertyType;
-
-  return [
-    {
-      label: listingLabel,
-      href: `/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`,
-    },
-    {
-      label: typeLabel,
-      href: `/${listingType}/${propertyTypeSlug}/${property.city.toLowerCase()}`,
-    },
-    {
-      label: property.title,
-      href: `/${property.canonicalSlug}`,
-    },
-    { label: sectionLabel },
-  ];
-}
-
 async function baseMetadata({
   params,
 }: PropertySectionPageProps): Promise<Metadata> {
-  const { slug, section } = await params;
+  const { slug: rawSlug, section } = await params;
+  const slug = decodeRouteSegment(rawSlug);
   const rootSeo = await getEffectiveRootSeo(slug);
 
   if (RESERVED_SECTION_SLUGS.has(slug)) {
@@ -623,7 +594,8 @@ function ProjectSectionContent({
 export default async function PropertySectionPage({
   params,
 }: PropertySectionPageProps): Promise<React.JSX.Element> {
-  const { slug, section } = await params;
+  const { slug: rawSlug, section } = await params;
+  const slug = decodeRouteSegment(rawSlug);
 
   if (RESERVED_SECTION_SLUGS.has(slug)) {
     notFound();
@@ -680,7 +652,7 @@ export default async function PropertySectionPage({
       field(childSeo, "meta_description", "metaDescription", "description") ||
       `${sectionConfig.descriptionPrefix} ${property.title} in ${property.city}. ${sectionConfig.descriptionSuffix}`;
 
-    const breadcrumbItems = buildBreadcrumbItems(property, sectionH1);
+    const breadcrumbItems = propertySectionBreadcrumbItems(property, sectionH1);
 
     // JSON-LD for this section page
     const structuredData = {
@@ -946,7 +918,8 @@ export default async function PropertySectionPage({
 export async function generateMetadata(
   props: PropertySectionPageProps,
 ): Promise<Metadata> {
-  const { slug, section } = await props.params;
+  const { slug: rawSlug, section } = await props.params;
+  const slug = decodeRouteSegment(rawSlug);
   const record =
     (await getPropertyBySeoSlug((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug)) ||
     (await getProjectBySlugUrl((await getEffectiveRootSeo(slug))?.source_path?.replace(/^\//, "") || slug).catch((error: unknown) => {

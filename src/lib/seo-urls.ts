@@ -58,6 +58,21 @@ export function toLocationSlug(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Dynamic route params arrive percent-encoded (`p%26k-…`). Inventory slugs and
+ * SEO paths are stored decoded, so comparing the raw param against them made
+ * `/p&k-…` redirect to itself. Decode once; keep the raw value if it is
+ * malformed or would introduce a path separator.
+ */
+export function decodeRouteSegment(value: string): string {
+  try {
+    const decoded = decodeURIComponent(value);
+    return decoded.includes("/") ? value : decoded;
+  } catch {
+    return value;
+  }
+}
+
 function fromLocationSlug(value: string): string {
   return decodeURIComponent(value).replace(/-/g, " ").trim();
 }

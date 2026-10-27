@@ -28,13 +28,13 @@ import { buildFaqPageJsonLd } from "@/lib/faq-page-jsonld";
 import { resolveViewForPath } from "@/lib/site/route-resolver";
 import {
   PROPERTY_TYPES,
+  decodeRouteSegment,
   parsePseoSlug,
-  buildPseoSlug,
   isSinglePageType,
   toLocationSlug,
-  type PropertyTypeSlug,
 } from "@/lib/seo-urls";
 import { getVisibleSingleSections } from "@/lib/property-sections";
+import { propertyBreadcrumbItems } from "@/lib/property-breadcrumbs";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
@@ -166,7 +166,8 @@ export async function generateMetadata({
   params,
   searchParams,
 }: SlugPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeRouteSegment(rawSlug);
   const engineSeo = await getSeo("/" + slug);
   const sourceSlug = engineSeo?.source_path?.replace(/^\//, "") || slug;
 
@@ -464,40 +465,12 @@ function buildPropertyStructuredData(
   };
 }
 
-function buildBreadcrumbItems(
-  property: NonNullable<Awaited<ReturnType<typeof getPropertyBySeoSlug>>>,
-) {
-  const isSale = !property.status.toLowerCase().includes("rent");
-  const listingType = isSale ? ("Sell" as const) : ("Rent" as const);
-  const listingLabel = isSale ? "For Sale" : "For Rent";
-
-  // Find the property type slug
-  const ptEntry = Object.entries(PROPERTY_TYPES).find(
-    ([, data]) => data.apiValue === property.propertyType,
-  );
-  const ptSlug = (ptEntry?.[0] || "apartments") as PropertyTypeSlug;
-  const typeLabel = ptEntry?.[1].label || property.propertyType;
-
-  // Build canonical PSEO URL for the parent breadcrumb
-  const parentSlug = buildPseoSlug(
-    listingType,
-    ptSlug,
-    property.city.toLowerCase(),
-  );
-
-  return [
-    { label: listingLabel, href: `/${parentSlug}` },
-    { label: typeLabel, href: `/${parentSlug}` },
-    { label: property.city, href: `/${parentSlug}` },
-    { label: property.title },
-  ];
-}
-
 export default async function SlugPage({
   params,
   searchParams,
 }: SlugPageProps): Promise<React.JSX.Element> {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeRouteSegment(rawSlug);
   const engineSeo = await getSeo("/" + slug);
   const sourceSlug = engineSeo?.source_path?.replace(/^\//, "") || slug;
   // NOTE: searchParams must NOT be awaited here. Reading it at the top level
@@ -552,7 +525,7 @@ export default async function SlugPage({
       property,
       engineSeo || undefined,
     );
-    const breadcrumbItems = buildBreadcrumbItems(property);
+    const breadcrumbItems = propertyBreadcrumbItems(property);
     // Every property page renders exactly one FAQ block (overview FAQs at
     // the end), so only those are marked up.
     const isSingle = isSinglePageType(property.propertyType);

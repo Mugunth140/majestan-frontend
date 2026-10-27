@@ -1,0 +1,112 @@
+.page { --about-ink: #161e2d; --about-blue: #27427f; --about-muted: #596579; background: #f4f6f9; color: var(--about-ink); padding-top: var(--site-header-h); padding-bottom: 80px; }
+.page :is(h1,h2,h3,p,ul,figure) { margin: 0 !important; }
+.page p { text-wrap: pretty; }
+.page :is(h1,h2,h3) { text-wrap: balance; }
+.container { width: 100%; max-width: 1280px; padding: 0 32px !important; margin: 0 auto !important; }
+.breadcrumb { padding-top: 24px !important; }
+.hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 64px; padding: 40px 0 48px !important; }
+.eyebrow { display: flex; align-items: center; gap: 8px; color: var(--about-blue); font-size: 12px !important; line-height: 16px !important; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.eyebrow::before { content: ''; width: 24px; height: 2px; background: #e9b500; flex-shrink: 0; }
+.title { max-width: 680px; padding: 24px 0 !important; color: var(--about-ink) !important; font-size: 48px !important; line-height: 1.12 !important; font-weight: 600 !important; letter-spacing: -.045em; }
+.intro { max-width: 560px; color: #344054; font-size: 20px !important; line-height: 28px !important; }
+.body { color: var(--about-muted); font-size: 16px !important; line-height: 28px !important; }
+.heroCopy > .body { padding-top: 16px !important; max-width: 520px; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; padding-top: 32px !important; }
+.primary { min-height: 48px; padding: 12px 24px !important; gap: 12px; font-size: 16px !important; font-weight: 600 !important; white-space: nowrap; flex-shrink: 0; }
+.page a:focus-visible { outline: 2px solid #27427f !important; outline-offset: 5px; }
+.textLink { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: var(--about-blue) !important; font-size: 14px; font-weight: 600; text-decoration: none; }
+.textLink:hover { text-decoration: underline; text-underline-offset: 4px; }
+.heroVisual { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; align-items: start; }
+.mainPhoto { position: relative; height: 448px; border-radius: 24px; overflow: hidden; }
+.secondColumn { padding-top: 40px !important; }
+.secondPhoto { position: relative; height: 272px; border-radius: 24px; overflow: hidden; }
+.photo { object-fit: cover; }
+.locationNote { display: flex; gap: 12px; align-items: flex-start; padding: 24px 16px !important; margin-top: 16px; border-radius: 16px; background: #fff6d9; color: var(--about-blue); }
+.locationNote svg { flex-shrink: 0; margin-top: 4px; }
+.locationNote p { font-size: 14px; line-height: 24px; }
+.locationNote strong { font-weight: 600; color: #344054; }
+.scopeStrip { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; padding: 24px 0 !important; border-top: 1px solid #dfe5ef; border-bottom: 1px solid #dfe5ef; }
+.scopeStrip > span { font-size: 14px; font-weight: 600; color: var(--about-blue); }
+.scopeStrip ul { display: flex; flex-wrap: wrap; gap: 24px; list-style: none; padding: 0 !important; color: var(--about-muted); font-size: 14px; }
+.scopeStrip li { display: flex; align-items: center; gap: 8px; }
+.scopeStrip li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #c1cbda; }
+.section { padding-top: 64px !important; scroll-margin-top: calc(var(--site-header-h) + 24px); }
+.storyPanel { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; background: white; border: 1px solid #e6ebf2; border-radius: 24px; padding: 40px !important; }
+.heading { color: var(--about-ink) !important; font-size: 30px !important; line-height: 36px !important; letter-spacing: -.03em; font-weight: 600 !important; padding-top: 16px !important; }
+.storyPanel .body { padding-top: 16px !important; }
+.missionStack { display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+.missionCard { display: flex; align-items: flex-start; gap: 16px; border: 1px solid #e6ebf2; background: #f8faff; border-radius: 16px; padding: 24px !important; }
+.icon { display: grid; place-items: center; width: 48px; height: 48px; flex-shrink: 0; border-radius: 12px; background: #edf2ff; color: #27427f; }
+.page h3 { font-size: 18px !important; line-height: 28px !important; font-weight: 600 !important; color: var(--about-ink) !important; letter-spacing: -.02em; }
+.missionCard p { padding-top: 8px !important; color: var(--about-muted); font-size: 14px; line-height: 24px; }
+.sectionHeader { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; padding-bottom: 24px !important; }
+.sectionHeader > div { max-width: 560px; }
+.sectionDescription { max-width: 352px; color: var(--about-muted); font-size: 14px; line-height: 24px; }
+.valuesGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+.valueCard { padding: 32px !important; background: white; border: 1px solid #e6ebf2; border-radius: 16px; }
+.cardTop { display: flex; align-items: center; justify-content: space-between; padding-bottom: 24px !important; }
+.cardNumber { font-size: 14px; font-weight: 600; color: #8a96a8; }
+.valueCard p { padding-top: 12px !important; color: var(--about-muted); font-size: 14px; line-height: 24px; }
+.servicesGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.serviceCard { display: flex; align-items: center; gap: 16px; padding: 24px !important; background: white; border: 1px solid #e6ebf2; border-radius: 16px; text-decoration: none !important; transition: border-color 200ms cubic-bezier(.23,1,.32,1), box-shadow 200ms cubic-bezier(.23,1,.32,1); }
+.serviceCard > div { flex: 1; min-width: 0; }
+.serviceCard p { padding-top: 4px !important; color: var(--about-muted); font-size: 14px; line-height: 24px; }
+.serviceArrow { flex-shrink: 0; color: #8794a9; transition: transform 200ms cubic-bezier(.23,1,.32,1), color 200ms cubic-bezier(.23,1,.32,1); }
+.serviceCard:hover { border-color: #bacbe9; box-shadow: 0 8px 24px -16px #27427f55; }
+.serviceCard:hover .serviceArrow { color: var(--about-blue); transform: translate(2px,-2px); }
+.serviceCard:active { transform: translateY(1px); }
+.landNote { padding-top: 24px !important; font-size: 14px; line-height: 24px; color: var(--about-muted); }
+.landNote a { display: inline-flex; align-items: center; gap: 4px; color: var(--about-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.closingWrap { padding-top: 64px !important; }
+.closing { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 48px !important; background: #27427f; border-radius: 24px; }
+.closing .eyebrow { color: #dce5fb; }
+.closing h2 { padding-top: 16px !important; font-size: 36px !important; line-height: 40px !important; font-weight: 600 !important; color: white !important; letter-spacing: -.03em; }
+.closing > div > p:last-child { padding-top: 16px !important; color: #dce5fb; font-size: 16px; line-height: 24px; }
+.closing a:focus-visible { outline-color: white !important; }
+@media (max-width: 1023px) {
+  .hero { gap: 32px; }
+  .title { font-size: 36px !important; line-height: 40px !important; }
+  .mainPhoto { height: 400px; }
+  .secondPhoto { height: 240px; }
+  .locationNote { padding: 16px !important; flex-direction: column; gap: 8px; }
+  .storyPanel { gap: 32px; padding: 32px !important; }
+  .missionCard { flex-direction: column; padding: 16px !important; }
+  .valueCard { padding: 24px !important; }
+  .serviceCard { align-items: flex-start; padding: 16px !important; }
+  .sectionHeader { align-items: flex-start; gap: 24px; }
+  .closing { padding: 32px !important; }
+}
+@media (max-width: 767px) {
+  .page { padding-bottom: 48px; }
+  .container { padding-right: 16px !important; padding-left: 16px !important; }
+  .breadcrumb { padding-top: 16px !important; }
+  .hero { grid-template-columns: 1fr; padding: 24px 0 32px !important; gap: 32px; }
+  .title { max-width: 540px; padding: 16px 0 !important; }
+  .intro { font-size: 18px !important; line-height: 28px !important; }
+  .heroCopy > .body { font-size: 14px !important; line-height: 24px !important; }
+  .actions { gap: 16px; padding-top: 24px !important; }
+  .primary { padding: 12px 16px !important; font-size: 14px !important; }
+  .mainPhoto { height: 352px; border-radius: 16px; }
+  .secondPhoto { height: 208px; border-radius: 16px; }
+  .secondColumn { padding-top: 24px !important; }
+  .locationNote { gap: 8px; margin-top: 12px; padding: 16px !important; }
+  .locationNote p { font-size: 12px; line-height: 20px; }
+  .scopeStrip { gap: 12px; padding: 24px 0 !important; }
+  .scopeStrip ul { gap: 8px 16px; font-size: 12px; }
+  .section, .closingWrap { padding-top: 40px !important; }
+  .storyPanel { grid-template-columns: 1fr; gap: 24px; padding: 24px !important; border-radius: 16px; }
+  .heading { font-size: 24px !important; line-height: 32px !important; }
+  .missionCard { flex-direction: row; padding: 16px !important; }
+  .sectionHeader { flex-direction: column; gap: 16px; }
+  .sectionDescription { max-width: 100%; }
+  .valuesGrid, .servicesGrid { grid-template-columns: 1fr; }
+  .valueCard { padding: 24px !important; }
+  .cardTop { padding-bottom: 16px !important; }
+  .serviceCard { align-items: center; gap: 12px; }
+  .serviceCard h3 { font-size: 16px !important; line-height: 24px !important; }
+  .serviceCard .icon { width: 40px; height: 40px; }
+  .serviceCard p { font-size: 12px; line-height: 20px; }
+  .closing { flex-direction: column; align-items: flex-start; gap: 24px; padding: 32px 24px !important; border-radius: 16px; }
+  .closing h2 { font-size: 30px !important; line-height: 36px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .page a, .serviceArrow { transition: none !important; transform: none !important; } }

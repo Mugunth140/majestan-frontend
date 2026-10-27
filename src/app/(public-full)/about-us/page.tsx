@@ -4,7 +4,9 @@ import { Metadata } from "next";
 import { AboutHero } from "@/components/site/about/AboutHero";
 import { AboutMission } from "@/components/site/about/AboutMission";
 import { AboutValues } from "@/components/site/about/AboutValues";
-import { AboutStats } from "@/components/site/about/AboutStats";
+import { AboutServices } from "@/components/site/about/AboutServices";
+import { AboutClosing } from "@/components/site/about/AboutClosing";
+import styles from "@/components/site/about/about.module.css";
 
 const defaultMetadata: Metadata = {
   title: "About Us | Majestan Realty",
@@ -15,11 +17,12 @@ export async function generateMetadata():Promise<Metadata>{return seoMetadata(aw
 
 export default function AboutPage() {
   return (<CoreSeoBoundary path="/about-us">
-    <main className="min-h-screen! bg-white!">
+    <main className={`font-manrope-page ${styles.page}`}>
       <AboutHero />
       <AboutMission />
       <AboutValues />
-      <AboutStats />
+      <AboutServices />
+      <AboutClosing />
     </main>
   </CoreSeoBoundary>);
 }

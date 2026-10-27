@@ -1,57 +1,25 @@
-import Image from "next/image";
-import { UserRound } from "lucide-react";
+import { Compass, Flag } from "lucide-react";
+import styles from "./about.module.css";
 
 export function AboutMission() {
   return (
-    <section className="py-20! bg-white!">
-      <div className="container! mx-auto! px-4!">
-        <div className="flex! flex-col! lg:flex-row! items-center! gap-16!">
-          
-          {/* Image Side */}
-          <div className="w-full! lg:w-1/2! relative!">
-            <div className="relative! h-[400px]! md:h-[500px]! w-full! rounded-2xl! overflow-hidden! shadow-2xl!">
-              <Image 
-                src="/assets/images/home/apartment-buy.png" 
-                alt="Our Mission" 
-                fill 
-                className="object-cover!"
-              />
-            </div>
-            {/* Decorative Element */}
-            <div className="absolute! -bottom-6! -right-6! w-32! h-32! bg-[#ffc900]! rounded-2xl! -z-10!" />
-            <div className="absolute! -top-6! -left-6! w-32! h-32! bg-[#27427f]/10! rounded-full! -z-10!" />
-          </div>
-
-          {/* Text Side */}
-          <div className="w-full! lg:w-1/2! space-y-6!">
-            <h2 className="text-sm! font-bold! text-[#27427f]! uppercase! tracking-widest!">Our Vision & Mission</h2>
-            <h3 className="text-3xl! md:text-4xl! font-bold! text-[#161e2d]! leading-tight!">
-              To be Coimbatore's leading real estate company
-            </h3>
-            <p className="text-gray-600! text-lg! leading-relaxed!">
-              <strong className="text-[#161e2d]!">Our Vision:</strong> To provide innovative solutions across residential, commercial, industrial, and agricultural sectors while ensuring superior customer experiences.
-            </p>
-            <p className="text-gray-600! text-lg! leading-relaxed!">
-              <strong className="text-[#161e2d]!">Our Mission:</strong> To offer seamless and comprehensive real estate services, including property transactions, management, and liaisoning, while addressing the diverse needs of urban, industrial, and rural property markets.
-            </p>
-            
-            <div className="pt-4! flex! items-center! gap-6!">
-              <div className="flex! -space-x-4!">
-                {[19, 20, 21].map((n, idx) => (
-                  // Icon discs: the stock avatar photos (/assets/images/avatar) were never
-                  // shipped, so these were three broken images (404s).
-                  <div key={n} style={{ zIndex: 10 - idx }} className="w-12! h-12! rounded-full! border-2! border-white! bg-[#eef3fb]! flex! items-center! justify-center! overflow-hidden!" aria-hidden="true">
-                    <UserRound className="w-5! h-5! text-[#27427f]!" />
-                  </div>
-                ))}
-              </div>
-              <div className="text-sm!">
-                <p className="font-bold! text-[#161e2d]!">Trusted by</p>
-                <p className="text-gray-500!">10,000+ happy clients</p>
-              </div>
-            </div>
-          </div>
-          
+    <section className={`${styles.container} ${styles.section}`} aria-labelledby="about-story">
+      <div className={styles.storyPanel}>
+        <div>
+          <p className={styles.eyebrow}>Our story</p>
+          <h2 id="about-story" className={styles.heading}>Local knowledge.<br />A wider perspective.</h2>
+          <p className={styles.body}>Majestan Realty works with buyers, sellers, owners and investors across Coimbatore&apos;s residential, commercial, industrial and agricultural property markets.</p>
+          <p className={styles.body}>From finding a home or a suitable business location to managing a property and coordinating approvals, we look at the whole picture. Our role is to help you understand your options and move forward with clarity.</p>
+        </div>
+        <div className={styles.missionStack}>
+          <article className={styles.missionCard}>
+            <span className={styles.icon}><Compass size={22} aria-hidden="true" /></span>
+            <div><h3>Our vision</h3><p>To be a trusted real estate partner in Coimbatore, bringing thoughtful solutions to the city&apos;s urban, industrial and rural property needs.</p></div>
+          </article>
+          <article className={styles.missionCard}>
+            <span className={styles.icon}><Flag size={22} aria-hidden="true" /></span>
+            <div><h3>Our mission</h3><p>To make property transactions and ownership easier through clear communication, practical guidance and comprehensive support.</p></div>
+          </article>
         </div>
       </div>
     </section>

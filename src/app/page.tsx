@@ -40,7 +40,7 @@ export default async function Page() {
   const [banners, offers, articles] = await Promise.all([
     getAdsBanners("hero").catch(() => []),
     getAdsBanners("offers").catch(() => []),
-    blogFetch<{items: Post[]}>("?limit=3").then(result => result.items).catch(() => []),
+    blogFetch<{items: Post[]}>("?limit=8").then(result => result.items).catch(() => []),
   ]);
 
   return <CoreSeoBoundary path="/"><HomePage data={homeData} banners={banners} offers={offers} articles={articles} /></CoreSeoBoundary>;

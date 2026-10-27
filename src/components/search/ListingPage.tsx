@@ -148,7 +148,7 @@ export function ListingShellSkeleton() {
     // while the listing streams in, so it never flashes up under the header.
     <div className="min-h-screen! bg-[#f4f6f9]! font-manrope-page" aria-hidden="true">
     {/* ── Mobile filter bar — mirrors MobileFilterBar ── */}
-    <div className="lg:hidden! bg-white! border-b! border-gray-200/80! shadow-sm!">
+    <div className="lg:hidden! sticky! top-[var(--site-header-h)]! z-30! bg-white! border-b! border-gray-200/80! shadow-sm!">
       <div className="flex! items-center! gap-2! pl-4! pr-4! py-2.5!">
         <div className="w-9! h-9! rounded-full! border! border-gray-200! shrink-0!" />
         <div className="h-[34px]! rounded-full! bg-gray-100! w-20! shimmer!" />

@@ -49,7 +49,8 @@ export function MobileFilterBar({
 }: MobileFilterBarProps) {
   const sortLabel = sortOptions.find((o) => o.value === sort)?.label ?? "Sort By";
   return (
-    <div className="lg:hidden! sticky! top-16! z-30! bg-white! border-b! border-gray-200/80! shadow-sm!">
+    // Use the header's measured height so the bar never slides underneath it.
+    <div className="lg:hidden! sticky! top-[var(--site-header-h)]! z-30! bg-white! border-b! border-gray-200/80! shadow-sm!">
       <div className="flex! items-center! gap-2! pl-4! pr-4! py-2.5!">
         {/* Fixed filter button */}
         <button

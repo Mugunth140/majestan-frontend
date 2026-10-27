@@ -14,6 +14,7 @@ import {
 } from "@radix-ui/themes";
 import { ArrowLeft, Save, ExternalLink } from "lucide-react";
 import { seoApi } from "../seo-admin-shell";
+import { blogSeo } from "@/lib/blog-seo";
 import { OgImageUpload } from "../og-image-upload";
 import "./blogs-admin.css";
 type BlogSeo = {
@@ -26,8 +27,10 @@ type BlogSeo = {
   published_at: string | null;
   meta_title: string;
   meta_description: string;
+  meta_keywords?: string;
   social_image: string;
   cover_image: string;
+  cover_alt: string;
   noindex: boolean;
 };
 export default function BlogsAdmin() {
@@ -41,6 +44,7 @@ export default function BlogsAdmin() {
     [uploading, setUploading] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
+  const effectiveSeo = post ? blogSeo(post) : null;
   const dirty = !!post && JSON.stringify(post) !== saved;
   useEffect(() => {
     let live = true;
@@ -99,6 +103,7 @@ export default function BlogsAdmin() {
           slug: post.slug,
           meta_title: post.meta_title,
           meta_description: post.meta_description,
+          meta_keywords: post.meta_keywords || "",
           social_image: post.social_image,
           noindex: post.noindex,
           revision: post.revision,
@@ -177,8 +182,8 @@ export default function BlogsAdmin() {
           </div>
           <div className="seo-field">
             <div className="seo-blog-label">
-              <label htmlFor="blog-meta-title">SEO title</label>
-              <span>{(post.meta_title || post.title).length}/60</span>
+              <label htmlFor="blog-meta-title">Meta title</label>
+              <span>{effectiveSeo!.title.length}/60</span>
             </div>
             <TextField.Root
               id="blog-meta-title"
@@ -191,16 +196,27 @@ export default function BlogsAdmin() {
           <div className="seo-field">
             <div className="seo-blog-label">
               <label htmlFor="blog-meta-description">Meta description</label>
-              <span>{(post.meta_description || post.excerpt).length}/160</span>
+              <span>{effectiveSeo!.description.length}/160</span>
             </div>
             <TextArea
               id="blog-meta-description"
               rows={3}
               maxLength={320}
               value={post.meta_description}
-              placeholder={post.excerpt}
+              placeholder={effectiveSeo!.description}
               onChange={(e) => change("meta_description", e.target.value)}
             />
+          </div>
+          <div className="seo-field">
+            <label htmlFor="blog-keywords">Keywords</label>
+            <TextField.Root
+              id="blog-keywords"
+              value={post.meta_keywords || ""}
+              maxLength={1000}
+              placeholder="Property guides, Coimbatore real estate"
+              onChange={(e) => change("meta_keywords", e.target.value)}
+            />
+            <small>Separate keywords with commas.</small>
           </div>
           <Flex gap="3" align="center" className="seo-blog-indexing">
             <Switch
@@ -241,10 +257,10 @@ export default function BlogsAdmin() {
                 majestanrealty.com › blogs › {post.slug}
               </Text>
               <Heading as="h3" size="4" color="blue" mt="2">
-                {post.meta_title || post.title}
+                {effectiveSeo!.title}
               </Heading>
               <Text as="p" size="2" mt="2">
-                {post.meta_description || post.excerpt}
+                {effectiveSeo!.description}
               </Text>
             </div>
           </details>

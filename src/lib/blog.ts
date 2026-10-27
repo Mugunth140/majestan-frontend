@@ -15,6 +15,7 @@ export type Post = {
   cover_alt: string;
   meta_title: string;
   meta_description: string;
+  meta_keywords?: string;
   social_image: string;
   noindex: boolean;
   published_at: string;

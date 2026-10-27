@@ -1,3 +1,4 @@
+import { blogSeo } from "@/lib/blog-seo";
 import { CopyArticleLink } from "@/components/site/blog/copy-article-link";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -15,15 +16,13 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPost((await params).slug);
-  const title = post.meta_title || post.title,
-    description = post.meta_description || post.excerpt;
-  const image = post.social_image || post.cover_image;
+  const { title, description, image, imageAlt, keywords } = blogSeo(post);
   return {
     title: { absolute: `${title} | Majestan Realty` },
     description,
-    keywords: [],
+    keywords,
     alternates: { canonical: postUrl(post.slug) },
-    authors: [{ name: post.author_name }],
+    authors: [{ name: post.author_name, url: BLOG_SITE }],
     robots: {
       index: !post.noindex,
       follow: true,
@@ -34,21 +33,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
+      siteName: "Majestan Realty",
+      locale: "en_IN",
       type: "article",
       title,
       description,
       url: postUrl(post.slug),
       publishedTime: isoDate(post.published_at),
       modifiedTime: isoDate(post.updated_at),
-      authors: [post.author_name],
+      authors: [BLOG_SITE],
       section: post.category,
-      images: image ? [{ url: image, alt: post.cover_alt }] : [],
+      tags: keywords,
+      images: image ? [{ url: image, alt: imageAlt }] : [],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: image ? [image] : [],
+      images: image ? [{ url: image, alt: imageAlt }] : [],
     },
   };
 }
@@ -75,6 +77,8 @@ export default async function Article({ params }: Props) {
         author: {
           "@type": "Organization",
           name: post.author_name,
+          url: BLOG_SITE,
+          "@id": `${BLOG_SITE}#organization`,
         },
         publisher: {
           "@type": "Organization",
@@ -86,6 +90,7 @@ export default async function Article({ params }: Props) {
           },
         },
         articleSection: post.category,
+        keywords: blogSeo(post).keywords.join(", "),
         inLanguage: "en-IN",
         wordCount: words,
       },

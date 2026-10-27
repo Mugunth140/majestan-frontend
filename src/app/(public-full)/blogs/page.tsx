@@ -26,6 +26,8 @@ export async function generateMetadata({
     description,
     alternates: { canonical: url },
     openGraph: {
+      siteName: "Majestan Realty",
+      locale: "en_IN",
       title,
       description,
       url,

@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/components/site/layout/site-header";
 import { SiteFooter } from "@/components/site/layout/site-footer";
 import { ProjectsListingShell } from "@/components/projects/ProjectsListingShell";
+import { ListingShellSkeleton } from "@/components/search/ListingPage";
 
 const defaultMetadata: Metadata = {
   title: "New Villa & Apartment Projects | Majestan Realty",
@@ -36,10 +37,12 @@ export default async function ProjectsIndexPage({ searchParams }: Props) {
   return (<CoreSeoBoundary path="/projects">
     <div className="min-h-screen! bg-gray-50!">
       <SiteHeader />
-      <Suspense>
+      {/* Footer lives inside the boundary so it never paints ahead of the
+          listing (it used to flash up under the header, then jump ~5000px). */}
+      <Suspense fallback={<ListingShellSkeleton />}>
         <ProjectsListingShell initialData={initialData} initialFilters={filters} />
+        <SiteFooter />
       </Suspense>
-      <SiteFooter />
     </div>
   </CoreSeoBoundary>);
 }

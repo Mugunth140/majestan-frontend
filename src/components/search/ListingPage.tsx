@@ -144,7 +144,19 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
  */
 export function ListingShellSkeleton() {
   return (
-    <div className="max-w-[1250px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!" aria-hidden="true">
+    // Same root as ListingShell: min-h-screen keeps the footer below the fold
+    // while the listing streams in, so it never flashes up under the header.
+    <div className="min-h-screen! bg-[#f4f6f9]! font-manrope-page" aria-hidden="true">
+    {/* ── Mobile filter bar — mirrors MobileFilterBar ── */}
+    <div className="lg:hidden! bg-white! border-b! border-gray-200/80! shadow-sm!">
+      <div className="flex! items-center! gap-2! pl-4! pr-4! py-2.5!">
+        <div className="w-9! h-9! rounded-full! border! border-gray-200! shrink-0!" />
+        <div className="h-[34px]! rounded-full! bg-gray-100! w-20! shimmer!" />
+        <div className="h-[34px]! rounded-full! bg-gray-100! w-24! shimmer! shimmer-d1!" />
+        <div className="h-[34px]! rounded-full! bg-gray-100! w-20! shimmer! shimmer-d2!" />
+      </div>
+    </div>
+    <div className="max-w-[1250px]! mx-auto! px-4! sm:px-6! lg:px-8! pt-0! pb-16!">
       <div className="flex! gap-6! items-start!">
         {/* ── Sidebar — mirrors PropertySearchFilters + map ── */}
         <aside className="hidden! lg:flex! lg:flex-col! lg:gap-4! w-[280px]! shrink-0! pt-4! pb-6! pr-1!">
@@ -233,6 +245,7 @@ export function ListingShellSkeleton() {
           </div>
         </main>
       </div>
+    </div>
     </div>
   );
 }

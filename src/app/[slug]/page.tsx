@@ -682,14 +682,20 @@ export default async function SlugPage({
   // so the page shell stays statically prerenderable.
   const pseo = parsePseoSlug(slug);
   if (pseo) {
+    // Header sits outside the boundary so the skeleton paints under it and
+    // the swap to real content doesn't shift the page by the header height.
     return (
-      <Suspense fallback={<ListingShellSkeleton />}>
-        <PseoListingSection
-          slug={slug}
-          pseo={pseo}
-          searchParams={searchParams}
-        />
-      </Suspense>
+      <>
+        <SiteHeader />
+        <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
+        <Suspense fallback={<ListingShellSkeleton />}>
+          <PseoListingSection
+            slug={slug}
+            pseo={pseo}
+            searchParams={searchParams}
+          />
+        </Suspense>
+      </>
     );
   }
 
@@ -805,8 +811,6 @@ async function PseoListingSection({
 
     return (
       <>
-        <SiteHeader />
-        <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
         <SeoHeadingProvider heading={listingSeo?.h1}>
           <Suspense fallback={<ListingShellSkeleton />}>
             <PropertyListingShell

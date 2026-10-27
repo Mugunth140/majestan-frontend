@@ -341,10 +341,8 @@
   font: inherit;
   font-size: inherit !important;
   line-height: inherit !important;
-  color: #27427f;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  color: #3b82f6;
+  text-decoration: none;
 }
 .realty-blog .blog-prose blockquote {
   padding: 24px;

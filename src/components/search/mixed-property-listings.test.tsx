@@ -44,3 +44,29 @@ describe("Mixed property listing feed", () => {
     expect(url.searchParams.has("includeProjects")).toBe(false);
   });
 });
+
+describe("Property condition in listing requests and URLs", () => {
+  it.each(["New", "Resale"])("passes %s to the combined API and preserves it on refresh", async propertyCondition => {
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ items: [], total: 0, limit: 12 }) });
+    vi.stubGlobal("fetch", fetcher);
+    const listing = adapter();
+    const filters = { ...listing.resetFilters, propertyCondition, minPrice: "5000000" };
+    await listing.fetchItems({ filters, sort: "low_to_high", page: 1 });
+    expect(new URL(fetcher.mock.calls[0][0], "http://localhost").searchParams.get("propertyCondition")).toBe(propertyCondition);
+    const url = listing.syncUrl({ filters, sort: "low_to_high", pathname: "/apartments-for-sale-in-coimbatore", searchParams: new URLSearchParams("page=3") });
+    const params = new URL(url, "http://localhost").searchParams;
+    expect(params.get("page")).toBeNull();
+    expect(listing.filtersFromParams(params)).toMatchObject({ propertyCondition, minPrice: "5000000" });
+    expect(listing.resetFilters.propertyCondition).toBe("");
+  });
+
+  it("ignores buy conditions on rent URLs and requests", async () => {
+    const listing = createPropertyAdapter({ initialListingType: "Rent", initialPropertyType: "apartment", initialCity: "Coimbatore" });
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ items: [], total: 0, limit: 12 }) });
+    vi.stubGlobal("fetch", fetcher);
+    expect(listing.filtersFromParams(new URLSearchParams("propertyCondition=Resale"))).toMatchObject({ propertyCondition: "" });
+    await listing.fetchItems({ filters: { ...listing.resetFilters, propertyCondition: "Resale" }, sort: "", page: 1 });
+    expect(new URL(fetcher.mock.calls[0][0], "http://localhost").searchParams.has("propertyCondition")).toBe(false);
+    expect(listing.syncUrl({ filters: { ...listing.resetFilters, propertyCondition: "Resale" }, sort: "", pathname: "/apartments-for-rent-in-coimbatore", searchParams: new URLSearchParams() })).not.toContain("propertyCondition");
+  });
+});

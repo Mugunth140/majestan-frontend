@@ -229,6 +229,7 @@ export type PropertySearchParams = {
   facing?: string;
   furnishing?: string;
   propertyAge?: string;
+  propertyCondition?: string;
   sort?: string;
   page?: number;
   limit?: number;
@@ -334,6 +335,7 @@ export async function searchProperties(
   if (params.facing) query.set("facing", params.facing);
   if (params.furnishing) query.set("furnishing", params.furnishing);
   if (params.propertyAge) query.set("propertyAge", params.propertyAge);
+  if (params.propertyCondition && params.listingType !== "Rent") query.set("propertyCondition", params.propertyCondition);
   if (params.sort) query.set("sort", params.sort);
   if (params.page) query.set("page", String(params.page));
   if (params.limit) query.set("limit", String(params.limit));

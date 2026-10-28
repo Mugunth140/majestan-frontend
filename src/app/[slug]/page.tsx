@@ -732,6 +732,8 @@ async function PseoListingSection({
     const qOrUndef = (v: string) => (v.trim() !== "" ? v : undefined);
     const qBedrooms = qsFirst(query.bedrooms);
     const qLocation = qsFirst(query.location);
+    const conditionParam = qsFirst(query.propertyCondition);
+    const propertyCondition = pseo.listingType === "Sell" && ["New", "Resale"].includes(conditionParam) ? conditionParam : "";
     const qSort = qsFirst(query.sort);
     const qPage = listingPageNumber(query.page);
     const seedLocation = qLocation || canonicalSubloc;
@@ -756,6 +758,7 @@ async function PseoListingSection({
           facing: qOrUndef(qsFirst(query.facing)),
           furnishing: qOrUndef(qsFirst(query.furnishing)),
           propertyAge: qOrUndef(qsFirst(query.propertyAge)),
+          propertyCondition: propertyCondition || undefined,
           sort: qSort || undefined,
           page: qPage,
           limit: 12,
@@ -807,6 +810,7 @@ async function PseoListingSection({
       facing: qsFirst(query.facing),
       furnishing: qsFirst(query.furnishing),
       propertyAge: qsFirst(query.propertyAge),
+      propertyCondition,
     };
 
     return (

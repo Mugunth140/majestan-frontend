@@ -20,7 +20,7 @@ afterEach(cleanup);
 const propertyFilters: FilterValues = {
   keyword: "", propertyType: "apartment", listingType: "Sell", location: "Coimbatore",
   minPrice: "", maxPrice: "", minArea: "", maxArea: "", bedrooms: "", facing: "",
-  furnishing: "", propertyAge: "",
+  furnishing: "", propertyAge: "", propertyCondition: "",
 };
 
 describe.each(["properties", "projects"])("Sub-locality search for %s", (kind) => {
@@ -69,4 +69,30 @@ it("keeps other dropdowns without a search field", () => {
   fireEvent.click(screen.getByRole("button", { name: "Property Type" }));
   expect(screen.queryByRole("searchbox")).toBeNull();
   expect(screen.getByRole("button", { name: "All Types" })).toBeDefined();
+});
+
+describe("Buy property condition filter", () => {
+  it.each(["New", "Resale"])("selects %s without dropping other filters", condition => {
+    const onChange = vi.fn();
+    render(<PropertySearchFilters values={{ ...propertyFilters, minPrice: "5000000" }} onChange={onChange} onReset={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: condition }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ propertyCondition: condition, minPrice: "5000000", listingType: "Sell" }));
+  });
+
+  it("clears an active selection when clicked again", () => {
+    const onChange = vi.fn();
+    render(<PropertySearchFilters values={{ ...propertyFilters, propertyCondition: "New" }} onChange={onChange} onReset={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "New" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "New" }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ propertyCondition: "" }));
+  });
+
+  it("clears the buy condition when switching to rent, and hides the group for rentals", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<PropertySearchFilters values={{ ...propertyFilters, propertyCondition: "Resale" }} onChange={onChange} onReset={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Rent" }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ listingType: "Rent", propertyCondition: "" }));
+    rerender(<PropertySearchFilters values={{ ...propertyFilters, listingType: "Rent", propertyCondition: "" }} onChange={onChange} onReset={vi.fn()} />);
+    expect(screen.queryByRole("group", { name: "Property condition" })).toBeNull();
+  });
 });

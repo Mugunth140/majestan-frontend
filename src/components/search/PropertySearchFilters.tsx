@@ -21,6 +21,7 @@ export type FilterValues = {
   facing: string;
   furnishing: string;
   propertyAge: string;
+  propertyCondition: string;
 };
 
 export type PropertySearchFiltersProps = {
@@ -124,7 +125,9 @@ export function PropertySearchFilters({
   };
 
   const updateFilter = (key: keyof FilterValues, value: string) => {
-    onChange({ ...values, ...textFields, [key]: value });
+    onChange({ ...values, ...textFields, [key]: value,
+      ...(key === "listingType" && value === "Rent" ? { propertyCondition: "" } : {}),
+    });
   };
 
   const presetPrices = [
@@ -180,6 +183,8 @@ export function PropertySearchFilters({
           {["Sell", "Rent"].map((type) => (
             <button
               key={type}
+              type="button"
+              aria-pressed={values.listingType === type}
               onClick={() => updateFilter("listingType", type)}
               className={`flex-1! py-2! text-[13px]! font-medium! rounded-md! transition-all! duration-200! cursor-pointer! ${
                 values.listingType === type
@@ -191,6 +196,24 @@ export function PropertySearchFilters({
             </button>
           ))}
         </div>
+        {values.listingType === "Sell" && (
+          <div className="mt-4!" role="group" aria-label="Property condition">
+            <span className="block! mb-2! text-xs! font-medium! text-gray-600!">Property condition</span>
+            <div className="flex! gap-2!">
+              {["New", "Resale"].map(condition => (
+                <button
+                  type="button"
+                  key={condition}
+                  aria-pressed={values.propertyCondition === condition}
+                  onClick={() => updateFilter("propertyCondition", values.propertyCondition === condition ? "" : condition)}
+                  className={`flex-1! rounded-lg! border! py-2! text-[13px]! font-medium! cursor-pointer! transition-colors! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-[#1645bf]! focus-visible:ring-offset-2! ${values.propertyCondition === condition
+                    ? "border-[#1645bf]! bg-[#edf2ff]! text-[#1645bf]!"
+                    : "border-gray-200! bg-white! text-gray-600! hover:border-[#1645bf]! hover:text-[#1645bf]!"}`}
+                >{condition}</button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Accordion sections */}

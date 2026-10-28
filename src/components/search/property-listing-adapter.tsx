@@ -735,7 +735,7 @@ export function createPropertyAdapter(init: {
 }): ListingAdapter<FilterValues, PropertySearchItem> {
   const resetFilters: FilterValues = {
     keyword: "", propertyType: init.initialPropertyType, listingType: init.initialListingType, location: init.initialCity,
-    minPrice: "", maxPrice: "", minArea: "", maxArea: "", bedrooms: "", facing: "", furnishing: "", propertyAge: ""
+    minPrice: "", maxPrice: "", minArea: "", maxArea: "", bedrooms: "", facing: "", furnishing: "", propertyAge: "", propertyCondition: ""
   };
 
   return {
@@ -759,6 +759,7 @@ export function createPropertyAdapter(init: {
         facing: filters.facing,
         furnishing: filters.furnishing,
         propertyAge: filters.propertyAge,
+        propertyCondition: filters.listingType === "Sell" ? filters.propertyCondition : undefined,
         sort,
         page,
         limit: 12,
@@ -783,11 +784,18 @@ export function createPropertyAdapter(init: {
     renderActiveChips: (filters, onChange) => {
       const FURNISHING_LABELS: Record<string, string> = { furnished: "Furnished", semi: "Semi-Furnished", unfurnished: "Unfurnished" };
       const AGE_LABELS: Record<string, string> = { new: "New", "1-5": "1–5 Years", "5-10": "5–10 Years", "10+": "10+ Years" };
-      if (!(filters.keyword || filters.minPrice || filters.maxPrice || filters.minArea || filters.maxArea || filters.bedrooms || filters.facing || filters.furnishing || filters.propertyAge)) return null;
+      if (!(filters.keyword || filters.minPrice || filters.maxPrice || filters.minArea || filters.maxArea || filters.bedrooms || filters.facing || filters.furnishing || filters.propertyAge || filters.propertyCondition)) return null;
       return (
         <div className="bg-white! rounded-2xl! shadow-sm! border! border-gray-200/60! p-5!">
           <h3 className="text-[11px]! font-bold! text-gray-500! uppercase! tracking-wider! mb-2!">Active Filters</h3>
           <div className="flex! flex-wrap! gap-1.5!">
+            {filters.listingType === "Sell" && filters.propertyCondition && (
+              <button type="button" aria-label={`Clear ${filters.propertyCondition.toLowerCase()} property filter`}
+                onClick={() => onChange({ ...filters, propertyCondition: "" })}
+                className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold! cursor-pointer!">
+                {filters.propertyCondition} properties<X className="w-3! h-3!" aria-hidden="true" />
+              </button>
+            )}
             {filters.keyword && (
               <span className="inline-flex! items-center! gap-1.5! bg-[#1645bf]/10! text-[#1645bf]! px-2.5! py-1! rounded-md! text-xs! font-bold!">
                 &ldquo;{filters.keyword}&rdquo;
@@ -895,6 +903,7 @@ export function createPropertyAdapter(init: {
       if (filters.facing) params.set("facing", filters.facing);
       if (filters.furnishing) params.set("furnishing", filters.furnishing);
       if (filters.propertyAge) params.set("propertyAge", filters.propertyAge);
+      if (filters.listingType === "Sell" && ["New", "Resale"].includes(filters.propertyCondition)) params.set("propertyCondition", filters.propertyCondition);
       if (sort) params.set("sort", sort);
 
       // Check if any PSEO-defining axis changed (listingType, propertyType, or
@@ -954,6 +963,7 @@ export function createPropertyAdapter(init: {
       facing: searchParams.get("facing") || "",
       furnishing: searchParams.get("furnishing") || "",
       propertyAge: searchParams.get("propertyAge") || "",
+      propertyCondition: init.initialListingType === "Sell" && ["New", "Resale"].includes(searchParams.get("propertyCondition") || "") ? searchParams.get("propertyCondition")! : "",
     }),
   };
 }

@@ -112,7 +112,7 @@ export function getAdditionalPropertyDetails(property: SeoProperty, existingLabe
     add("Carpet Area", quantity(d?.carpetArea, "sq.ft"), Ruler);
     add("Super Built-Up Area", quantity(d?.superBuiltUpArea, "sq.ft"), Maximize2);
     add("UDS Area", quantity(d?.udsArea, "sq.ft"), Maximize2);
-    add("Plot Area", formatPlotArea(d?.plotArea, d?.areaUnit), Ruler);
+    add("Plot Area", formatPlotArea(d?.plotArea, d?.areaUnit, d?.measurementUnits?.plotArea), Ruler);
     add("Balconies", quantity(d?.balconies), DoorOpen);
     add("Water Supply", text(d?.waterSupply), Droplets);
     add("Power Backup", yesNo(d?.powerBackup), Zap);

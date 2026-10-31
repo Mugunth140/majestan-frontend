@@ -195,3 +195,22 @@ describe("property detail groups", () => {
     expect(shown).toContain("Ownership");
   });
 });
+
+it('uses canonical plot sqft with per-field units while retaining legacy interpretation', () => {
+  const property = full('commercial', 'Rent');
+  property.details = { ...property.details!, areaUnit: 'Acres', plotArea: '43560', measurementUnits: { plotArea: 'Acres' } };
+  const value = () => getGroupedPropertyDetails(property).flatMap(g => g.fields).find(f => f.label === 'Plot Area')?.value;
+  expect(value()).toBe('1 acres');
+  delete property.details.measurementUnits;
+  expect(value()).toBe('43560 acres');
+});
+
+it('maps Farm House to a hybrid profile and PG to Apartment Rent', () => {
+  const farm = full('farm_house', 'Sell');
+  farm.details = { ...farm.details!, cropSuitability: 'Coconut', boreWell: true, boreWellCount: 2, numberOfPortions: 3 };
+  const farmFields = getGroupedPropertyDetails(farm).flatMap(group => group.fields);
+  expect(farmFields.some(field => field.label === 'No of Portions')).toBe(true);
+  expect(farmFields.some(field => field.value.includes('Coconut'))).toBe(true);
+  expect(farmFields.filter(field => field.label === 'Property Type')).toEqual([expect.objectContaining({ value: 'Farm House' })]);
+  expect(labels(full('pg_service_apartment', 'Rent'))).toEqual(labels(full('apartment', 'Rent')));
+});

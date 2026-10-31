@@ -162,8 +162,15 @@ function areaSqftInCents(d: LandDetails): number | null {
  * Sq Ft, Sq M, Acres and Cents, so a stored "5.5" can mean cents —
  * never blindly print sq.ft.
  */
-export function formatPlotArea(value: unknown, areaUnit?: string | null): string | null {
-  const n = nzNum(value);
+export function formatPlotArea(value: unknown, areaUnit?: string | null, canonicalUnit?: string | null): string | null {
+  let n = nzNum(value);
+  // Per-field metadata marks the new canonical-sqft contract. Without it,
+  // retain the legacy interpretation of the stored numeric value and unit.
+  const factors: Record<string, number> = { "Sq Ft": 1, "Sq M": 1 / 0.3048 ** 2, Cents: 435.6, Acres: 43560, Grounds: 2400 };
+  if (n != null && canonicalUnit && factors[canonicalUnit]) {
+    n = Number((n / factors[canonicalUnit]).toFixed(8));
+    areaUnit = canonicalUnit;
+  }
   if (n == null) return null;
   if (/cent/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} cents`;
   if (/ground/i.test(String(areaUnit ?? ""))) return `${trimNum(n)} grounds`;
@@ -173,7 +180,7 @@ export function formatPlotArea(value: unknown, areaUnit?: string | null): string
 }
 
 function plotAreaRow(d: LandDetails): LandSpecRow | null {
-  const area = formatPlotArea(d.plotArea, d.areaUnit);
+  const area = formatPlotArea(d.plotArea, d.areaUnit, d.measurementUnits?.plotArea);
   if (area != null) {
     return { label: "Plot Area", value: area, icon: Maximize2 };
   }
@@ -186,7 +193,7 @@ function plotAreaRow(d: LandDetails): LandSpecRow | null {
 
 function farmAreaRow(d: LandDetails): LandSpecRow | null {
   // Preserve the chosen display unit while retaining cents for unit pricing.
-  const area = d.areaUnit ? formatPlotArea(d.plotArea, d.areaUnit) : null;
+  const area = d.areaUnit ? formatPlotArea(d.plotArea, d.areaUnit, d.measurementUnits?.plotArea) : null;
   if (area != null) return { label: "Farm Area", value: area, icon: Maximize2 };
   const cents = nzNum(d.plotSizeCents) ?? areaSqftInCents(d);
   if (cents != null) {

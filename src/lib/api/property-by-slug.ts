@@ -9,6 +9,17 @@ type ApiEnvelope<T> = {
 };
 
 export type SeoPropertyDetails = {
+  measurementUnits?: Record<string, string> | null;
+  plotFacing?: string | null;
+  hasGroundFloor?: boolean | null;
+  numberOfPortions?: number | null;
+  fundedBy?: string | null;
+  specialPurpose?: string | null;
+  containerAccess?: string | null;
+  laborRooms?: number | null;
+  toilets?: number | null;
+  boreWellCount?: number | null;
+  plotBoundaries?: { direction: string; length: number | null; unit: string }[] | null;
   bedrooms: number;
   bathrooms: number;
   areaSqft: string;

@@ -142,7 +142,7 @@ function dimension(d: Details): string | null {
 function plotArea(d: Details): string | null {
   const cents = positive(d?.plotSizeCents);
   if (cents) return `${trimNum(cents)} cents`;
-  return formatPlotArea(d?.plotArea, d?.areaUnit);
+  return formatPlotArea(d?.plotArea, d?.areaUnit, d?.measurementUnits?.plotArea);
 }
 
 const list = (value: unknown): string | null =>
@@ -272,7 +272,7 @@ function homeGroups(ctx: Ctx, hidden: ReadonlySet<string>): DetailGroup[] {
     ["Super Built-Up Area", sqft(d?.superBuiltUpArea)],
     ["Carpet Area", sqft(d?.carpetArea)],
     ["Undivided Share of Land (UDS)", sqft(d?.udsArea)],
-    ["Plot Area", isApartment ? null : formatPlotArea(d?.plotArea, d?.areaUnit)],
+    ["Plot Area", isApartment ? null : formatPlotArea(d?.plotArea, d?.areaUnit, d?.measurementUnits?.plotArea)],
     // Fall back to the generic area only when no specific figure is stored.
     ["Area", !d?.builtUpArea && !d?.superBuiltUpArea && !d?.carpetArea ? sqft(d?.areaSqft) : null],
   ]);
@@ -391,7 +391,7 @@ function commercialGroups(ctx: Ctx): DetailGroup[] {
     ["Built-Up Area", sqft(d?.builtUpArea)],
     ["Carpet Area", sqft(d?.carpetArea)],
     ["Area", !d?.builtUpArea && !d?.superBuiltUpArea && !d?.carpetArea ? sqft(d?.areaSqft) : null],
-    ["Plot Area", formatPlotArea(d?.plotArea, d?.areaUnit)],
+    ["Plot Area", formatPlotArea(d?.plotArea, d?.areaUnit, d?.measurementUnits?.plotArea)],
   ]);
   group("Floor & Building Details", [
     ["Floors Occupied", list(d?.floorsOccupied)],
@@ -440,7 +440,7 @@ function industrialGroups(ctx: Ctx): DetailGroup[] {
     ["Monthly Maintenance Charges", money(property.maintenanceCharges)],
   ]);
   group("Area & Structure", [
-    ["Plot Area", formatPlotArea(d?.plotArea, d?.areaUnit)],
+    ["Plot Area", formatPlotArea(d?.plotArea, d?.areaUnit, d?.measurementUnits?.plotArea)],
     ["Built-Up Area", sqft(d?.builtUpArea) ?? sqft(d?.areaSqft)],
     ["Covered Area", sqft(d?.coveredArea)],
     ["Open Area", sqft(d?.openArea)],
@@ -543,7 +543,7 @@ function coworkingGroups(ctx: Ctx): DetailGroup[] {
   return groups;
 }
 
-export function getGroupedPropertyDetails(
+function basePropertyDetails(
   property: SeoProperty,
   extras: { pricePerSqft?: string | null } = {},
 ): DetailGroup[] {
@@ -575,4 +575,45 @@ export function getGroupedPropertyDetails(
         new Set((HOME_TYPES as readonly string[]).includes(type) ? HIDDEN_FIELDS[`${type}:${mode}`] ?? [] : []),
       );
   }
+}
+
+/** Additional curated facts, without exposing owner/finance-only CRM fields. */
+function curatedFacts(property: SeoProperty): DetailField[] {
+  const d = property.details;
+  const rows: Field[] = [
+    ["Plot Facing", text(d?.plotFacing)],
+    ["Includes Ground Floor", typeof d?.hasGroundFloor === "boolean" ? (d.hasGroundFloor ? "Yes" : "No") : null],
+    ["No of Portions", count(d?.numberOfPortions)],
+    ["Special Purpose", property.propertyType === "commercial" && property.listingType === "Rent" ? text(d?.specialPurpose) : null],
+    ["Container Access", text(d?.containerAccess)],
+    ["No of Labor Rooms", count(d?.laborRooms)],
+    ["No of Toilets", count(d?.toilets)],
+    ["No of Borewells", d?.boreWell ? count(d.boreWellCount) : null],
+    ["Plot Boundaries", d?.plotBoundaries?.filter(side => side.length != null).map(side => `${side.direction}: ${side.length} ${side.unit}`).join("; ") || null],
+  ];
+  return rows.flatMap(([label, value]) => value ? [{ label, value, wide: value.length > 60 }] : []);
+}
+
+export function getGroupedPropertyDetails(property: SeoProperty, extras: { pricePerSqft?: string | null } = {}): DetailGroup[] {
+  const profile = property.propertyType === "investment_property" || property.propertyType === "farm_house" ? "individual_portion"
+    : property.propertyType === "pg_service_apartment" ? "apartment" : property.propertyType;
+  const groups = basePropertyDetails({ ...property, propertyType: profile }, extras);
+  if (property.propertyType === "farm_house") {
+    const agricultural = basePropertyDetails({ ...property, propertyType: "farmland" }, extras);
+    const seen = new Set(groups.flatMap(group => group.fields.map(field => field.label)));
+    for (const group of agricultural) {
+      const fields = group.fields.filter(field => !seen.has(field.label));
+      fields.forEach(field => seen.add(field.label));
+      if (!fields.length) continue;
+      const existing = groups.find(entry => entry.title === group.title);
+      if (existing) existing.fields.push(...fields);
+      else groups.push({ ...group, fields });
+    }
+  }
+  const shown = new Set(groups.flatMap(group => group.fields.map(field => field.label)));
+  const added = curatedFacts(property).filter(field => !shown.has(field.label));
+  if (added.length) groups.push({ title: "Additional Property Details", fields: added });
+  // Keep the actual new type's name rather than the mapped profile label.
+  for (const group of groups) for (const field of group.fields) if (field.label === "Property Type") field.value = typeLabel(property.propertyType);
+  return groups;
 }

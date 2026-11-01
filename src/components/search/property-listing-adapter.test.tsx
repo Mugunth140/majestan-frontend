@@ -297,3 +297,15 @@ describe("isRentListing", () => {
     expect(isRentListing(posttype)).toBe(false);
   });
 });
+
+describe('building price rate area basis', () => {
+  const adapter = createPropertyAdapter({ initialListingType: 'Sell', initialPropertyType: 'apartment', initialCity: 'Coimbatore' });
+  it('uses built-up area instead of normal, super built-up or carpet area', () => {
+    render(adapter.renderCard({ ...withDetails('apartment', { builtUpArea: '1000', areaSqft: '2000', superBuiltUpArea: '3000', carpetArea: '800' }), expectedsaleprice: 6000000 } as unknown as PropertySearchItem));
+    expect(screen.getByText('₹ 6,000/sqft')).toBeInTheDocument();
+  });
+  it('omits the calculated rate when built-up area is missing', () => {
+    render(adapter.renderCard({ ...withDetails('apartment', { areaSqft: '2000', superBuiltUpArea: '3000', carpetArea: '800' }), expectedsaleprice: 6000000 } as unknown as PropertySearchItem));
+    expect(screen.queryByText(/\/sqft/)).not.toBeInTheDocument();
+  });
+});

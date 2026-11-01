@@ -327,7 +327,7 @@ function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string
     if (cents == null) return null;
     return `₹ ${Math.round(price / cents).toLocaleString("en-IN")}/cent`;
   }
-  const area = nzNum(d.superBuiltUpArea) ?? nzNum(d.areaSqft) ?? nzNum(d.carpetArea);
+  const area = nzNum(d.builtUpArea);
   if (area == null) return null;
   return `₹ ${Math.round(price / area).toLocaleString("en-IN")}/sqft`;
 }

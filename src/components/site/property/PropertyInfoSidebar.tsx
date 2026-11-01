@@ -100,8 +100,8 @@ export function PropertyInfoSidebar({
   const seatRent = property.propertyType === "coworking" ? getCoworkingSeatRent(property.details) : null;
   const displayPrice = seatRent == null ? property.price : String(seatRent);
   const pricePeriod = seatRent == null ? "/ mo" : "/ seat / mo";
-  const areaNum = property.details?.areaSqft
-    ? parseFloat(property.details.areaSqft)
+  const areaNum = property.details?.builtUpArea
+    ? parseFloat(property.details.builtUpArea)
     : NaN;
   const priceNum = parseFloat(property.price);
   // Land types curate their own spec rows (area, facing, dimensions, water,

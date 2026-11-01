@@ -1,5 +1,6 @@
 "use client";
 
+import { getCoworkingSeatRent } from "@/lib/property-curation-two";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -312,7 +313,7 @@ function isReraVerified(item: PropertySearchItem): boolean {
   }
 
 function getPricePerSqft(item: PropertySearchItem, priceDisplay: string): string | null {
-  if (priceDisplay.includes("-")) return null;
+  if (item.propertyType === "coworking" || priceDisplay.includes("-")) return null;
   const rawPrice = item.posttype === "Sell" ? (item as any).expectedsaleprice : (item as any).monthly_rent;
   const price = nzNum(rawPrice);
   if (price == null) return null;
@@ -482,7 +483,9 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
   const sectionLinks = getCardSectionLinks(item, detailPath);
   const specCells = getCardSpecCells(item);
 
+  const seatRent = item.propertyType === "coworking" ? getCoworkingSeatRent(getDetails(item)) : null;
   const priceDisplay = (() => {
+    if (seatRent != null) return formatPrice(seatRent);
     if ((item as any).isProject && (item as any).ranges && (item as any).ranges.unitsCount >= 2) {
       const min = (item as any).ranges.minPrice;
       const max = (item as any).ranges.maxPrice;
@@ -639,7 +642,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             <span className="text-xl! lg:text-2xl! font-semibold! tracking-[-0.025em]! text-[#0a0f1c]!">
               {priceDisplay}
               {isRentListing(item.posttype) && (
-                <span className="text-[13px]! font-medium! text-gray-500!"> /mo</span>
+                <span className="text-[13px]! font-medium! text-gray-500!">{seatRent == null ? " /mo" : " /seat/mo"}</span>
               )}
             </span>
             {(() => {

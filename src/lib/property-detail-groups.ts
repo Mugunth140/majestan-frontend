@@ -1,3 +1,4 @@
+import { curationDetailRows } from "./property-curation-two";
 import type { SeoProperty } from "./api/property-by-slug";
 import { formatDate, formatFurnishing } from "./property-format";
 import { formatPlotArea } from "./property-sections";
@@ -140,6 +141,7 @@ function dimension(d: Details): string | null {
 
 /** Plot area in cents when stored that way, else in its stored unit. */
 function plotArea(d: Details): string | null {
+  if (d?.measurementUnits?.landArea) return formatPlotArea(d.areaSqft, d.areaUnit, d.measurementUnits.landArea);
   const cents = positive(d?.plotSizeCents);
   if (cents) return `${trimNum(cents)} cents`;
   return formatPlotArea(d?.plotArea, d?.areaUnit, d?.measurementUnits?.plotArea);
@@ -184,8 +186,13 @@ function collector(hidden: ReadonlySet<string>) {
   return { groups, group };
 }
 
-const priceLabel = (pricePerUnit: string | null) =>
-  pricePerUnit && /cent/i.test(pricePerUnit) ? "Price per Cent" : "Price per Sq. Ft.";
+const priceLabel = (pricePerUnit: string | null) => {
+  if (pricePerUnit && /cent/i.test(pricePerUnit)) return "Price per Cent";
+  if (pricePerUnit && /\/acre/i.test(pricePerUnit)) return "Price per Acre";
+  if (pricePerUnit && /\/ground/i.test(pricePerUnit)) return "Price per Ground";
+  if (pricePerUnit && /\/sqm/i.test(pricePerUnit)) return "Price per Sq. M.";
+  return "Price per Sq. Ft.";
+};
 
 /** Pricing fields every type shares; sale vs rent decides which apply. */
 function pricing({ property, isSale, pricePerUnit }: Ctx): Field[] {
@@ -610,10 +617,21 @@ export function getGroupedPropertyDetails(property: SeoProperty, extras: { price
       else groups.push({ ...group, fields });
     }
   }
+  const refinements = curationDetailRows(property);
+  const replaced = new Set(refinements.map(field => field.label));
+  if (property.propertyType === "commercial" && property.listingType === "Rent") {
+    const c = property.details?.curationDetails;
+    if (Array.isArray(c?.propertyUses)) replaced.add("Property Use");
+    if (Array.isArray(c?.specialPurposes)) replaced.add("Special Purpose");
+    if (Array.isArray(c?.utilities)) replaced.add("Utilities Provided");
+  }
+  if (property.propertyType === "industrial" && property.details?.curationDetails && Object.hasOwn(property.details.curationDetails, "powerSupplyCapacity")) replaced.add("Power Supply");
+  for (const group of groups) group.fields = group.fields.filter(field => !replaced.has(field.label));
+  if (refinements.length) groups.push({ title: "Property Specifications", fields: refinements });
   const shown = new Set(groups.flatMap(group => group.fields.map(field => field.label)));
-  const added = curatedFacts(property).filter(field => !shown.has(field.label));
+  const added = curatedFacts(property).filter(field => !shown.has(field.label) && !replaced.has(field.label));
   if (added.length) groups.push({ title: "Additional Property Details", fields: added });
   // Keep the actual new type's name rather than the mapped profile label.
   for (const group of groups) for (const field of group.fields) if (field.label === "Property Type") field.value = typeLabel(property.propertyType);
-  return groups;
+  return groups.filter(group => group.fields.length > 0);
 }

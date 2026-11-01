@@ -1,3 +1,4 @@
+import { getBathroomCount } from "@/lib/property-curation-two";
 import { type SeoProperty } from "@/lib/api/property-by-slug";
 import { formatDate, formatFurnishing } from "@/lib/property-format";
 import {
@@ -152,12 +153,12 @@ export function PropertyDetailsView({ property }: PropertyDetailsViewProps) {
           },
         ]
       : []),
-    ...(!isLand && !isWorkspace && property.details?.bathrooms
+    ...(!isLand && !isWorkspace && getBathroomCount(property.details)
       ? [
           {
             icon: <Bath className="w-5! h-5!" />,
             label: "Bathrooms",
-            value: `${property.details.bathrooms}`,
+            value: `${getBathroomCount(property.details)}`,
           },
         ]
       : []),

@@ -1,3 +1,4 @@
+import { getCoworkingSeatRent } from "@/lib/property-curation-two";
 // site/majestan-frontend/src/components/site/property/PropertyInfoSidebar.tsx
 import Image from "next/image";
 import {
@@ -96,6 +97,9 @@ export function PropertyInfoSidebar({
     pincode,
   });
 
+  const seatRent = property.propertyType === "coworking" ? getCoworkingSeatRent(property.details) : null;
+  const displayPrice = seatRent == null ? property.price : String(seatRent);
+  const pricePeriod = seatRent == null ? "/ mo" : "/ seat / mo";
   const areaNum = property.details?.areaSqft
     ? parseFloat(property.details.areaSqft)
     : NaN;
@@ -123,7 +127,7 @@ export function PropertyInfoSidebar({
           ? getCoworkingSpecs(property.details)
           : [];
   // Land is priced per cent or not at all — never per sq.ft.
-  const perSqft =
+  const perSqft = property.propertyType === "coworking" ? null :
     getLandPricePerUnit(
       property.price,
       property.details,
@@ -225,7 +229,7 @@ export function PropertyInfoSidebar({
     <DetailEnquiryPanel
       key={property.id}
       title={title}
-      price={`${formatPrice(property.price)}${isSale ? "" : " / mo"}`}
+      price={`${formatPrice(displayPrice)}${isSale ? "" : ` ${pricePeriod}`}`}
       actions={<PropertyEnquiryActions
           property={{
             id: property.id,
@@ -297,11 +301,11 @@ export function PropertyInfoSidebar({
         <div className="mt-5! pt-5! border-t! border-[#e2e9f4]! flex! flex-col! items-start! gap-3!">
           <div className="min-w-0!">
             <p className="m-0! text-3xl! font-manrope! font-semibold! text-[#0a0f1c]! tracking-tight! tabular-nums!">
-              {formatPrice(property.price)}
+              {formatPrice(displayPrice)}
               {!isSale && (
                 <span className="text-sm! font-normal! text-[#5f6b80]!">
                   {" "}
-                  / mo
+                  {pricePeriod}
                 </span>
               )}
             </p>

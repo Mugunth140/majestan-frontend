@@ -1,3 +1,4 @@
+import type { PropertyCurationDetails } from "@/lib/property-curation-two";
 import { sanitizePublicAreas } from "@/lib/seo-quality";
 import {getSeo,withSeo} from '@/lib/seo-engine';
 import { cache } from "react";
@@ -9,6 +10,7 @@ type ApiEnvelope<T> = {
 };
 
 export type SeoPropertyDetails = {
+  curationDetails?: PropertyCurationDetails | null;
   measurementUnits?: Record<string, string> | null;
   plotFacing?: string | null;
   hasGroundFloor?: boolean | null;

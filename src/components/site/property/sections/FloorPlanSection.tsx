@@ -44,7 +44,7 @@ export function FloorPlanSection({ property, embedded = false }: FloorPlanSectio
         <Panel id="property-room-dimensions" title="Room Dimensions" meta="Detailed dimensions of the property rooms">
           <dl className="m-0! mt-4! grid! grid-cols-2! sm:grid-cols-3! gap-3!">
             {roomDimensions.map((room, index) => {
-              const dimensions = room.dimensions.trim();
+              const dimensions = String(room.dimensions ?? "").trim();
               const value = !dimensions ? "—"
                 : /\b(?:ft|feet|foot|m|cm|mm|metres?|meters?)\b|['′\"″]/i.test(dimensions)
                   ? dimensions : `${dimensions} ft`;

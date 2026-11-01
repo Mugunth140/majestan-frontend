@@ -1,3 +1,4 @@
+import { industrialPowerLabel } from "./property-curation-two";
 // Visibility of stacked sections on single-page property overviews.
 // A section renders only when it has at least one data item — empty
 // "coming soon" cards are never shown. Locality always renders (city map +
@@ -180,6 +181,10 @@ export function formatPlotArea(value: unknown, areaUnit?: string | null, canonic
 }
 
 function plotAreaRow(d: LandDetails): LandSpecRow | null {
+  if (d.measurementUnits?.landArea) {
+    const area = formatPlotArea(d.areaSqft, d.areaUnit, d.measurementUnits.landArea);
+    return area ? { label: "Plot Area", value: area, icon: Maximize2 } : null;
+  }
   const area = formatPlotArea(d.plotArea, d.areaUnit, d.measurementUnits?.plotArea);
   if (area != null) {
     return { label: "Plot Area", value: area, icon: Maximize2 };
@@ -192,6 +197,10 @@ function plotAreaRow(d: LandDetails): LandSpecRow | null {
 }
 
 function farmAreaRow(d: LandDetails): LandSpecRow | null {
+  if (d.measurementUnits?.landArea) {
+    const area = formatPlotArea(d.areaSqft, d.areaUnit, d.measurementUnits.landArea);
+    return area ? { label: "Farm Area", value: area, icon: Maximize2 } : null;
+  }
   // Preserve the chosen display unit while retaining cents for unit pricing.
   const area = d.areaUnit ? formatPlotArea(d.plotArea, d.areaUnit, d.measurementUnits?.plotArea) : null;
   if (area != null) return { label: "Farm Area", value: area, icon: Maximize2 };
@@ -388,8 +397,8 @@ export function getIndustrialSpecs(details: LandDetails | null | undefined): Lan
       : nzNum(d.areaSqft) != null
         ? { label: "Built-Up Area", value: sqft(d.areaSqft) as string, icon: Maximize2 }
         : null,
-    nzNum(d.powerSupplyHp) != null
-      ? { label: "Power Supply", value: `${trimNum(Number(d.powerSupplyHp))} HP`, icon: Plug }
+    industrialPowerLabel(d)
+      ? { label: "Power Supply", value: industrialPowerLabel(d)!, icon: Plug }
       : null,
     nzNum(d.ceilingHeightFt) != null
       ? { label: "Ceiling Height", value: `${trimNum(Number(d.ceilingHeightFt))} ft`, icon: LayoutGrid }
@@ -495,7 +504,7 @@ export function getTypeMeasurements(
       { label: "Open Area", value: formatAreaSqft(details?.openArea ?? null), icon: Expand },
       {
         label: "Power Supply",
-        value: nzNum(details?.powerSupplyHp) != null ? `${trimNum(Number(details?.powerSupplyHp))} HP` : "—",
+        value: industrialPowerLabel(details) ?? "—",
         icon: Plug,
       },
     ];
@@ -531,6 +540,19 @@ export function getLandPricePerUnit(
   const priceNum = parseFloat(price);
   if (!Number.isFinite(priceNum) || priceNum <= 0) return null;
   const d = details as unknown as Record<string, unknown> | null | undefined;
+  const units = d?.measurementUnits as Record<string, string> | undefined;
+  const factors: Record<string, number> = { "Sq Ft": 1, "Sq M": 1 / 0.3048 ** 2, Cents: 435.6, Acres: 43560, Grounds: 2400 };
+  const labels: Record<string, string> = { "Sq Ft": "sqft", "Sq M": "sqm", Cents: "cent", Acres: "acre", Grounds: "ground" };
+  // New CRM records store searchable area in sqft and retain the chosen rate
+  // basis separately. Older records retain their existing per-cent fallback.
+  if (units?.pricePerSqft && factors[units.pricePerSqft]) {
+    const rawArea = nzNum(d?.areaSqft);
+    const baseFactor = factors[String(d?.areaUnit || "Sq Ft")];
+    if (rawArea && baseFactor) return `₹ ${(priceNum / (rawArea * baseFactor) * factors[units.pricePerSqft]).toLocaleString("en-IN", { maximumFractionDigits: 2 })}/${labels[units.pricePerSqft]}`;
+    // Once canonical land area is recorded, a cleared area must not revive
+    // an older plot-size value as the price denominator.
+    if (units.landArea) return null;
+  }
   const cents =
     nzNum(d?.plotSizeCents) ??
     (/cent/i.test(String(d?.areaUnit ?? "")) ? nzNum((d as Record<string, unknown>)?.areaSqft) : null);

@@ -1,4 +1,4 @@
-import { curationDetailRows } from "./property-curation-two";
+import { curationDetailRows, getBathroomCount } from "./property-curation-two";
 import type { SeoProperty } from "./api/property-by-slug";
 import { formatDate, formatFurnishing } from "./property-format";
 import { formatPlotArea } from "./property-sections";
@@ -602,6 +602,19 @@ function curatedFacts(property: SeoProperty): DetailField[] {
 }
 
 export function getGroupedPropertyDetails(property: SeoProperty, extras: { pricePerSqft?: string | null } = {}): DetailGroup[] {
+  const pg = property.details?.curationDetails?.pgDetails;
+  if (property.propertyType === "pg_service_apartment" && pg) {
+    const d = property.details;
+    const roomBasis = pg.roomType === "Sharing" ? "bed" : pg.roomType === "Private" ? "room" : null;
+    const field = (label: string, value: string | null | undefined): DetailField[] => value ? [{label,value}] : [];
+    return [
+      {title:"PG / Service Apartment",fields:[...field("Property ID",text(property.propertyCode)),...field("Property Type",typeLabel(property.propertyType)),...field("Monthly rent",money(property.price) ? `${money(property.price)}${roomBasis ? ` / ${roomBasis} / month` : " / month"}` : null),...field("Bedrooms",count(d?.bedrooms)),...field("Bathrooms",count(getBathroomCount(d))),...field("Balconies",count(d?.balconies)),...field("Furnishing",formatFurnishing(d) ?? null)]},
+      {title:"Area & Building",fields:[...field("Built-Up Area",sqft(d?.builtUpArea)),...field("Carpet Area",sqft(d?.carpetArea)),...field("Super Built-Up Area",sqft(d?.superBuiltUpArea)),...field("Floor Number",floorLabel(d?.floorNumber)),...field("Total Floors",count(d?.totalFloors)),...field("Property Age",text(d?.propertyAge)),...field("Available From",day(property.availableFrom))]},
+      {title:"Accommodation, services & rules",fields:curationDetailRows(property).filter(row => row.label !== "Bathroom Breakdown")},
+      {title:"Existing rental details",fields:[...field("Security Deposit",!pg.depositType ? money(property.securityDeposit) : null),...field("Monthly Maintenance Charges",!Object.hasOwn(pg,"maintenanceAmount") ? money(property.maintenanceCharges) : null)]},
+    ].filter(group=>group.fields.length>0);
+  }
+
   const profile = property.propertyType === "investment_property" || property.propertyType === "farm_house" ? "individual_portion"
     : property.propertyType === "pg_service_apartment" ? "apartment" : property.propertyType;
   const groups = basePropertyDetails({ ...property, propertyType: profile }, extras);

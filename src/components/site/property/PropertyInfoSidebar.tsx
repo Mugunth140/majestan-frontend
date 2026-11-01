@@ -1,3 +1,4 @@
+import { pgRentBasis } from "@/lib/pg-accommodation";
 import { getCoworkingSeatRent } from "@/lib/property-curation-two";
 // site/majestan-frontend/src/components/site/property/PropertyInfoSidebar.tsx
 import Image from "next/image";
@@ -99,7 +100,8 @@ export function PropertyInfoSidebar({
 
   const seatRent = property.propertyType === "coworking" ? getCoworkingSeatRent(property.details) : null;
   const displayPrice = seatRent == null ? property.price : String(seatRent);
-  const pricePeriod = seatRent == null ? "/ mo" : "/ seat / mo";
+  const pgBasis = property.propertyType === "pg_service_apartment" ? pgRentBasis(property.details?.curationDetails?.pgDetails) : null;
+  const pricePeriod = pgBasis ? `/ ${pgBasis} / mo` : seatRent == null ? "/ mo" : "/ seat / mo";
   const areaNum = property.details?.builtUpArea
     ? parseFloat(property.details.builtUpArea)
     : NaN;
@@ -127,7 +129,7 @@ export function PropertyInfoSidebar({
           ? getCoworkingSpecs(property.details)
           : [];
   // Land is priced per cent or not at all — never per sq.ft.
-  const perSqft = property.propertyType === "coworking" ? null :
+  const perSqft = property.propertyType === "coworking" || pgBasis ? null :
     getLandPricePerUnit(
       property.price,
       property.details,

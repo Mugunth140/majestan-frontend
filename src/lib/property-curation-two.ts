@@ -1,6 +1,8 @@
+import { pgReadFields, isPgFurnished } from "./pg-accommodation";
 import type { SeoProperty } from "./api/property-by-slug";
 
 export interface PropertyCurationDetails {
+  pgDetails?: Record<string, unknown> | null;
   individualBathrooms?: number | null;
   attachedBathrooms?: number | null;
   portions?: { bhk: string; count: number }[];
@@ -146,6 +148,7 @@ export function curationDetailRows(
     if (typeof c.hasFreeRefreshment === "boolean")
       add("Free Refreshment", c.hasFreeRefreshment ? "Yes" : "No");
   }
+  if (property.propertyType === "pg_service_apartment") rows.push(...pgReadFields(c.pgDetails).filter(row => !["In room furnishings", "Common area furnishings"].includes(row.label) || isPgFurnished(d?.furnishingStatus)));
   return rows;
 }
 

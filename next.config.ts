@@ -22,6 +22,8 @@ import type { NextConfig } from "next";
 // ---------------------------------------------------------------------------
 
 const nextConfig: NextConfig = {
+  // Next reloads clients whose assets belong to an earlier deployment.
+  deploymentId: process.env.NEXT_DEPLOYMENT_ID || undefined,
   // Isolated build/test output keeps local verification separate from dev.
   distDir: process.env.NEXT_DIST_DIR || '.next',
   // Disable Strict Mode to prevent React DevTools crashes during HMR

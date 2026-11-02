@@ -1,3 +1,4 @@
+import { searchText, searchChoice, searchNumber, searchPage, searchLimit } from "../search-query";
 import {getSeo,withSeo} from '@/lib/seo-engine';
 import { cache } from 'react';
 export type ProjectFurnishingItem = { id: number; name: string; icon?: string | null };
@@ -169,7 +170,9 @@ const API_BASE =
   typeof window === "undefined" ? SERVER_API_BASE : "/site-api";
 
 export class ProjectApiError extends Error {
-  constructor(public readonly status: number) { super(`Projects API failed: ${status}`); }
+  constructor(public readonly status: number, detail?: string) {
+    super(`Projects API failed: ${status}${detail ? ` (${detail})` : ""}`);
+  }
 }
 
 async function fetchProjectApi<T>(path: string, init?: RequestInit): Promise<T> {
@@ -177,7 +180,11 @@ async function fetchProjectApi<T>(path: string, init?: RequestInit): Promise<T> 
     ...init,
     next: (init as any)?.next ?? { revalidate: 300, tags: ["public-inventory"] },
   });
-  if (!res.ok) throw new ProjectApiError(res.status);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    const detail = Array.isArray(body?.message) ? body.message.join("; ") : body?.message;
+    throw new ProjectApiError(res.status, typeof detail === "string" ? detail : undefined);
+  }
   const payload = (await res.json()) as ApiEnvelope<T> | T;
   if (typeof payload === "object" && payload !== null && "success" in payload && "data" in payload) {
     return (payload as ApiEnvelope<T>).data;
@@ -194,7 +201,18 @@ export const getProjectBySlugUrl = cache(async function getProjectBySlugUrl(slug
 
 export function listProjects(params: ProjectListParams = {}): Promise<ProjectListResponse> {
   const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
+  const safeParams: ProjectListParams = {
+    city: searchText(params.city, 100),
+    projectType: searchChoice(params.projectType, ["apartment", "villa"]),
+    bhk: searchNumber(params.bhk, true, 1),
+    minPrice: searchNumber(params.minPrice),
+    maxPrice: searchNumber(params.maxPrice),
+    possession: searchChoice(params.possession, ["under_construction", "ready_to_move"]),
+    rera: typeof params.rera === "boolean" ? params.rera : undefined,
+    page: searchPage(params.page),
+    limit: searchLimit(params.limit, 12),
+  };
+  for (const [k, v] of Object.entries(safeParams)) {
     if (v !== undefined && v !== null && v !== "") q.set(k, String(v));
   }
   const qs = q.toString();

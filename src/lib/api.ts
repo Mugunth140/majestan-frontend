@@ -1,3 +1,4 @@
+import { searchText, searchChoice, searchPage, searchLimit } from "./search-query";
 import { sanitizePublicAreas } from "./seo-quality";
 import { getSublocation, type LocationRecord } from "./location-display";
 import type { ProjectListItem } from "./api/projects";
@@ -321,24 +322,27 @@ export async function searchProperties(
   if (params.includeProjects) query.set("includeProjects", "true");
   if (params.propertyType) {
     const mapped = PROPERTY_TYPE_MAP[params.propertyType] ?? params.propertyType;
-    query.set("propertyType", mapped);
+    query.set("propertyType", searchText(mapped, 64) ?? "");
   }
-  if (params.listingType) query.set("listingType", params.listingType);
-  if (params.location) query.set("location", params.location);
-  if (params.city) query.set("city", params.city);
-  if (params.propertyName) query.set("propertyName", params.propertyName);
-  if (params.minPrice) query.set("minPrice", params.minPrice);
-  if (params.maxPrice) query.set("maxPrice", params.maxPrice);
-  if (params.minArea) query.set("minArea", params.minArea);
-  if (params.maxArea) query.set("maxArea", params.maxArea);
-  if (params.bedrooms) query.set("bedrooms", params.bedrooms);
+  const listingType = searchChoice(params.listingType, ["Sell", "Rent"]);
+  if (listingType) query.set("listingType", listingType);
+  if (params.location) query.set("location", searchText(params.location, 100) ?? "");
+  if (params.city) query.set("city", searchText(params.city, 100) ?? "");
+  if (params.propertyName) query.set("propertyName", searchText(params.propertyName, 120) ?? "");
+  if (params.minPrice) query.set("minPrice", searchText(params.minPrice, 32) ?? "");
+  if (params.maxPrice) query.set("maxPrice", searchText(params.maxPrice, 32) ?? "");
+  if (params.minArea) query.set("minArea", searchText(params.minArea, 32) ?? "");
+  if (params.maxArea) query.set("maxArea", searchText(params.maxArea, 32) ?? "");
+  if (params.bedrooms) query.set("bedrooms", searchText(params.bedrooms, 8) ?? "");
   if (params.facing) query.set("facing", params.facing);
   if (params.furnishing) query.set("furnishing", params.furnishing);
-  if (params.propertyAge) query.set("propertyAge", params.propertyAge);
-  if (params.propertyCondition && params.listingType !== "Rent") query.set("propertyCondition", params.propertyCondition);
-  if (params.sort) query.set("sort", params.sort);
-  if (params.page) query.set("page", String(params.page));
-  if (params.limit) query.set("limit", String(params.limit));
+  if (params.propertyAge) query.set("propertyAge", searchText(params.propertyAge, 16) ?? "");
+  const condition = searchChoice(params.propertyCondition, ["New", "Resale"]);
+  if (condition && listingType !== "Rent") query.set("propertyCondition", condition);
+  const sort = searchChoice(params.sort, ["low_to_high", "high_to_low", "Area_low_to_high", "Area_high_to_low"]);
+  if (sort) query.set("sort", sort);
+  if (params.page) query.set("page", String(searchPage(params.page)));
+  if (params.limit) query.set("limit", String(searchLimit(params.limit, 14)));
 
   // No ISR caching here: every unique query-string permutation would create a
   // separate cache entry in .next/cache (unbounded growth from crawlers/filters).

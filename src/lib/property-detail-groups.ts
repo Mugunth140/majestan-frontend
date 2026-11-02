@@ -632,6 +632,10 @@ export function getGroupedPropertyDetails(property: SeoProperty, extras: { price
   }
   const refinements = curationDetailRows(property);
   const replaced = new Set(refinements.map(field => field.label));
+  // Classified parking replaces legacy scalar counts/types, which may be stale.
+  if (["apartment", "villa"].includes(property.propertyType) && Array.isArray(property.details?.curationDetails?.parkingSpaces)) {
+    for (const label of ["Parking", "Parking Type", "Car Parking", "Bike Parking"]) replaced.add(label);
+  }
   if (property.propertyType === "commercial" && property.listingType === "Rent") {
     const c = property.details?.curationDetails;
     if (Array.isArray(c?.propertyUses)) replaced.add("Property Use");

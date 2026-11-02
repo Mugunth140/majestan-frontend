@@ -88,7 +88,7 @@ export function curationDetailRows(
         .join(", "),
     );
   if (
-    property.propertyType === "investment_property" ||
+    ["apartment", "villa", "investment_property"].includes(property.propertyType) ||
     (property.propertyType === "commercial" && !rent)
   )
     add(
@@ -96,7 +96,7 @@ export function curationDetailRows(
       c.parkingSpaces
         ?.filter((p) => p.count > 0)
         .map((p) => `${p.vehicle} ${p.type} × ${p.count}`)
-        .join(", "),
+        .join(", ") || (Array.isArray(c.parkingSpaces) ? "No parking" : undefined),
     );
   if (property.propertyType === "commercial" && rent) {
     add("Passenger Lifts", c.passengerLifts);

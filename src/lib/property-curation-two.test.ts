@@ -156,3 +156,16 @@ describe("curation 2 website mappings", () => {
     expect(getCoworkingSeatRent({ rentPerSeat: 0 })).toBeNull();
   });
 });
+
+it.each([ ["apartment", "Sell"], ["apartment", "Rent"], ["villa", "Sell"], ["villa", "Rent"] ])("displays the parking breakdown instead of stale scalar parking for %s %s", (type, listing) => {
+  const details = { parking: 9, parkingType: "Covered", curationDetails: { parkingSpaces: [
+    { vehicle: "Car", type: "Open", count: 1 }, { vehicle: "Bike", type: "Covered", count: 2 },
+  ] } };
+  const fields = getGroupedPropertyDetails(property(type, details, listing)).flatMap(group => group.fields);
+  expect(fields).toContainEqual(expect.objectContaining({ label: "Parking Spaces", value: "Car Open × 1, Bike Covered × 2" }));
+  expect(fields.some(field => field.label === "Parking Type" || field.value === "9 Covered")).toBe(false);
+  const noParking = getGroupedPropertyDetails(property(type, { ...details, curationDetails: { parkingSpaces: [] } }, listing)).flatMap(group => group.fields);
+  expect(noParking).toContainEqual(expect.objectContaining({ label: "Parking Spaces", value: "No parking" }));
+  const legacy = getGroupedPropertyDetails(property(type, { parking: 3, parkingType: "Covered" }, listing)).flatMap(group => group.fields);
+  expect(legacy).toContainEqual(expect.objectContaining({ label: "Parking Type", value: "Covered" }));
+});

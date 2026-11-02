@@ -18,7 +18,7 @@ import { Breadcrumbs } from "@/components/site/layout/breadcrumbs";
 import { WhatsAppPopup } from "@/components/site/enquiry/whatsapp-enquiry-popup";
 import { MobileFilterBar } from "./MobileFilterBar";
 import type { ListingAdapter, ListingPageData } from "./listing-adapter";
-import { AdBanner } from "@/components/site/ads/ad-banner";
+import { ListingFeedBanner } from "@/components/site/ads/listing-feed-banner";
 import { interleaveAds } from "@/components/site/ads/listing-feed";
 import { useAds } from "@/components/site/ads/use-ads";
 import { adsForAudience } from "@/lib/ads";
@@ -641,12 +641,9 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                         entry.kind === "item" ? (
                           adapter.renderCard(entry.item)
                         ) : (
-                          <AdBanner
+                          <ListingFeedBanner
                             key={`ad-${entry.slot}-${entry.ad.id}`}
                             ad={entry.ad}
-                            aspectClass="aspect-[16/9] md:aspect-[4/1]"
-                            desktopOnlyAspectClass="aspect-[4/1]"
-                            className="rounded-xl! border! border-gray-100!"
                           />
                         )
                       )}

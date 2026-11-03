@@ -187,6 +187,15 @@ describe("getCardSpecCells", () => {
     expect(labels).toEqual(["Plot Area", "Facing", "Dimension", "Plot Type"]);
   });
 
+  it("omits zoning even when the plot has room for more specs", () => {
+    const cells = getCardSpecCells(withDetails("plot", {
+      plotSizeCents: "10",
+      zoning: "Residential",
+      approvals: "DTCP",
+    }));
+    expect(cells.map((cell) => cell.label)).toEqual(["Plot Area", "Approvals"]);
+  });
+
   it("never shows possession on plot cards, even when available-from exists", () => {
     const cells = getCardSpecCells({
       ...withDetails("plot", {

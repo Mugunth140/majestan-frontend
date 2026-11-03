@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectListingCard } from "./ProjectListingCard";
 import type { ProjectListItem } from "@/lib/api/projects";
@@ -82,6 +82,42 @@ describe("ProjectListingCard", () => {
     expect(screen.getByText("4")).toBeInTheDocument();
     expect(screen.queryByText("Facing")).not.toBeInTheDocument();
     expect(screen.queryByText("North")).not.toBeInTheDocument();
+  });
+
+  it("shows only the four plot specs with decimal sizes as a range", () => {
+    render(<ProjectListingCard item={item({
+      projectType: "plot",
+      totalUnits: 7,
+      projectAreaSqft: "87120",
+      ranges: {
+        ...item().ranges,
+        unitsCount: 7,
+        plotCents: [12.55, 11.59, 12.03, 12.32, 12.53, 12.54],
+        minPlotCents: 11.59,
+        maxPlotCents: 12.55,
+        facings: ["north_east", "east"],
+        plotDimensions: ["40 × 60"],
+        plotBoundaryWall: true,
+        plotOpenSides: [1],
+      },
+    })} />);
+    const specs = screen.getByLabelText("Project specifications");
+    expect(Array.from(specs.querySelectorAll("dt"), (cell) => cell.textContent))
+      .toEqual(["Plot Area", "Total Units", "Facing", "Project Area"]);
+    for (const value of ["11.59 – 12.55 Cents", "7", "North East, East", "2 acres"]) {
+      expect(within(specs).getByText(value)).toBeInTheDocument();
+    }
+  });
+
+  it.each([
+    { plotCents: [5], minPlotCents: null, maxPlotCents: null, expected: "5 Cents" },
+    { plotCents: [], minPlotCents: 4.5, maxPlotCents: 7.25, expected: "4.5 – 7.25 Cents" },
+    { plotCents: [NaN, -1], minPlotCents: null, maxPlotCents: null, expected: "—" },
+  ])("handles single and legacy plot sizes: $expected", ({ expected, ...ranges }) => {
+    render(<ProjectListingCard item={item({ projectType: "plot", projectAreaSqft: "17424", ranges: { ...item().ranges, ...ranges } })} />);
+    const specs = screen.getByLabelText("Project specifications");
+    expect(specs.querySelector("dd")).toHaveTextContent(expected);
+    expect(within(specs).getByText("17,424 sq.ft")).toBeInTheDocument();
   });
 
   it("hides the cell when there is nothing countable", () => {

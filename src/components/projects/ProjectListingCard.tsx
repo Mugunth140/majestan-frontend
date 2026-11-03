@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MapPin, Phone, LayoutDashboard, Sparkles, Grid3X3, MapPinned, Images, Share2, Check, BadgeCheck, Download } from "lucide-react";
-import { formatPlotCents, type ProjectListItem } from "@/lib/api/projects";
+import type { ProjectListItem } from "@/lib/api/projects";
 import { getFloorPlanLabel } from "@/lib/property-sections";
 import { WishlistButton } from "@/components/site/wishlist/WishlistButton";
 import { ListingImage } from "@/components/site/listing/ListingImage";
@@ -283,23 +283,19 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
   const specCells: { label: string; value: React.ReactNode }[] = [];
   const isPlot = item.projectType === "plot";
   if (isPlot) {
-    // Land parcels quote in cents; a single Plot Area cell leads — mirroring
-    // the property plot card cells (area, facing, dimension, boundary).
-    // Consecutive sizes collapse to a range, scattered ones list out.
-    const cents = (item.ranges.plotCents ?? []).filter(
-      (n) => Number.isFinite(n) && (n as number) > 0,
-    );
-    const plotArea =
-      cents.length > 0
-        ? formatSmartRange(cents, "Cents")
-        : (() => {
-            const { minPlotCents, maxPlotCents } = item.ranges;
-            if (minPlotCents == null) return null;
-            return maxPlotCents != null && maxPlotCents !== minPlotCents
-              ? `${formatPlotCents(minPlotCents)} – ${formatPlotCents(maxPlotCents)}`
-              : formatPlotCents(minPlotCents);
-          })();
-    if (plotArea) specCells.push({ label: "Plot Area", value: plotArea });
+    const cents = [
+      ...(item.ranges.plotCents ?? []),
+      item.ranges.minPlotCents,
+      item.ranges.maxPlotCents,
+    ].filter((n): n is number => n != null && Number.isFinite(n) && n > 0);
+    const minCents = cents.length ? Math.min(...cents) : null;
+    const maxCents = cents.length ? Math.max(...cents) : null;
+    const plotArea = minCents == null || maxCents == null
+      ? "—"
+      : minCents === maxCents
+        ? `${trimNum(minCents)} Cents`
+        : `${trimNum(minCents)} – ${trimNum(maxCents)} Cents`;
+    specCells.push({ label: "Plot Area", value: plotArea });
   } else {
     if (item.ranges.bhk.length > 0) {
       const bhk = formatSmartRange(item.ranges.bhk, "BHK");
@@ -307,13 +303,22 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
     }
     if (area) specCells.push({ label: "Built-Up Area", value: area });
   }
-  if (totalUnits) specCells.push({ label: "Total Units", value: totalUnits });
+  if (totalUnits || isPlot) specCells.push({ label: "Total Units", value: totalUnits ?? "—" });
   if (isPlot) {
-    if (item.ranges.plotDimensions.length > 0)
-      specCells.push({ label: "Dimension", value: item.ranges.plotDimensions.join(", ") });
-    if (item.ranges.plotBoundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });
-    else if (item.ranges.plotOpenSides.length > 0)
-      specCells.push({ label: "Open Sides", value: item.ranges.plotOpenSides.join(", ") });
+    const facing = (item.ranges.facings ?? [])
+      .map((value) => value.trim().replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
+      .filter(Boolean)
+      .join(", ");
+    const projectArea = Number(item.projectAreaSqft);
+    specCells.push({ label: "Facing", value: facing || "—" });
+    specCells.push({
+      label: "Project Area",
+      value: Number.isFinite(projectArea) && projectArea > 0
+        ? projectArea >= 43560
+          ? `${trimNum(projectArea / 43560)} acres`
+          : `${projectArea.toLocaleString("en-IN")} sq.ft`
+        : "—",
+    });
   }
   if (possession && !isPlot) specCells.push({ label: "Possession", value: possession });
 

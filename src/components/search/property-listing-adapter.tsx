@@ -358,13 +358,9 @@ export function getCardSpecCells(item: PropertySearchItem): CardSpecCell[] {
     if (dimension) specCells.push({ label: "Dimension", value: dimension });
     const plotType = trimStr(d.plotType);
     if (plotType) specCells.push({ label: "Plot Type", value: plotType });
-    const zoning = trimStr(d.zoning);
-    if (zoning) specCells.push({ label: "Zoning", value: zoning });
-    else {
-      // Approvals lives on the property row, not details — read both shapes.
-      const approvals = trimStr(d.approvals) ?? trimStr((item as any).approvals);
-      if (approvals) specCells.push({ label: "Approvals", value: approvals });
-    }
+    // Approvals lives on the property row, not details — read both shapes.
+    const approvals = trimStr(d.approvals) ?? trimStr((item as any).approvals);
+    if (approvals) specCells.push({ label: "Approvals", value: approvals });
     // No possession fallback: the photo strip already shows availability,
     // and a move-in date is noise on a land card.
     if (d.boundaryWall) specCells.push({ label: "Boundary Wall", value: "Yes" });

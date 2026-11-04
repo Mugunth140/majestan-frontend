@@ -87,11 +87,11 @@ describe("ProjectListingCard", () => {
   it("shows only the four plot specs with decimal sizes as a range", () => {
     render(<ProjectListingCard item={item({
       projectType: "plot",
-      totalUnits: 7,
+      totalUnits: 1882,
       projectAreaSqft: "87120",
       ranges: {
         ...item().ranges,
-        unitsCount: 7,
+        unitsCount: 2,
         plotCents: [12.55, 11.59, 12.03, 12.32, 12.53, 12.54],
         minPlotCents: 11.59,
         maxPlotCents: 12.55,
@@ -104,7 +104,7 @@ describe("ProjectListingCard", () => {
     const specs = screen.getByLabelText("Project specifications");
     expect(Array.from(specs.querySelectorAll("dt"), (cell) => cell.textContent))
       .toEqual(["Plot Area", "Total Units", "Facing", "Project Area"]);
-    for (const value of ["11.59 – 12.55 Cents", "7", "North East, East", "2 acres"]) {
+    for (const value of ["11.59 – 12.55 Cents", "1,882", "North East, East", "2 acres"]) {
       expect(within(specs).getByText(value)).toBeInTheDocument();
     }
   });

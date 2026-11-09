@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/lib/api";
+import { trackSiteEvent } from '@/lib/site-analytics';
 
 export type WishlistProperty = Record<string, unknown> & {
   id: number;
@@ -47,13 +48,15 @@ export function getWishlistCount(guestId: string): Promise<{ total: number }> {
   return wishlistFetch<{ total: number }>(`/wishlist/count?guestId=${encodeURIComponent(guestId)}`);
 }
 
-export function toggleWishlist(payload: {
+export async function toggleWishlist(payload: {
   guestId: string;
   propertyId: number;
   propertyType: string;
 }): Promise<WishlistToggleResponse> {
-  return wishlistFetch<WishlistToggleResponse>(`/wishlist/toggle`, {
+  const result = await wishlistFetch<WishlistToggleResponse>(`/wishlist/toggle`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  trackSiteEvent(result.wished ? 'wishlist_add' : 'wishlist_remove', { entityId: payload.propertyId });
+  return result;
 }

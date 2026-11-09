@@ -548,7 +548,7 @@ export default async function SlugPage({
           sections={isSingle ? getVisibleSingleSections(property) : undefined}
           propertyType={property.propertyType}
         />
-        <div className="bg-[#f4f6f9]! min-h-screen! font-manrope">
+        <div data-analytics-listing-kind="property" data-analytics-listing-id={property.id} className="bg-[#f4f6f9]! min-h-screen! font-manrope">
           <div className={`${PAGE_CONTAINER} pt-5! pb-24!`}>
             <div className="mb-0!">
               <Breadcrumbs items={breadcrumbItems} jsonLd />
@@ -607,7 +607,7 @@ export default async function SlugPage({
       return (
         <>
           <SiteHeader />
-          <div className="min-h-screen! bg-[#f4f6f9]! font-manrope-page">
+          <div data-analytics-listing-kind="project" data-analytics-listing-id={project.id} className="min-h-screen! bg-[#f4f6f9]! font-manrope-page">
             {/* Spacer matching the fixed header's measured height */}
             <div className="h-[var(--site-header-h)]!" aria-hidden="true" />
             <ProjectNavigation

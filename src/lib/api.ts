@@ -1,4 +1,5 @@
 import { searchText, searchChoice, searchPage, searchLimit } from "./search-query";
+import { trackSiteEvent, siteAnalyticsContext } from './site-analytics';
 import { sanitizePublicAreas } from "./seo-quality";
 import { getSublocation, type LocationRecord } from "./location-display";
 import type { ProjectListItem } from "./api/projects";
@@ -137,6 +138,9 @@ export async function fetchApi<T>(
         ...init?.headers,
       },
       next: (init as any)?.next ?? (init?.cache === "no-store" ? undefined : { revalidate: 60 }),
+    }).catch((error: unknown) => {
+      if (typeof window !== 'undefined' && error instanceof TypeError) trackSiteEvent('api_error', { statusCode: 0 });
+      throw error;
     });
 
     if (response.status === 401) {
@@ -159,6 +163,7 @@ export async function fetchApi<T>(
     }
 
     if (!response.ok) {
+      if (typeof window !== 'undefined' && (response.status === 0 || response.status === 429 || response.status >= 500)) trackSiteEvent('api_error', { statusCode: response.status });
       const method = (init?.method || "GET").toUpperCase();
       const error = await response.json().catch(() => null);
       const detail = Array.isArray(error?.message) ? error.message.join(". ") : error?.message;
@@ -206,11 +211,13 @@ export async function createEnquiry(payload: {
   location?: string;
   whatsappOptIn?: boolean;
 }) {
-  return fetchApi<{ id: number; submitted: boolean }>("/leads/enquiry", {
+  const result = await fetchApi<{ id: number; submitted: boolean }>("/leads/enquiry", {
     method: "POST",
     body: JSON.stringify(payload),
     cache: "no-store",
   });
+  if (result.submitted) trackSiteEvent('enquiry_submitted');
+  return result;
 }
 
 /* ── Property Search ───────────────────────────────────────── */
@@ -409,6 +416,10 @@ export async function getPropertyBySlug(slug: string): Promise<any> {
   });
 }
 
+const pendingListingSubmissions=new Map<string,string>();
+function listingSubmission(kind:string,payload:unknown) {
+  try{if(!globalThis.crypto?.randomUUID)return {};const fingerprint=kind+JSON.stringify(payload);let id=pendingListingSubmissions.get(fingerprint);if(!id){id=crypto.randomUUID();if(pendingListingSubmissions.size>=100)pendingListingSubmissions.delete(pendingListingSubmissions.keys().next().value!);pendingListingSubmissions.set(fingerprint,id);}return {analyticsSubmissionId:id,...siteAnalyticsContext()};}catch{return {};}
+}
 export async function createProjectEnquiry(
   payload: {
     projectId: number;
@@ -425,12 +436,15 @@ export async function createProjectEnquiry(
   token: string,
 ) {
   // A 401 clears the visitor session; the form resumes after OTP sign-in.
-  return fetchApi<{ id: number; submitted: boolean }>("/leads/project-enquiry", {
+  const result = await fetchApi<{ id: number; submitted: boolean }>("/leads/project-enquiry", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({...payload,...listingSubmission("project",payload)}),
     cache: "no-store",
   });
+  if (result.submitted) trackSiteEvent(payload.intent === 'site_visit' ? 'site_visit_requested' : 'enquiry_submitted', { entityId: payload.projectId, entityKind: 'project' });
+  if(result.submitted)pendingListingSubmissions.delete("project"+JSON.stringify(payload));
+  return result;
 }
 
 export async function createPropertyEnquiry(
@@ -449,10 +463,13 @@ export async function createPropertyEnquiry(
   token: string,
 ) {
   // A 401 clears the visitor session; the form resumes after OTP sign-in.
-  return fetchApi<{ id: number; submitted: boolean }>("/leads/property-enquiry", {
+  const result = await fetchApi<{ id: number; submitted: boolean }>("/leads/property-enquiry", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({...payload,...listingSubmission("property",payload)}),
     cache: "no-store",
   });
+  if (result.submitted) trackSiteEvent(payload.intent === 'site_visit' ? 'site_visit_requested' : 'enquiry_submitted', { entityId: payload.propertyId, entityKind: 'property' });
+  if(result.submitted)pendingListingSubmissions.delete("property"+JSON.stringify(payload));
+  return result;
 }

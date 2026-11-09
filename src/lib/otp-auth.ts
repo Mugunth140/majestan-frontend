@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './api';
+import { trackSiteEvent } from './site-analytics';
 
 export type OtpMode = 'login' | 'register';
 
@@ -22,8 +23,11 @@ export const requestRegisterOtp = (body: { name: string; email: string; countryC
 export const requestLoginOtp = (body: { countryCode: string; phone: string }) =>
   post<{ otpSent: boolean; expiresInSeconds: number }>('/auth/otp/login-request', body);
 
-export const verifyRegisterOtp = (body: { countryCode: string; phone: string; otp: string; name: string; email: string }) =>
-  post<{ accessToken: string; user: { id: number; name: string; email: string; phone: string; role: string } }>('/auth/otp/register-verify', body);
+export const verifyRegisterOtp = async (body: { countryCode: string; phone: string; otp: string; name: string; email: string }) => {
+  const result = await post<{ accessToken: string; user: { id: number; name: string; email: string; phone: string; role: string } }>('/auth/otp/register-verify', body);
+  if (result.accessToken) trackSiteEvent('registration_completed');
+  return result;
+};
 
 export const verifyLoginOtp = (body: { countryCode: string; phone: string; otp: string }) =>
   post<{ accessToken: string; user: { id: number; name: string; email: string; phone: string; role: string } }>('/auth/otp/login-verify', body);

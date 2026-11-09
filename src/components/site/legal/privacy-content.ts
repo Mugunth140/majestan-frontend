@@ -5,6 +5,11 @@ export const privacyIntroduction = "At Majestan Realty Services Pvt Ltd (â€œwe,â
 
 export const privacySections: LegalSection[] = [
   {
+    id: 'site-analytics',
+    title: 'Website analytics',
+    blocks: [{ type: 'paragraph', text: 'We use first party analytics to understand public page visits, referring websites, campaign labels, device and browser categories, approximate country, website performance and interactions such as enquiry submissions. Analytics does not record form contents, passwords, phone numbers, email addresses, raw IP addresses or browsing query strings. A daily changing identifier estimates visitors, and a temporary browser session identifier groups visits. Analytics records are retained for up to 180 days by default. We respect browser Do Not Track and Global Privacy Control signals. Browser restrictions or opting out may prevent a visit from being counted.' }],
+  },
+  {
     "id": "information",
     "title": "Information We Collect",
     "blocks": [

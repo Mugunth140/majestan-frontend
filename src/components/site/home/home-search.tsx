@@ -1,4 +1,5 @@
 "use client";
+import { trackSiteEvent } from '@/lib/site-analytics';
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -163,6 +164,7 @@ export function HomeSearch({
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    trackSiteEvent('search');
     setError("");
 
     // Project mode — Meili-first text search, direct /projects fallback.

@@ -1,4 +1,6 @@
 import { PublicStyles } from "@/components/site/layout/public-styles";
+import { Suspense } from 'react';
+import { SiteAnalytics } from '@/components/site/analytics/site-analytics';
 import { seoFetch,jsonLd } from '@/lib/seo-engine';
 /* eslint-disable @next/next/no-css-tags */
 import type { Metadata, Viewport } from "next";
@@ -159,6 +161,9 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
       </head>
       <body className="theme-color-3 majestan-app-root" suppressHydrationWarning>
+        <Suspense fallback={null}>
+          <SiteAnalytics />
+        </Suspense>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLd(orgJsonLd) }}

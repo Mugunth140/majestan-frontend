@@ -1,4 +1,5 @@
 "use client";
+import { trackSiteEvent } from '@/lib/site-analytics';
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -342,6 +343,7 @@ export function OwnerPostWizard({ data }: Props) {
           "We could not confirm your submission. Please contact our team before trying again.",
         );
       state.complete();
+      trackSiteEvent('owner_submission', { entityId: result.id });
       setReceipt(result);
     } catch (err) {
       state.resume();

@@ -97,7 +97,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(dest, 301);
     }
     // Legal pages have dedicated routes; keep them out of the legacy view wrapper.
-    if (path === "/privacy-policy" || path === "/terms-and-conditions") {
+    if (path === "/privacy-policy" || path === "/terms-and-conditions" || path === "/data-deletion") {
       return NextResponse.next();
     }
     const sections = [

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, ChevronDown, FileText, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ChevronDown, FileText, Mail, ShieldCheck, Trash2 } from "lucide-react";
 import { SeoH1 } from "@/components/seo/core-heading";
 import styles from "./legal-page.module.css";
 
@@ -15,14 +15,19 @@ function PolicyText({ text }: { text: string }) {
   return <>{parts.map((part, index) => <span key={index}>{index > 0 && <a href={`mailto:${email}`}>{email}</a>}{part}</span>)}</>;
 }
 
+const LEGAL_KINDS = {
+  privacy: { title: "Privacy policy", tagline: "Your information, handled with care.", Icon: ShieldCheck, about: "policy" },
+  terms: { title: "Terms and conditions", tagline: "A clear understanding, from the start.", Icon: FileText, about: "page" },
+  "data-deletion": { title: "Data deletion", tagline: "Ask us to delete your information at any time.", Icon: Trash2, about: "process" },
+} as const;
+
 export function LegalPage({ kind, introduction, sections }: {
-  kind: "privacy" | "terms";
+  kind: "privacy" | "terms" | "data-deletion";
   introduction: string;
   sections: LegalSection[];
 }) {
   const privacy = kind === "privacy";
-  const title = privacy ? "Privacy policy" : "Terms and conditions";
-  const Icon = privacy ? ShieldCheck : FileText;
+  const { title, tagline, Icon, about } = LEGAL_KINDS[kind];
   const sectionLinks = <ol>{sections.map((section, index) => <li key={section.id}>
     <a href={`#${section.id}`}><span>{String(index + 1).padStart(2, "0")}</span>{section.title}</a>
   </li>)}</ol>;
@@ -33,10 +38,11 @@ export function LegalPage({ kind, introduction, sections }: {
         <header className={styles.hero}>
           <span className={styles.eyebrow}><Icon size={18} aria-hidden="true" /> Majestan Realty · Legal</span>
           <SeoH1>{title}</SeoH1>
-          <p>{privacy ? "Your information, handled with care." : "A clear understanding, from the start."}</p>
+          <p>{tagline}</p>
           <nav aria-label="Legal documents" className={styles.documents}>
             <Link href="/privacy-policy" aria-current={privacy ? "page" : undefined}>Privacy policy</Link>
-            <Link href="/terms-and-conditions" aria-current={!privacy ? "page" : undefined}>Terms and conditions</Link>
+            <Link href="/terms-and-conditions" aria-current={kind === "terms" ? "page" : undefined}>Terms and conditions</Link>
+            <Link href="/data-deletion" aria-current={kind === "data-deletion" ? "page" : undefined}>Data deletion</Link>
           </nav>
         </header>
         <div className={styles.layout}>
@@ -51,7 +57,7 @@ export function LegalPage({ kind, introduction, sections }: {
             <div className={styles.help}>
               <Mail size={20} aria-hidden="true" />
               <h2>Have a question?</h2>
-              <p>Our team is here to help with questions about this {privacy ? "policy" : "page"}.</p>
+              <p>Our team is here to help with questions about this {about}.</p>
               <a href="mailto:info@majestanrealty.com">Email our team <ArrowUpRight size={16} aria-hidden="true" /></a>
             </div>
           </aside>
@@ -61,7 +67,7 @@ export function LegalPage({ kind, introduction, sections }: {
               <h2 id={`${section.id}-heading`}><span>{String(index + 1).padStart(2, "0")}</span>{section.title}</h2>
               {section.blocks.map((block, blockIndex) => block.type === "paragraph"
                 ? <p key={blockIndex}><PolicyText text={block.text} /></p>
-                : <ul key={blockIndex}>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>)}
+                : <ul key={blockIndex}>{block.items.map((item) => <li key={item}><PolicyText text={item} /></li>)}</ul>)}
             </section>)}
             <footer className={styles.articleFooter}><span>Majestan Realty Services Pvt Ltd</span><a href="#legal-top">Back to top ↑</a></footer>
           </article>

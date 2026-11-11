@@ -69,7 +69,7 @@
  .bottomNote { align-items: flex-start; }
 }
 
-.article p a { color: #27427f; text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
+.article p a, .article li a { color: #27427f; text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
 @media (max-width: 639px) {
  .desktopContents { display: none; }
  .mobileContents { display: block; }

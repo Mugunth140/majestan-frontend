@@ -122,7 +122,7 @@ describe("LocalitySection with the ap088 production payload", () => {
         <LocalitySection
           property={{
             ...ap088,
-            locations: [{ address: "saravanampatti main", latitude: null, longitude: null }] as any,
+            locations: [{ sublocation: { localityName: "Saravanampatti" }, latitude: null, longitude: null }] as any,
           }}
         />,
       );
@@ -157,7 +157,7 @@ describe("LocalitySection with the ap088 production payload", () => {
         <LocalitySection
           property={{
             ...ap088,
-            locations: [{ address: "saravanampatti main", latitude: null, longitude: null }] as unknown as SeoProperty["locations"],
+            locations: [{ sublocation: { localityName: "Saravanampatti" }, latitude: null, longitude: null }] as unknown as SeoProperty["locations"],
           }}
           embedded
         />,

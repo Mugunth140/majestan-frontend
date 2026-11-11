@@ -79,10 +79,6 @@ export function PropertyInfoSidebar({
     ) && !property.status.toLowerCase().includes("rent");
 
   const locRow = property.locations?.[0] as LocationRecord | undefined;
-  const locData = locRow?.localityData as LocationRecord | undefined;
-  const fullAddress = String(
-    locRow?.address || locRow?.landmark || locData?.address || "",
-  ).trim();
   const rawSub =
     (property as SeoProperty & { sublocation?: string }).sublocation ||
     (property as SeoProperty & { locality?: string }).locality ||
@@ -92,9 +88,10 @@ export function PropertyInfoSidebar({
       ? capFirst(rawSub)
       : "";
   const pincode = getPincode(locRow);
-  const locationLines = formatAddressLines(fullAddress, {
+  const locationLines = formatAddressLines({
     sublocation: subLocation,
     city: property.city,
+    state: property.state,
     pincode,
   });
 

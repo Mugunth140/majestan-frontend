@@ -20,9 +20,10 @@ function EnquiryCard({ project }: { project: ProjectDetail }) {
     project.ranges.minPrice != null && project.ranges.minPrice > 0
       ? emi(project.ranges.minPrice, 7.25, 20)
       : null;
-  const locationLines = formatAddressLines(project.address, {
+  const locationLines = formatAddressLines({
     sublocation: project.sublocation,
     city: project.city,
+    state: project.state,
     pincode: project.pincode,
   });
 

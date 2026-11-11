@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { LocalityGoogleMap } from './LocalityGoogleMap';
 import { LocalityTeaser } from "@/components/site/locality/LocalityTeaser";
-import { resolveListingLocality, type LocationRow } from '@/lib/locality-geo';
+import { getSublocation, type LocationRecord } from '@/lib/location-display';
 import { NeedMoreDetails } from "@/components/site/property/NeedMoreDetails";
 import { PlaceDistanceSearch } from "@/components/site/property/PlaceDistanceSearch";
 
@@ -208,7 +208,11 @@ export function LocalitySection({ property, embedded = false, hideContact = fals
 
   const lat = property.locations?.[0]?.latitude ? Number(property.locations[0].latitude) : null;
   const lng = property.locations?.[0]?.longitude ? Number(property.locations[0].longitude) : null;
-  const localityName = resolveListingLocality(property.locations as LocationRow[]);
+  // The listing's locality, never a chunk of its street address.
+  const localityName =
+    (property as { sublocation?: string }).sublocation ||
+    getSublocation(property.locations?.[0] as LocationRecord | undefined) ||
+    null;
 
   return (
     <div className="flex! flex-col! gap-6! min-w-0!">

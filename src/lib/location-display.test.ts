@@ -22,20 +22,25 @@ describe("location display", () => {
     expect(getSublocation({ sublocation: { locality_name: "RS Puram" } })).toBe("RS Puram");
   });
 
-  it("puts the full address first and falls back to one line when absent", () => {
+  it("shows locality, city, state and pincode only, never a street address", () => {
     expect(
-      formatAddressLines("12 Main Road", {
-        sublocation: "RS Puram",
-        city: "Coimbatore",
-        pincode: "641002",
-      }),
-    ).toEqual(["12 Main Road", "RS Puram, Coimbatore, 641002"]);
-    expect(
-      formatAddressLines("", {
-        sublocation: "RS Puram",
-        city: "Coimbatore",
-        pincode: "641002",
-      }),
-    ).toEqual(["RS Puram, Coimbatore, 641002"]);
+      formatAddressLines({ sublocation: "RS Puram", city: "Coimbatore", state: "Tamil Nadu", pincode: "641002" }),
+    ).toEqual(["RS Puram, Coimbatore, Tamil Nadu, 641002"]);
+    expect(formatAddressLines({ sublocation: "RS Puram", city: "Coimbatore" })).toEqual(["RS Puram, Coimbatore"]);
+    expect(formatAddressLines({})).toEqual([]);
+  });
+});
+
+describe("withoutStreetAddress", () => {
+  it("drops street fields from the record and its locations", async () => {
+    const { withoutStreetAddress, getPincode } = await import("./location-display");
+    const out = withoutStreetAddress({
+      address: "1, SS Garden, Sathy Rd",
+      locations: [{ address: "1, SS Garden, Sathy Rd", landmark: "Near X", sublocation: { localityName: "CRI Nagar", postalCode: "641035" } }],
+    });
+    expect(out.address).toBeNull();
+    expect(out.locations[0].address).toBeNull();
+    expect(out.locations[0].landmark).toBeNull();
+    expect(getPincode(out.locations[0])).toBe("641035");
   });
 });

@@ -1,6 +1,7 @@
 import { searchText, searchChoice, searchNumber, searchPage, searchLimit } from "../search-query";
 import {getSeo,withSeo} from '@/lib/seo-engine';
 import { cache } from 'react';
+import { withoutStreetAddress } from '@/lib/location-display';
 export type ProjectFurnishingItem = { id: number; name: string; icon?: string | null };
 
 export type ProjectUnit = {
@@ -196,7 +197,7 @@ export const getProjectBySlugUrl = cache(async function getProjectBySlugUrl(slug
   const project=await fetchProjectApi<ProjectDetail>(`/projects/by-slug/${encodeURIComponent(slug)}`);
   const mainSeo=await getSeo('/'+slug);
   const effectiveSeo=mainSeo?.redirect?await getSeo(mainSeo.redirect):mainSeo;
-  return withSeo(withSeo(project,effectiveSeo),mainSeo?.redirect ? mainSeo : effectiveSeo);
+  return withSeo(withSeo(withoutStreetAddress(project),effectiveSeo),mainSeo?.redirect ? mainSeo : effectiveSeo);
 });
 
 export function listProjects(params: ProjectListParams = {}): Promise<ProjectListResponse> {

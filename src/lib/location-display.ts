@@ -1,6 +1,7 @@
 export type LocationParts = {
   sublocation?: string | null;
   city?: string | null;
+  state?: string | null;
   pincode?: string | number | null;
 };
 
@@ -64,8 +65,40 @@ export function getPincode(location: LocationRecord | null | undefined): string 
       location.postal_code ??
       nested?.pincode ??
       nested?.postalCode ??
-      nested?.postal_code,
+      nested?.postal_code ??
+      sublocationPincode(location.sublocation),
   );
+}
+
+function sublocationPincode(value: unknown): unknown {
+  if (!value || typeof value !== "object") return undefined;
+  const sub = value as LocationRecord;
+  return sub.postalCode ?? sub.postal_code ?? sub.pincode;
+}
+
+const STREET_FIELDS = ["address", "landmark", "addressLine1", "addressLine2"];
+
+/**
+ * Public pages show only locality, city, state and pincode, so the street
+ * address must not reach the browser either (it would sit in the page data).
+ * Drops street fields from the record and its location rows.
+ */
+export function withoutStreetAddress<T>(record: T): T {
+  if (!record || typeof record !== "object") return record;
+  const out = { ...(record as Record<string, unknown>) };
+  for (const key of STREET_FIELDS) if (key in out) out[key] = null;
+  for (const key of ["locations", "propertyLocations", "__propertyLocations__"]) {
+    const rows = out[key];
+    if (Array.isArray(rows)) {
+      out[key] = rows.map((row) => {
+        if (!row || typeof row !== "object") return row;
+        const copy = { ...(row as Record<string, unknown>) };
+        for (const f of STREET_FIELDS) if (f in copy) copy[f] = null;
+        return copy;
+      });
+    }
+  }
+  return out as T;
 }
 
 function uniqueParts(parts: string[]): string[] {
@@ -75,19 +108,19 @@ function uniqueParts(parts: string[]): string[] {
   );
 }
 
-export function formatLocationLine({ sublocation, city, pincode }: LocationParts): string {
-  return uniqueParts([clean(sublocation), clean(city), clean(pincode)].filter(Boolean)).join(", ");
+export function formatLocationLine({ sublocation, city, state, pincode }: LocationParts): string {
+  return uniqueParts([clean(sublocation), clean(city), clean(state), clean(pincode)].filter(Boolean)).join(", ");
 }
 
 export function capFirst(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
 
-export function formatAddressLines(
-  fullAddress: string | null | undefined,
-  location: LocationParts,
-): string[] {
-  const address = clean(fullAddress);
+/**
+ * Where a listing is, as the public sees it: locality, city, state and pincode.
+ * The street address is never shown on the website.
+ */
+export function formatAddressLines(location: LocationParts): string[] {
   const locationLine = formatLocationLine(location);
-  return [address, locationLine].filter(Boolean);
+  return locationLine ? [locationLine] : [];
 }

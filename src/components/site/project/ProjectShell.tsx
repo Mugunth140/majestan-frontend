@@ -42,7 +42,6 @@ export function ProjectTitleRow({
   project: ProjectDetail;
   heading: string;
 }) {
-  const street = (project.address || "").trim();
   const region = [
     project.sublocation,
     project.city,
@@ -59,14 +58,14 @@ export function ProjectTitleRow({
         {heading}
       </h1>
       <div className="flex! flex-col! gap-3! lg:flex-row! lg:items-center! lg:justify-between! lg:gap-6!">
-        {(street || region) && (
+        {region && (
           <p className="m-0! flex! min-w-0! items-start! gap-2! text-sm! leading-relaxed! text-[#1c2433]! lg:max-w-[45%]!">
             <MapPin
               className="w-[18px]! h-[18px]! shrink-0! mt-0.5! text-[#0a0f1c]!"
               aria-hidden="true"
             />
             <span className="min-w-0!">
-              {[street, region].filter(Boolean).join(", ")}
+              {region}
             </span>
           </p>
         )}

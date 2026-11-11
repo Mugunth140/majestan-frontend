@@ -28,7 +28,7 @@ export function buildRealEstateSchema(record: Data, seo: Data = record.seoEngine
   const lng = entity.longitude ?? record.longitude ?? record.locations?.[0]?.longitude;
   const latitude = Number(lat), longitude = Number(lng);
   const validGeo = lat != null && lng != null && String(lat).trim() !== '' && String(lng).trim() !== '' && Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180 && !(latitude === 0 && longitude === 0);
-  const address = {'@type':'PostalAddress',addressLocality:city, ...(locality ? {streetAddress: record.address || locality} : {}), ...(record.state ? {addressRegion:record.state} : {}),postalCode:entity.pincode || record.pincode,addressCountry:record.country || 'IN'};
+  const address = {'@type':'PostalAddress',addressLocality:city, ...(locality ? {streetAddress: locality} : {}), ...(record.state ? {addressRegion:record.state} : {}),postalCode:entity.pincode || record.pincode,addressCountry:record.country || 'IN'};
   const geo = validGeo ? {'@type':'GeoCoordinates',latitude,longitude} : undefined;
   const sold = Boolean(inventoryAvailability(record.status));
   const renting = record.listingType === 'Rent';

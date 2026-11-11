@@ -80,24 +80,3 @@
  .mobileContents summary:focus-visible { outline: 2px solid #27427f; outline-offset: 2px; border-radius: 8px; }
 }
 
-.optIn { display: flex; flex-direction: column; gap: 16px; max-width: 480px; margin-top: 24px !important; padding: 24px !important; border: 1px solid #dfe7f5; border-radius: 16px; background: #f5f8fd; }
-.optIn h3 { display: flex; align-items: center; gap: 8px; margin: 0 !important; color: #101828; font-size: 16px !important; line-height: 24px !important; font-weight: 600; }
-.optIn h3 svg { color: #1f9d55; }
-.optInField { display: flex; flex-direction: column; gap: 8px; }
-.optInField > span:first-child { color: #344054; font-size: 14px; line-height: 20px; font-weight: 500; }
-.optInPhone { display: flex; align-items: center; min-height: 48px; border: 1px solid #d0d8e4; border-radius: 12px; background: #fff; overflow: hidden; }
-.optInPhone:focus-within { border-color: #27427f; box-shadow: 0 0 0 3px rgba(39, 66, 127, .15); }
-.optInPhone > span { padding: 0 12px !important; align-self: stretch; display: flex; align-items: center; color: #475467; font-size: 16px; border-right: 1px solid #e4e9f0; background: #f9fafb; }
-.optInPhone input { flex: 1; min-width: 0; height: 46px !important; padding: 0 12px !important; border: 0 !important; border-radius: 0 !important; outline: none; background: transparent !important; box-shadow: none !important; color: #101828 !important; font-size: 16px; font-variant-numeric: tabular-nums; }
-.optInPhone input[aria-invalid] { color: #b42318; }
-.optInCheck { display: flex; align-items: flex-start; gap: 12px; color: #344054; font-size: 15px; line-height: 24px; cursor: pointer; }
-.optInCheck input { flex-shrink: 0; width: 20px; height: 20px; margin-top: 2px !important; accent-color: #27427f; cursor: pointer; }
-.optIn button { align-self: flex-start; min-height: 44px; padding: 10px 20px !important; border: 0; border-radius: 999px; background: #27427f; color: #fff; font-size: 15px; line-height: 24px; font-weight: 600; cursor: pointer; transition: background-color .15s ease, transform .1s ease; }
-.optIn button:hover:not(:disabled) { background: #1e3566; }
-.optIn button:active:not(:disabled) { transform: scale(.97); }
-.optIn button:disabled { opacity: .7; cursor: progress; }
-.optIn button:focus-visible, .optInCheck input:focus-visible { outline: 2px solid #27427f; outline-offset: 3px; }
-.article .optInError { margin: 0 !important; color: #b42318; font-size: 14px; line-height: 20px; }
-.article .optInDone { display: flex; align-items: flex-start; gap: 8px; margin: 0 !important; color: #05603a; }
-.optInDone svg { flex-shrink: 0; margin-top: 4px; }
-@media (max-width: 639px) { .optIn { padding: 16px !important; } .optIn button { align-self: stretch; } }

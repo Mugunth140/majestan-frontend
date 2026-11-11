@@ -24,6 +24,7 @@ import {
 import { DEFAULT_COUNTRY, flagOf, type Country } from "@/lib/country-codes";
 import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
 import { CountryList } from "@/components/site/auth/country-list";
+import { ConsentNote } from "@/components/site/legal/consent-note";
 
 interface UserAuthModalProps {
   isOpen: boolean;
@@ -737,19 +738,10 @@ export function UserAuthModal({ isOpen, onClose }: UserAuthModalProps) {
                   )}
                 </button>
 
-                <p className={`!m-0 !mt-4 !flex !items-center !justify-center !gap-1.5 !text-center !text-[12px] !font-medium !leading-[1.6] !text-[#667085] ${FONT}`}>
-                  <ShieldCheck size={14} className="!shrink-0 !text-[#27427f]/70" />
-                  <span>
-                    By continuing you agree to our{" "}
-                    <a href="#" className="!font-semibold !text-[#27427f] hover:!underline !underline-offset-4">
-                      Terms
-                    </a>{" "}
-                    &{" "}
-                    <a href="#" className="!font-semibold !text-[#27427f] hover:!underline !underline-offset-4">
-                      Privacy Policy
-                    </a>
-                  </span>
-                </p>
+                <div className={`!m-0 !mt-4 !flex !items-center !justify-center !gap-1.5 !text-center !text-[12px] !font-medium !leading-[1.6] !text-[#667085] ${FONT}`}>
+                  <ShieldCheck size={14} className="!shrink-0 !text-[#27427f]/70" aria-hidden="true" />
+                  <ConsentNote className="!m-0 !text-[12px] !font-medium !leading-[1.6] !text-[#667085]" />
+                </div>
               </form>
             </section>
           </motion.div>

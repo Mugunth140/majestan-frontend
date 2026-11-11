@@ -9,6 +9,7 @@ import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { CTA } from "./content";
 import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
 import { Reveal } from "@/components/site/shared/reveal";
+import { ConsentNote } from "@/components/site/legal/consent-note";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -74,6 +75,7 @@ export function LiaisoningCta() {
         phone: normalizeIndianPhone(phone) ?? phone.trim(),
         message: message.trim(),
         source: "liaisoning_cta",
+        whatsappOptIn: true,
         pageUrl: typeof window === "undefined" ? undefined : window.location.href,
       });
       setStatus("success");
@@ -281,6 +283,7 @@ export function LiaisoningCta() {
                         </>
                       )}
                     </button>
+                    <ConsentNote className="m-0! text-[12px]! leading-[1.6]! text-[#667085]!" />
                   </motion.form>
                 )}
               </AnimatePresence>

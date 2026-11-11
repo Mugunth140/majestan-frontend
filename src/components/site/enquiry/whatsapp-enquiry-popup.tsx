@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X, MessageCircle } from "lucide-react";
 import { createEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { parsePseoSlug } from "@/lib/seo-urls";
+import { ConsentNote } from "@/components/site/legal/consent-note";
 
 /* ── Spring vocabulary ─────────────────────────────────────────────────────
    One critically-damped spring for the trigger (response 0.32) and one
@@ -234,12 +234,7 @@ export function WhatsAppPopup({
                   >
                     {status === "submitting" ? "Requesting…" : "Request callback"}
                   </motion.button>
-                  <p className="text-[11px]! text-slate-500! leading-relaxed! font-['Manrope',sans-serif]! text-center!">
-                    By enquiring, you agree to our{" "}
-                    <Link href="/privacy-policy" className="text-[#27427f]! font-semibold! hover:underline!">
-                      Terms &amp; Conditions.
-                    </Link>
-                  </p>
+                  <ConsentNote className="m-0! text-[11px]! text-slate-500! leading-relaxed! font-['Manrope',sans-serif]! text-center!" />
                 </form>
               )}
             </div>

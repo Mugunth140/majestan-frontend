@@ -8,6 +8,7 @@ import { createEnquiry } from "@/lib/api";
 import { normalizeIndianPhone } from "@/lib/validate-phone";
 import { FORM } from "./content";
 import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
+import { ConsentNote } from "@/components/site/legal/consent-note";
 
 type Status = "idle" | "submitting" | "success" | "error";
 type Field = "name" | "email" | "phone" | "message";
@@ -94,6 +95,7 @@ export function ContactEnquiryForm() {
         // without needing a schema change.
         message: subject ? `[${subject}] ${message.trim()}` : message.trim(),
         source: "contact_page",
+        whatsappOptIn: true,
         pageUrl: typeof window === "undefined" ? undefined : window.location.href,
       });
       setStatus("success");
@@ -310,6 +312,7 @@ export function ContactEnquiryForm() {
                 FORM.submitLabel
               )}
             </button>
+            <ConsentNote className="m-0! text-center! text-[12px]! leading-[1.6]! text-[#667085]!" />
           </motion.form>
         )}
       </AnimatePresence>

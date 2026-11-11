@@ -17,6 +17,7 @@ import { CONTACT } from "./contact";
 import type { CtaContent } from "./types";
 import { usePrefersReducedMotion } from "@/components/site/shared/use-prefers-reduced-motion";
 import { Reveal } from "@/components/site/shared/reveal";
+import { ConsentNote } from "@/components/site/legal/consent-note";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -87,6 +88,7 @@ export function ServiceCta({ id, cta: CTA }: { id: string; cta: CtaContent }) {
         phone: normalizeIndianPhone(phone) ?? phone.trim(),
         message: message.trim(),
         source: CTA.source,
+        whatsappOptIn: true,
         pageUrl:
           typeof window === "undefined" ? undefined : window.location.href,
       });
@@ -302,6 +304,7 @@ export function ServiceCta({ id, cta: CTA }: { id: string; cta: CtaContent }) {
                         </>
                       )}
                     </button>
+                    <ConsentNote className="m-0! text-[12px]! leading-[1.6]! text-[#667085]!" />
                   </motion.form>
                 )}
               </AnimatePresence>

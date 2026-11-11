@@ -14,6 +14,10 @@ export const termsSections: LegalSection[] = [
   { id: "enquiries-and-visits", title: "Enquiries and site visits", blocks: [
     { type: "paragraph", text: "When you request information or a site visit, provide contact details that belong to you or that you are authorised to use. Our team may contact you about your request. Visit times depend on confirmation and property access, and may need to be rescheduled." },
   ] },
+  { id: "whatsapp-updates", title: "WhatsApp updates", form: "whatsapp-updates", blocks: [
+    { type: "paragraph", text: "With your consent, Majestan Realty may send you WhatsApp messages about your enquiries and site visits, and updates on properties and projects. We only message numbers whose owners have agreed below or when making an enquiry. Message and data charges from your mobile operator may apply." },
+    { type: "paragraph", text: "You can stop these messages at any time by replying STOP to any of our WhatsApp messages or by writing to info@majestanrealty.com. Stopping WhatsApp updates does not affect an enquiry you have already made." },
+  ] },
   { id: "posting-a-property", title: "Posting a property", blocks: [
     { type: "paragraph", text: "Submit a property only if you own it or have permission to represent it. You are responsible for the accuracy of the description, pricing, photographs and documents you provide, and for having permission to share that material." },
     { type: "paragraph", text: "We may request clarification, correct information with you, or decline or remove listings that are inaccurate, unauthorised, duplicated or otherwise unsuitable for the website. Submitting a listing does not guarantee publication, enquiries or a completed transaction." },

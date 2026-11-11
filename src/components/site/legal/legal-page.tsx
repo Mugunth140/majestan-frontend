@@ -2,10 +2,13 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, ChevronDown, FileText, Mail, ShieldCheck } from "lucide-react";
 import { SeoH1 } from "@/components/seo/core-heading";
 import styles from "./legal-page.module.css";
+import { WhatsappUpdatesForm } from "./whatsapp-updates-form";
 
 export type LegalSection = {
   id: string;
   title: string;
+  /** A form shown at the end of the section. */
+  form?: "whatsapp-updates";
   blocks: ({ type: "paragraph"; text: string } | { type: "list"; items: string[] })[];
 };
 
@@ -62,6 +65,7 @@ export function LegalPage({ kind, introduction, sections }: {
               {section.blocks.map((block, blockIndex) => block.type === "paragraph"
                 ? <p key={blockIndex}><PolicyText text={block.text} /></p>
                 : <ul key={blockIndex}>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>)}
+              {section.form === "whatsapp-updates" && <WhatsappUpdatesForm />}
             </section>)}
             <footer className={styles.articleFooter}><span>Majestan Realty Services Pvt Ltd</span><a href="#legal-top">Back to top ↑</a></footer>
           </article>

@@ -153,6 +153,17 @@ describe("HomeSearch submit targets", () => {
     expect(push).toHaveBeenCalledWith("/properties-for-sale-in-townhall-coimbatore");
   });
 
+  it("opens the top property hit's own page, not its locality listing", async () => {
+    const user = userEvent.setup();
+    stubFetch(() => ({
+      hits: [{ slug: "prestige-lakeside-villa-v012", canonicalUrl: "/for-sale/villas/coimbatore/peelamedu" }],
+    }));
+    renderSearch();
+    await user.type(screen.getByPlaceholderText("Search by area, keyword or property ID..."), "prestige lakeside");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    expect(push).toHaveBeenCalledWith("/prestige-lakeside-villa-v012");
+  });
+
   it("falls back to the Rent listing with the keyword, not apartments for sale", async () => {
     const user = userEvent.setup();
     stubFetch(() => ({ hits: [] }));

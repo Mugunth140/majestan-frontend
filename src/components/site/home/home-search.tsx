@@ -29,6 +29,17 @@ const API_PROPERTY_TYPE: Record<string, string> = {
   coworking: "coworking",
 };
 
+/**
+ * Where a property search hit leads: the property's own page. The index's
+ * canonicalUrl for a property is its locality listing (/for-sale/<type>/
+ * <city>/<locality>), so searching a property by name landed on a list.
+ */
+function propertyHitHref(hit: { slug?: unknown; canonicalUrl?: unknown } | undefined): string | null {
+  if (!hit) return null;
+  if (typeof hit.slug === "string" && /^[a-z0-9][a-z0-9-]*$/i.test(hit.slug)) return `/${hit.slug}`;
+  return typeof hit.canonicalUrl === "string" && hit.canonicalUrl.startsWith("/") ? hit.canonicalUrl : null;
+}
+
 const HOME_SEARCH_PROPERTY_TYPE_MAP: Record<string, PropertyTypeSlug> = {
   apartment:        "apartments",
   villa:            "villas",
@@ -276,9 +287,9 @@ export function HomeSearch({
           }),
         });
         const data = await res.json();
-        const topHit = data?.hits?.[0];
-        if (topHit?.canonicalUrl) {
-          router.push(topHit.canonicalUrl);
+        const href = propertyHitHref(data?.hits?.[0]);
+        if (href) {
+          router.push(href);
           return;
         }
       } catch {

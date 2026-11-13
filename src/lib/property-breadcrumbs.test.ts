@@ -22,6 +22,11 @@ const saleFlat = {
 };
 
 describe("property breadcrumbs", () => {
+  it("uses the all-types hub for types without a listing page", () => {
+    const [transaction] = propertyBreadcrumbItems({ ...saleFlat, propertyType: "other" });
+    expect(transaction.href).toBe("/properties-for-sale-in-coimbatore");
+  });
+
   it("uses the listing type, not the availability status", () => {
     expect(isRentProperty(rentOffice)).toBe(true);
     const rentedOffice = { ...rentOffice, status: "rented" };
@@ -50,7 +55,8 @@ describe("property breadcrumbs", () => {
   it("applies the same rule on subpages", () => {
     const items = propertySectionBreadcrumbItems(rentOffice, "Office Space Photos");
     expect(items[0].label).toBe("For Rent");
-    expect(items[0].href).toMatch(/^\/for-rent\//);
+    // Canonical hub directly, not the legacy /for-rent/… redirect.
+    expect(items[0].href).toBe("/commercial-spaces-for-rent-in-coimbatore");
     expect(items[2].href).toBe("/" + rentOffice.canonicalSlug);
     expect(items[3]).toEqual({ label: "Office Space Photos" });
   });

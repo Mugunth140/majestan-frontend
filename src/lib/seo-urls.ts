@@ -74,7 +74,13 @@ export function decodeRouteSegment(value: string): string {
 }
 
 function fromLocationSlug(value: string): string {
-  return decodeURIComponent(value).replace(/-/g, " ").trim();
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    // Malformed "%" escape: keep the raw text instead of a 500.
+  }
+  return decoded.replace(/-/g, " ").trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -260,19 +266,19 @@ export function parseListingUrl(
   const propertyData = PROPERTY_TYPES[propertyTypeParam as PropertyTypeSlug];
   if (!propertyData) return null;
 
-  const city = fromLocationSlug(locationSegments[0] || "coimbatore");
-  const locality = locationSegments[1]
-    ? fromLocationSlug(locationSegments[1])
-    : undefined;
-  // Extract bedroom from third segment (e.g. "2-bhk")
+  // Old URLs put "N-bhk" right after the city when there was no locality
+  // (/coimbatore/2-bhk), which used to become the "2 bhk" locality → 404.
+  const bhkIndex = locationSegments.findIndex((seg, i) => i > 0 && /^\d+-bhk$/.test(seg));
+  const bedroomSegment = bhkIndex === -1 ? undefined : locationSegments[bhkIndex];
+  const placeSegments = locationSegments.filter((_, i) => i !== bhkIndex);
+  const city = fromLocationSlug(placeSegments[0] || "coimbatore");
+  // A "locality" equal to the city means the whole city, not <city>-<city>.
+  const locality =
+    placeSegments[1] && toLocationSlug(fromLocationSlug(placeSegments[1])) !== toLocationSlug(city)
+      ? fromLocationSlug(placeSegments[1])
+      : undefined;
   let bedrooms: number | undefined;
-  const bedroomSegment = locationSegments[2];
-  if (bedroomSegment) {
-    const match = bedroomSegment.match(/^(\d+)-bhk$/);
-    if (match) {
-      bedrooms = parseInt(match[1], 10);
-    }
-  }
+  if (bedroomSegment) bedrooms = parseInt(bedroomSegment, 10);
   // Join the rest if needed, or just use locality
   const fullLocation = locationSegments.join(" ");
 

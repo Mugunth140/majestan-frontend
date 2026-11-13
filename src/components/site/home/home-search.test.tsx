@@ -8,8 +8,9 @@ import { HomeSearch } from "./home-search";
 // in document.body and make queries ambiguous.
 afterEach(cleanup);
 
+const push = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push }),
 }));
 
 // The provider is not exported from LocationContext, so stub the hook instead.
@@ -34,7 +35,7 @@ describe("HomeSearch responsive search bar", () => {
   it("keeps the search input and an icon-only submit button", () => {
     const { container } = renderSearch();
 
-    const input = screen.getByPlaceholderText("Search by area, landmark or keyword...");
+    const input = screen.getByPlaceholderText("Search by area, keyword or property ID...");
     expect(input).toBeDefined();
 
     // Submit button is always reachable by its accessible name, on both layouts.
@@ -115,4 +116,50 @@ describe("HomeSearch responsive search bar", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
+});
+
+describe("HomeSearch submit targets", () => {
+  afterEach(() => {
+    push.mockReset();
+    vi.unstubAllGlobals();
+  });
+
+  const stubFetch = (handler: (url: string) => unknown, status = 200) => {
+    const fetchMock = vi.fn(async (url: string) => ({
+      ok: status < 400,
+      status,
+      json: async () => handler(url),
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  };
+
+  it("opens a property directly from its ID", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubFetch(() => ({ url: "/2bhk-apartment-in-peelamedu-ap8471" }));
+    renderSearch();
+    await user.type(screen.getByPlaceholderText("Search by area, keyword or property ID..."), "ap 8471");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/property-id?q=ap%208471");
+    expect(push).toHaveBeenCalledWith("/2bhk-apartment-in-peelamedu-ap8471");
+  });
+
+  it("searches a locality on its own instead of erroring", async () => {
+    const user = userEvent.setup();
+    renderSearch();
+    await user.click(screen.getByRole("button", { name: /locality/i }));
+    await user.click(await screen.findByRole("option", { name: "Townhall" }).catch(() => screen.getByRole("button", { name: "Townhall" })));
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    expect(push).toHaveBeenCalledWith("/properties-for-sale-in-townhall-coimbatore");
+  });
+
+  it("falls back to the Rent listing with the keyword, not apartments for sale", async () => {
+    const user = userEvent.setup();
+    stubFetch(() => ({ hits: [] }));
+    renderSearch();
+    await user.click(screen.getByRole("button", { name: "Rent" }));
+    await user.type(screen.getByPlaceholderText("Search by area, keyword or property ID..."), "near school");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    expect(push).toHaveBeenCalledWith("/properties-for-rent-in-coimbatore?keyword=near%20school");
+  });
 });

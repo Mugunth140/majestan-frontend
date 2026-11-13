@@ -11,11 +11,24 @@ import {
   buildPseoSlug,
   type PropertyTypeSlug,
 } from "@/lib/seo-urls";
+import { propertyIdCandidates } from "@/lib/property-id";
 
 import styles from "./home-search.module.css";
 import { POST_PROPERTY_BUTTON, PostPropertyHover } from "@/components/site/shared/brand-cta";
 
 // Map home-search form property type values (API/form slugs) to PSEO URL slugs
+// Form value → DB property type, for the search API's propertyType filter.
+const API_PROPERTY_TYPE: Record<string, string> = {
+  apartment: "apartment",
+  villa: "villa",
+  independenthouse: "individual_portion",
+  plot: "plot",
+  commercialspace: "commercial",
+  industrialspace: "industrial",
+  farmlands: "farmland",
+  coworking: "coworking",
+};
+
 const HOME_SEARCH_PROPERTY_TYPE_MAP: Record<string, PropertyTypeSlug> = {
   apartment:        "apartments",
   villa:            "villas",
@@ -36,6 +49,7 @@ const propertyTypeOptions = [
   ["commercialspace", "Commercial Space"],
   ["industrialspace", "Industrial"],
   ["farmlands", "Farmlands"],
+  ["coworking", "Co-Working"],
 ] as const;
 
 // Project-mode type options — API values the /projects page understands.
@@ -111,6 +125,15 @@ export function HomeSearch({
     setPropertyType("");
     setError("");
   };
+
+  // A locality belongs to one city: drop it when the navbar city changes,
+  // or the next search builds "<old-locality>-<new-city>" (a 404).
+  const [localityCity, setLocalityCity] = useState(selectedCity);
+  if (localityCity !== selectedCity) {
+    setLocalityCity(selectedCity);
+    setLocality("");
+    setLocalityQuery("");
+  }
 
   const filteredSublocations = useMemo(() => {
     const citySublocations = sublocations.filter(
@@ -206,16 +229,34 @@ export function HomeSearch({
       return;
     }
 
+    const city = selectedCity || "coimbatore";
+    const listingPath = (typeSlug: PropertyTypeSlug) =>
+      `/${buildPseoSlug(listingType, typeSlug, city, locality || undefined)}`;
+
+    // Case 0: Property ID ("AP8471", "#ap 8471", "ID: V012") — open that
+    // property directly. Anything that doesn't resolve falls through to the
+    // normal search below.
+    if (propertyIdCandidates(searchQuery).length > 0) {
+      setIsSearching(true);
+      try {
+        const res = await fetch(`/api/property-id?q=${encodeURIComponent(searchQuery.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data?.url === "string" && data.url.startsWith("/")) {
+            router.push(data.url);
+            return;
+          }
+        }
+      } catch {
+        // Fall through to the regular search
+      } finally {
+        setIsSearching(false);
+      }
+    }
+
     // Case 1: Property type selected — build canonical PSEO URL from Row 1 filters
-    if (propertyType) {
-      const ptSlug = HOME_SEARCH_PROPERTY_TYPE_MAP[propertyType] || "apartments";
-      const pseoSlug = buildPseoSlug(
-        listingType,
-        ptSlug,
-        selectedCity.toLowerCase(),
-        locality || undefined
-      );
-      router.push(`/${pseoSlug}`);
+    if (propertyType && !searchQuery.trim()) {
+      router.push(listingPath(HOME_SEARCH_PROPERTY_TYPE_MAP[propertyType] || "properties"));
       return;
     }
 
@@ -227,10 +268,11 @@ export function HomeSearch({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            q: searchQuery,
+            q: searchQuery.trim(),
             city: selectedCity,
             listingType: listingType === "Sell" ? "Sell" : "Rent",
             locality: locality || undefined,
+            propertyType: propertyType ? API_PROPERTY_TYPE[propertyType] : undefined,
           }),
         });
         const data = await res.json();
@@ -244,14 +286,23 @@ export function HomeSearch({
       } finally {
         setIsSearching(false);
       }
-      // Fallback: go to generic listing page with keyword (city-level PSEO URL)
-      const fallbackSlug = buildPseoSlug("Sell", "apartments", selectedCity.toLowerCase() || "coimbatore");
-      router.push(`/${fallbackSlug}?keyword=${encodeURIComponent(searchQuery)}`);
+      // Fallback: the listing page for what was picked (Buy/Rent, type,
+      // locality), filtered by the keyword. Was always apartments-for-sale.
+      const fallbackPath = listingPath(
+        propertyType ? HOME_SEARCH_PROPERTY_TYPE_MAP[propertyType] || "properties" : "properties",
+      );
+      router.push(`${fallbackPath}?keyword=${encodeURIComponent(searchQuery.trim())}`);
+      return;
+    }
+
+    // Case 3: Only a locality — every property there.
+    if (locality) {
+      router.push(listingPath("properties"));
       return;
     }
 
     // Nothing selected or typed
-    setError("Please select a property type or enter a search term.");
+    setError("Please select a property type, a locality or enter a search term.");
   }
 
   return (
@@ -465,7 +516,7 @@ export function HomeSearch({
             <Search className="hidden! md:block! text-gray-400! shrink-0!" size={22} strokeWidth={2} />
             <input
               type="text"
-              placeholder={isProjectMode ? "Search by Project or Builder..." : "Search by area, landmark or keyword..."}
+              placeholder={isProjectMode ? "Search by Project or Builder..." : "Search by area, keyword or property ID..."}
               className="w-full! min-w-0! outline-none! bg-transparent! text-gray-800! placeholder-gray-400! font-medium! text-[16px]! border-none! p-0! m-0! shadow-none! focus:ring-0! truncate!"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

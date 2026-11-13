@@ -25,25 +25,29 @@ function typeEntry(propertyType: string) {
   );
 }
 
+/**
+ * The "<type>-for-sale-in-<city>" listing hub for a property. Unknown types
+ * ("other") use the all-types page rather than pretending to be apartments.
+ */
+function listingHubs(property: BreadcrumbProperty) {
+  const listingType = isRentProperty(property) ? "Rent" : "Sell";
+  const city = property.city?.trim() || "coimbatore";
+  const typeSlug = (typeEntry(property.propertyType)?.[0] || "properties") as PropertyTypeSlug;
+  return { type: `/${buildPseoSlug(listingType, typeSlug, city)}` };
+}
+
 export function propertyBreadcrumbItems(
   property: BreadcrumbProperty,
 ): PropertyBreadcrumbItem[] {
   const rent = isRentProperty(property);
   const entry = typeEntry(property.propertyType);
-  const ptSlug = (entry?.[0] || "apartments") as PropertyTypeSlug;
   const typeLabel = entry?.[1].label || property.propertyType;
-
-  // Canonical PSEO hub for the parent breadcrumb
-  const parentSlug = buildPseoSlug(
-    rent ? "Rent" : "Sell",
-    ptSlug,
-    property.city.toLowerCase(),
-  );
+  const hubs = listingHubs(property);
 
   return [
-    { label: rent ? "For Rent" : "For Sale", href: `/${parentSlug}` },
-    { label: typeLabel, href: `/${parentSlug}` },
-    { label: property.city, href: `/${parentSlug}` },
+    { label: rent ? "For Rent" : "For Sale", href: hubs.type },
+    { label: typeLabel, href: hubs.type },
+    { label: property.city, href: hubs.type },
     { label: property.title },
   ];
 }
@@ -55,11 +59,13 @@ export function propertySectionBreadcrumbItems(
   const rent = isRentProperty(property);
   const entry = typeEntry(property.propertyType);
   const typeLabel = entry?.[1].label || property.propertyType;
-  const hub = `/${rent ? "for-rent" : "for-sale"}/${entry?.[0] || property.propertyType}/${property.city.toLowerCase()}`;
+  // Was the legacy /for-sale/<type>/<city> URL: an extra redirect, and a
+  // homepage bounce for types without a listing slug ("other").
+  const hubs = listingHubs(property);
 
   return [
-    { label: rent ? "For Rent" : "For Sale", href: hub },
-    { label: typeLabel, href: hub },
+    { label: rent ? "For Rent" : "For Sale", href: hubs.type },
+    { label: typeLabel, href: hubs.type },
     { label: property.title, href: `/${property.canonicalSlug}` },
     { label: sectionLabel },
   ];

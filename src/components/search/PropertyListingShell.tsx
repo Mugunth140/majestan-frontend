@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ListingShell } from "./ListingPage";
 import { createPropertyAdapter } from "./property-listing-adapter";
@@ -56,17 +56,21 @@ export function PropertyListingShell({ adapterInit, initialFilters, initialData 
 
   // A navbar pick fires "majestan-location-changed" (adoptCity does not), so
   // a stored city can never bounce a visitor off a shared link.
-  const latest = useRef({ adapterInit, search: searchParams.toString() });
-  latest.current = { adapterInit, search: searchParams.toString() };
+  const search = searchParams.toString();
+  const { initialListingType, initialPropertyType, initialCity, initialBedrooms } = adapterInit;
   useEffect(() => {
     const onCityChange = (event: Event) => {
       const nextCity = (event as CustomEvent<string>).detail;
-      const href = cityChangeHref(latest.current.adapterInit, nextCity, latest.current.search);
+      const href = cityChangeHref(
+        { initialListingType, initialPropertyType, initialCity, initialBedrooms },
+        nextCity,
+        search,
+      );
       if (href) router.push(href);
     };
     window.addEventListener("majestan-location-changed", onCityChange);
     return () => window.removeEventListener("majestan-location-changed", onCityChange);
-  }, [router]);
+  }, [router, search, initialListingType, initialPropertyType, initialCity, initialBedrooms]);
 
   return <ListingShell adapter={adapter} initialFilters={initialFilters} initialData={initialData} />;
 }

@@ -18,6 +18,7 @@ type Props = {
     propertyType: string;
     location: string[];
   }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 // measurement ("...cannot have a negative time stamp" TypeError).
 export const dynamic = "force-dynamic";
 
-export default async function ForSaleRedirect({ params }: Props) {
+export default async function ForSaleRedirect({ params, searchParams }: Props) {
   const p = await params;
   const parsed = parseListingUrl("for-sale", p.propertyType, p.location);
 
@@ -46,5 +47,11 @@ export default async function ForSaleRedirect({ params }: Props) {
     parsed.bedrooms
   );
 
-  permanentRedirect(`/${newSlug}`);
+  // Keep filters (?minPrice=…, ?sort=…) across the redirect.
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) {
+    for (const v of Array.isArray(value) ? value : value != null ? [value] : []) query.append(key, v);
+  }
+  const qs = query.toString();
+  permanentRedirect(qs ? `/${newSlug}?${qs}` : `/${newSlug}`);
 }

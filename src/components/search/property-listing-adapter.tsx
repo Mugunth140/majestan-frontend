@@ -25,6 +25,7 @@ import { PropertyEnquiryActions, type EnquiryPropertyRef } from "@/components/si
 import {
   PROPERTY_TYPES,
   buildPseoSlug,
+  toLocationSlug,
   BEDROOM_PROPERTY_TYPE_SLUGS,
   type PropertyTypeSlug,
 } from "@/lib/seo-urls";
@@ -734,8 +735,25 @@ export function createPropertyAdapter(init: {
   initialLocality?: string;
   initialBedrooms?: number;
 }): ListingAdapter<FilterValues, PropertySearchItem> {
+  // Whole-city is always "" — the URL city ("coimbatore"), the context city
+  // ("Coimbatore") and "" used to coexist, and the case-sensitive compare
+  // turned "All of Coimbatore" into a /…-in-coimbatore-coimbatore 404.
+  const citySlug = toLocationSlug(init.initialCity);
+  const normalizeLocation = (location: string | undefined): string =>
+    !location || toLocationSlug(location) === citySlug ? "" : location;
+  const cityLabel = init.initialCity
+    .split(/[-\s]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+  const locationLabelOf = (location: string): string => {
+    const loc = normalizeLocation(location);
+    return loc
+      ? loc.replace(/-/g, " ").split(" ").filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+      : cityLabel;
+  };
   const resetFilters: FilterValues = {
-    keyword: "", propertyType: init.initialPropertyType, listingType: init.initialListingType, location: init.initialCity,
+    keyword: "", propertyType: init.initialPropertyType, listingType: init.initialListingType, location: "",
     minPrice: "", maxPrice: "", minArea: "", maxArea: "", bedrooms: "", facing: "", furnishing: "", propertyAge: "", propertyCondition: ""
   };
 
@@ -750,7 +768,7 @@ export function createPropertyAdapter(init: {
         city: init.initialCity,
         listingType: filters.listingType,
         propertyType: filters.propertyType,
-        location: filters.location,
+        location: normalizeLocation(filters.location) || undefined,
         propertyName: filters.keyword,
         minPrice: filters.minPrice,
         maxPrice: filters.maxPrice,
@@ -847,12 +865,7 @@ export function createPropertyAdapter(init: {
     buildTitle: (filters) => {
       const propertyTypeLabel = Object.values(PROPERTY_TYPES).find(p => p.apiValue === filters.propertyType)?.label || filters.propertyType;
       const listingTypeLabel = filters.listingType === "Rent" ? "Rent" : "Sale";
-      const rawLocation = filters.location ? filters.location.replace(/-/g, ' ') : "Coimbatore";
-      const locationLabel = rawLocation
-        .split(" ")
-        .filter(Boolean)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
+      const locationLabel = locationLabelOf(filters.location);
       return `${propertyTypeLabel} in ${locationLabel} for ${listingTypeLabel}`;
     },
 
@@ -861,9 +874,7 @@ export function createPropertyAdapter(init: {
         Object.values(PROPERTY_TYPES).find((p) => p.apiValue === filters.propertyType)?.label ||
         filters.propertyType;
       const listingTypeLabel = filters.listingType === "Rent" ? "For Rent" : "For Sale";
-      const locationLabel = filters.location
-        ? filters.location.replace(/-/g, " ")
-        : init.initialCity;
+      const locationLabel = locationLabelOf(filters.location);
 
       // Find the URL slug for the property type (e.g. "apartment" → "apartments")
       const ptSlug =
@@ -885,12 +896,12 @@ export function createPropertyAdapter(init: {
       ];
     },
 
-    mapCity: (filters) => filters.location || init.initialCity,
+    mapCity: (filters) => normalizeLocation(filters.location) || init.initialCity,
     mapLocality: () => init.initialLocality,
 
     emptyTitle: "No properties found",
     emptyHint: (filters) => {
-      const locationLabel = filters.location ? filters.location.replace(/-/g, ' ') : "Coimbatore";
+      const locationLabel = locationLabelOf(filters.location);
       return `We couldn't find any properties matching your current criteria in ${locationLabel}. Try adjusting your filters or exploring a different area.`;
     },
 
@@ -909,21 +920,19 @@ export function createPropertyAdapter(init: {
 
       // Check if any PSEO-defining axis changed (listingType, propertyType, or
       // location). If so, navigate to the new canonical PSEO URL.
-      const currentLocality = init.initialLocality || "";
-      const filterLocationIsLocality = filters.location && filters.location !== init.initialCity;
+      const newLocality = normalizeLocation(filters.location);
+      const currentLocality = normalizeLocation(init.initialLocality);
 
       if (
         filters.listingType !== init.initialListingType ||
         filters.propertyType !== init.initialPropertyType ||
-        filters.location !== (init.initialLocality || init.initialCity)
+        toLocationSlug(newLocality) !== toLocationSlug(currentLocality)
       ) {
         // Find the URL slug for the property type
         const ptSlug =
           (Object.entries(PROPERTY_TYPES).find(
             ([, data]) => data.apiValue === filters.propertyType
           )?.[0] as PropertyTypeSlug | undefined) || "apartments";
-
-        const newLocality = filterLocationIsLocality ? filters.location : undefined;
 
         // Only include bedrooms in the URL if this is a BHK-supporting type
         // and bedrooms is set. Bedrooms as a user filter appends as a query param.
@@ -955,7 +964,7 @@ export function createPropertyAdapter(init: {
       keyword: searchParams.get("keyword") || "",
       propertyType: init.initialPropertyType,
       listingType: init.initialListingType,
-      location: searchParams.get("location") || init.initialLocality || init.initialCity, // Use param if present
+      location: normalizeLocation(searchParams.get("location") || init.initialLocality),
       minPrice: searchParams.get("minPrice") || "",
       maxPrice: searchParams.get("maxPrice") || "",
       minArea: searchParams.get("minArea") || "",

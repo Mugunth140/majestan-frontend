@@ -1,11 +1,17 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useCallback, useContext, useState, ReactNode, useEffect } from "react";
 import { getCities, type City } from "@/lib/api";
 
 interface LocationContextType {
   location: string;
   setLocation: (city: string) => void;
+  /**
+   * Adopt a city the page itself is about (e.g. from a listing URL) without
+   * firing "majestan-location-changed" — that event means the USER picked a
+   * city, and listing pages navigate on it.
+   */
+  adoptCity: (city: string) => void;
   cities: City[];
   isLoadingCities: boolean;
   isLocating: boolean;
@@ -76,6 +82,18 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     } catch {}
   };
 
+  const adoptCity = useCallback((city: string) => {
+    const configuredCity = cities.find(
+      (item) => item.city.toLowerCase() === city.trim().toLowerCase(),
+    );
+    if (!configuredCity) return;
+    setLocation(configuredCity.city);
+    try {
+      localStorage.setItem("majestan_city", configuredCity.city);
+      localStorage.setItem("majestan-location", configuredCity.city);
+    } catch {}
+  }, [cities]);
+
   const updateLocation = async () => {
     setIsLocating(true);
     
@@ -142,6 +160,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       value={{
         location,
         setLocation: handleSetLocation,
+        adoptCity,
         cities,
         isLoadingCities,
         isLocating,

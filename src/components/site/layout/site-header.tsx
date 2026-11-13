@@ -29,7 +29,7 @@ import { useUserAuthStore } from "@/store/userAuthStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { UserAuthModal } from "@/components/site/auth/user-auth-modal";
 import { useLocationContext } from "@/contexts/LocationContext";
-import { toLocationSlug } from "@/lib/seo-urls";
+import { buildPseoSlug, toLocationSlug, type PropertyTypeSlug } from "@/lib/seo-urls";
 import { adsForAudience, resolveAdHref } from "@/lib/ads";
 import { useAds } from "@/components/site/ads/use-ads";
 import { useLockBodyScroll } from "@/components/site/shared/use-lock-body-scroll";
@@ -245,26 +245,28 @@ export function SiteHeader(): React.JSX.Element {
   };
 
   const getLinks = (cat: Category): MegaMenuLink[] => {
-    const citySlug = toLocationSlug(location);
+    // Link straight to the canonical PSEO URL (no /for-sale/… 301 hop).
+    const pseoHref = (listingType: "Sell" | "Rent", type: PropertyTypeSlug) =>
+      `/${buildPseoSlug(listingType, type, location || "coimbatore")}`;
     switch (cat) {
       case "Buy":
         return [
-          { text: "Apartments", href: `/for-sale/apartments/${citySlug}`, icon: <Building size={18} /> },
-          { text: "Villas", href: `/for-sale/villas/${citySlug}`, icon: <House size={18} /> },
-          { text: "Independent Houses", href: `/for-sale/independent-houses/${citySlug}`, icon: <House size={18} /> },
-          { text: "Plots", href: `/for-sale/plots/${citySlug}`, icon: <Map size={18} /> },
-          { text: "Farmlands", href: `/for-sale/farmlands/${citySlug}`, icon: <Palmtree size={18} /> },
-          { text: "Commercial Spaces", href: `/for-sale/commercial-spaces/${citySlug}`, icon: <Store size={18} /> },
-          { text: "Industrials", href: `/for-sale/industrial-spaces/${citySlug}`, icon: <Factory size={18} /> },
+          { text: "Apartments", href: pseoHref("Sell", "apartments"), icon: <Building size={18} /> },
+          { text: "Villas", href: pseoHref("Sell", "villas"), icon: <House size={18} /> },
+          { text: "Independent Houses", href: pseoHref("Sell", "independent-houses"), icon: <House size={18} /> },
+          { text: "Plots", href: pseoHref("Sell", "plots"), icon: <Map size={18} /> },
+          { text: "Farmlands", href: pseoHref("Sell", "farmlands"), icon: <Palmtree size={18} /> },
+          { text: "Commercial Spaces", href: pseoHref("Sell", "commercial-spaces"), icon: <Store size={18} /> },
+          { text: "Industrials", href: pseoHref("Sell", "industrial-spaces"), icon: <Factory size={18} /> },
         ];
       case "Rent":
         return [
-          { text: "Commercial", href: `/for-rent/commercial-spaces/${citySlug}`, icon: <Store size={18} /> },
-          { text: "Industrial", href: `/for-rent/industrial-spaces/${citySlug}`, icon: <Factory size={18} /> },
-          { text: "Apartment", href: `/for-rent/apartments/${citySlug}`, icon: <Building size={18} /> },
-          { text: "Villa", href: `/for-rent/villas/${citySlug}`, icon: <House size={18} /> },
-          { text: "Independent House", href: `/for-rent/independent-houses/${citySlug}`, icon: <House size={18} /> },
-          { text: "Co-Working", href: `/for-rent/coworking/${citySlug}`, icon: <Laptop size={18} /> },
+          { text: "Commercial", href: pseoHref("Rent", "commercial-spaces"), icon: <Store size={18} /> },
+          { text: "Industrial", href: pseoHref("Rent", "industrial-spaces"), icon: <Factory size={18} /> },
+          { text: "Apartment", href: pseoHref("Rent", "apartments"), icon: <Building size={18} /> },
+          { text: "Villa", href: pseoHref("Rent", "villas"), icon: <House size={18} /> },
+          { text: "Independent House", href: pseoHref("Rent", "independent-houses"), icon: <House size={18} /> },
+          { text: "Co-Working", href: pseoHref("Rent", "coworking"), icon: <Laptop size={18} /> },
         ];
       case "Services":
         return SERVICE_LINKS;

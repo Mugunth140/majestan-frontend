@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Search, MapPin, SlidersHorizontal, ChevronDown } from "lucide-react";
-import { PROPERTY_TYPES } from "@/lib/seo-urls";
+import { PROPERTY_TYPES, toLocationSlug } from "@/lib/seo-urls";
 import { CustomSelect } from "./CustomSelect";
 import { getHomePageData, type Sublocation } from "@/lib/api";
 import { useLocationContext } from "@/contexts/LocationContext";
@@ -137,7 +137,9 @@ export function PropertySearchFilters({
     { label: "₹2Cr+", min: "20000000", max: "" },
   ];
 
-  const isAll = values.location.toLowerCase() === currentCity.toLowerCase() || values.location === "";
+  // "" means the whole city. A location equal to the city name (any casing)
+  // is treated the same so it never becomes a "<city>-<city>" sub-locality URL.
+  const isAll = !values.location || toLocationSlug(values.location) === toLocationSlug(currentCity);
   const locationSummary = isAll
     ? `All of ${currentCity}`
     : (citySublocations.find(s => s.sublocation.toLowerCase() === values.location.toLowerCase())?.sublocation ?? values.location);
@@ -230,7 +232,7 @@ export function PropertySearchFilters({
               })),
             ]}
             onChange={(newVal) => {
-              onChange({ ...values, ...textFields, location: newVal || currentCity });
+              onChange({ ...values, ...textFields, location: newVal });
             }}
             ariaLabel="Location"
             searchable

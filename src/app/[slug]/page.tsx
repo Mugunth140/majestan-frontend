@@ -736,7 +736,14 @@ async function PseoListingSection({
     const propertyCondition = pseo.listingType === "Sell" && ["New", "Resale"].includes(conditionParam) ? conditionParam : "";
     const qSort = qsFirst(query.sort);
     const qPage = listingPageNumber(query.page);
-    const seedLocation = qLocation || canonicalSubloc;
+    // "" = whole city; must match the client adapter's normalizeLocation so
+    // the server seed is reused instead of refetched.
+    const rawSeedLocation = qLocation || canonicalSubloc;
+    const seedLocation =
+      rawSeedLocation &&
+      toLocationSlug(rawSeedLocation) !== toLocationSlug(pseo.city || "coimbatore")
+        ? rawSeedLocation
+        : undefined;
     const seedBedrooms =
       qBedrooms || (pseo.bedrooms != null ? String(pseo.bedrooms) : "");
 

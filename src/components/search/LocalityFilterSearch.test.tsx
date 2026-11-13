@@ -59,7 +59,7 @@ describe.each(["properties", "projects"])("Sub-locality search for %s", (kind) =
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole("button", { name: "All of Coimbatore" }));
     expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining(
-      kind === "properties" ? { location: "Coimbatore" } : { city: "Coimbatore" },
+      kind === "properties" ? { location: "" } : { city: "Coimbatore" },
     ));
   });
 });

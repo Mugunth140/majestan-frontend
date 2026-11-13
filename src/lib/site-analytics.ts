@@ -12,7 +12,6 @@ export type AnalyticsEventName =
   | "enquiry_submitted"
   | "site_visit_requested"
   | "owner_submission"
-  | "registration_completed"
   | "javascript_error"
   | "unhandled_rejection"
   | "api_error";
@@ -56,7 +55,6 @@ const CONVERSIONS = new Set([
   "enquiry_submitted",
   "site_visit_requested",
   "owner_submission",
-  "registration_completed",
 ]);
 const ERRORS = new Set([
   "javascript_error",

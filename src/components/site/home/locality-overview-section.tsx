@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
 import type { Sublocation } from "@/lib/api";
-import { toLocationSlug } from "@/lib/seo-urls";
+import { buildPseoSlug } from "@/lib/seo-urls";
+
+/** "Medavakkam, Chennai" / "Electronic City," → the bare area name. */
+const areaName = (loc: Sublocation) =>
+  loc.sublocation
+    .trim()
+    .replace(/[,\s]+$/, "")
+    .replace(new RegExp(`\\s*,\\s*${loc.city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"), "")
+    .trim() || loc.sublocation;
 
 type Props = {
   items: Sublocation[];
@@ -49,7 +57,7 @@ export function LocalityOverviewSection({ items }: Props) {
               </p>
               <div className="w-full! h-px! bg-slate-200! my-6! transition-colors! duration-500! group-hover:bg-slate-100!"></div>
               <Link
-                href={`/for-sale/apartments/${toLocationSlug(loc.city)}`}
+                href={`/${buildPseoSlug("Sell", "properties", loc.city, areaName(loc))}`}
                 className="flex! items-center! gap-2! text-sm! font-normal! text-slate-900! hover:text-[#27427f]! transition-colors! duration-300! uppercase! tracking-wide! no-underline!"
               >
                 <span>Properties in {loc.sublocation}</span>

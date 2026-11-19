@@ -43,35 +43,51 @@ export async function proxy(request: NextRequest) {
     url.pathname = path.toLowerCase();
     return NextResponse.redirect(url, 308);
   }
+  // The old site's "/overview" tab is the listing page itself.
+  if (/^\/[^/]+-[a-z]{1,6}\d+\/overview$/i.test(path)) {
+    const routing = await routingTable();
+    const root = path.slice(0, -"/overview".length).toLowerCase();
+    const destination = routing?.redirects?.find((rule: { source: string }) => rule.source === root)?.destination
+      || (routing?.inventory_paths?.includes(root) ? root : null);
+    // Unknown listings stay a plain 404 rather than a redirect to one.
+    if (destination) {
+      const url = new URL(destination, request.url);
+      url.search = request.nextUrl.search;
+      return NextResponse.redirect(url, 301);
+    }
+  }
   if (/^\/[^/]+-[a-z]{1,6}\d+\/(amenities|floor-plans?|locality|photos|videos|price|specifications)$/i.test(path)) {
     // Resolve configured alias redirects before rendering. Redirect exceptions raised
     // from both metadata and a cached page can otherwise duplicate Location headers.
-    try {
-      const result = await fetch(SEO_API_BASE + '/seo-engine/routing', {
-        headers: process.env.INTERNAL_API_KEY ? { 'x-internal-key': process.env.INTERNAL_API_KEY } : {},
-        signal: AbortSignal.timeout(4000),
-      });
-      if (result.ok) {
-        const payload = await result.json(), routing = payload.data ?? payload;
+    {
+      const routing = await routingTable();
+      if (routing) {
         const root = path.slice(0, path.lastIndexOf('/'));
         const suffix = path.slice(path.lastIndexOf('/'));
         const direct = routing.redirects?.find((rule: { source: string }) => rule.source === path);
         const parent = routing.redirects?.find((rule: { source: string }) => rule.source === root);
         if (direct || parent) {
-          const destination = direct?.destination || parent.destination + (routing.inventory_paths?.includes(parent.destination) ? suffix : '');
+          const destination = direct?.destination || parent!.destination + (routing.inventory_paths?.includes(parent!.destination) ? suffix : '');
           const url = new URL(destination, request.url);
           url.search = request.nextUrl.search;
           return NextResponse.redirect(url, 301);
         }
       }
-    } catch { /* The detail renderer still resolves redirects if routing is unavailable. */ }
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/detail-section" + path;
     return NextResponse.rewrite(url);
   }
-  // Code-suffixed inventory URLs resolve redirects and off-market policies in
-  // the detail renderer itself. Avoid a second routing-table API round trip.
+  // Code-suffixed inventory URLs: answer moved URLs here. A redirect thrown by the
+  // cached detail renderer can be replayed from the ISR cache as a 308 with no
+  // Location header, which Search Console reports as a broken redirect.
   if (/^\/[^/]+-[a-z]{1,6}\d+$/i.test(path)) {
+    const moved = (await routingTable())?.redirects?.find((rule: { source: string }) => rule.source === path);
+    if (moved) {
+      const url = new URL(moved.destination, request.url);
+      url.search = request.nextUrl.search;
+      return NextResponse.redirect(url, 301);
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/detail-render" + path;
     return NextResponse.rewrite(url);
@@ -145,6 +161,36 @@ export async function proxy(request: NextRequest) {
   }
   return NextResponse.next();
 }
+// The routing table changes only when SEO or redirects are saved; a short
+// in-process copy keeps detail pages to one backend call per 30 seconds.
+type Routing = {
+  redirects?: { source: string; destination: string }[];
+  inventory_paths?: string[];
+  paths?: string[];
+};
+let routingCopy: { expires: number; value: Routing } | undefined;
+/** Tests only: forget the in-process routing copy. */
+export function resetRoutingTable() {
+  routingCopy = undefined;
+}
+async function routingTable(): Promise<Routing | null> {
+  if (routingCopy && routingCopy.expires > Date.now()) return routingCopy.value;
+  try {
+    const result = await fetch(SEO_API_BASE + "/seo-engine/routing", {
+      cache: "no-store",
+      headers: process.env.INTERNAL_API_KEY ? { "x-internal-key": process.env.INTERNAL_API_KEY } : {},
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!result.ok) return routingCopy?.value ?? null;
+    const payload = await result.json();
+    routingCopy = { expires: Date.now() + 30_000, value: payload.data ?? payload };
+    return routingCopy.value;
+  } catch {
+    // The detail renderer still resolves redirects if routing is unavailable.
+    return routingCopy?.value ?? null;
+  }
+}
+
 export const config = {
   matcher: [
     "/site-api/:path*",

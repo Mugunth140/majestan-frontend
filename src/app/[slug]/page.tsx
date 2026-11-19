@@ -93,14 +93,21 @@ async function resolveSublocName(
     )
       ? data
       : data.data || data.items || [];
-    const match = list.find(
-      (s) =>
-        toLocationSlug(s.city) === toLocationSlug(city) &&
-        // Compare as slugs so multi-word names match: "sai-baba-colony"
-        // ↔ "Sai Baba Colony".
-        toLocationSlug(s.sublocation) === toLocationSlug(slug),
-    );
-    return match?.sublocation ?? slug;
+    // Registry names can carry the city or a stray comma ("Medavakkam, Chennai",
+    // "Electronic City,"); listing URLs and headings use the bare area.
+    const bare = (name: string) => {
+      const cleaned = name.trim().replace(/[,\s]+$/, "");
+      const suffix = `, ${city}`.toLowerCase();
+      return cleaned.toLowerCase().endsWith(suffix)
+        ? cleaned.slice(0, -suffix.length).trim() || cleaned
+        : cleaned;
+    };
+    const inCity = list.filter((s) => toLocationSlug(s.city) === toLocationSlug(city));
+    // Compare as slugs so multi-word names match: "sai-baba-colony" ↔ "Sai Baba Colony".
+    const match =
+      inCity.find((s) => toLocationSlug(bare(s.sublocation)) === toLocationSlug(slug)) ??
+      inCity.find((s) => toLocationSlug(s.sublocation) === toLocationSlug(slug));
+    return match ? bare(match.sublocation) : slug;
   } catch {
     return slug;
   }

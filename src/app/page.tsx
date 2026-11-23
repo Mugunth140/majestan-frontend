@@ -26,6 +26,16 @@ const emptyHomeData: HomePageData = {
   googleReviews: null,
 };
 
+// ISR: the homepage is served from cache and rebuilt in the background at most
+// once a minute (and on demand: the CRM's /api/revalidate calls revalidatePath("/")
+// on every listing change). Rendering it per request cost ~1 s of TTFB (LCP).
+export const revalidate = 60;
+
+// The build has no API access, so it prerenders the empty fallback (replaced
+// within a minute). At runtime a failed /home fetch throws instead, which keeps
+// the last good page in the cache rather than caching an empty homepage.
+const isBuild = process.env.NEXT_PHASE === "phase-production-build";
+
 export async function generateMetadata():Promise<Metadata>{return seoMetadata(await getSeo('/'),defaultMetadata);}
 
 export default async function Page() {
@@ -33,14 +43,15 @@ export default async function Page() {
 
   try {
     homeData = await getHomePageData();
-  } catch {
+  } catch (error) {
+    if (!isBuild) throw error;
     homeData = emptyHomeData;
   }
 
   const [banners, offers, articles] = await Promise.all([
     getAdsBanners("hero").catch(() => []),
     getAdsBanners("offers").catch(() => []),
-    blogFetch<{items: Post[]}>("?limit=8").then(result => result.items).catch(() => []),
+    blogFetch<{items: Post[]}>("?limit=8", 300).then(result => result.items).catch(() => []),
   ]);
 
   return <CoreSeoBoundary path="/"><HomePage data={homeData} banners={banners} offers={offers} articles={articles} /></CoreSeoBoundary>;

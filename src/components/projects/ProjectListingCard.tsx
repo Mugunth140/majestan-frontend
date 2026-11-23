@@ -101,7 +101,7 @@ function getConditionBadge(possessionStatus: string | null | undefined): string 
   return null;
 }
 
-export function ProjectListingCard({ item }: { item: ProjectListItem }) {
+export function ProjectListingCard({ item, priority = false }: { item: ProjectListItem; priority?: boolean }) {
   const isRent = item.listingType === "Rent";
   const router = useRouter();
   const detailPath = `/${item.canonicalSlug}`;
@@ -340,6 +340,7 @@ export function ProjectListingCard({ item }: { item: ProjectListItem }) {
           placeholderSrc={placeholderUrl}
           alt={item.name || "Project"}
           className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+          eager={priority}
         />
         {/* RERA verified badge — left on mobile, right on desktop */}
         {reraVerified && (

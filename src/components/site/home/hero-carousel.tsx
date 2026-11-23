@@ -35,20 +35,20 @@ export function HeroCarousel({ banners, citySlug }: HeroCarouselProps) {
               aria-label={banner.title || "Promotion"}
               className="absolute! inset-0!"
             >
-              <img
-                src={banner.desktopImage}
-                alt={banner.title || "Promotion"}
-                className="hidden! md:block! absolute! inset-0! w-full! h-full! object-cover! object-center! select-none! pointer-events-none!"
-                loading={i === 0 ? "eager" : "lazy"}
-                fetchPriority={i === 0 ? "high" : "auto"}
-              />
-              <img
-                src={banner.mobileImage}
-                alt={banner.title || "Promotion"}
-                className="md:hidden! absolute! inset-0! w-full! h-full! object-cover! object-center! select-none! pointer-events-none!"
-                loading={i === 0 ? "eager" : "lazy"}
-                fetchPriority={i === 0 ? "high" : "auto"}
-              />
+              {/* One <picture> so each device downloads only its creative. Two
+                  CSS-toggled <img>s both fetched eagerly at high priority, so
+                  phones also pulled the desktop banner and the LCP image
+                  shared bandwidth with it. 768px = Tailwind's md breakpoint. */}
+              <picture>
+                <source media="(min-width: 768px)" srcSet={banner.desktopImage} />
+                <img
+                  src={banner.mobileImage}
+                  alt={banner.title || "Promotion"}
+                  className="absolute! inset-0! w-full! h-full! object-cover! object-center! select-none! pointer-events-none!"
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
+                />
+              </picture>
             </Link>
           </SwiperSlide>
         ))}

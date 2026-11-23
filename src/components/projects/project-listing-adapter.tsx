@@ -24,7 +24,7 @@ export function createProjectAdapter(city: string): ListingAdapter<ProjectFilter
 
     getItemKey: (item) => item.id,
 
-    renderCard: (item) => <ProjectListingCard key={item.id} item={item} />,
+    renderCard: (item, index) => <ProjectListingCard key={item.id} item={item} priority={index === 0} />,
     adAudience: () => "projects",
 
     renderFilters: ({ values, onChange, onReset }) => (

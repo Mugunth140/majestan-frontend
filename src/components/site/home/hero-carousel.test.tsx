@@ -28,13 +28,14 @@ describe('HeroCarousel', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/for-sale/apartments/coimbatore');
   });
 
-  it('renders desktop and mobile sources', () => {
-    render(<HeroCarousel banners={banners} citySlug="coimbatore" />);
+  it('renders one picture: desktop source from md up, mobile image otherwise', () => {
+    const { container } = render(<HeroCarousel banners={banners} citySlug="coimbatore" />);
     const imgs = screen.getAllByRole('img');
-    expect(imgs.map((i) => (i as HTMLImageElement).src)).toEqual([
-      'https://cdn.example/a.webp',
-      'https://cdn.example/am.webp',
-    ]);
+    expect(imgs).toHaveLength(1);
+    expect((imgs[0] as HTMLImageElement).src).toBe('https://cdn.example/am.webp');
+    const source = container.querySelector('picture > source');
+    expect(source).toHaveAttribute('media', '(min-width: 768px)');
+    expect(source).toHaveAttribute('srcset', 'https://cdn.example/a.webp');
   });
 
   it('renders nothing when empty (caller shows the static fallback)', () => {

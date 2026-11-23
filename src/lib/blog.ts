@@ -21,9 +21,11 @@ export type Post = {
   published_at: string;
   updated_at: string;
 };
-export const blogFetch = cache(async <T>(path: string): Promise<T> => {
+// Uncached by default. Pass revalidateSeconds to let a static (ISR) page use the
+// response; a no-store fetch would force that whole page to render per request.
+export const blogFetch = cache(async <T>(path: string, revalidateSeconds?: number): Promise<T> => {
   const res = await fetch(SEO_API_BASE + "/editorial" + path, {
-    cache: "no-store",
+    ...(revalidateSeconds ? { next: { revalidate: revalidateSeconds } } : { cache: "no-store" as const }),
     headers: process.env.INTERNAL_API_KEY
       ? { "x-internal-key": process.env.INTERNAL_API_KEY }
       : {},

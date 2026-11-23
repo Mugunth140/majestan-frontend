@@ -639,7 +639,7 @@ export function ListingShell<TFilters extends Record<string, string>, TItem>({
                     <div className={refreshing ? "flex! flex-col! gap-3! opacity-40! pointer-events-none! select-none! transition-opacity! duration-300!" : "flex! flex-col! gap-3! transition-opacity! duration-300!"}>
                       {interleaveAds(data?.items ?? [], feedAds).map((entry) =>
                         entry.kind === "item" ? (
-                          adapter.renderCard(entry.item)
+                          adapter.renderCard(entry.item, (data?.items ?? []).indexOf(entry.item))
                         ) : (
                           <ListingFeedBanner
                             key={`ad-${entry.slot}-${entry.ad.id}`}

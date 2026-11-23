@@ -471,7 +471,9 @@ export function isRentListing(posttype: unknown): boolean {
   );
 }
 
-function PropertyListingCard({ item }: { item: PropertySearchItem }) {
+// priority: the first card's photo is usually the LCP element, so it loads
+// eagerly with high fetch priority instead of lazily.
+function PropertyListingCard({ item, priority = false }: { item: PropertySearchItem; priority?: boolean }) {
   const router = useRouter();
   const detailPath = getDetailPath(item);
   const photosPath = `${detailPath}/photos`;
@@ -570,6 +572,7 @@ function PropertyListingCard({ item }: { item: PropertySearchItem }) {
             placeholderSrc={placeholderUrl}
             alt={item.propertyname || "Property"}
             className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-700! ease-out!"
+            eager={priority}
           />
         </Link>
         {/* RERA verified badge — left on mobile, right on desktop */}
@@ -787,9 +790,9 @@ export function createPropertyAdapter(init: {
 
     getItemKey: (item) => `${item.listingKind ?? "property"}:${item.id}`,
 
-    renderCard: (item) => item.listingKind === "project" && item.project
-      ? <ProjectListingCard key={`project:${item.id}`} item={item.project} />
-      : <PropertyListingCard key={`property:${item.id}`} item={item} />,
+    renderCard: (item, index) => item.listingKind === "project" && item.project
+      ? <ProjectListingCard key={`project:${item.id}`} item={item.project} priority={index === 0} />
+      : <PropertyListingCard key={`property:${item.id}`} item={item} priority={index === 0} />,
     adAudience: (filters) => (filters.listingType === "Rent" ? "rent" : "buy"),
 
     renderFilters: ({ values, onChange, onReset }) => (

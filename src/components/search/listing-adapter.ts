@@ -7,7 +7,8 @@ export interface ListingAdapter<TFilters extends Record<string, string>, TItem> 
   sortOptions: { value: string; label: string }[];
   fetchItems: (args: { filters: TFilters; sort: string; page: number }) => Promise<ListingPageData<TItem>>;
   getItemKey: (item: TItem) => string | number;
-  renderCard: (item: TItem) => ReactNode;
+  /** index = position among items (ads excluded); 0 is the likely LCP image. */
+  renderCard: (item: TItem, index?: number) => ReactNode;
   renderFilters: (props: { values: TFilters; onChange: (v: TFilters) => void; onReset: () => void }) => ReactNode;
   renderActiveChips: (filters: TFilters, onChange: (v: TFilters) => void) => ReactNode | null;
   /** Optional right-rail content rendered beside the card feed on wide screens */

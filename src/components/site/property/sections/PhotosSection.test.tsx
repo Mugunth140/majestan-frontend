@@ -34,10 +34,16 @@ const property = {
   ],
 } as SeoProperty;
 
+// Photos are served through the image optimizer; compare the original URL.
+const originalSrc = (el: Element) => {
+  const src = el.getAttribute("src") ?? "";
+  return src.startsWith("/_next/image") ? new URL(src, "http://x").searchParams.get("url") : src;
+};
+
 describe("Property photo gallery", () => {
   it("keeps every photo, including legacy duplicate primary flags, in cover-first order", () => {
     render(<PhotosSection property={property} embedded />);
-    expect(screen.getAllByRole("img").map((image) => image.getAttribute("src")))
+    expect(screen.getAllByRole("img").map(originalSrc))
       .toEqual(["/cover.jpg", "/another-cover.jpg", "/room.jpg"]);
   });
 

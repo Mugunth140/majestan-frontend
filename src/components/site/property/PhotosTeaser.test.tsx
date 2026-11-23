@@ -15,12 +15,18 @@ const img = (over: Partial<SeoPropertyImage> & { id: number }): SeoPropertyImage
   ...over,
 });
 
+// Photos are served through the image optimizer; compare the original URL.
+const originalSrc = (el: Element) => {
+  const src = el.getAttribute("src") ?? "";
+  return src.startsWith("/_next/image") ? new URL(src, "http://x").searchParams.get("url") : src;
+};
+
 describe("PhotosTeaser", () => {
   it("orders primary first, caps at three tiles with an overflow overlay, all linking through", () => {
     const images = [img({ id: 2 }), img({ id: 3 }), img({ id: 1, isPrimary: true }), img({ id: 4 }), img({ id: 5 })];
     render(<PhotosTeaser images={images} title="Lakeview Apartment" photosHref="/x/photos" />);
 
-    const srcs = screen.getAllByRole("img").map((el) => el.getAttribute("src"));
+    const srcs = screen.getAllByRole("img").map(originalSrc);
     expect(srcs).toEqual(["/img-1.jpg", "/img-2.jpg", "/img-3.jpg"]);
     expect(screen.getByText("+2")).toBeDefined();
     expect(screen.getByText(/5 photos/i)).toBeDefined();

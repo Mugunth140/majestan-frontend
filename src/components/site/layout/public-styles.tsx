@@ -3,8 +3,8 @@ import { usePathname } from "next/navigation";
 const styles = [
   "bootstrap",
   "animate.min",
-  "magnific-popup.min",
-  "odometer.min",
+  // magnific-popup and odometer were removed (2026-11-23): nothing uses their
+  // classes, and each was another render-blocking request on every page.
   "swiper-bundle.min",
   "sib-styles",
   "styles",
@@ -13,7 +13,7 @@ export function PublicStyles() {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin")) return null;
   const inventory = /-[a-z]{1,6}\d+(?:\/|$)/i.test(pathname || "");
-  const activeStyles = inventory ? styles.filter(name => !["animate.min", "magnific-popup.min", "odometer.min", "swiper-bundle.min"].includes(name)) : styles;
+  const activeStyles = inventory ? styles.filter(name => !["animate.min", "swiper-bundle.min"].includes(name)) : styles;
   return (
     <>
       {activeStyles.map((name) => (

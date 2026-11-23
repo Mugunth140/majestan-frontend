@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { responsiveImage } from "@/lib/responsive-images";
 import { Panel, PanelLink } from "@/components/site/project/overview/overview-ui";
 import type { SeoPropertyImage } from "@/lib/api/property-by-slug";
 
@@ -41,11 +42,12 @@ export function PhotosTeaser({ images, title, photosHref }: PhotosTeaserProps) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={img.imageUrl}
+              {...responsiveImage(img.imageUrl, "(max-width: 1023px) 33vw, 280px")}
               alt={img.altText || `${title} — photo ${i + 1}`}
               title={(img as any).titleText}
               className="w-full! h-full! object-cover!"
               loading="lazy"
+              decoding="async"
             />
             {(img as any).caption && <span className="block! text-sm!">{(img as any).caption}</span>}
             {i === visible.length - 1 && overflow > 0 && (

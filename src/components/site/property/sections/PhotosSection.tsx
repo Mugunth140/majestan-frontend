@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { responsiveImage } from "@/lib/responsive-images";
 import type { SeoProperty } from "@/lib/api/property-by-slug";
 import {
   Panel,
@@ -67,7 +68,12 @@ export function PhotosSection({
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={photo.imageUrl}
+                    {...responsiveImage(
+                      photo.imageUrl,
+                      index === 0
+                        ? "(max-width: 1023px) 100vw, 820px"
+                        : "(max-width: 1023px) 50vw, 410px",
+                    )}
                     alt={
                       photo.altText || `${property.title} photo ${index + 1}`
                     }
@@ -169,7 +175,7 @@ export function PhotosSection({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={photo.imageUrl}
+                      {...responsiveImage(photo.imageUrl, "64px")}
                       alt=""
                       className="h-full! w-full! object-cover!"
                     />

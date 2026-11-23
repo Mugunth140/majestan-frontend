@@ -17,7 +17,7 @@ describe("public/admin stylesheet isolation", () => {
     render(<PublicStyles />);
     expect(
       document.querySelectorAll('link[href^="/assets/css/"]'),
-    ).toHaveLength(7);
+    ).toHaveLength(5);
     expect(
       document.querySelector('link[href="/assets/css/styles.css"]'),
     ).not.toBeNull();

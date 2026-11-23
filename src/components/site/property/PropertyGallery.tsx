@@ -176,7 +176,10 @@ export function PropertyGallery({
                     }
                     alt=""
                     fill
-                    unoptimized
+                    // Resized thumbnails: the full originals (300-700 KB each)
+                    // all loaded on mobile and starved the cover (LCP) photo.
+                    unoptimized={!canOptimizeImage(image.imageUrl)}
+                    sizes="120px"
                     loading="lazy"
                     onError={() => markFailed(image.imageUrl)}
                   />

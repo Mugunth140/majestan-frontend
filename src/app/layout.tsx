@@ -143,18 +143,11 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300..700&family=Manrope:wght@400..700&family=Mulish:wght@400..700&family=Poppins:wght@300;400;500;600;700&display=swap" />
-        <link
-          rel="preconnect"
-          href="https://cdnjs.cloudflare.com"
-          crossOrigin="anonymous"
-        />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://prismarkcrm.in" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.majestanrealty.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        />
+        {/* Font Awesome (cdnjs) removed 2026-11-23: no live page uses fa-* icons,
+            and it was a third-party render-blocking stylesheet on every page. */}
         <link rel="shortcut icon" href="/favicon/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />

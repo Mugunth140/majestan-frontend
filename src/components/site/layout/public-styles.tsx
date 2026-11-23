@@ -1,24 +1,14 @@
 "use client";
 import { usePathname } from "next/navigation";
-const styles = [
-  "bootstrap",
-  "animate.min",
-  // magnific-popup and odometer were removed (2026-11-23): nothing uses their
-  // classes, and each was another render-blocking request on every page.
-  "swiper-bundle.min",
-  "sib-styles",
-  "styles",
-];
+import { LEGACY_CSS_HREF } from "./legacy-css";
+
+// The old theme CSS (Bootstrap, animate, swiper-bundle, sib-styles, styles) as
+// one trimmed, minified, content-hashed file built by
+// scripts/build-legacy-css.mjs. It replaced seven render-blocking requests
+// (~89 KB gzip) with one (~28 KB) for mobile LCP. Rebuild it after adding
+// markup that relies on classes from those stylesheets.
 export function PublicStyles() {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin")) return null;
-  const inventory = /-[a-z]{1,6}\d+(?:\/|$)/i.test(pathname || "");
-  const activeStyles = inventory ? styles.filter(name => !["animate.min", "swiper-bundle.min"].includes(name)) : styles;
-  return (
-    <>
-      {activeStyles.map((name) => (
-        <link key={name} rel="stylesheet" href={`/assets/css/${name}.css`} />
-      ))}
-    </>
-  );
+  return <link rel="stylesheet" href={LEGACY_CSS_HREF} />;
 }

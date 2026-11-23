@@ -12,14 +12,11 @@ describe("public/admin stylesheet isolation", () => {
       document.querySelectorAll('link[href^="/assets/css/"]'),
     ).toHaveLength(0);
   });
-  it("preserves the original public stylesheets on public routes", () => {
+  it("loads the bundled legacy stylesheet on public routes", () => {
     route.path = "/projects";
     render(<PublicStyles />);
-    expect(
-      document.querySelectorAll('link[href^="/assets/css/"]'),
-    ).toHaveLength(5);
-    expect(
-      document.querySelector('link[href="/assets/css/styles.css"]'),
-    ).not.toBeNull();
+    const links = document.querySelectorAll('link[href^="/assets/css/"]');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute("href")).toMatch(/^\/assets\/css\/legacy\.[0-9a-f]{10}\.css$/);
   });
 });

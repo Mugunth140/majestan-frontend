@@ -54,6 +54,9 @@ type PropertyInfoSidebarProps = {
  * (apartments show Furnishing + Facing); other types keep the generic rows
  * until curated.
  */
+/** Fixed brokerage terms for every listing; the brokerage entered in the CRM is not shown. Projects carry no brokerage (see ProjectAside). */
+export const brokerageNote = (isSale: boolean) => (isSale ? "Brokerage: Only 2% on Sale Value" : "Brokerage: Just 30 Days Rent");
+
 export function PropertyInfoSidebar({
   property,
   headingLevel = 1,
@@ -243,11 +246,7 @@ export function PropertyInfoSidebar({
         />}
       footer={<><div className="mt-5! pt-3! border-t! border-[#e2e9f4]! flex! items-center! justify-center! gap-1! text-sm! font-manrope! font-normal! text-[#465066]!">
           <Coins className="w-4! h-4! text-emerald-600! shrink-0!" />
-          {!property.brokerageType || property.brokerageType === "no_brokerage"
-            ? "No brokerage for this property"
-            : property.brokerageType === "percentage"
-              ? `Brokerage: Only ${property.brokerageValue}% on Sale Value`
-              : `Brokerage: Just ${property.brokerageValue} Days Rent`}
+          {brokerageNote(isSale)}
         </div>
 
         {property.propertyCode && (

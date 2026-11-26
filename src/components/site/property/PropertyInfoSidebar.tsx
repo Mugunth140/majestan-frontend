@@ -75,7 +75,8 @@ export function PropertyInfoSidebar({
   const isHomeType =
     property.propertyType === "apartment" ||
     property.propertyType === "villa" ||
-    property.propertyType === "individual_portion";
+    property.propertyType === "individual_portion" ||
+    property.propertyType === "portion";
   const isSale =
     !["rent", "rental", "lease"].includes(
       property.listingType?.toLowerCase(),

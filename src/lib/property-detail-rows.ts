@@ -50,7 +50,7 @@ export function getAdditionalPropertyDetails(property: SeoProperty, existingLabe
   if (property.propertyType === "commercial") return [];
   const d = property.details;
   const isLand = property.propertyType === "plot" || property.propertyType === "farmland";
-  const isHome = ["apartment", "villa", "individual_portion"].includes(property.propertyType);
+  const isHome = ["apartment", "villa", "individual_portion", "portion"].includes(property.propertyType);
   const isRent = /rent|lease/i.test(property.listingType) || /rent/i.test(property.status);
   const rows: PropertyDetailRow[] = [];
   const seen = new Set(existingLabels);

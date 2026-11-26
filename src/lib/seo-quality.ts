@@ -1,12 +1,12 @@
 /** Missing or implausible measurements remain unknown; never infer the original unit. */
 export function usableArea(value: unknown, type: string): number | null {
   const n = Number(value);
-  return Number.isFinite(n) && n >= (['apartment', 'villa', 'individual_portion'].includes(type) ? 100 : 1) ? n : null;
+  return Number.isFinite(n) && n >= (['apartment', 'villa', 'individual_portion', 'portion'].includes(type) ? 100 : 1) ? n : null;
 }
 
 export function sanitizePublicAreas<T extends { propertyType?: string; details?: Record<string, unknown>; propertyDetails?: Record<string, unknown> }>(record: T): T {
   const type = record.propertyType || "";
-  if (!['apartment', 'villa', 'individual_portion'].includes(type)) return record;
+  if (!['apartment', 'villa', 'individual_portion', 'portion'].includes(type)) return record;
   const clean = (details: Record<string, unknown>) => details && Object.fromEntries(Object.entries(details).map(([key, value]) => [key,
     ['areaSqft', 'builtUpArea', 'carpetArea', 'superBuiltUpArea'].includes(key) && value != null && usableArea(value, type) === null ? null : value
   ]));

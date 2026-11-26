@@ -9,7 +9,7 @@ type Data = Record<string, any>;
 export function realEstateType(type: string, project = false): string {
   if (type === 'apartment') return project ? 'ApartmentComplex' : 'Apartment';
   if (type === 'villa') return project ? 'GatedResidenceCommunity' : 'SingleFamilyResidence';
-  if (type === 'individual_portion') return 'House';
+  if (type === 'individual_portion' || type === 'portion') return 'House';
   if (['plot', 'farmland'].includes(type)) return 'Landform';
   if (type === 'coworking') return 'Place';
   return 'Place';
@@ -42,7 +42,7 @@ export function buildRealEstateSchema(record: Data, seo: Data = record.seoEngine
   const home: Data = {'@id':homeId,'@type':realEstateType(type, Boolean(record.projectType)),name,url:parent,address,...(geo ? {geo} : {}),...(record.reraNumber && !/not applicable|^n\/?a$/i.test(record.reraNumber) ? {identifier:record.reraNumber} : {})};
   const rooms = Number(record.details?.bedrooms || record.bedrooms);
   const area = usableArea(record.details?.builtUpArea || record.details?.areaSqft, type);
-  if (rooms>0 && ['apartment','villa','individual_portion'].includes(type)) home.numberOfRooms=rooms;
+  if (rooms>0 && ['apartment','villa','individual_portion','portion'].includes(type)) home.numberOfRooms=rooms;
   if (area) home.floorSize={'@type':'QuantitativeValue',value:area,unitCode:'FTK'};
   const graph: Data[] = [{'@type':'BreadcrumbList',itemListElement:crumbs.map((c,i)=>({'@type':'ListItem',position:i+1,...c}))},home];
   graph.push({'@type':'RealEstateListing',name,url:parent,mainEntity:{'@id':homeId},...(record.projectType ? (low>0 ? {offers:{'@type':'AggregateOffer',lowPrice:low,highPrice:high,priceCurrency:'INR',availability}} : {}) : price>0 ? {offers:{'@type':'Offer',price,priceCurrency:'INR',availability,itemOffered:{'@id':homeId}}} : {})});

@@ -27,6 +27,7 @@ const labels: Record<string, string> = {
   apartment: "Apartment",
   villa: "Villa",
   individual_portion: "Independent house",
+  portion: "Individual portion",
   independent_house: "Independent house",
   plot: "Plot",
   farmland: "Farmland",

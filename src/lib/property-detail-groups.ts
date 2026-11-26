@@ -153,6 +153,8 @@ const list = (value: unknown): string | null =>
 const typeLabel = (type: string) =>
   type === "individual_portion"
     ? "Individual House"
+    : type === "portion"
+      ? "Individual Portion"
     : type === "coworking"
       ? "Co-working Space"
       : type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -615,7 +617,7 @@ export function getGroupedPropertyDetails(property: SeoProperty, extras: { price
     ].filter(group=>group.fields.length>0);
   }
 
-  const profile = property.propertyType === "investment_property" || property.propertyType === "farm_house" ? "individual_portion"
+  const profile = ["investment_property", "farm_house", "portion"].includes(property.propertyType) ? "individual_portion"
     : property.propertyType === "pg_service_apartment" ? "apartment" : property.propertyType;
   const groups = basePropertyDetails({ ...property, propertyType: profile }, extras);
   if (property.propertyType === "farm_house") {

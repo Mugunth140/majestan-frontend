@@ -60,6 +60,7 @@ const TYPE_LABEL: Record<string, string> = {
   apartment: "Flats",
   villa: "Villas",
   individual_portion: "Independent Houses",
+  portion: "Individual Portions",
   plot: "Plots",
   farmland: "Farmlands",
   commercial: "Commercial Spaces",
@@ -68,7 +69,7 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 /** Tie-break order when two categories have the same number of listings. */
-const TYPE_ORDER = ["apartment", "villa", "individual_portion", "plot", "farmland", "commercial", "industrial", "coworking"];
+const TYPE_ORDER = ["apartment", "villa", "individual_portion", "portion", "plot", "farmland", "commercial", "industrial", "coworking"];
 
 /** Tidy "saravanampatti" / "SAI BABA COLONY" into "Sai Baba Colony". */
 const displayName = (v: string) =>

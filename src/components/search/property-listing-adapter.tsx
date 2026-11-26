@@ -38,6 +38,7 @@ const PROPERTY_DETAIL_SUFFIX: Record<string, string> = {
   apartment:          "ap",
   villa:              "v",
   individual_portion: "ip",
+  portion:            "pn",
   "independent-house":"ip",
   plot:               "p",
   farmland:           "fl",

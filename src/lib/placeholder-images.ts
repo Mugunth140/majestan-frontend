@@ -9,6 +9,7 @@ const BY_TYPE: Record<string, string> = {
   apartment: "Apartment.webp",
   villa: "Villa.webp",
   individual_portion: "Independent-house.webp",
+  portion: "Independent-house.webp",
   "independent-house": "Independent-house.webp",
   independenthouse: "Independent-house.webp",
   plot: "Plot.webp",

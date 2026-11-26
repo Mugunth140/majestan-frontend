@@ -44,6 +44,7 @@ const PSEO_API_TYPE_MAP: Record<string, string> = {
   apartments: "apartment",
   villas: "villa",
   "independent-houses": "individual_portion",
+  "individual-portions": "portion",
   plots: "plot",
   farmlands: "farmland",
   "commercial-spaces": "commercial",

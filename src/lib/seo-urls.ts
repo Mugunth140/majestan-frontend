@@ -7,12 +7,13 @@ export const LISTING_TYPES = {
 
 // Map frontend URL slugs to backend API property types and readable labels
 // apiValue MUST match DB enum values in property.entity.ts:
-//   'apartment','villa','plot','commercial','industrial','individual_portion','farmland','coworking','other'
+//   'apartment','villa','plot','commercial','industrial','individual_portion','portion','farmland','coworking','other'
 export const PROPERTY_TYPES = {
   properties: { apiValue: "", label: "Properties" },
   apartments: { apiValue: "apartment", label: "Apartments" },
   villas: { apiValue: "villa", label: "Villas" },
   "independent-houses": { apiValue: "individual_portion", label: "Individual Houses" },
+  "individual-portions": { apiValue: "portion", label: "Individual Portions" },
   plots: { apiValue: "plot", label: "Plots" },
   farmlands: { apiValue: "farmland", label: "Farmlands" },
   "commercial-spaces": { apiValue: "commercial", label: "Commercial Spaces" },
@@ -28,6 +29,7 @@ export const BEDROOM_PROPERTY_TYPE_SLUGS: PropertyTypeSlug[] = [
   "apartments",
   "villas",
   "independent-houses",
+  "individual-portions",
 ];
 
 // BHK options for PSEO page generation (1-BHK excluded from indexable PSEO pages)

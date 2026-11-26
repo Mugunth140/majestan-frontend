@@ -62,6 +62,7 @@ export function curationDetailRows(
     "apartment",
     "villa",
     "individual_portion",
+    "portion",
     "investment_property",
     "farm_house",
     "pg_service_apartment",
@@ -106,7 +107,7 @@ export function curationDetailRows(
     add("Utilities Provided", c.utilities?.join(", "));
   }
   if (
-    ["individual_portion", "investment_property"].includes(
+    ["individual_portion", "portion", "investment_property"].includes(
       property.propertyType,
     ) &&
     rent
